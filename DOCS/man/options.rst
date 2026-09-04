@@ -5489,6 +5489,19 @@ Terminal
 
     See `Property Expansion`_.
 
+``--status-msg-update-rate=<updates_per_sec>``
+    Maximum update rate of both ``--osd-status-msg`` and ``--term-status-msg``.
+
+    Only a hard limit when ``--status-msg-update-rate-forced`` is set to ``yes``
+    (default: ``20.0``).
+
+``--status-msg-update-rate-forced=<no|yes>``
+    Updates to status messages are forced on each frame update. Setting this option
+    to ``yes`` makes sure ``--status-msg-update-rate`` serves as a hard limit instead.
+
+    Forced updates still happen when pausing/frame-stepping, to make sure up-to-date info
+    is displayed immediately (default: ``no``).
+
 ``--term-status-msg=<string>``
     Print out a custom string during playback instead of the standard status
     line. Expands properties. See `Property Expansion`_.
