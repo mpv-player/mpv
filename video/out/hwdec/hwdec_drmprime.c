@@ -77,7 +77,7 @@ static const char *forked_pix_fmt_names[] = {
     "rpi4_10",
 };
 
-static int init(struct ra_hwdec *hw)
+static int pre_init(struct ra_hwdec *hw)
 {
     struct priv_owner *p = hw->priv;
 
@@ -92,36 +92,12 @@ static int init(struct ra_hwdec *hw)
         return -1;
     }
 
-    /*
-     * The drm_params resource is not provided when using X11 or Wayland, but
-     * there are extensions that supposedly provide this information from the
-     * drivers. Not properly documented. Of course.
-     */
-    mpv_opengl_drm_params_v2 *params = ra_get_native_resource(hw->ra_ctx->ra,
-                                                              "drm_params_v2");
+    return 0;
+}
 
-    /*
-     * Respect drm_device option, so there is a way to control this when not
-     * using a DRM gpu context. If drm_params_v2 are present, they will already
-     * respect this option.
-     */
-    void *tmp = talloc_new(NULL);
-    struct drm_opts *drm_opts = mp_get_config_group(tmp, hw->global, &drm_conf);
-    const char *opt_path = drm_opts->device_path;
-
-    const char *device_path = params && params->render_fd > -1 ?
-                              drmGetRenderDeviceNameFromFd(params->render_fd) :
-                              opt_path ? opt_path : "/dev/dri/renderD128";
-    MP_VERBOSE(hw, "Using DRM device: %s\n", device_path);
-
-    int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
-                                     AV_HWDEVICE_TYPE_DRM,
-                                     device_path, NULL, 0);
-    talloc_free(tmp);
-    if (ret != 0) {
-        MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
-        return -1;
-    }
+static int post_init(struct ra_hwdec *hw)
+{
+    struct priv_owner *p = hw->priv;
 
     /*
      * At the moment, there is no way to discover compatible formats
@@ -153,6 +129,75 @@ static int init(struct ra_hwdec *hw)
 
     return 0;
 }
+
+static int init_drmprime(struct ra_hwdec *hw)
+{
+    struct priv_owner *p = hw->priv;
+
+    int ret = pre_init(hw);
+    if (ret < 0)
+        return ret;
+
+    /*
+     * The drm_params resource is not provided when using X11 or Wayland, but
+     * there are extensions that supposedly provide this information from the
+     * drivers. Not properly documented. Of course.
+     */
+    mpv_opengl_drm_params_v2 *params = ra_get_native_resource(hw->ra_ctx->ra,
+                                                              "drm_params_v2");
+
+    /*
+     * Respect drm_device option, so there is a way to control this when not
+     * using a DRM gpu context. If drm_params_v2 are present, they will already
+     * respect this option.
+     */
+    void *tmp = talloc_new(NULL);
+    struct drm_opts *drm_opts = mp_get_config_group(tmp, hw->global, &drm_conf);
+    const char *opt_path = drm_opts->device_path;
+
+    const char *device_path = params && params->render_fd > -1 ?
+                              drmGetRenderDeviceNameFromFd(params->render_fd) :
+                              opt_path ? opt_path : "/dev/dri/renderD128";
+    MP_VERBOSE(hw, "Using DRM device: %s\n", device_path);
+
+    ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                 AV_HWDEVICE_TYPE_DRM,
+                                 device_path, NULL, 0);
+    talloc_free(tmp);
+    if (ret < 0) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
+        return ret;
+    }
+
+    return post_init(hw);
+}
+
+#if HAVE_V4L2REQUEST
+static int init_v4l2request(struct ra_hwdec *hw)
+{
+    struct priv_owner *p = hw->priv;
+
+    int ret = pre_init(hw);
+    if (ret < 0)
+        return ret;
+
+    /*
+     * AVCodecHWConfig contains a combo of a pixel format and hwdevice type,
+     * correct type must be created here or hwaccel will fail.
+     *
+     * FIXME: Create hwdevice based on type in AVCodecHWConfig
+     */
+    ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                 AV_HWDEVICE_TYPE_V4L2REQUEST,
+                                 NULL, NULL, 0);
+    if (ret < 0) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
+        return ret;
+    }
+
+    return post_init(hw);
+}
+#endif
 
 static void mapper_unmap(struct ra_hwdec_mapper *mapper)
 {
@@ -308,7 +353,7 @@ const struct ra_hwdec_driver ra_hwdec_drmprime = {
     .priv_size = sizeof(struct priv_owner),
     .imgfmts = {IMGFMT_DRMPRIME, 0},
     .device_type = AV_HWDEVICE_TYPE_DRM,
-    .init = init,
+    .init = init_drmprime,
     .uninit = uninit,
     .mapper = &(const struct ra_hwdec_mapper_driver){
         .priv_size = sizeof(struct dmabuf_interop_priv),
@@ -318,3 +363,21 @@ const struct ra_hwdec_driver ra_hwdec_drmprime = {
         .unmap = mapper_unmap,
     },
 };
+
+#if HAVE_V4L2REQUEST
+const struct ra_hwdec_driver ra_hwdec_v4l2request = {
+    .name = "v4l2request",
+    .priv_size = sizeof(struct priv_owner),
+    .imgfmts = {IMGFMT_DRMPRIME, 0},
+    .device_type = AV_HWDEVICE_TYPE_V4L2REQUEST,
+    .init = init_v4l2request,
+    .uninit = uninit,
+    .mapper = &(const struct ra_hwdec_mapper_driver){
+        .priv_size = sizeof(struct dmabuf_interop_priv),
+        .init = mapper_init,
+        .uninit = mapper_uninit,
+        .map = mapper_map,
+        .unmap = mapper_unmap,
+    },
+};
+#endif
