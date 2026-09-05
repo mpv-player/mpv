@@ -35,6 +35,8 @@ int af_fmt_to_bytes(int format)
     }
     if (format == AF_FORMAT_S_DOP)
         return 4;
+    if (format == AF_FORMAT_DSD)
+        return 1;
     if (af_fmt_is_spdif(format))
         return 2;
     return 0;
@@ -55,7 +57,8 @@ bool af_fmt_is_float(int format)
 // true for both unsigned and signed ints
 bool af_fmt_is_int(int format)
 {
-    return format && af_fmt_is_pcm(format) && !af_fmt_is_float(format);
+    return format && af_fmt_is_pcm(format) && !af_fmt_is_float(format) &&
+           format != AF_FORMAT_DSD;
 }
 
 // true for IEC61937 wrapped formats only (not other bitstream formats)
@@ -140,13 +143,19 @@ const char *af_fmt_to_str(int format)
     case AF_FORMAT_S_MP3:       return "spdif-mp3";
     case AF_FORMAT_S_TRUEHD:    return "spdif-truehd";
     case AF_FORMAT_S_DOP:       return "dop";
+    case AF_FORMAT_DSD:         return "dsd";
     }
     return "??";
 }
 
 void af_fill_silence(void *dst, size_t bytes, int format)
 {
-    memset(dst, af_fmt_is_unsigned(format) ? 0x80 : 0, bytes);
+    int fill = 0;
+    if (af_fmt_is_unsigned(format))
+        fill = 0x80;
+    if (format == AF_FORMAT_DSD)
+        fill = 0x69; // only ultrasonic tones, filtered out on playback
+    memset(dst, fill, bytes);
 }
 
 // Returns a "score" that serves as heuristic how lossy or hard a conversion is.
@@ -159,6 +168,13 @@ int af_format_conversion_score(int dst_format, int src_format)
         return INT_MIN;
     if (dst_format == src_format)
         return 1024;
+    if (src_format == AF_FORMAT_DSD) {
+        return af_fmt_is_pcm(dst_format) && dst_format != AF_FORMAT_DSD
+               ? af_format_conversion_score(dst_format, AF_FORMAT_FLOAT) - 1
+               : INT_MIN;
+    }
+    if (dst_format == AF_FORMAT_DSD)
+        return INT_MIN;
     // Can't be normally converted
     if (!af_fmt_is_pcm(dst_format) || !af_fmt_is_pcm(src_format))
         return INT_MIN;

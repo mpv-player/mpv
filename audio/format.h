@@ -52,6 +52,9 @@ enum af_format {
     // 32-bit samples.
     AF_FORMAT_S_DOP,
 
+    // Raw DSD bitstream, MSBF interleaved.
+    AF_FORMAT_DSD,
+
     AF_FORMAT_COUNT
 };
 
