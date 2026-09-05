@@ -281,6 +281,8 @@ typedef struct MPOpts {
     char *playing_msg;
     char *osd_playing_msg;
     int osd_playing_msg_duration;
+    double status_msg_update_rate;
+    bool status_msg_update_rate_forced;
     char *status_msg;
     char *osd_status_msg;
     char *osd_msg[3];
