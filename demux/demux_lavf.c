@@ -1551,7 +1551,20 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (demuxer->params && demuxer->params->skip_lavf_probing)
         probeinfo = false;
     if (probeinfo) {
-        if (avformat_find_stream_info(avfc, NULL) < 0) {
+        int nb_streams = avfc->nb_streams;
+        AVDictionary **opts = talloc_zero_array(NULL, AVDictionary *, nb_streams);
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(61, 7, 100)
+        for (int i = 0; i < nb_streams; i++) {
+            AVCodecParameters *par = avfc->streams[i]->codecpar;
+            if (par->codec_type == AVMEDIA_TYPE_AUDIO && par->format == AV_SAMPLE_FMT_DSD)
+                av_dict_set(&opts[i], "request_sample_fmt", "dsd", 0);
+        }
+#endif
+        int r = avformat_find_stream_info(avfc, opts);
+        for (int i = 0; i < nb_streams; i++)
+            av_dict_free(&opts[i]);
+        talloc_free(opts);
+        if (r < 0) {
             MP_ERR(demuxer, "av_find_stream_info() failed\n");
             goto fail;
         }
