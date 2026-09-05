@@ -131,6 +131,14 @@ static bool init(struct mp_filter *da, struct mp_codec_params *codec,
     // Let decoder add AV_FRAME_DATA_SKIP_SAMPLES.
     av_opt_set(ctx->avctx, "flags2", "+skip_manual", AV_OPT_SEARCH_CHILDREN);
 
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(61, 7, 100)
+    // Request the raw bitstream from DSD decoders, decoder built-in conversion
+    // to PCM is deprecated. It's still default in lavc for backwards
+    // compatibility, but will be removed.
+    if (codec->lav_codecpar && codec->lav_codecpar->format == AV_SAMPLE_FMT_DSD)
+        ctx->avctx->request_sample_fmt = AV_SAMPLE_FMT_DSD;
+#endif
+
     mp_set_avopts(da->log, ctx->avctx, opts->avopts);
 
     if (mp_set_avctx_codec_headers(ctx->avctx, codec) < 0) {
