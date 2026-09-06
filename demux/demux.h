@@ -230,6 +230,7 @@ typedef struct demuxer {
     int64_t filepos;  // input stream current pos.
     int64_t filesize;
     char *filename;  // same as stream->url
+    char *server_filename; // same as stream->server_filename
     bool seekable;
     bool partially_seekable; // true if _maybe_ seekable; implies seekable=true
     double start_time;

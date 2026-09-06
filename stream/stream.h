@@ -244,6 +244,7 @@ typedef struct stream {
     char *url;  // filename/url (possibly including protocol prefix)
     char *path; // filename (url without protocol prefix)
     char *mime_type; // when HTTP streaming is used
+    char *server_filename; // file name reported by the server, if any
     char *demuxer; // request demuxer to be used
     char *lavf_type; // name of expected demuxer type for lavf
     bool streaming : 1; // known to be a network stream if true

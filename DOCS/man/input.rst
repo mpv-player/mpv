@@ -2267,6 +2267,10 @@ Property list
     looks better for display purposes. Use the ``path`` property to get an
     unmodified filename.)
 
+    If the server reported a file name for the stream, as with the HTTP
+    ``Content-Disposition`` header, that name is returned instead of the one
+    derived from the URL.
+
     This has a sub-property:
 
     ``filename/no-ext``

@@ -3517,6 +3517,7 @@ struct parent_stream_info {
     int stream_origin;
     struct mp_cancel *cancel;
     char *filename;
+    char *server_filename;
 };
 
 static struct demuxer *open_given_type(struct mpv_global *global,
@@ -3550,6 +3551,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .packet_pool = demux_packet_pool_get(global),
         .glog = log,
         .filename = talloc_strdup(demuxer, sinfo->filename),
+        .server_filename = talloc_strdup(demuxer, sinfo->server_filename),
         .is_network = sinfo->is_network,
         .is_streaming = sinfo->is_streaming,
         .stream_origin = sinfo->stream_origin,
@@ -3679,6 +3681,7 @@ static struct demuxer *demux_open(struct stream *stream,
         .stream_origin = stream->stream_origin,
         .cancel = cancel,
         .filename = talloc_strdup(NULL, stream->url),
+        .server_filename = stream->server_filename,
     };
 
     if (!force_format)

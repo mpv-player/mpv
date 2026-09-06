@@ -429,5 +429,7 @@ const char *mp_find_non_filename_media_title(MPContext *mpctx)
     }
     if (mpctx->playing && mpctx->playing->title)
         return mpctx->playing->title;
+    if (mpctx->demuxer && mpctx->demuxer->server_filename)
+        return mpctx->demuxer->server_filename;
     return NULL;
 }

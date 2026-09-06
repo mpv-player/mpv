@@ -76,3 +76,6 @@ void mp_icy_process(struct mp_icy *icy, const char *buf, size_t len,
 
 // Returns talloc-allocated mp_tags.
 struct mp_tags *mp_icy_get_metadata(struct mp_icy *icy, struct stream *s);
+
+// Parse the value of an HTTP Content-Disposition header.
+char *mp_parse_content_disposition(void *talloc_ctx, struct stream *s, bstr value);
