@@ -3575,7 +3575,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame,
                            (p->frames_drawn || !frame->still);
         if (interpolate) {
             double ratio = frame->ideal_frame_duration / frame->vsync_interval;
-            if (fabs(ratio - 1.0) < p->opts.interpolation_threshold)
+            if (fabs(ratio - floor(ratio + 0.5)) < p->opts.interpolation_threshold)
                 interpolate = false;
         }
 
