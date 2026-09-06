@@ -429,6 +429,8 @@ static int stream_create_instance(const stream_info_t *sinfo,
 
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
+    if (s->server_filename)
+        MP_VERBOSE(s, "Server filename: '%s'\n", s->server_filename);
 
     MP_DBG(s, "Stream opened successfully.\n");
 

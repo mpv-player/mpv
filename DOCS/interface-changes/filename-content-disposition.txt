@@ -1,0 +1,1 @@
+`filename` and the `%f` screenshot template use the file name from the HTTP `Content-Disposition` header when the server sends one

@@ -529,12 +529,16 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->filename)
         return M_PROPERTY_UNAVAILABLE;
-    char *filename = talloc_strdup(NULL, mpctx->filename);
-    if (mp_is_url(bstr0(filename)))
-        mp_url_unescape_inplace(filename);
-    char *f = (char *)mp_basename(filename);
-    if (!f[0])
-        f = filename;
+    const char *name = mpctx->demuxer ? mpctx->demuxer->server_filename : NULL;
+    char *filename = talloc_strdup(NULL, name ? name : mpctx->filename);
+    char *f = filename;
+    if (!name) {
+        if (mp_is_url(bstr0(filename)))
+            mp_url_unescape_inplace(filename);
+        f = (char *)mp_basename(filename);
+        if (!f[0])
+            f = filename;
+    }
     if (action == M_PROPERTY_KEY_ACTION) {
         struct m_property_action_arg *ka = arg;
         if (strcmp(ka->key, "no-ext") == 0) {

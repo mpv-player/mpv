@@ -33,6 +33,7 @@
 #include "misc/node.h"
 #include "misc/thread_tools.h"
 #include "common/msg.h"
+#include "demux/demux.h"
 #include "options/path.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
@@ -171,14 +172,17 @@ static char *create_fname(struct MPContext *mpctx, char *template,
             const char *name;
             if (!mpctx->filename) {
                 name = "NO_FILE";
-            } else if (bstr_endswith0(bstr0(mpctx->filename), "/")) {
-                name = mpctx->filename;
+            } else if (mpctx->demuxer && mpctx->demuxer->server_filename) {
+                name = mpctx->demuxer->server_filename;
             } else {
-                name = mp_basename(mpctx->filename);
+                if (bstr_endswith0(bstr0(mpctx->filename), "/")) {
+                    name = mpctx->filename;
+                } else {
+                    name = mp_basename(mpctx->filename);
+                }
+                if (mp_is_url(bstr0(mpctx->filename)))
+                    name = mp_url_unescape(res, name);
             }
-
-            if (mp_is_url(bstr0(mpctx->filename)))
-                name = mp_url_unescape(res, name);
 
             if (fmt == 'F')
                 name = bstrto0(res, mp_strip_ext(bstr0(name)));

@@ -169,6 +169,7 @@ struct priv {
     bool seekable;
     int64_t content_size; // -1 if unknown
     int64_t start_offset; // requested initial byte offset, immutable after open
+    char *server_filename; // from Content-Disposition, NULL if absent
 
     // Producer state. Only touched by the curl thread.
     uint64_t request_start;    // absolute byte position of next request
@@ -526,6 +527,11 @@ static void probe_http(struct priv *p, struct bstr line)
         }
         p->content_size = total;
     }
+
+    const char *cd = header_value(p->curl, "Content-Disposition");
+    if (cd)
+        p->server_filename = mp_parse_content_disposition(p, p->s, bstr0(cd));
+
     p->stream_ok = true;
 done:
     finalize_probe(p);
@@ -1011,6 +1017,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     bstr mime = bstr_strip(bstr_split(bstr0(content_type), ";", NULL));
     if (mime.len)
         s->mime_type = bstrto0(s, mime);
+    s->server_filename = talloc_strdup(s, p->server_filename);
 
     const char *effective_url = NULL;
     curl_easy_getinfo(p->curl, CURLINFO_EFFECTIVE_URL, &effective_url);
