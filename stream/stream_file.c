@@ -104,8 +104,8 @@ static int64_t get_size(stream_t *s)
     struct priv *p = s->priv;
     struct stat st;
     if (fstat(p->fd, &st) == 0) {
-        if (st.st_size <= 0 && !s->seekable)
-            st.st_size = -1;
+        if (!S_ISREG(st.st_mode) && !s->seekable)
+            return -1;
         if (st.st_size >= 0)
             return st.st_size;
     }
