@@ -3558,7 +3558,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .access_references = opts->access_references,
         .opts = opts,
         .opts_cache = opts_cache,
-        .events = DEMUX_EVENT_ALL,
+        .events = DEMUX_EVENT_INIT | DEMUX_EVENT_DURATION | DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS,
         .duration = -1,
         .depth = params ? params->depth : 0,
     };
@@ -3619,7 +3619,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_copy(in->d_user, in->d_thread);
         in->duration = in->d_thread->duration;
         demuxer_sort_chapters(demuxer);
-        in->events = DEMUX_EVENT_ALL;
+        in->events = DEMUX_EVENT_INIT | DEMUX_EVENT_DURATION | DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS;
 
         struct demuxer *sub = NULL;
         if (!(params && params->disable_timeline)) {
