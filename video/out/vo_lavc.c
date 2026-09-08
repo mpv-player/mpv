@@ -46,7 +46,7 @@ struct priv {
 static int preinit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
-    vc->enc = encoder_context_alloc(vo->encode_lavc_ctx, STREAM_VIDEO, vo->log);
+    vc->enc = mp_encoder_context_alloc(vo->encode_lavc_ctx, STREAM_VIDEO, vo->log);
     if (!vc->enc)
         return -1;
     talloc_steal(vc, vc->enc);
@@ -59,7 +59,7 @@ static void uninit(struct vo *vo)
     struct encoder_context *enc = vc->enc;
 
     if (!vc->shutdown)
-        encoder_encode(enc, NULL); // finish encoding
+        mp_encoder_encode(enc, NULL); // finish encoding
 }
 
 static int reconfig2(struct vo *vo, struct mp_image *img)
@@ -143,7 +143,7 @@ static int reconfig2(struct vo *vo, struct mp_image *img)
     else
         encoder->framerate = (AVRational){ 240, 1 };
 
-    if (!encoder_init_codec_and_muxer(vc->enc))
+    if (!mp_encoder_init_codec_and_muxer(vc->enc))
         goto error;
 
     return 0;
@@ -232,7 +232,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *voframe)
     frame->pts = rint(outpts * av_q2d(av_inv_q(avc->time_base)));
     frame->pict_type = 0; // keep this at unknown/undefined
     frame->quality = avc->global_quality;
-    encoder_encode(enc, frame);
+    mp_encoder_encode(enc, frame);
     av_frame_free(&frame);
 
 done:
