@@ -319,6 +319,36 @@ static double spline64(params *p, double x)
     }
 }
 
+// Magic Kernel Sharp family: the quadratic B-spline ("magic kernel")
+// See https://johncostella.com/magic/
+static double magic_sharp_2013(double x)
+{
+    // quadric(x) convolved with {-1/4, +3/2, -1/4}
+    if (x < 0.5)
+        return 17.0/16.0 - 7.0/4.0 * (x * x);
+    if (x < 1.5)
+        return (x * x) - 11.0/4.0 * x + 7.0/4.0;
+    if (x < 2.5) {
+        x -= 5.0/2.0;
+        return -1.0/8.0 * (x * x);
+    }
+    return 0.0;
+}
+
+static double mks2013(params *p, double x)
+{
+    // Scaled to mks2013(0) == 1
+    return 16.0/17.0 * magic_sharp_2013(x);
+}
+
+static double mks2021(params *p, double x)
+{
+    // magic_sharp_2013(x) convolved with {+1/36, 0, +34/36, 0, +1/36},
+    // scaled to mks2021(0) == 1
+    return (magic_sharp_2013(fabs(x - 2.0)) + 34.0 * magic_sharp_2013(x) +
+            magic_sharp_2013(x + 2.0)) * 16.0/577.0;
+}
+
 static double gaussian(params *p, double x)
 {
     return exp(-2.0 * x * x / p->params[0]);
@@ -420,6 +450,9 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{SCALER_EWA_ROBIDOUXSHARP, 2,cubic_bc,
       .params = {6 / (13 + 7 * M_SQRT2), 7 / (2 + 12 * M_SQRT2)}},
         .polar = true},
+    // Magic Kernel Sharp filters, see https://johncostella.com/magic/
+    {{SCALER_MKS2013, 2.5, mks2013}},
+    {{SCALER_MKS2021, 4.5, mks2021}},
     // Miscellaneous filters
     {{SCALER_BOX,      1,   box, .resizable = true}},
     {{SCALER_NEAREST,  0.5, box}},
