@@ -41,8 +41,8 @@
 #include "video/sws_utils.h"
 #include "video/mp_image.h"
 
-#define IMGFMT IMGFMT_RGB24
-#define BYTES_PER_PX 3
+#define IMGFMT IMGFMT_RGBA
+#define BYTES_PER_PX 4
 #define DEFAULT_WIDTH_PX  320
 #define DEFAULT_HEIGHT_PX 240
 #define DEFAULT_WIDTH 80
@@ -77,8 +77,8 @@ static inline void write_str(unsigned char* s)
     write_bstr(bstr0(s));
 }
 
-#define KITTY_ESC_IMG        "\033_Ga=T,f=24,s=%d,v=%d,C=1,q=2,m=1;"
-#define KITTY_ESC_IMG_SHM    "\033_Ga=T,t=s,f=24,s=%d,v=%d,C=1,q=2,m=1;%s"
+#define KITTY_ESC_IMG        "\033_Ga=T,f=32,s=%d,v=%d,C=1,q=2,m=1;"
+#define KITTY_ESC_IMG_SHM    "\033_Ga=T,t=s,f=32,s=%d,v=%d,C=1,q=2,m=1;%s"
 #define KITTY_ESC_CONTINUE   "\033_Gm=%d;"
 static const bstr KITTY_ESC_END = bstr0_lit("\033\\");
 static const bstr KITTY_ESC_DELETE_ALL = bstr0_lit("\033_Ga=d;");
@@ -212,7 +212,7 @@ static void set_out_params(struct vo *vo)
         p->opts.left : p->cols * p->dst.x0 / vo->dwidth;
     p->display_par = p->osd.display_par;
 
-    p->buffer_size = 3 * p->width * p->height;
+    p->buffer_size = BYTES_PER_PX * p->width * p->height;
     p->output_size = AV_BASE64_SIZE(p->buffer_size);
 }
 
