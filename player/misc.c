@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include <libavutil/rational.h>
+
 #include "mpv_talloc.h"
 
 #include "osdep/io.h"
@@ -174,6 +176,59 @@ void issue_refresh_seek(struct MPContext *mpctx, enum seek_precision min_prec)
     queue_seek(mpctx, MPSEEK_ABSOLUTE, get_current_time(mpctx), min_prec, 0);
 }
 
+// Recover an exact frame rate from a container which only reports a rounded
+// one (Matroska's DefaultDuration for example gives 41708333ns instead of
+// 1001/24000s). Plain av_d2q() would turn that into 1000000000/41708333, while
+// consumers of the rate need to be able to tell x/1 and x*1000/1001 rates
+// apart (DP AdaptiveSync FAVT encodes the 1.001 divider as a single bit), so
+// prefer the nearest normative rate.
+static AVRational fps_to_rational(double fps)
+{
+    long int n = lrint(fps);
+    if (n > 0 && n <= INT_MAX / 1000) {
+        // The two families are ~0.1% apart, so this can't be ambiguous.
+        double tolerance = n * 1e-4;
+        if (fabs(fps - n) < tolerance)
+            return (AVRational){n, 1};
+        if (fabs(fps - n * 1000.0 / 1001.0) < tolerance)
+            return (AVRational){n * 1000, 1001};
+    }
+    // Not a normative rate; keep num and den small enough to stay meaningful.
+    return av_d2q(fps, 65535);
+}
+
+static void update_content_frame_rate(struct MPContext *mpctx, struct track *track)
+{
+    struct voctrl_content_frame_rate frame_rate = {
+        .numerator = 0,
+        .denominator = 1,
+    };
+
+    if (track && track->vo_c && !track->image) {
+        struct mp_output_chain *filter = track->vo_c->filter;
+        AVRational rate = {
+            filter->container_fps_num,
+            filter->container_fps_den,
+        };
+
+        // Pass the container rate through unchanged if it is known exactly.
+        // Some containers report a rate which is exact, but averaged over the
+        // whole file instead of being the authored cadence (10800000/450449
+        // instead of 24000/1001), which is of no use here either - all rates
+        // in actual use have a denominator of 1 or 1001.
+        if (rate.num <= 0 || rate.den <= 0 || rate.den > 1001)
+            rate = fps_to_rational(filter->container_fps);
+
+        if (rate.num > 0 && rate.den > 0) {
+            frame_rate.numerator = rate.num;
+            frame_rate.denominator = rate.den;
+        }
+    }
+
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_CONTENT_FRAME_RATE, &frame_rate);
+}
+
 void update_content_type(struct MPContext *mpctx, struct track *track)
 {
     enum mp_content_type content_type;
@@ -186,6 +241,8 @@ void update_content_type(struct MPContext *mpctx, struct track *track)
     }
     if (mpctx->video_out)
         vo_control(mpctx->video_out, VOCTRL_CONTENT_TYPE, &content_type);
+
+    update_content_frame_rate(mpctx, track);
 }
 
 void update_vo_playback_state(struct MPContext *mpctx)

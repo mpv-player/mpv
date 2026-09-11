@@ -271,6 +271,9 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
         vo_c->dec_src = track->dec->f->pins[0];
         vo_c->filter->container_fps =
             mp_decoder_wrapper_get_container_fps(track->dec);
+        mp_decoder_wrapper_get_container_fps_rational(track->dec,
+                                            &vo_c->filter->container_fps_num,
+                                            &vo_c->filter->container_fps_den);
         vo_c->is_coverart = !!track->attached_picture;
         vo_c->is_sparse = track->stream->still_image || vo_c->is_coverart;
 

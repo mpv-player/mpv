@@ -163,6 +163,9 @@ struct mp_codec_params {
     // STREAM_VIDEO
     bool avi_dts;         // use DTS timing; first frame and DTS is 0
     double fps;           // frames per second (set only if constant fps)
+    int fps_num, fps_den; // fps as exact rational (0/0 if not known); this is
+                          // set only if the container provides an exact rate,
+                          // and is always consistent with the fps field
     bool reliable_fps;    // the fps field is definitely not broken
     int par_w, par_h;     // pixel aspect ratio (0 if unknown/square)
     int disp_w, disp_h;   // display size
