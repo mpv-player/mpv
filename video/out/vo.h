@@ -205,6 +205,8 @@ enum {
     VO_CAP_FRAMEOWNER   = 1 << 5,
     // VO does handle mp_image_params.vflip
     VO_CAP_VFLIP        = 1 << 6,
+    // VO supports deinterlacing
+    VO_CAP_DEINTERLACE  = 1 << 7,
 };
 
 enum {
@@ -265,6 +267,11 @@ struct vo_frame {
     // Warning: When OSD should be redrawn in --force-window --idle mode, this
     //          can be NULL. The VO should draw a black background, OSD on top.
     struct mp_image *current;
+    // List of images immediately preceding the current one.
+    // past_frames[0] is the newest, immediately preceding frame.
+    // The actual number delivered can be lower than requested.
+    int num_past_frames;
+    struct mp_image *past_frames[VO_MAX_REQ_FRAMES];
     // List of future images, starting with the current one. This does not
     // care about repeated frames - it simply contains the next real frames.
     // vo_set_queue_params() sets how many future frames this should include.
@@ -549,8 +556,10 @@ void vo_query_formats(struct vo *vo, uint8_t *list);
 void vo_event(struct vo *vo, int event);
 int vo_query_and_reset_events(struct vo *vo, int events);
 struct mp_image *vo_get_current_frame(struct vo *vo);
-void vo_set_queue_params(struct vo *vo, int64_t offset_ns, int num_req_frames,
+void vo_set_queue_params(struct vo *vo, int64_t offset_ns,
+                         int num_req_past_frames, int num_req_frames,
                          int num_frame_refs);
+int vo_get_num_req_past_frames(struct vo *vo);
 int vo_get_num_req_frames(struct vo *vo);
 int vo_get_num_frame_refs(struct vo *vo);
 double vo_get_vsync_interval(struct vo *vo);

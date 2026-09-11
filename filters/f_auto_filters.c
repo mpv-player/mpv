@@ -22,6 +22,7 @@
 struct deint_priv {
     struct mp_subfilter sub;
     int prev_imgfmt;
+    int prev_deint_opt;
     bool interlaced_frame;
     struct m_config_cache *opts;
 };
@@ -52,10 +53,6 @@ static void deint_process(struct mp_filter *f)
     m_config_cache_update(p->opts);
     struct filter_opts *opts = p->opts->opts;
 
-    // Handle deinterlace=0 case by destroying any existing filter immediately.
-    if (!opts->deinterlace)
-        mp_subfilter_destroy(&p->sub);
-
     // Insert a deinterlace filter in the chain if:
     //   1) deinterlace=1 (always), or
     //   2) deinterlace=-1 (auto) and the frame is interlaced.
@@ -66,9 +63,17 @@ static void deint_process(struct mp_filter *f)
     // If the image format changed, destroy any existing filter immediately since
     // it may not support the new format. If we no longer need a filter, drain
     // and destroy it gracefully.
-    if (img->imgfmt != p->prev_imgfmt) {
+    bool imgfmt_changed = img->imgfmt != p->prev_imgfmt;
+    // If we already have a deinterlace filter, and the option value changed
+    // (i.e. we switched from auto to yes or vice versa), we need to recreate it
+    // immediately to reflect the new value.
+    bool deint_opt_changed = p->sub.filter && opts->deinterlace != p->prev_deint_opt;
+    // Handle deinterlace=0 case by destroying any existing filter immediately.
+    bool deint_off = opts->deinterlace == 0;
+    if (imgfmt_changed || deint_opt_changed || deint_off) {
         mp_subfilter_destroy(&p->sub);
-        p->prev_imgfmt = img->imgfmt;
+        if (imgfmt_changed)
+            p->prev_imgfmt = img->imgfmt;
     } else if (p->sub.filter && !filter_needed) {
         if (!mp_subfilter_drain_destroy(&p->sub))
             return;
@@ -95,6 +100,7 @@ static void deint_process(struct mp_filter *f)
         field_parity = "auto";
     }
 
+    struct mp_stream_info *info = mp_filter_find_stream_info(f);
     bool has_filter = true;
     if (img->imgfmt == IMGFMT_VDPAU) {
         char *args[] = {"deint", "yes",
@@ -126,6 +132,11 @@ static void deint_process(struct mp_filter *f)
                         "parity", field_parity, NULL};
         p->sub.filter =
             mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO, "vavpp", args);
+    } else if (info && info->deinterlace && !IMGFMT_IS_HWACCEL(img->imgfmt)) {
+        char *args[] = {"interlaced-only", opts->deinterlace == 1 ? "no" : "yes",
+                        "parity", field_parity, NULL};
+        p->sub.filter = mp_create_user_filter(f, MP_OUTPUT_CHAIN_VIDEO,
+                                              "fieldrate", args);
     } else {
         has_filter = false;
     }
@@ -161,6 +172,7 @@ static void deint_process(struct mp_filter *f)
         mp_chain_filters(subf->ppins[0], subf->ppins[1], filters, 2);
         p->sub.filter = subf;
     }
+    p->prev_deint_opt = opts->deinterlace;
 
     mp_subfilter_continue(&p->sub);
 }
