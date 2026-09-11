@@ -908,7 +908,15 @@ local function run_ytdl_hook(url)
         msg.verbose("Video disabled. Only using audio")
     end
 
-    if format ~= "" and format ~= "ytdl" then
+    if format == "" then
+        -- youtube-dl defaults to separate video and audio tracks only when it
+        -- finds ffmpeg to merge them, which mpv doesn't need. The "bestvideo*"
+        -- alternative is for yt-dlp, youtube-dl treats it as an unknown format
+        -- and moves on to the next one.
+        format = "bestvideo*+bestaudio/bestvideo+bestaudio/best"
+    end
+
+    if format ~= "ytdl" then
         table.insert(command, "--format")
         table.insert(command, format)
     end
