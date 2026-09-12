@@ -66,6 +66,7 @@ extern const demuxer_desc_t demuxer_desc_libarchive;
 #if HAVE_SUBRANDR
 extern const demuxer_desc_t demuxer_desc_sbr;
 #endif
+extern const demuxer_desc_t demuxer_desc_json3;
 extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
 
@@ -83,6 +84,7 @@ static const demuxer_desc_t *const demuxer_list[] = {
 #if HAVE_SUBRANDR
     &demuxer_desc_sbr,
 #endif
+    &demuxer_desc_json3,
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
     &demuxer_desc_playlist,

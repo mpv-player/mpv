@@ -4243,6 +4243,26 @@ Demuxer
     https://gitlab.com/mbunkus/mkvtoolnix/-/issues/2389
     https://github.com/mpv-player/mpv/pull/13446
 
+``--demuxer-json3-youtube-styling=<yes|no>``
+    Mimic YouTube's default styling for YouTube json3 subtitles, as used
+    by YouTube's automatically generated captions.
+    (default: yes).
+
+``--demuxer-json3-word-timing=<yes|no|auto>``
+    Display YouTube json3 subtitles word by word as they are spoken.
+    Default is ``auto``, which is ``yes`` with ``--demuxer-json3-youtube-styling``
+    and ``no`` without.
+
+``--demuxer-json3-multi-line=<yes|no|auto>``
+    Display two lines of subtitles at a time: the line currently being spoken
+    and the line before it. Default is ``auto``, which is ``yes`` with
+    ``--demuxer-json3-youtube-styling`` and ``no`` without.
+
+``--demuxer-json3-scroll-ms=<0-1000>``
+    Duration in milliseconds of the new line row scrolling animation with
+    ``--demuxer-json3-youtube-styling`` and ``--demuxer-json3-multi-line`` set to yes.
+    (default: 250). ``0`` disables the animation.
+
 ``--demuxer-rawaudio-channels=<value>``
     Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used
     (default: stereo).

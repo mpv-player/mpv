@@ -74,6 +74,7 @@ extern const struct m_sub_options demux_mkv_conf;
 #if HAVE_SUBRANDR
 extern const struct m_sub_options demux_sbr_conf;
 #endif
+extern const struct m_sub_options demux_json3_conf;
 extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options hwdec_conf;
@@ -724,6 +725,7 @@ static const m_option_t mp_opts[] = {
 #if HAVE_SUBRANDR
     {"demuxer-sbr", OPT_SUBSTRUCT(demux_sbr, demux_sbr_conf)},
 #endif
+    {"demuxer-json3", OPT_SUBSTRUCT(demux_json3, demux_json3_conf)},
 
 // ------------------------- subtitles options --------------------
 
