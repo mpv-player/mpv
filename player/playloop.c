@@ -464,6 +464,17 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     update_ab_loop_clip(mpctx);
 
     mpctx->current_seek = seek;
+    // A sub-snap chain is built against a position, so any seek other than the
+    // one it queued itself invalidates it. Its own seek only means the target
+    // has been reached, and any steps still pending go on from there.
+    struct sub_snap_state *snap = &mpctx->sub_snap;
+    if (snap->queued && seek.type == MPSEEK_ABSOLUTE &&
+        seek.amount == snap->base)
+    {
+        snap->queued = false;
+    } else {
+        *snap = (struct sub_snap_state){0};
+    }
     redraw_subs(mpctx);
 }
 
@@ -1326,6 +1337,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_sstep(mpctx);
 
     update_core_idle_state(mpctx);
+
+    handle_sub_snap(mpctx);
 
     execute_queued_seek(mpctx);
 
