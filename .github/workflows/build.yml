@@ -275,6 +275,7 @@ jobs:
           - os: "macos-14"
             arch: "arm"
             xcode: "Xcode_15.0"
+            homebrew: "b1d3cbaeb724947c97bf0e334adb3db56e4b5438"
           - os: "macos-15"
             arch: "arm"
           - os: "macos-15-intel"
@@ -307,6 +308,7 @@ jobs:
           if [[ -n "${{ matrix.homebrew }}" ]]; then
             export HOMEBREW_NO_AUTO_UPDATE=1
             cd "$(brew --repo homebrew/core)"
+            git fetch --depth=1 origin ${{ matrix.homebrew }}
             git checkout --force ${{ matrix.homebrew }}
           else
             brew update
