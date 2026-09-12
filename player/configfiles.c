@@ -254,6 +254,19 @@ static void write_filename(struct MPContext *mpctx, void *talloc_ctx, bstr *s, c
     }
 }
 
+static void write_title(struct MPContext *mpctx, void *talloc_ctx, bstr *s)
+{
+    if (mpctx->opts->write_filename_in_watch_later_config) {
+        const char *title = mp_find_non_filename_media_title(mpctx);
+        if (title) {
+            char written_title[1024] = {0};
+            for (int n = 0; title[n] && n < sizeof(written_title) - 1; n++)
+                written_title[n] = (unsigned char)title[n] < 32 ? '_' : title[n];
+            bstr_xappend_asprintf(talloc_ctx, s, "# title: %s\n", written_title);
+        }
+    }
+}
+
 static void write_redirect(struct MPContext *mpctx, char *path)
 {
     char *conffile = mp_get_playback_resume_config_filename(mpctx, path);
@@ -318,6 +331,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
     bstr data = {0};
     write_filename(mpctx, conffile, &data, cur->filename);
+
+    write_title(mpctx, conffile, &data);
 
     bool write_start = true;
     double pos = get_playback_time(mpctx);
