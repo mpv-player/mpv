@@ -6,6 +6,9 @@
 #include "video/out/libmpv.h"
 
 static const struct libmpv_gpu_context_fns *context_backends[] = {
+#if HAVE_D3D11
+    &libmpv_gpu_context_d3d11,
+#endif
 #if HAVE_GL
     &libmpv_gpu_context_gl,
 #endif
