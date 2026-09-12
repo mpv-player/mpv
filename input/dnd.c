@@ -114,6 +114,10 @@ static MP_THREAD_VOID mpv_event_loop_fn(void *arg)
     mpv_observe_property(mpv, 0, "dropped-files", MPV_FORMAT_NODE);
     mpv_observe_property(mpv, 0, "input-builtin-drag-and-drop", MPV_FORMAT_FLAG);
 
+    int enabled_flag;
+    if (mpv_get_property(mpv, "input-builtin-drag-and-drop", MPV_FORMAT_FLAG, &enabled_flag) == MPV_ERROR_SUCCESS)
+        enabled = (bool)enabled_flag;
+
     while (1) {
         mpv_event *event = mpv_wait_event(mpv, -1);
         if (event->event_id == MPV_EVENT_SHUTDOWN)
