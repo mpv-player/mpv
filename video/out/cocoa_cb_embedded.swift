@@ -17,29 +17,21 @@
 
 import Cocoa
 
-class CocoaCB: Common, EventSubscriber {
-    var libmpv: LibmpvHelper
-    var layer: GLLayer?
+class CocoaCBEmbedded: CocoaCB {
+    let externalView: NSView
 
-    var isShuttingDown: Bool = false
-
-    enum State {
-        case uninitialized
-        case needsInit
-        case initialized
-    }
-    var backendState: State = .uninitialized
-
-    init(_ mpv: OpaquePointer) {
-        let log = LogHelper(mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "cocoacb"))
-        let option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
-        libmpv = LibmpvHelper(mpv, log)
-        super.init(option, log)
-        layer = GLLayer(cocoaCB: self)
-        AppHub.shared.event?.subscribe(self, event: .init(name: "MPV_EVENT_SHUTDOWN"))
+    init(_ mpv: OpaquePointer, _ view: NSView) {
+        externalView = view
+        super.init(mpv)
+        log.verbose("Initialized in embedded mode, NSView: \(view)")
     }
 
-    func preinit(_ vo: UnsafeMutablePointer<vo>) {
+    override func getEmbeddedBackingScaleFactor() -> CGFloat {
+        return externalView.window?.backingScaleFactor ??
+               getCurrentScreen()?.backingScaleFactor ?? 1.0
+    }
+
+    override func preinit(_ vo: UnsafeMutablePointer<vo>) {
         eventsLock.withLock { self.vo = vo }
         input = InputHelper(vo.pointee.input_ctx, option)
 
@@ -51,71 +43,66 @@ class CocoaCB: Common, EventSubscriber {
                 exit(1)
             }
 
-            initView(vo, layer)
+            initEmbeddedView(layer)
             initMisc(vo)
         }
     }
 
-    func uninit() {
-        eventsLock.withLock { self.vo = nil }
-        window?.orderOut(nil)
-        window?.close()
+    func initEmbeddedView(_ layer: CALayer) {
+        log.verbose("Attaching GLLayer to external view")
+
+        view = View(frame: externalView.bounds, common: self)
+        guard let sub = view else {
+            log.error("Unable to allocate sub-view for embedded mode")
+            return
+        }
+
+        sub.autoresizingMask = [.width, .height]
+        sub.wantsLayer = true
+        sub.layer = layer
+        sub.layerContentsPlacement = .scaleProportionallyToFit
+        layer.delegate = sub
+        externalView.addSubview(sub)
+
+        externalView.postsFrameChangedNotifications = true
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(hostViewFrameDidChange(_:)),
+            name: NSView.frameDidChangeNotification,
+            object: externalView)
+
+        let scale = getEmbeddedBackingScaleFactor()
+        layer.contentsScale = scale
+
+        log.verbose("Embedded view initialized with scale factor: \(scale)")
     }
 
-    func reconfig(_ vo: UnsafeMutablePointer<vo>) {
+    override func uninit() {
+        eventsLock.withLock { self.vo = nil }
+        NotificationCenter.default.removeObserver(self,
+                                                  name: NSView.frameDidChangeNotification,
+                                                  object: externalView)
+        view?.removeFromSuperview()
+    }
+
+    override func reconfig(_ vo: UnsafeMutablePointer<vo>) {
         eventsLock.withLock { self.vo = vo }
         if backendState == .needsInit {
             DispatchQueue.main.sync { self.initBackend(vo) }
         } else if option.vo.auto_window_resize {
             DispatchQueue.main.async {
-                self.updateWindowSize(vo)
                 self.layer?.update(force: true)
-                if self.option.vo.focus_on == 2 {
-                    NSApp.activate(ignoringOtherApps: true)
-                }
             }
         }
     }
 
-    func initBackend(_ vo: UnsafeMutablePointer<vo>) {
-        let previousActiveApp = getActiveApp()
-        initApp()
-        initWindow(vo, previousActiveApp)
+    override func initBackend(_ vo: UnsafeMutablePointer<vo>) {
         updateICCProfile()
-        initWindowState()
-
         backendState = .initialized
     }
 
-    func updateWindowSize(_ vo: UnsafeMutablePointer<vo>) {
-        guard let targetScreen = getTargetScreen(forFullscreen: false) ?? NSScreen.main else {
-            log.warning("Couldn't update Window size, no Screen available")
-            return
-        }
-
-        let (wr, _) = getWindowGeometry(forScreen: targetScreen, videoOut: vo)
-        if !(window?.isVisible ?? false) && !(window?.isMiniaturized ?? false) && !NSApp.isHidden {
-            window?.makeKeyAndOrderFront(nil)
-        }
-        layer?.atomicDrawingStart()
-        window?.updateSize(wr.size)
-    }
-
-    override func displayLinkCallback(_ displayLink: CVDisplayLink,
-                                      _ inNow: UnsafePointer<CVTimeStamp>,
-                                      _ inOutputTime: UnsafePointer<CVTimeStamp>,
-                                      _ flagsIn: CVOptionFlags,
-                                      _ flagsOut: UnsafeMutablePointer<CVOptionFlags>) -> CVReturn {
-        libmpv.reportRenderFlip()
-        return kCVReturnSuccess
-    }
-
-    func getEmbeddedBackingScaleFactor() -> CGFloat {
-        return window?.backingScaleFactor ?? 1.0
-    }
-
     override func updateICCProfile() {
-        guard let colorSpace = window?.screen?.colorSpace else {
+        guard let colorSpace = getCurrentScreen()?.colorSpace else {
             log.warning("Couldn't update ICC Profile, no color space available")
             return
         }
@@ -126,8 +113,8 @@ class CocoaCB: Common, EventSubscriber {
         layer?.wantsExtendedDynamicRangeContent = isEdr
     }
 
-    func getColorSpace() -> (Bool, CGColorSpace?) {
-        guard let colorSpace = window?.screen?.colorSpace?.cgColorSpace else {
+    override func getColorSpace() -> (Bool, CGColorSpace?) {
+        guard let colorSpace = getCurrentScreen()?.colorSpace?.cgColorSpace else {
             log.warning("Couldn't retrieve ICC Profile, no color space available")
             return (false, nil)
         }
@@ -182,56 +169,18 @@ class CocoaCB: Common, EventSubscriber {
         return (false, colorSpace)
     }
 
-    override func windowDidEndAnimation() {
-        layer?.update()
-        checkShutdown()
-    }
-
-    override func windowSetToFullScreen() {
-        layer?.update(force: true)
-    }
-
-    override func windowSetToWindow() {
-        layer?.update(force: true)
-    }
-
-    override func windowDidUpdateFrame() {
-        layer?.update(force: true)
-    }
-
-    override func windowDidChangeScreen() {
-        layer?.update(force: true)
-    }
-
-    override func windowDidChangeScreenProfile() {
-        layer?.needsICCUpdate = true
+    override func getCurrentScreen() -> NSScreen? {
+        return externalView.window?.screen ??
+               getTargetScreen(forFullscreen: false) ??
+               NSScreen.main
     }
 
     override func windowDidChangeBackingProperties() {
         layer?.contentsScale = getEmbeddedBackingScaleFactor()
     }
 
-    override func windowWillStartLiveResize() {
-        layer?.inLiveResize = true
-    }
-
-    override func windowDidEndLiveResize() {
-        layer?.inLiveResize = false
-    }
-
-    override func windowDidChangeOcclusionState() {
+    @objc func hostViewFrameDidChange(_ note: Notification) {
         layer?.update(force: true)
-    }
-
-    var controlCallback: mp_render_cb_control_fn = { ( v, ctx, e, request, data ) -> Int32 in
-        let ccb = unsafeBitCast(ctx, to: CocoaCB.self)
-
-        guard let vo = v, let events = e else {
-            ccb.log.warning("Unexpected nil value in Control Callback")
-            return VO_FALSE
-        }
-
-        return ccb.control(vo, events: events, request: request, data: data)
     }
 
     override func control(_ vo: UnsafeMutablePointer<vo>,
@@ -239,46 +188,47 @@ class CocoaCB: Common, EventSubscriber {
                           request: UInt32,
                           data: UnsafeMutableRawPointer?) -> Int32 {
         switch mp_voctrl(request) {
-        case VOCTRL_PREINIT:
-            DispatchQueue.main.sync { self.preinit(vo) }
+        case VOCTRL_GET_WINDOW_ID:
+            let wid = data!.assumingMemoryBound(to: Int64.self)
+            wid.pointee = unsafeBitCast(externalView, to: Int64.self)
             return VO_TRUE
-        case VOCTRL_UNINIT:
-            DispatchQueue.main.async { self.uninit() }
+        case VOCTRL_GET_HIDPI_SCALE:
+            let scaleFactor = data!.assumingMemoryBound(to: CDouble.self)
+            scaleFactor.pointee = Double(getEmbeddedBackingScaleFactor())
             return VO_TRUE
-        case VOCTRL_RECONFIG:
-            reconfig(vo)
+        case VOCTRL_GET_UNFS_WINDOW_SIZE:
+            let sizeData = data!.assumingMemoryBound(to: Int32.self)
+            let size = UnsafeMutableBufferPointer(start: sizeData, count: 2)
+            let rect = externalView.bounds
+
+            if Bool(option.vo.hidpi_window_scale) {
+                size[0] = Int32(rect.size.width)
+                size[1] = Int32(rect.size.height)
+            } else {
+                let scale = getEmbeddedBackingScaleFactor()
+                size[0] = Int32(rect.size.width * scale)
+                size[1] = Int32(rect.size.height * scale)
+            }
+            return VO_TRUE
+        case VOCTRL_SET_UNFS_WINDOW_SIZE:
+            return VO_NOTIMPL
+        case VOCTRL_VO_OPTS_CHANGED:
+            var opt: UnsafeMutableRawPointer?
+            while option.nextChangedOption(property: &opt) {
+                // Skip window-specific options in embedded mode.
+            }
             return VO_TRUE
         default:
-            break
+            return super.control(vo, events: events, request: request, data: data)
         }
-
-        return super.control(vo, events: events, request: request, data: data)
     }
 
-    func shutdown() {
-        isShuttingDown = window?.isAnimating ?? false ||
-                         window?.isInFullscreen ?? false && option.vo.native_fs
-        if window?.isInFullscreen ?? false && !(window?.isAnimating ?? false) {
-            window?.close()
-        }
-        if isShuttingDown { return }
-
+    override func shutdown() {
+        log.verbose("Shutdown")
         uninit()
         uninitCommon()
-        window = nil
-
         layer?.lockCglContext()
         libmpv.uninit()
         layer?.unlockCglContext()
-    }
-
-    func checkShutdown() {
-        if isShuttingDown {
-            shutdown()
-        }
-    }
-
-    func handle(event: EventHelper.Event) {
-        if event.name == String(describing: MPV_EVENT_SHUTDOWN) { shutdown() }
     }
 }
