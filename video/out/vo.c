@@ -65,6 +65,7 @@ extern const struct vo_driver video_out_dmabuf_wayland;
 extern const struct vo_driver video_out_wlshm;
 extern const struct vo_driver video_out_tct;
 extern const struct vo_driver video_out_sixel;
+extern const struct vo_driver video_out_chafa;
 extern const struct vo_driver video_out_kitty;
 
 static const struct vo_driver *const video_out_drivers[] =
@@ -114,6 +115,9 @@ static const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_SIXEL
     &video_out_sixel,
+#endif
+#if HAVE_CHAFA
+    &video_out_chafa,
 #endif
     &video_out_kitty,
     &video_out_lavc,
