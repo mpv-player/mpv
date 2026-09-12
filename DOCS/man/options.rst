@@ -4540,6 +4540,11 @@ Input
     Enable the built-in drag-and-drop behavior (default: yes). Setting it to no
     disables the built-in drag-and-drop handling.
 
+    .. admonition:: Note (macOS)
+
+        This also affects the drag and drop behavior on the Dock Icon and
+        loading files from Finder, since both cases can't be distinguished.
+
 ``--input-cmdlist``
     Prints all commands that can be bound to keys.
 
