@@ -487,6 +487,26 @@ struct sd_times sub_get_times(struct dec_sub *sub, double pts)
     return res;
 }
 
+// True if a subtitle is visible on the frame at cur_pts but not on the one at
+// next_pts (both video PTS). Compared in the subtitle timebase, so --sub-delay
+// and --sub-speed are accounted for.
+bool sub_ends_between(struct dec_sub *sub, double cur_pts, double next_pts)
+{
+    mp_mutex_lock(&sub->lock);
+    bool res = false;
+
+    if (sub->sd->driver->get_times) {
+        struct sd_times t = sub->sd->driver->get_times(sub->sd,
+                                            pts_to_subtitle(sub, cur_pts));
+        // Same epsilon as sd_lavc.c's visibility test; sd_ass rounds to ms.
+        res = t.end != MP_NOPTS_VALUE &&
+              pts_to_subtitle(sub, next_pts) + 1e-6 >= t.end;
+    }
+
+    mp_mutex_unlock(&sub->lock);
+    return res;
+}
+
 void sub_reset(struct dec_sub *sub)
 {
     mp_mutex_lock(&sub->lock);
