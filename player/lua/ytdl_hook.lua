@@ -93,8 +93,11 @@ local codec_map = {
     ["hev1%..*"]    = "hevc",
 }
 
+local sub_format = "ass/vtt/srt/best"
+
 if mp.get_property_native("subrandr-version") ~= nil then
     codec_map["srv3"] = "subrandr/srv3"
+    sub_format = "srv3/" .. sub_format
 end
 
 -- Codec name as reported by youtube-dl mapped to mpv internal codec names.
@@ -944,7 +947,7 @@ local function run_ytdl_hook(url)
 
     local command = {
         ytdl.path, "--no-warnings", "-J", "--flat-playlist",
-        "--sub-format", "ass/vtt/srt/best"
+        "--sub-format", sub_format
     }
 
     -- Checks if video option is "no", change format accordingly,
