@@ -84,6 +84,7 @@ local codec_map = {
     ["ass"]         = "ass",
     ["srt"]         = "subrip",
     ["vtt"]         = "webvtt",
+    ["json3"]       = "ass",
     ["opus"]        = "opus",
     ["vp9"]         = "vp9",
     ["vp9%..*"]     = "vp9",
@@ -93,7 +94,7 @@ local codec_map = {
     ["hev1%..*"]    = "hevc",
 }
 
-local sub_format = "ass/vtt/srt/best"
+local sub_format = "json3/ass/vtt/srt/best"
 
 if mp.get_property_native("subrandr-version") ~= nil then
     codec_map["srv3"] = "subrandr/srv3"
