@@ -120,7 +120,8 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
      * thread which is just not good. Use MAILBOX for those compositors to
      * avoid indefinite blocking. */
     struct vo_wayland_state *wl = ctx->vo->wl;
-    p->use_fifo = wl->has_fifo && wl->present_v2 && wl->opts->wl_internal_vsync != 2;
+    p->use_fifo = wl->has_fifo && wl->presentation && wl->opts->wl_internal_vsync != 2 &&
+                  vo_wayland_proxy_get_version((struct wl_proxy *)wl->presentation) >= 2;
     if (!ra_vk_ctx_init(ctx, vk, params, p->use_fifo ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR))
         goto error;
 
