@@ -290,16 +290,17 @@ struct MPContext *mp_create(void)
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
 
+    // Nothing must call mp_msg*() and related before this
+    mp_msg_init(mpctx->global);
+    mp_msg_set_early_logging(mpctx->global, true);
+    mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
+    mpctx->statusline = mp_log_new(mpctx, mpctx->log, "!statusline");
+
     demux_packet_pool_init(mpctx->global);
     stats_global_init(mpctx->global);
 #if HAVE_LIBCURL
     mp_curl_global_init(mpctx->global);
 #endif
-
-    // Nothing must call mp_msg*() and related before this
-    mp_msg_init(mpctx->global);
-    mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
-    mpctx->statusline = mp_log_new(mpctx, mpctx->log, "!statusline");
 
     mpctx->stats = stats_ctx_create(mpctx, mpctx->global, "main");
 
@@ -326,10 +327,6 @@ struct MPContext *mp_create(void)
     cocoa_set_input_context(mpctx->input);
 #endif
 
-    char *verbose_env = getenv("MPV_VERBOSE");
-    if (verbose_env)
-        mpctx->opts->verbose = strtol(verbose_env, NULL, 10);
-
     mp_cancel_trigger(mpctx->playback_abort);
 
     return mpctx;
@@ -353,7 +350,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     }
 
     mp_init_paths(mpctx->global, opts);
-    mp_msg_set_early_logging(mpctx->global, true);
     mp_update_logging(mpctx, true);
 
     if (options) {
