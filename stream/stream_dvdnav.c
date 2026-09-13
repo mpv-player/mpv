@@ -322,13 +322,39 @@ static const char *dvd_domain_name(dvdnav_t *dvdnav)
     return "?";
 }
 
-// Map a libdvdnav physical audio stream number (0..7) to the corresponding
-// MPEG-PS substream byte that demux_lavf assigns to AVStream->id.
-static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
+// dvdnav_get_*_logical_stream() map the other way, taking the logical stream
+// number and returning the physical substream it is muxed under. Attributes,
+// language and format are all keyed by the logical one, so invert here.
+static int dvd_audio_logical_stream(struct priv *priv, int physical)
 {
-    if (physical < 0 || physical > 7)
+    if (physical < 0)
         return -1;
-    uint16_t fmt = dvdnav_audio_stream_format(priv->dvdnav, physical);
+    for (int n = 0; n < 8; n++) {
+        if (dvdnav_get_audio_logical_stream(priv->dvdnav, n) == physical)
+            return n;
+    }
+    return -1;
+}
+
+static int dvd_spu_logical_stream(struct priv *priv, int physical)
+{
+    if (physical < 0)
+        return -1;
+    for (int n = 0; n < 32; n++) {
+        if (dvdnav_get_spu_logical_stream(priv->dvdnav, n) == physical)
+            return n;
+    }
+    return -1;
+}
+
+// Build the MPEG-PS substream byte that demux_lavf assigns to AVStream->id.
+// The format is an attribute, so it is keyed by the logical stream, while the
+// number within that format comes from the physical one.
+static int dvd_audio_substream_id(struct priv *priv, int logical, int physical)
+{
+    if (logical < 0 || physical < 0 || physical > 7)
+        return -1;
+    uint16_t fmt = dvdnav_audio_stream_format(priv->dvdnav, logical);
     switch (fmt) {
     case DVD_AUDIO_FORMAT_AC3:
         return 0x80 + physical;
@@ -342,6 +368,28 @@ static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
     default:
         return -1;
     }
+}
+
+// Map a libdvdnav physical audio stream number (0..7) to its substream byte.
+static int dvd_physical_audio_to_substream(struct priv *priv, int physical)
+{
+    int logical = dvd_audio_logical_stream(priv, physical);
+    return dvd_audio_substream_id(priv, logical, physical);
+}
+
+// The physical number alone does not identify a substream, a disc carrying the
+// same track as both AC3 and DTS gives them the same one. Match on the whole
+// substream byte instead, so the format tells the two apart.
+static int dvd_audio_logical_for_id(struct priv *priv, int id)
+{
+    if (id < 0)
+        return -1;
+    for (int n = 0; n < 8; n++) {
+        int physical = dvdnav_get_audio_logical_stream(priv->dvdnav, n);
+        if (dvd_audio_substream_id(priv, n, physical) == id)
+            return n;
+    }
+    return -1;
 }
 
 static void refresh_video_resolution(struct priv *priv)
@@ -534,16 +582,12 @@ static void handle_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
  */
 static int mp_dvdnav_lang_from_aid(stream_t *stream, int aid)
 {
-    uint8_t lg;
-    uint16_t lang;
     struct priv *priv = stream->priv;
 
-    if (aid < 0)
+    int lg = dvd_audio_logical_for_id(priv, aid);
+    if (lg < 0)
         return 0;
-    lg = dvdnav_get_audio_logical_stream(priv->dvdnav, aid & 0x7);
-    if (lg == 0xff)
-        return 0;
-    lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
+    uint16_t lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
     if (lang == 0xffff)
         return 0;
     return lang;
@@ -557,17 +601,12 @@ static int mp_dvdnav_lang_from_aid(stream_t *stream, int aid)
  */
 static int mp_dvdnav_lang_from_sid(stream_t *stream, int sid)
 {
-    uint8_t k;
-    uint16_t lang;
     struct priv *priv = stream->priv;
-    if (sid < 0)
+
+    int k = dvd_spu_logical_stream(priv, sid);
+    if (k < 0)
         return 0;
-    for (k = 0; k < 32; k++)
-        if (dvdnav_get_spu_logical_stream(priv->dvdnav, k) == sid)
-            break;
-    if (k == 32)
-        return 0;
-    lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
+    uint16_t lang = dvdnav_spu_stream_to_lang(priv->dvdnav, k);
     if (lang == 0xffff)
         return 0;
     return lang;
