@@ -11,6 +11,7 @@ local o = {
     force_all_formats = true,
     thumbnails = "none",
     ytdl_path = "",
+    auto_captions = "auto",
 }
 
 local ytdl = {
@@ -739,9 +740,50 @@ local function add_single_video(json)
 
     -- add subtitles
     if json.requested_subtitles ~= nil then
+        local function base_lang(lang)
+            return (lang:lower():gsub("[-_].*", ""))
+        end
+
+        local slang = {}
+        for _, l in ipairs(mp.get_property_native("options/slang") or {}) do
+            slang[base_lang(l)] = true
+        end
+
+        local regular_langs = {}
+        for lang, _ in pairs(json.subtitles or {}) do
+            regular_langs[base_lang(lang)] = true
+        end
+
+        local function is_auto_caption(lang)
+            return json.automatic_captions ~= nil and
+                   json.automatic_captions[lang] ~= nil and
+                   (json.subtitles == nil or json.subtitles[lang] == nil)
+        end
+
+        local function auto_caption_wanted(lang)
+            if lang:find("%-orig$") then
+                return true
+            end
+            if json.requested_subtitles[lang .. "-orig"] ~= nil then
+                return false
+            end
+            local base = base_lang(lang)
+            return slang[base] == true and not regular_langs[base]
+        end
+
+        local regular_subs = false
+        for lang, _ in pairs(json.requested_subtitles) do
+            regular_subs = regular_subs or not is_auto_caption(lang)
+        end
+        local add_auto = o.auto_captions == "yes" or
+                         (o.auto_captions ~= "no" and not regular_subs)
+
         local subs = {}
         for lang, info in pairs(json.requested_subtitles) do
-            subs[#subs + 1] = {lang = lang or "-", info = info}
+            local auto = is_auto_caption(lang)
+            if not auto or (add_auto and auto_caption_wanted(lang)) then
+                subs[#subs + 1] = {lang = lang or "-", info = info, auto = auto}
+            end
         end
         table.sort(subs, function(a, b) return a.lang < b.lang end)
         for _, e in ipairs(subs) do
@@ -765,6 +807,10 @@ local function add_single_video(json)
                 end
                 edl = edl .. ";" .. edl_escape(sub)
                 local title = sub_info.name or sub_info.ext
+                if e.auto then
+                    title = title .. " (auto-generated)"
+                    lang = lang:gsub("%-orig$", "")
+                end
                 mp.commandv("sub-add", edl, "auto", title, lang)
             else
                 msg.verbose("No subtitle data/url for ["..lang.."]")
@@ -932,6 +978,9 @@ local function run_ytdl_hook(url)
         table.insert(command, "all")
     end
     table.insert(command, "--write-srt")
+    if o.auto_captions ~= "no" then
+        table.insert(command, "--write-auto-sub")
+    end
 
     if not use_playlist then
         table.insert(command, "--no-playlist")
