@@ -108,6 +108,7 @@ struct priv {
     uint32_t eof_log_id;    // last logged EOF state, avoids per-read spam
     bool eof_log_still;
     int disc_audio_id; // last audio track selected by the disc itself, -1 = unknown
+    double seek_base_time; // playback time captured right after a seek
 
     bool is_dvd, is_dvda, is_cdda, is_bd;
 
@@ -536,6 +537,15 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
         MP_VERBOSE(demuxer, "seek to: %f\n", stream_target);
         double seek_arg[] = {stream_target, stream_flags};
         stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, seek_arg);
+        // DVD-Audio answers where it landed straight away, and read-ahead
+        // spoils that answer within a few packets, so take it now. libdvdnav
+        // is the other way round, its VM has not moved until data is read, so
+        // that one is still asked later.
+        if (p->is_dvda) {
+            double landed;
+            if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &landed) >= 1)
+                p->seek_base_time = landed;
+        }
         if (p->is_bd) {
             // The reposition starts a new byte-stream run. Restart the byte
             // position counters, the slave's drop_buffers below resyncs the
@@ -579,8 +589,12 @@ static void reset_pts(demuxer_t *demuxer)
     struct priv *p = demuxer->priv;
 
     double base;
-    if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &base) < 1)
+    if (p->seek_base_time != MP_NOPTS_VALUE) {
+        base = p->seek_base_time;
+    } else if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &base) < 1) {
         base = 0;
+    }
+    p->seek_base_time = MP_NOPTS_VALUE;
 
     MP_VERBOSE(demuxer, "reset to time: %f\n", base);
 
@@ -1188,6 +1202,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 {
     struct priv *p = demuxer->priv = talloc_zero(demuxer, struct priv);
     p->disc_audio_id = -1;
+    p->seek_base_time = MP_NOPTS_VALUE;
 
     if (check != DEMUX_CHECK_FORCE)
         return -1;
@@ -1225,6 +1240,16 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
     // Initialize the playback time. We need to read _some_ data to get the
     // correct stream-layer time (at least with libdvdnav).
+    //
+    // The peek fills a whole stream buffer, and DVD-Audio serves that in one
+    // read, so afterwards the disc reports a position already well past the
+    // title start and the whole timeline would be anchored there. Take the
+    // position first, the same way a seek does.
+    if (p->is_dvda) {
+        double start;
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_TIME, &start) >= 1)
+            p->seek_base_time = start;
+    }
     stream_read_peek(demuxer->stream, &(char){0}, 1);
     reset_pts(demuxer);
 
