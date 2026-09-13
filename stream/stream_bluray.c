@@ -231,6 +231,17 @@ static const BLURAY_CLIP_INFO *bd_current_clip(const struct bluray_priv_s *priv)
     return &ti->clips[n];
 }
 
+static int bd_title_for_playlist(const struct bluray_priv_s *priv, uint32_t playlist)
+{
+    if (!priv->title_to_playlist)
+        return -1;
+    for (int i = 0; i < priv->num_titles; i++) {
+        if (priv->title_to_playlist[i] == playlist)
+            return i;
+    }
+    return -1;
+}
+
 static bool bd_clip_lang(const BLURAY_CLIP_INFO *ci, struct stream_track_req *req)
 {
     if (!ci)
@@ -642,15 +653,7 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             break;
         case BD_EVENT_PLAYLIST: {
             int playlist = ev.param;
-            int title = bd_get_current_title(b->bd);
-            if (b->title_to_playlist) {
-                for (int i = 0; i < b->num_titles; i++) {
-                    if (b->title_to_playlist[i] == ev.param) {
-                        title = i;
-                        break;
-                    }
-                }
-            }
+            int title = bd_title_for_playlist(b, ev.param);
             mp_mutex_lock(&b->overlay_lock);
             int cur_angle = b->current_angle;
             mp_mutex_unlock(&b->overlay_lock);
@@ -676,13 +679,12 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             mp_mutex_unlock(&b->overlay_lock);
             break;
         case BD_EVENT_TITLE: {
-            int title = bd_get_current_title(b->bd);
+            MP_VERBOSE(s, "title number %u\n", ev.param);
             mp_mutex_lock(&b->overlay_lock);
             if (b->title_info) {
                 bd_free_title_info(b->title_info);
                 b->title_info = NULL;
             }
-            b->current_title = title;
             if (b->hdmv_mode)
                 b->discontinuity_id++;
             mp_mutex_unlock(&b->overlay_lock);
@@ -877,8 +879,13 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
     case STREAM_CTRL_GET_CURRENT_TITLE: {
         mp_mutex_lock(&b->overlay_lock);
-        *((unsigned int *) arg) = b->current_title;
+        int title = b->current_title;
         mp_mutex_unlock(&b->overlay_lock);
+        // The disc can play something that is not in the title list, a menu
+        // playlist for one. Report nothing rather than a wrong index.
+        if (title < 0)
+            break;
+        *((unsigned int *) arg) = title;
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_NUM_TITLES: {
@@ -1232,7 +1239,7 @@ static void select_initial_title(stream_t *s, int title_guess) {
     if (b->cfg_title == BLURAY_PLAYLIST_TITLE) {
         if (!play_playlist(b, b->cfg_playlist))
             MP_WARN(s, "Couldn't start playlist '%05d'.\n", b->cfg_playlist);
-        b->current_title = bd_get_current_title(b->bd);
+        b->current_title = bd_title_for_playlist(b, b->cfg_playlist);
     } else {
         int title = -1;
         if (b->cfg_title != BLURAY_DEFAULT_TITLE )
@@ -1246,7 +1253,7 @@ static void select_initial_title(stream_t *s, int title_guess) {
             b->current_title = title;
         else {
             MP_WARN(s, "Couldn't start title '%d'.\n", title);
-            b->current_title = bd_get_current_title(b->bd);
+            b->current_title = -1;
         }
     }
 }
@@ -1440,9 +1447,8 @@ static int bluray_stream_open_internal(stream_t *s)
             ret = STREAM_UNSUPPORTED;
             goto err;
         }
-        b->current_title = bd_get_current_title(bd);
-        MP_VERBOSE(s, "bdnav: HDMV entered; current title=%d\n",
-                   b->current_title);
+        // BD_EVENT_PLAYLIST fills current_title in once the disc picks one.
+        MP_VERBOSE(s, "bdnav: HDMV entered\n");
     } else {
         select_initial_title(s, bd_get_main_title(bd));
     }
