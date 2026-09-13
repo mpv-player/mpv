@@ -315,6 +315,17 @@ Playback Control
         Always restart playback at keyframe boundaries (fast).
     exact
         Always do exact/hr/precise seeks (slow).
+    sub-snap
+        With ``relative`` seeks, seek to the start of the next or previous
+        (depending on the sign of ``<target>``) primary subtitle event instead,
+        if it is closer than ``<target>`` seconds. Otherwise, if subtitles are
+        hidden or disabled, or if the event has not been decoded yet, an
+        ordinary relative seek is done. Snapping seeks are always exact.
+        Ignored for the other seek modes and with ``--play-dir=backward``.
+        Like ``sub-seek``, this works only with events that have already been
+        displayed or are within the prefetch range, except that snapping
+        backwards also looks behind the play position while playback is
+        paused.
 
     Multiple flags can be combined, e.g.: ``absolute+keyframes``.
 
