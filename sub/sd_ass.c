@@ -311,9 +311,14 @@ static int init(struct sd *sd)
         strcmp(sd->codec->codec, "null") != 0)
     {
         ctx->is_converted = true;
-        ctx->converter = lavc_conv_create(sd);
-        if (!ctx->converter)
-            return -1;
+        // "ass-text" packets (emitted by demux_json3 for plain, unstyled
+        // captions) are already valid ASS events, so they don't need
+        // lavc_conv's SRT/VTT->ASS conversion
+        if (strcmp(sd->codec->codec, "ass-text") != 0) {
+            ctx->converter = lavc_conv_create(sd);
+            if (!ctx->converter)
+                return -1;
+        }
     }
 
     assobjects_init(sd);
@@ -322,7 +327,7 @@ static int init(struct sd *sd)
     ctx->packer = mp_sub_packer_alloc(ctx);
 
     // Subtitles does not have any profile value, so put the converted type as a profile.
-    const char *_Atomic *desc = ctx->converter ? &sd->codec->codec_profile : &sd->codec->codec_desc;
+    const char *_Atomic *desc = ctx->is_converted ? &sd->codec->codec_profile : &sd->codec->codec_desc;
     switch (ctx->ass_track->track_type) {
     case TRACK_TYPE_ASS:
         *desc = "Advanced Sub Station Alpha";
@@ -390,7 +395,7 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
 
     // This bookkeeping only has any practical use for ASS subs
     // over a VO with no video.
-    if (!ctx->is_converted) {
+    if (!ctx->converter) {
         if (!pkt->seen) {
             for (int n = track->n_events - 1; n >= 0; n--) {
                 if (n + 1 == old_n_events || pkt->animated == 1)
@@ -731,7 +736,8 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,
     struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
     bool no_ass = !opts->ass_enabled ||
         shared_opts->ass_style_override[sd->order] == ASS_STYLE_OVERRIDE_STRIP;
-    bool converted = (ctx->is_converted && !lavc_conv_is_styled(ctx->converter)) || no_ass;
+    bool converted = (ctx->is_converted &&
+                      !(ctx->converter && lavc_conv_is_styled(ctx->converter))) || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
     ASS_Renderer *renderer = ctx->ass_renderer;
     struct sub_bitmaps *res = &(struct sub_bitmaps){0};

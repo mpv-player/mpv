@@ -460,7 +460,8 @@ char *sub_ass_get_extradata(struct dec_sub *sub)
 {
     char *data = NULL;
     mp_mutex_lock(&sub->lock);
-    if (strcmp(sub->sd->codec->codec, "ass") != 0)
+    if (strcmp(sub->sd->codec->codec, "ass") != 0 &&
+        strcmp(sub->sd->codec->codec, "ass-text") != 0)
         goto done;
     char *extradata = sub->sd->codec->extradata;
     int extradata_size = sub->sd->codec->extradata_size;

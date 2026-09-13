@@ -1028,6 +1028,16 @@ Program Behavior
         have a noticeable impact on how long it takes to open the video when
         there are a lot of thumbnails.
 
+    ``auto_captions=<yes|no|auto>``
+        Add automatically generated captions as subtitle tracks. With ``auto``
+        (default), they are only added if there are no regular subtitles at
+        all, with ``yes`` also alongside regular subtitles.
+
+        Sites like YouTube offer these in the original language as well as
+        automatically translated into a lot of other languages. Translations
+        are only added for the languages in ``--slang`` that don't have
+        regular subtitles.
+
     ``use_manifests=<yes|no>``
         Make mpv use the master manifest URL for formats like HLS and DASH,
         if available, allowing for video/audio selection in runtime (default:
@@ -4232,6 +4242,26 @@ Demuxer
     https://github.com/ietf-wg-cellar/matroska-specification/pull/947
     https://gitlab.com/mbunkus/mkvtoolnix/-/issues/2389
     https://github.com/mpv-player/mpv/pull/13446
+
+``--demuxer-json3-youtube-styling=<yes|no>``
+    Mimic YouTube's default styling for YouTube json3 subtitles, as used
+    by YouTube's automatically generated captions.
+    (default: yes).
+
+``--demuxer-json3-word-timing=<yes|no|auto>``
+    Display YouTube json3 subtitles word by word as they are spoken.
+    Default is ``auto``, which is ``yes`` with ``--demuxer-json3-youtube-styling``
+    and ``no`` without.
+
+``--demuxer-json3-multi-line=<yes|no|auto>``
+    Display two lines of subtitles at a time: the line currently being spoken
+    and the line before it. Default is ``auto``, which is ``yes`` with
+    ``--demuxer-json3-youtube-styling`` and ``no`` without.
+
+``--demuxer-json3-scroll-ms=<0-1000>``
+    Duration in milliseconds of the new line row scrolling animation with
+    ``--demuxer-json3-youtube-styling`` and ``--demuxer-json3-multi-line`` set to yes.
+    (default: 250). ``0`` disables the animation.
 
 ``--demuxer-rawaudio-channels=<value>``
     Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used
