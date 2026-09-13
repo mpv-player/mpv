@@ -944,7 +944,7 @@ local function run_ytdl_hook(url)
 
     local command = {
         ytdl.path, "--no-warnings", "-J", "--flat-playlist",
-        "--sub-format", "ass/srt/best"
+        "--sub-format", "ass/vtt/srt/best"
     }
 
     -- Checks if video option is "no", change format accordingly,
