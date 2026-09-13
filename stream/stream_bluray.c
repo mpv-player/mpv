@@ -158,6 +158,8 @@ struct bluray_priv_s {
     uint64_t next_read_pos;          // expected bd_tell() of the next read
     bool read_pos_known;             // next_read_pos is valid
     bool resync_owed;                // jump settled, resync seek not acked yet
+    bool clip_open;                  // libbluray still has a clip to act on
+    int pending_angle;               // 1-based, 0 when no angle change is owed
 
     // Disc-driven audio/sub selection, mirrored from BD_EVENT_AUDIO_STREAM
     // and BD_EVENT_PG_TEXTST{,_STREAM}. The numbers are 1-based libbluray
@@ -629,6 +631,7 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         case BD_EVENT_END_OF_TITLE:
             mp_mutex_lock(&b->overlay_lock);
             b->still_active = false;
+            b->clip_open = false;
             mp_mutex_unlock(&b->overlay_lock);
             stalled = true;
             break;
@@ -647,8 +650,11 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
                 mp_mutex_lock(&b->overlay_lock);
                 b->still_active = true;
                 mp_mutex_unlock(&b->overlay_lock);
-            } else {
-                bd_read_skip_still(b->bd);
+            } else if (!bd_read_skip_still(b->bd)) {
+                // No next clip, so libbluray has nothing left to act on.
+                mp_mutex_lock(&b->overlay_lock);
+                b->clip_open = false;
+                mp_mutex_unlock(&b->overlay_lock);
             }
             break;
         case BD_EVENT_PLAYLIST: {
@@ -665,6 +671,7 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             b->current_playlist = playlist;
             b->current_title = title;
             b->current_playitem = 0;
+            b->clip_open = true;
             if (b->hdmv_mode)
                 b->discontinuity_id++;
             mp_mutex_unlock(&b->overlay_lock);
@@ -685,6 +692,7 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
                 bd_free_title_info(b->title_info);
                 b->title_info = NULL;
             }
+            b->clip_open = false;
             if (b->hdmv_mode)
                 b->discontinuity_id++;
             mp_mutex_unlock(&b->overlay_lock);
@@ -734,6 +742,14 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
                      bd_event_str(ev.event), ev.event, ev.param);
             break;
         }
+
+        mp_mutex_lock(&b->overlay_lock);
+        int pending_angle = b->clip_open ? b->pending_angle : 0;
+        if (pending_angle)
+            b->pending_angle = 0;
+        mp_mutex_unlock(&b->overlay_lock);
+        if (pending_angle)
+            bd_seamless_angle_change(b->bd, pending_angle - 1);
 
         if (n > 0) {
             // A jump event popped by this read can mean the data already
@@ -955,13 +971,14 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         mp_mutex_lock(&b->overlay_lock);
         const BLURAY_TITLE_INFO *ti = b->title_info;
         bool ok = ti && angle >= 1 && angle <= ti->angle_count;
-        if (ok)
+        if (ok) {
             b->current_angle = angle - 1;
-        int cur = b->current_angle;
+            // Deferred to the read thread to do the seamless angle change.
+            b->pending_angle = angle;
+        }
         mp_mutex_unlock(&b->overlay_lock);
         if (!ok)
             return STREAM_UNSUPPORTED;
-        bd_seamless_angle_change(b->bd, cur);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_TITLE_LENGTH: {
