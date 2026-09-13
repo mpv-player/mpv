@@ -1,31 +1,30 @@
-#include <assert.h>
-#include <limits.h>
-#include <math.h>
-#include <stdatomic.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "mpv_talloc.h"
-#include "common/common.h"
-#include "misc/bstr.h"
-#include "misc/dispatch.h"
-#include "common/msg.h"
-#include "options/m_config.h"
-#include "options/options.h"
-#include "aspect.h"
-#include "dr_helper.h"
-#include "vo.h"
-#include "video/mp_image.h"
-#include "sub/osd.h"
-#include "osdep/threads.h"
-#include "osdep/timer.h"
-
-#include "common/global.h"
-#include "player/client.h"
-
-#include "libmpv.h"
+#include <math.h>                   // for INFINITY
+#include <stdatomic.h>              // for atomic_load, atomic_bool, atomic_...
+#include <stdbool.h>                // for true, bool, false
+#include <stdint.h>                 // for int64_t, intptr_t, uint64_t, uint...
+#include <stdlib.h>                 // for NULL, abs
+#include <string.h>                 // for strcmp
+#include "aspect.h"                 // for mp_get_src_dst_rects
+#include "common/common.h"          // for mp_rect
+#include "common/global.h"          // for mpv_global
+#include "common/msg.h"             // for MP_VERBOSE, MP_STATS, mp_log_new
+#include "config.h"                 // for HAVE_MACOS_COCOA_CB
+#include "dr_helper.h"              // for dr_helper_acquire_thread, dr_help...
+#include "libmpv.h"                 // for render_backend, render_backend_fns
+#include "misc/dispatch.h"          // for mp_dispatch_queue_process, mp_dis...
+#include "misc/mp_assert.h"         // for mp_assert
+#include "mpv/client.h"             // for mpv_error, mpv_handle
+#include "mpv/render.h"             // for mpv_render_context, mpv_render_pa...
+#include "options/m_config_core.h"  // for m_config_cache_alloc, m_config_ca...
+#include "options/options.h"        // for vo_sub_opts
+#include "osdep/threads.h"          // for mp_mutex_unlock, mp_mutex_lock
+#include "osdep/timer.h"            // for mp_time_ns, MP_TIME_MS_TO_NS
+#include "player/client.h"          // for mp_set_main_render_context, kill_...
+#include "sub/osd.h"                // for mp_osd_res
+#include "ta/ta_talloc.h"           // for talloc_free, talloc_zero, TA_FREEP
+#include "video/img_format.h"       // for mp_imgfmt
+#include "video/mp_image.h"         // for mp_image_params
+#include "vo.h"                     // for vo, vo_frame, mp_voctrl, vo_frame...
 
 #if HAVE_MACOS_COCOA_CB
 #include "osdep/mac/app_bridge.h"
@@ -111,11 +110,10 @@ struct mpv_render_context {
     struct mp_vo_opts *vo_opts;
 };
 
-const struct render_backend_fns *render_backends[] = {
-    &render_backend_gpu,
-    &render_backend_sw,
-    NULL
-};
+// Forward declare the available render backends
+extern const struct render_backend_fns render_backend_gpu;
+extern const struct render_backend_fns render_backend_gpu_next;
+extern const struct render_backend_fns render_backend_sw;
 
 static void update(struct mpv_render_context *ctx)
 {
@@ -183,6 +181,27 @@ int mpv_render_context_create(mpv_render_context **res, mpv_handle *mpv,
 
     if (GET_MPV_RENDER_PARAM(params, MPV_RENDER_PARAM_ADVANCED_CONTROL, int, 0))
         ctx->advanced_control = true;
+
+    char *backend_name = get_mpv_render_param(params, MPV_RENDER_PARAM_BACKEND, "");
+    const struct render_backend_fns **render_backends;
+
+    if (backend_name && strcmp(backend_name, "gpu-next") == 0) {
+        MP_VERBOSE(ctx, "Using gpu-next backend.\n");
+        static const struct render_backend_fns* backends[] = {
+            &render_backend_gpu_next,
+            &render_backend_sw,
+            NULL
+        };
+        render_backends = backends;
+    } else {
+        MP_VERBOSE(ctx, "Using default gpu backend.\n");
+        static const struct render_backend_fns* backends[] = {
+            &render_backend_gpu,
+            &render_backend_sw,
+            NULL
+        };
+        render_backends = backends;
+    }
 
     int err = MPV_ERROR_NOT_IMPLEMENTED;
     for (int n = 0; render_backends[n]; n++) {
