@@ -900,6 +900,8 @@ static const m_option_t mp_opts[] = {
     {"osd-playing-msg", OPT_STRING(osd_playing_msg)},
     {"osd-playing-msg-duration", OPT_INT(osd_playing_msg_duration),
         M_RANGE(0, 3600000)},
+    {"status-msg-update-rate", OPT_DOUBLE(status_msg_update_rate), M_RANGE(1.0, 100.0), .flags = UPDATE_OSD},
+    {"status-msg-update-rate-forced", OPT_BOOL(status_msg_update_rate_forced), .flags = UPDATE_OSD},
     {"term-status-msg", OPT_STRING(status_msg), .flags = UPDATE_OSD},
     {"osd-status-msg", OPT_STRING(osd_status_msg), .flags = UPDATE_OSD},
     {"osd-msg1", OPT_STRING(osd_msg[0]), .flags = UPDATE_OSD},
@@ -1010,6 +1012,8 @@ static const m_option_t mp_opts[] = {
 
 static const struct MPOpts mp_default_opts = {
     .use_terminal = true,
+    .status_msg_update_rate = 20.0,
+    .status_msg_update_rate_forced = false,
     .msg_color = true,
     .softvol_max = 130,
     .softvol_volume = 100,
