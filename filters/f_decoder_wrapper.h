@@ -53,6 +53,13 @@ int mp_decoder_wrapper_get_frames_dropped(struct mp_decoder_wrapper *d);
 
 double mp_decoder_wrapper_get_container_fps(struct mp_decoder_wrapper *d);
 
+// Return the container FPS as an exact rational, as provided by the demuxer.
+// Returns false and sets *num/*den to 0 if the container did not provide an
+// exact rate (in which case only the value returned by
+// mp_decoder_wrapper_get_container_fps() is known).
+bool mp_decoder_wrapper_get_container_fps_rational(struct mp_decoder_wrapper *d,
+                                                   int *num, int *den);
+
 // Whether to prefer spdif wrapper over real decoders on next reinit.
 void mp_decoder_wrapper_set_spdif_flag(struct mp_decoder_wrapper *d, bool spdif);
 

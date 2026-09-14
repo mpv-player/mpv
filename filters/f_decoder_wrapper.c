@@ -197,6 +197,7 @@ struct priv {
     struct mp_image_params dec_format, last_format, fixed_format;
 
     double fps;
+    int fps_num, fps_den;
 
     double start_pts;
     double start, end;
@@ -579,6 +580,17 @@ double mp_decoder_wrapper_get_container_fps(struct mp_decoder_wrapper *d)
     double res = p->fps;
     thread_unlock(p);
     return res;
+}
+
+bool mp_decoder_wrapper_get_container_fps_rational(struct mp_decoder_wrapper *d,
+                                                   int *num, int *den)
+{
+    struct priv *p = d->f->priv;
+    thread_lock(p);
+    *num = p->fps_num;
+    *den = p->fps_den;
+    thread_unlock(p);
+    return *num > 0 && *den > 0;
 }
 
 void mp_decoder_wrapper_set_spdif_flag(struct mp_decoder_wrapper *d, bool spdif)
@@ -1288,6 +1300,8 @@ static bool init_group_decoder(struct priv *p, struct mp_filter *public_f)
 
     p->is_group = true;
     p->fps = p->header->codec->fps;
+    p->fps_num = p->header->codec->fps_num;
+    p->fps_den = p->header->codec->fps_den;
 
     // Currently only lavfi merge is supported, this can be extended if needed.
     if (g->num_members < 1 || !g->lavfi_graph) {
@@ -1387,11 +1401,14 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
         p->log = mp_log_new(p, parent->global->log, "!vd");
 
         p->fps = src->codec->fps;
+        p->fps_num = src->codec->fps_num;
+        p->fps_den = src->codec->fps_den;
 
         MP_VERBOSE(p, "Container reported FPS: %f\n", p->fps);
 
         if (p->opts->fps_override) {
             p->fps = p->opts->fps_override;
+            p->fps_num = p->fps_den = 0;
             MP_INFO(p, "Container FPS forced to %5.3f.\n", p->fps);
             MP_INFO(p, "Use --no-correct-pts to force FPS based timing.\n");
         }
