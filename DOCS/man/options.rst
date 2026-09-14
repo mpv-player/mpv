@@ -1028,6 +1028,16 @@ Program Behavior
         have a noticeable impact on how long it takes to open the video when
         there are a lot of thumbnails.
 
+    ``auto_captions=<yes|no|auto>``
+        Add automatically generated captions as subtitle tracks. With ``auto``
+        (default), they are only added if there are no regular subtitles at
+        all, with ``yes`` also alongside regular subtitles.
+
+        Sites like YouTube offer these in the original language as well as
+        automatically translated into a lot of other languages. Translations
+        are only added for the languages in ``--slang`` that don't have
+        regular subtitles.
+
     ``use_manifests=<yes|no>``
         Make mpv use the master manifest URL for formats like HLS and DASH,
         if available, allowing for video/audio selection in runtime (default:
