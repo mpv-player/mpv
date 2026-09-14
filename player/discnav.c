@@ -529,8 +529,7 @@ void disc_nav_update(struct MPContext *mpctx)
     if (visible != st->overlay_visible) {
         MP_VERBOSE(s, "overlay %s\n", visible ? "on" : "off");
         if (visible) {
-            mp_input_enable_section(mpctx->input, "discnav",
-                MP_INPUT_ON_TOP | MP_INPUT_ALLOW_VO_DRAGGING | MP_INPUT_ALLOW_HIDE_CURSOR);
+            mp_input_enable_section(mpctx->input, "discnav", MP_INPUT_ON_TOP);
         } else {
             mp_input_disable_section(mpctx->input, "discnav");
         }
