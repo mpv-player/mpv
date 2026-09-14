@@ -108,6 +108,7 @@ sources = files(
     'demux/demux_playlist.c',
     'demux/demux_raw.c',
     'demux/demux_timeline.c',
+    'demux/demux_json3.c',
     'demux/dovi_split.c',
     'demux/ebml.c',
     'demux/packet.c',

@@ -387,6 +387,7 @@ typedef struct MPOpts {
 #if HAVE_SUBRANDR
     struct demux_sbr_opts *demux_sbr;
 #endif
+    struct demux_json3_opts *demux_json3;
 
     struct demux_opts *demux_opts;
     struct demux_cache_opts *demux_cache_opts;

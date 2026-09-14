@@ -1,0 +1,1 @@
+add `--demuxer-json3-youtube-styling`, `--demuxer-json3-word-timing`, `--demuxer-json3-multi-line` and `--demuxer-json3-scroll-ms`
