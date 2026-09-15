@@ -68,6 +68,9 @@ end
 local function judge(label)
     -- get the metadata
     local result = mp.get_property_native(string.format("vf-metadata/%s", label))
+    if result == nil then
+        return nil
+    end
     local num_tff          = tonumber(result["lavfi.idet.multiple.tff"])
     local num_bff          = tonumber(result["lavfi.idet.multiple.bff"])
     local num_progressive  = tonumber(result["lavfi.idet.multiple.progressive"])
