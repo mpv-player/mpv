@@ -117,6 +117,26 @@ const struct m_sub_options sub_style_conf = {
     .change_flags = UPDATE_OSD,
 };
 
+const struct m_sub_options secondary_sub_style_conf = {
+    .opts = style_opts,
+    .size = sizeof(struct osd_style_opts),
+    .defaults = &(const struct osd_style_opts){
+        .font = "sans-serif",
+        .font_size = 38,
+        .color = {255, 255, 255, 255},
+        .outline_color = {0, 0, 0, 255},
+        .back_color = {0, 0, 0, 175},
+        .border_style = 1,
+        .outline_size = 1.65,
+        .shadow_offset = 0,
+        .margin_x = 19,
+        .margin_y = 34,
+        .align_x = 0,
+        .align_y = 1,
+    },
+    .change_flags = UPDATE_OSD,
+};
+
 #undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct osd_bar_style_opts
 static const m_option_t bar_style_opts[] = {
