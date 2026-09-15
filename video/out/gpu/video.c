@@ -298,6 +298,8 @@ struct gl_video {
     {"mitchell",      SCALER_MITCHELL}, \
     {"robidoux",      SCALER_ROBIDOUX}, \
     {"robidouxsharp", SCALER_ROBIDOUXSHARP}, \
+    {"mks2013",       SCALER_MKS2013}, \
+    {"mks2021",       SCALER_MKS2021}, \
     {"box",           SCALER_BOX}, \
     {"nearest",       SCALER_NEAREST}, \
     {"triangle",      SCALER_TRIANGLE}, \
