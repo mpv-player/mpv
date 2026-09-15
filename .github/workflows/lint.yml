@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   commit-msg:
+    if: github.repository == 'mpv-player/mpv' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -26,6 +27,7 @@ jobs:
           ./ci/lint-commit-msg.py
 
   swift:
+    if: github.repository == 'mpv-player/mpv' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -33,12 +35,14 @@ jobs:
       - uses: norio-nomura/action-swiftlint@3.2.1
 
   lua:
+    if: github.repository == 'mpv-player/mpv' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: lunarmodules/luacheck@v1
 
   ruff:
+    if: github.repository == 'mpv-player/mpv' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -52,6 +56,7 @@ jobs:
         run: ruff check . TOOLS/umpv --diff
 
   mypy:
+    if: github.repository == 'mpv-player/mpv' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -62,6 +67,7 @@ jobs:
           paths: ". TOOLS/umpv"
 
   editorconfig:
+    if: github.repository == 'mpv-player/mpv' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -69,6 +75,7 @@ jobs:
       - run: editorconfig-checker -config .editorconfig-checker.json
 
   pre-commit:
+    if: github.repository == 'mpv-player/mpv' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
