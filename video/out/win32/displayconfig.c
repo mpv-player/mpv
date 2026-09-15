@@ -174,3 +174,52 @@ end:
     talloc_free(ctx);
     return white_level;
 }
+
+bool mp_w32_displayconfig_get_acm_status(const wchar_t *device,
+                                         struct mp_w32_acm_status *status)
+{
+    void *ctx = talloc_new(NULL);
+
+    bool acm_status_unknown = true;
+    status->acm_enabled = false;
+    status->hdr_enabled = false;
+
+    UINT32 num_paths;
+    DISPLAYCONFIG_PATH_INFO *paths;
+    UINT32 num_modes;
+    DISPLAYCONFIG_MODE_INFO *modes;
+
+    if (get_config(ctx, &num_paths, &paths, &num_modes, &modes))
+        goto end;
+
+    DISPLAYCONFIG_PATH_INFO* path;
+    if (!(path = get_path(num_paths, paths, device)))
+        goto end;
+
+    DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO color_info = {
+        .header = {
+            .size = sizeof(color_info),
+            .type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO,
+            .adapterId = path->targetInfo.adapterId,
+            .id = path->targetInfo.id,
+        }
+    };
+
+    if (DisplayConfigGetDeviceInfo(&color_info.header) != ERROR_SUCCESS)
+        goto end;
+
+    acm_status_unknown = false;
+    // This particular combination indicates HDR mode is enabled. This is
+    // undocumented but used by WinRT. When wideColorEnforced is true we are in
+    //SDR mode with advanced color.
+    // Reference:
+    // <https://projects.blender.org/blender/blender/src/commit/4c920e3b7fadeaac45c3d30b1beeec4e80d3883b/intern/ghost/intern/GHOST_WindowWin32.cc#L1341>
+    status->acm_enabled = color_info.advancedColorSupported &&
+                          color_info.advancedColorEnabled;
+    status->hdr_enabled = status->acm_enabled &&
+                          !color_info.wideColorEnforced;
+
+end:
+    talloc_free(ctx);
+    return !acm_status_unknown;
+}
