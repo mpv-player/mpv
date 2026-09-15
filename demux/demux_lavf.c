@@ -1097,8 +1097,8 @@ static void build_editions(demuxer_t *demuxer)
             if (rate > 0 && *end == '\0') {
                 rate /= 1000.0;
                 prefix = rate < 1000
-                    ? mp_tprintf(42, "Bitrate: %.f kbps", rate)
-                    : mp_tprintf(42, "Bitrate: %.3f Mbps", rate / 1000.0);
+                    ? talloc_asprintf(demuxer, "Bitrate: %.f kbps", rate)
+                    : talloc_asprintf(demuxer, "Bitrate: %.3f Mbps", rate / 1000.0);
             }
         }
 
