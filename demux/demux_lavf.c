@@ -1090,6 +1090,7 @@ static void build_editions(demuxer_t *demuxer)
             if (name_idx >= 0)
                 prefix = mp_tags_get_str(priv->streams[name_idx]->sh->tags, "comment");
         }
+        char buf[42];
         if (!prefix) {
             char *vb = mp_tags_get_str(ed.metadata, "variant_bitrate");
             char *end;
@@ -1097,8 +1098,8 @@ static void build_editions(demuxer_t *demuxer)
             if (rate > 0 && *end == '\0') {
                 rate /= 1000.0;
                 prefix = rate < 1000
-                    ? mp_tprintf(42, "Bitrate: %.f kbps", rate)
-                    : mp_tprintf(42, "Bitrate: %.3f Mbps", rate / 1000.0);
+                    ? mp_tprintf_buf(buf, sizeof(buf), "Bitrate: %.f kbps", rate)
+                    : mp_tprintf_buf(buf, sizeof(buf), "Bitrate: %.3f Mbps", rate / 1000.0);
             }
         }
 
