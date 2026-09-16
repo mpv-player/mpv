@@ -3103,10 +3103,20 @@ Subtitles
 
     ``--sub-border-color`` is an alias for ``--sub-outline-color``.
 
+``--secondary-sub-outline-color=<color>``
+    See ``--secondary-sub-color``. Color used for the secondary sub font outline.
+
+    ``--secondary-sub-border-color`` is an alias for ``--secondary-sub-outline-color``.
+
 ``--sub-back-color=<color>``
     See ``--sub-color``. Color used for sub text background.
 
     ``--sub-shadow-color`` is an alias for ``--sub-back-color``.
+
+``--secondary-sub-back-color=<color>``
+    See ``--secondary-sub-color``. Color used for secondary sub text background.
+
+    ``--secondary-sub-shadow-color`` is an alias for ``--secondary-sub-back-color``.
 
 ``--sub-outline-size=<size>``
     Size of the sub font outline in scaled pixels (see ``--sub-font-size``
@@ -3177,6 +3187,13 @@ Subtitles
 
         - ``--sub-color='#FF0000'`` set sub to opaque red
         - ``--sub-color='#C0808080'`` set sub to 50% gray with 75% alpha
+
+``--secondary-sub-color=<color>``
+    Specify the color used for unstyled text subtitles.
+    Control whether user secondary substyle overrides should be applied. This
+    works exactly like ``--sub-color``.
+
+    Default: '#7F7F7FFF'.
 
 ``--sub-margin-x=<size>``
     Left and right screen margin for the subs in scaled pixels (see
