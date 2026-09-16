@@ -3080,6 +3080,9 @@ Subtitles
         options) are ignored when ASS-subtitles are rendered, unless
         ``--sub-ass=no`` is specified.
 
+``--secondary-sub-font=<name>``
+    See ``--sub-font``. Font used for the secondary subtitles.
+
 ``--sub-font-size=<size>``
     Specify the sub font size. The unit is the size in scaled pixels at a
     window height of 720. The actual pixel size is scaled with the window
@@ -3088,15 +3091,29 @@ Subtitles
 
     Default: 38
 
+``--secondary-sub-font-size=<size>``
+    See ``--sub-font-size``. Font size used for the secondary subtitles.
+
+    Default: 38
+
 ``--sub-blur=<0..20.0>``
     Gaussian blur factor applied to the sub font border.
     0 means no blur applied (default).
 
+``--secondary-sub-blur=<0..20.0>``
+    See ``--sub-blur``. Blur factor applied to the secondary sub font border.
+
 ``--sub-bold=<yes|no>``
     Format text on bold.
 
+``--secondary-sub-bold=<yes|no>``
+    See ``--sub-bold``. Format secondary sub text on bold.
+
 ``--sub-italic=<yes|no>``
     Format text on italic.
+
+``--secondary-sub-italic=<yes|no>``
+    See ``--sub-italic``. Format secondary sub text on italic.
 
 ``--sub-outline-color=<color>``
     See ``--sub-color``. Color used for the sub font outline.
@@ -3123,6 +3140,14 @@ Subtitles
     for details). A value of 0 disables outlines.
 
     ``--sub-border-size`` is an alias for ``--sub-outline-size``.
+
+    Default: 1.65
+
+``--secondary-sub-outline-size=<size>``
+    See ``--sub-outline-size``. Size of the secondary sub font outline.
+
+    ``--secondary-sub-border-size`` is an alias for
+    ``--secondary-sub-outline-size``.
 
     Default: 1.65
 
@@ -3159,6 +3184,11 @@ Subtitles
         - ``--profile=osd-box`` applies the ``background-box`` style to the OSD,
           including stats and console
         - ``--profile=box`` applies the ``background-box`` style to both subtitles and OSD
+
+``--secondary-sub-border-style=<outline-and-shadow|opaque-box|background-box>``
+    See ``--sub-border-style``. The style of the secondary sub border.
+
+    Default: ``outline-and-shadow``.
 
 ``--sub-color=<color>``
     Specify the color used for unstyled text subtitles.
@@ -3204,12 +3234,25 @@ Subtitles
 
     Default: 19
 
+``--secondary-sub-margin-x=<size>``
+    See ``--sub-margin-x``. Left and right screen margin for the secondary
+    subs.
+
+    Default: 19
+
 ``--sub-margin-y=<size>``
     Top and bottom screen margin for the subs in scaled pixels (see
     ``--sub-font-size`` for details).
 
     This option specifies the vertical margins of unstyled text subtitles.
     If you just want to raise the vertical subtitle position, use ``--sub-pos``.
+
+    Default: 34
+
+``--secondary-sub-margin-y=<size>``
+    See ``--sub-margin-y``. Top and bottom screen margin for the secondary
+    subs. If you just want to raise the vertical secondary subtitle position,
+    use ``--secondary-sub-pos``.
 
     Default: 34
 
@@ -3223,6 +3266,12 @@ Subtitles
 
     Default: 0
 
+``--secondary-sub-margin-y-offset=<size>``
+    See ``--sub-margin-y-offset``. Additional vertical offset added to the
+    secondary subtitle margin, on top of ``--secondary-sub-margin-y``.
+
+    Default: 0
+
 ``--sub-align-x=<left|center|right>``
     Control to which corner of the screen text subtitles should be
     aligned to (default: ``center``).
@@ -3230,14 +3279,27 @@ Subtitles
     Never applied to ASS subtitles, except in ``--sub-ass=no`` mode. Likewise,
     this does not apply to image subtitles.
 
+``--secondary-sub-align-x=<left|center|right>``
+    See ``--sub-align-x``. Horizontal position of the secondary subtitles
+    (default: ``center``).
+
 ``--sub-align-y=<top|center|bottom>``
     Vertical position (default: ``bottom``).
     Details see ``--sub-align-x``.
+
+``--secondary-sub-align-y=<top|center|bottom>``
+    See ``--sub-align-y``. Vertical position of the secondary subtitles
+    (default: ``bottom``).
 
 ``--sub-justify=<auto|left|center|right>``
     Control how multi line subs are justified irrespective of where they
     are aligned (default: ``auto`` which justifies as defined by
     ``--sub-align-x``).
+
+``--secondary-sub-justify=<auto|left|center|right>``
+    See ``--sub-justify``. Justification of multi line secondary subs
+    (default: ``auto`` which justifies as defined by
+    ``--secondary-sub-align-x``).
 
 ``--sub-ass-justify=<yes|no>``
     Applies justification as defined by ``--sub-justify`` on ASS subtitles
@@ -3250,10 +3312,22 @@ Subtitles
 
     Default: 0.
 
+``--secondary-sub-shadow-offset=<size>``
+    See ``--sub-shadow-offset``. Displacement of the secondary sub text
+    shadow. A value of 0 disables shadows.
+
+    Default: 0.
+
 ``--sub-spacing=<size>``
     Horizontal sub font spacing in scaled pixels (see ``--sub-font-size``
     for details). This value is added to the normal letter spacing. Negative
     values are allowed.
+
+    Default: 0.
+
+``--secondary-sub-spacing=<size>``
+    See ``--sub-spacing``. Horizontal secondary sub font spacing. This value
+    is added to the normal letter spacing. Negative values are allowed.
 
     Default: 0.
 
@@ -3365,12 +3439,21 @@ Subtitles
     name does not match, it may prefer not to render any text that uses the
     missing font.)
 
+``--secondary-sub-font-provider=<auto|none|fontconfig>``
+    See ``--sub-font-provider``. Font provider backend used for the secondary
+    subtitles (default: auto).
+
 ``--sub-fonts-dir=<path>``
     Font files in this directory are used by mpv/libass for subtitles. Useful
     if you do not want to install fonts to your system. Note that files in this
     directory are loaded into memory before being used by mpv. If you have a
     lot of fonts, consider using fonts.conf (see `FILES`_ section) to include
     additional mpv user settings.
+
+    If this option is not specified, ``~~/fonts`` will be used by default.
+
+``--secondary-sub-fonts-dir=<path>``
+    See ``--sub-fonts-dir``. Font directory used for the secondary subtitles.
 
     If this option is not specified, ``~~/fonts`` will be used by default.
 
