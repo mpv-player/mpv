@@ -28,11 +28,23 @@
 #include "ao_coreaudio_properties.h"
 #include "ao_coreaudio_utils.h"
 #include "osdep/mac/compat.h"
+#include "osdep/threads.h"
 
 // The timeout for stopping the audio unit after being reset. This allows the
 // device to sleep after playback paused. The duration is chosen to match the
 // behavior of AVFoundation.
 #define IDLE_TIME 7 * NSEC_PER_SEC
+
+// Shared with hotplug_cb, which CoreAudio can still invoke on its own
+// dispatch queue after the property listener is removed. There is no
+// API to drain already-queued callbacks, so the ctx itself is never
+// freed; instead ctx->ao is detached under the lock before teardown,
+// and a queued callback drops the event instead of dereferencing
+// freed ao state.
+struct hotplug_ctx {
+    mp_mutex lock;
+    struct ao *ao;
+};
 
 struct priv {
     // This must be put in the front
@@ -53,6 +65,7 @@ struct priv {
     dispatch_queue_t queue;
 
     int hotplug_cb_registration_times;
+    struct hotplug_ctx *hotplug_ctx;
 };
 
 static int64_t ca_get_hardware_latency(struct ao *ao) {
@@ -141,6 +154,7 @@ static void init_physical_format(struct ao *ao);
 static void reinit_latency(struct ao *ao);
 static bool register_hotplug_cb(struct ao *ao);
 static void unregister_hotplug_cb(struct ao *ao);
+static void hotplug_detach(struct ao *ao);
 static void uninit(struct ao *ao);
 
 static bool reinit_device(struct ao *ao) {
@@ -438,6 +452,8 @@ static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
+    hotplug_detach(ao);
+
     if (p->queue) {
         dispatch_sync(p->queue, ^{
             cancel_and_release_idle_work(p);
@@ -465,13 +481,18 @@ static OSStatus hotplug_cb(AudioObjectID id, UInt32 naddr,
                            const AudioObjectPropertyAddress addr[],
                            void *ctx)
 {
-    struct ao *ao = ctx;
-    struct priv *p = ao->priv;
-    MP_VERBOSE(ao, "Handling potential hotplug event...\n");
-    reinit_device(ao);
-    if (p->audio_unit)
-        reinit_latency(ao);
-    ao_hotplug_event(ao);
+    struct hotplug_ctx *hctx = ctx;
+    mp_mutex_lock(&hctx->lock);
+    struct ao *ao = hctx->ao;
+    if (ao) {
+        struct priv *p = ao->priv;
+        MP_VERBOSE(ao, "Handling potential hotplug event...\n");
+        reinit_device(ao);
+        if (p->audio_unit)
+            reinit_latency(ao);
+        ao_hotplug_event(ao);
+    }
+    mp_mutex_unlock(&hctx->lock);
     return noErr;
 }
 
@@ -493,7 +514,32 @@ static int hotplug_init(struct ao *ao)
 
 static void hotplug_uninit(struct ao *ao)
 {
+    hotplug_detach(ao);
     unregister_hotplug_cb(ao);
+}
+
+// CoreAudio does not drain listener callbacks that are already queued
+// when a listener is removed. Detach the ao before teardown starts so
+// such a callback drops the event instead of dereferencing freed state.
+static void hotplug_detach(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    if (p->hotplug_ctx) {
+        mp_mutex_lock(&p->hotplug_ctx->lock);
+        p->hotplug_ctx->ao = NULL;
+        mp_mutex_unlock(&p->hotplug_ctx->lock);
+    }
+}
+
+// Runs when the sentinel (a talloc child of the ao) is freed, which is
+// whenever the ao itself is freed — including init-failure paths that
+// never reach uninit(). Keeps ctx->ao from dangling.
+static void hotplug_ctx_detach(void *ptr)
+{
+    struct hotplug_ctx *ctx = *(struct hotplug_ctx **)ptr;
+    mp_mutex_lock(&ctx->lock);
+    ctx->ao = NULL;
+    mp_mutex_unlock(&ctx->lock);
 }
 
 static bool register_hotplug_cb(struct ao *ao)
@@ -503,6 +549,21 @@ static bool register_hotplug_cb(struct ao *ao)
     if (p->hotplug_cb_registration_times++)
         return true;
 
+    if (!p->hotplug_ctx) {
+        p->hotplug_ctx = talloc_zero(NULL, struct hotplug_ctx);
+        mp_mutex_init(&p->hotplug_ctx->lock);
+    }
+    mp_mutex_lock(&p->hotplug_ctx->lock);
+    p->hotplug_ctx->ao = ao;
+    mp_mutex_unlock(&p->hotplug_ctx->lock);
+    // Sentinel child of the ao: clears ctx->ao on any free path,
+    // including init failure, which skips uninit entirely.
+    struct hotplug_ctx **sentinel = talloc_zero(ao, struct hotplug_ctx *);
+    if (sentinel) {
+        *sentinel = p->hotplug_ctx;
+        ta_set_destructor(sentinel, hotplug_ctx_detach);
+    }
+
     OSStatus err = noErr;
     for (int i = 0; i < MP_ARRAY_SIZE(hotplug_properties); i++) {
         AudioObjectPropertyAddress addr = {
@@ -511,7 +572,8 @@ static bool register_hotplug_cb(struct ao *ao)
             kAudioObjectPropertyElementMain
         };
         err = AudioObjectAddPropertyListener(
-            kAudioObjectSystemObject, &addr, hotplug_cb, (void *)ao);
+            kAudioObjectSystemObject, &addr, hotplug_cb,
+            (void *)p->hotplug_ctx);
         if (err != noErr) {
             char *c1 = mp_tag_str(hotplug_properties[i]);
             char *c2 = mp_tag_str(err);
@@ -541,7 +603,8 @@ static void unregister_hotplug_cb(struct ao *ao)
             kAudioObjectPropertyElementMain
         };
         err = AudioObjectRemovePropertyListener(
-            kAudioObjectSystemObject, &addr, hotplug_cb, (void *)ao);
+            kAudioObjectSystemObject, &addr, hotplug_cb,
+            (void *)p->hotplug_ctx);
         if (err != noErr) {
             char *c1 = mp_tag_str(hotplug_properties[i]);
             char *c2 = mp_tag_str(err);
