@@ -2367,7 +2367,9 @@ static bool read_packet(struct demux_internal *in)
         total_fw_bytes += get_forward_buffered_bytes(ds);
     }
 
-    if (in->hyst_bytes > 0 && total_fw_bytes <= in->hyst_bytes) {
+    if (in->hyst_active && in->hyst_bytes > 0 &&
+        total_fw_bytes <= in->hyst_bytes)
+    {
         in->hyst_active = false;
         prefetch_more |= true;
     }
