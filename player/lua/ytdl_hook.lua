@@ -165,7 +165,7 @@ local special_cookie_field_names = Set {
 }
 
 -- parse single-line Set-Cookie syntax
-local function parse_cookies(cookies_line)
+local function parse_cookies(cookies_line, origin_host)
     if not cookies_line then
         return {}
     end
@@ -189,8 +189,11 @@ local function parse_cookies(cookies_line)
             end
         end
     end
+
     if cookie.name and cookie.value then
-        local cookie_key = cookie.domain .. ":" .. cookie.name
+        -- a cookie with no Domain attribute defaults to the host of origin
+        cookie.domain = cookie.domain or origin_host
+        local cookie_key = (cookie.domain or "") .. ":" .. cookie.name
         cookies[cookie_key] = cookie
     end
     return cookies
@@ -214,11 +217,11 @@ local function serialize_cookies(cookies)
 end
 
 -- set file-local cookies-file pointing at an in-memory cookies.txt
-local function set_cookies(cookies)
+local function set_cookies(cookies, origin_host)
     if not cookies or cookies == "" then
         return
     end
-    local data = serialize_cookies(parse_cookies(cookies))
+    local data = serialize_cookies(parse_cookies(cookies, origin_host))
     if data ~= "" then
         mp.set_property_bool("file-local-options/cookies", true)
         mp.set_property("file-local-options/cookies-file", "memory://" .. data)
@@ -863,7 +866,10 @@ local function add_single_video(json)
         mp.set_property("file-local-options/http-proxy", json.proxy)
     end
 
-    set_cookies(cookies)
+    local cookies_url = (has_requested_formats and requested_formats[1].url)
+                        or json.url
+    set_cookies(cookies, cookies_url
+                         and cookies_url:match("^https?://([^/]+)"))
 
     local chunk_size = math.huge
     if has_requested_formats then
@@ -1073,7 +1079,11 @@ local function run_ytdl_hook(url)
 
             -- can't change the http headers for each entry, so use the 1st
             set_http_headers(json.entries[1].http_headers)
-            playlist_cookies[playlist] = json.entries[1].cookies or json.cookies
+            playlist_cookies[playlist] = {
+                cookies = json.entries[1].cookies or json.cookies,
+                host = json.entries[1].url
+                       and json.entries[1].url:match("^https?://([^/]+)"),
+            }
 
             mp.set_property("stream-open-filename", playlist)
             if json.title and mp.get_property("force-media-title", "") == "" then
@@ -1153,7 +1163,10 @@ local function run_ytdl_hook(url)
                 if playlist_url then
                     table.insert(playlist, playlist_url)
                     -- save the cookies in a table for the playlist hook
-                    playlist_cookies[playlist_url] = entry.cookies or json.cookies
+                    playlist_cookies[playlist_url] = {
+                        cookies = entry.cookies or json.cookies,
+                        host = playlist_url:match("^https?://([^/]+)"),
+                    }
                 end
 
             end
@@ -1204,8 +1217,9 @@ mp.add_hook("on_load_fail", 10, function(hook) on_load_hook(true, hook) end)
 mp.add_hook("on_load", 20, function ()
     msg.verbose('playlist hook')
     local url = mp.get_property("stream-open-filename", "")
-    if playlist_cookies[url] then
-        set_cookies(playlist_cookies[url])
+    local pc = playlist_cookies[url]
+    if pc then
+        set_cookies(pc.cookies, pc.host)
     end
 end)
 
