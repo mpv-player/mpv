@@ -347,6 +347,33 @@ static void mp_curl_destroy(void *ptr)
     mp_thread_join(ctx->thread);
 }
 
+// OpenSSL before 4.0 hooks its cleanup into atexit() when first initialized,
+// which happens inside curl_global_init(). If that runs on the curl thread
+// after mpv_create() returned, a client that tears mpv down from its own
+// atexit handler can have OpenSSL destroyed under a curl thread that is still
+// initializing. Wait for the init on such an OpenSSL so the hook is in place
+// before mpv_create() returns. Other backends do not hook atexit(), and some
+// block for a long time gathering entropy, so they keep initializing in the
+// background. libcurl declined to address this, see
+// <https://github.com/curl/curl/pull/12153>, and OpenSSL 4.0 dropped the atexit.
+static bool curl_tls_hooks_atexit(void)
+{
+    // Only OpenSSL < 4 is affected, but since curl_version_info() is documented
+    // as not thread safe before curl_global_init(), we use the backend enumeration
+    // instead. This catches more backends, but well...
+    const curl_ssl_backend **backends = NULL;
+    curl_global_sslset((curl_sslbackend)-1, NULL, &backends);
+    for (int i = 0; backends && backends[i]; i++) {
+        if (backends[i]->id == CURLSSLBACKEND_OPENSSL)
+            return true;
+    }
+    return false;
+}
+
+static void curl_nop(void *arg)
+{
+}
+
 void mp_curl_global_init(struct mpv_global *global)
 {
     struct curl_ctx *ctx = talloc_zero(global, struct curl_ctx);
@@ -354,6 +381,10 @@ void mp_curl_global_init(struct mpv_global *global)
     ctx->dispatch = mp_dispatch_create(ctx);
     global->curl = ctx;
     mp_require(!mp_thread_create(&ctx->thread, curl_thread, ctx));
+    // Wait for curl thread to finish initializing if necessary. Note that this
+    // may take long time for some backends.
+    if (curl_tls_hooks_atexit())
+        mp_dispatch_run(ctx->dispatch, curl_nop, NULL);
 }
 
 // Curl callbacks
