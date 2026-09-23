@@ -1,0 +1,1 @@
+change `--vf=format:stereo-in=no` to keep the source stereo 3D mode, `--vf=format:stereo-in=mono` now overrides it with 2D
