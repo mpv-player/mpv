@@ -584,8 +584,11 @@ static double get_delay_hackfixed(struct ao *ao)
         GENERIC_ERR_MSG("pa_stream_get_sample_spec() failed");
         return 0;
     }
-    // data left in PulseAudio's main buffers (not written to sink yet)
-    int64_t latency = pa_bytes_to_usec(ti->write_index - ti->read_index, ss);
+    // data left in PulseAudio's main buffers (not written to sink yet).
+    // With prebuf=0, an underrun may make write_index < read_index (negative buf_diff),
+    // which breaks the pa_bytes_to_usec() conversion and can overflow into an infinite drain wait.
+    int64_t buf_diff = ti->write_index - ti->read_index;
+    int64_t latency = buf_diff > 0 ? pa_bytes_to_usec(buf_diff, ss) : 0;
     // since this info may be from a while ago, playback has progressed since
     latency -= ti->transport_usec;
     // data already moved from buffers to sink, but not played yet
