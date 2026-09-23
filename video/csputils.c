@@ -130,7 +130,7 @@ const struct m_opt_choice_alternatives pl_alpha_names[] = {
     {0}
 };
 
-// The short name _must_ match with what vf_stereo3d accepts (if supported).
+// The short names follow the input format names of the vf_stereo3d.
 // The long name in comments is closer to the Matroska spec (StereoMode element).
 // The numeric index matches the Matroska StereoMode value. If you add entries
 // that don't match Matroska, make sure demux_mkv.c rejects them properly.
@@ -144,8 +144,8 @@ const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
     {"checkl",  5}, // "checkboard_left"  (unsupported by vf_stereo3d)
     {"irr",     6}, // "row_interleaved_right"
     {"irl",     7}, // "row_interleaved_left"
-    {"icr",     8}, // "column_interleaved_right" (unsupported by vf_stereo3d)
-    {"icl",     9}, // "column_interleaved_left" (unsupported by vf_stereo3d)
+    {"icr",     8}, // "column_interleaved_right"
+    {"icl",     9}, // "column_interleaved_left"
     {"arcc",   10}, // "anaglyph_cyan_red" (Matroska: unclear which mode)
     {"sbs2r",  11}, // "side_by_side_right"
     {"agmc",   12}, // "anaglyph_green_magenta" (Matroska: unclear which mode)
