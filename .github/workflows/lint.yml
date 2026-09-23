@@ -37,7 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: lunarmodules/luacheck@v1
+      - run: |
+          curl -sSfL -o "$RUNNER_TEMP/luacheck" https://github.com/lunarmodules/luacheck/releases/download/v1.2.0/luacheck
+          chmod +x "$RUNNER_TEMP/luacheck"
+          "$RUNNER_TEMP/luacheck" .
 
   ruff:
     runs-on: ubuntu-latest
