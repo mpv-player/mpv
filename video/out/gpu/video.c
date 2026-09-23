@@ -462,6 +462,7 @@ const struct m_sub_options gl_video_conf = {
             {"hable",    TONE_MAPPING_HABLE},
             {"gamma",    TONE_MAPPING_GAMMA},
             {"linear",   TONE_MAPPING_LINEAR},
+            {"linearlight", TONE_MAPPING_LINEARLIGHT},
             {"spline",   TONE_MAPPING_SPLINE},
             {"bt.2390",  TONE_MAPPING_BT_2390},
             {"bt.2446a", TONE_MAPPING_BT_2446A},
