@@ -1022,8 +1022,16 @@ static int demux_mkv_read_tracks(demuxer_t *demuxer)
     mkv_d->tracks = talloc_zero_array(mkv_d, struct mkv_track*,
                                       tracks.n_track_entry);
     for (int i = 0; i < tracks.n_track_entry; i++) {
+        struct ebml_track_entry *entry = &tracks.track_entry[i];
+        if (!entry->n_track_number || !entry->track_number ||
+            !entry->n_track_uid || !entry->track_uid ||
+            !entry->n_track_type || !entry->track_type ||
+            !entry->codec_id || !entry->codec_id[0]) {
+            MP_WARN(demuxer, "Ignoring malformed TrackEntry.\n");
+            continue;
+        }
         MP_DBG(demuxer, "| + a track...\n");
-        parse_trackentry(demuxer, &tracks.track_entry[i]);
+        parse_trackentry(demuxer, entry);
     }
     talloc_free(parse_ctx.talloc_ctx);
     return 0;
