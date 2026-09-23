@@ -27,10 +27,11 @@ jobs:
 
   swift:
     runs-on: ubuntu-latest
+    container: ghcr.io/realm/swiftlint:0.65.1
     steps:
       - uses: actions/checkout@v7
 
-      - uses: norio-nomura/action-swiftlint@3.2.1
+      - run: swiftlint lint --strict --reporter github-actions-logging
 
   lua:
     runs-on: ubuntu-latest
