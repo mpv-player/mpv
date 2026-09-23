@@ -137,7 +137,7 @@ jobs:
         include:
           - target: x86_64-pc-windows-msvc
             arch: "x64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
           - target: aarch64-pc-windows-msvc
             arch: "arm64"
             os: "windows-11-arm"
@@ -640,21 +640,21 @@ jobs:
       matrix:
         include:
           - sys: "clang64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
             auto-var-init: "uninitialized"
           - sys: "clang64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
             asan: true
           - sys: "clang64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
             auto-var-init: "zero"
           - sys: "clang64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
             auto-var-init: "pattern"
           - sys: "mingw64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
           - sys: "ucrt64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
           - sys: "clangarm64"
             os: "windows-11-arm"
     defaults:
