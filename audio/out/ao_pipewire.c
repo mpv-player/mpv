@@ -42,6 +42,7 @@
 #include "ao.h"
 #include "audio/format.h"
 #include "internal.h"
+#include "osdep/getpid.h"
 #include "osdep/timer.h"
 
 #if !PW_CHECK_VERSION(1, 0, 4)
@@ -580,6 +581,8 @@ static int init(struct ao *ao)
         PW_KEY_TARGET_OBJECT, ao->device,
         NULL
     );
+
+    pw_properties_setf(props, PW_KEY_APP_PROCESS_ID, "%d", mp_getpid());
 
     if (ao->set_media_role)
         pw_properties_set(props, PW_KEY_MEDIA_ROLE,
