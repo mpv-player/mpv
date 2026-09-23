@@ -69,6 +69,9 @@ enum mp_stereo3d_mode {
 
 extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 
+struct AVStereo3D;
+enum mp_stereo3d_mode mp_stereo3d_from_av(const struct AVStereo3D *s3d);
+
 #define MP_STEREO3D_NAME_DEF(x, def) m_opt_choice_str_def(mp_stereo3d_names, x, def)
 
 // Number of screen divisions per axis (div[0]=x, div[1]=y) for the given 3D mode

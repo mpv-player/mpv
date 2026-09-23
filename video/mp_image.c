@@ -1080,29 +1080,6 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     }
 }
 
-static enum mp_stereo3d_mode stereo3d_from_av(const AVStereo3D *s3d)
-{
-    bool inv = s3d->flags & AV_STEREO3D_FLAG_INVERT;
-    switch (s3d->type) {
-    case AV_STEREO3D_SIDEBYSIDE:
-    case AV_STEREO3D_SIDEBYSIDE_QUINCUNX:
-        return inv ? MP_STEREO3D_SBS2R : MP_STEREO3D_SBS2L;
-    case AV_STEREO3D_TOPBOTTOM:
-        return inv ? MP_STEREO3D_AB2R : MP_STEREO3D_AB2L;
-    case AV_STEREO3D_CHECKERBOARD:
-        return inv ? MP_STEREO3D_CHECKR : MP_STEREO3D_CHECKL;
-    case AV_STEREO3D_LINES:
-        return inv ? MP_STEREO3D_IRR : MP_STEREO3D_IRL;
-    case AV_STEREO3D_COLUMNS:
-        return inv ? MP_STEREO3D_ICR : MP_STEREO3D_ICL;
-    case AV_STEREO3D_FRAMESEQUENCE:
-        return inv ? MP_STEREO3D_AR : MP_STEREO3D_AL;
-    default:
-        // AV_STEREO3D_2D and types mpv has no mode for.
-        return MP_STEREO3D_MONO;
-    }
-}
-
 // Create a new mp_image reference to av_frame.
 struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 {
@@ -1157,7 +1134,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
 
     sd = av_frame_get_side_data(src, AV_FRAME_DATA_STEREO3D);
     if (sd)
-        dst->params.stereo3d = stereo3d_from_av((const AVStereo3D *)sd->data);
+        dst->params.stereo3d = mp_stereo3d_from_av((const AVStereo3D *)sd->data);
 
     if (src->opaque_ref) {
         struct mp_image_params *p = (void *)src->opaque_ref->data;
