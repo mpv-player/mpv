@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   commit-msg:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
         with:
@@ -34,7 +34,7 @@ jobs:
       - run: swiftlint lint --strict --reporter github-actions-logging
 
   lua:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
       - run: |
@@ -43,7 +43,7 @@ jobs:
           "$RUNNER_TEMP/luacheck" .
 
   ruff:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
       - name: Check
@@ -56,7 +56,7 @@ jobs:
         run: ruff check . TOOLS/umpv --diff
 
   mypy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
       - uses: python/mypy@v2.3.1
@@ -66,14 +66,14 @@ jobs:
           paths: ". TOOLS/umpv"
 
   editorconfig:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
       - uses: editorconfig-checker/action-editorconfig-checker@v3.0.0
       - run: editorconfig-checker -config .editorconfig-checker.json
 
   pre-commit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
       - uses: actions/cache@v6

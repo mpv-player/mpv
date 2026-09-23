@@ -733,7 +733,7 @@ jobs:
     needs: [mingw, win32, macos]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' &&
         github.repository == 'mpv-player/mpv'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       contents: write
       actions: read
