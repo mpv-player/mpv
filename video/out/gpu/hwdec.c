@@ -266,7 +266,7 @@ void ra_hwdec_ctx_init(struct ra_hwdec_ctx *ctx, struct mp_hwdec_devices *devs,
     mp_assert(ctx->ra_ctx);
 
     /*
-     * By default, or if the option value is "auto", we will not pre-emptively
+     * By default, or if the option value is "auto", we will not preemptively
      * load any interops, and instead allow them to be loaded on-demand.
      *
      * If the option value is "no", then no interops will be loaded now, and
