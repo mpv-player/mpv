@@ -12,6 +12,8 @@ project('mpv',
             'cpp_std=c++20',
             'cpp_eh=default',
             'warning_level=2',
+            'rust_std=2021',
+            'build.rust_std=2021',
         ]
 )
 
@@ -147,7 +149,6 @@ sources = files(
     'misc/hash.c',
     'misc/io_utils.c',
     'misc/json.c',
-    'misc/language.c',
     'misc/natural_sort.c',
     'misc/node.c',
     'misc/path_utils.c',
@@ -1833,6 +1834,8 @@ client_h_define = cc.get_define('MPV_CLIENT_API_VERSION', prefix: '#include "mpv
 major = client_h_define.split('|')[0].split('<<')[0].strip('() ')
 minor = client_h_define.split('|')[1].strip('() ')
 client_api_version = major + '.' + minor + '.0'
+
+subdir('rust')
 
 libmpv = library('mpv', sources, dependencies: dependencies, gnu_symbol_visibility: 'hidden',
                  include_directories: incdir_public,
