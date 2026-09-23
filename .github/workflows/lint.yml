@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: editorconfig-checker/action-editorconfig-checker@main
+      - uses: editorconfig-checker/action-editorconfig-checker@v3.0.0
       - run: editorconfig-checker -config .editorconfig-checker.json
 
   pre-commit:
