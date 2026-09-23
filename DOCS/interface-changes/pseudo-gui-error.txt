@@ -1,0 +1,2 @@
+add `--error-message-duration` option to control how long the OSD error is
+shown after a failed load in `pseudo-gui` mode before mpv exits
