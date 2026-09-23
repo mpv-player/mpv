@@ -3794,12 +3794,6 @@ void gl_video_set_osd_pts(struct gl_video *p, double pts)
     p->osd_pts = pts;
 }
 
-bool gl_video_check_osd_change(struct gl_video *p, struct mp_osd_res *res,
-                               double pts)
-{
-    return p->osd ? mpgl_osd_check_change(p->osd, res, pts) : false;
-}
-
 void gl_video_resize(struct gl_video *p,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd)
