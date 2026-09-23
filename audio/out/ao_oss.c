@@ -4,7 +4,7 @@
  * Original author: A'rpi
  * Support for >2 output channels added 2001-11-25
  * - Steve Davies <steve@daviesfam.org>
- * Rozhuk Ivan <rozhuk.im@gmail.com> 2020-2023
+ * Rozhuk Ivan <rozhuk.im@gmail.com> 2020-2026
  *
  * This file is part of mpv.
  *
@@ -25,14 +25,22 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
 #include <sys/stat.h>
 #if defined(__DragonFly__) || defined(__FreeBSD__)
-#include <sys/sysctl.h>
+#   include <sys/sysctl.h>
+#   include <sys/socket.h>
+#   include <sys/un.h>
+#   include <string.h>
+#   include <paths.h>
+#   define DEVD_SOCK_PATH       _PATH_VARRUN "devd.seqpacket.pipe"
+#   define DEVD_EVENT_NOTIFY    '!'
 #endif
 #include <sys/types.h>
+#include <dirent.h>
 
 #include "audio/format.h"
 #include "common/common.h"
@@ -40,18 +48,23 @@
 #include "options/options.h"
 #include "osdep/endian.h"
 #include "osdep/io.h"
+#include "osdep/threads.h"
+#include "misc/natural_sort.h"
 #include "ao.h"
 #include "internal.h"
 
 #ifndef AFMT_AC3
-#define AFMT_AC3 -1
+#   define AFMT_AC3         -1
 #endif
 
-#define PATH_DEV_DSP "/dev/dsp"
-#define PATH_DEV_MIXER "/dev/mixer"
+#define PATH_DEV_DSP        "/dev/dsp"
+#define PATH_DEV_MIXER      "/dev/mixer"
+
+
 
 struct priv {
     int dsp_fd;
+    int hotplug_fd;
     double bps; /* Bytes per second. */
 };
 
@@ -361,8 +374,32 @@ static void get_state(struct ao *ao, struct mp_pcm_state *state)
     state->playing = (state->queued_samples != 0);
 }
 
+static int mp_natural_sort_cmp_de(const struct dirent **a, const struct dirent **b)
+{
+    return mp_natural_sort_cmp((*a)->d_name, (*b)->d_name);
+}
+
+static int
+scandir_filter_cb(const struct dirent *de) {
+
+    if (de == NULL || de->d_fileno == 0)
+            return 0;
+    /* Only few types allowed. */
+    switch (de->d_type) {
+    case DT_CHR:
+    case DT_LNK:
+        break;
+    default: /* Filter out all other. */
+        return 0;
+    }
+    /* Allow only "dsp*". */
+    return (de->d_namlen > 3 && memcmp("dsp", de->d_name, 3) == 0);
+}
+
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
+    int rc, dev_idx;
+    struct dirent **dirp = NULL;
     struct stat st;
     char dev_path[32] = PATH_DEV_DSP, dev_descr[256] = "Default";
     struct ao_device_desc dev = {.name = dev_path, .desc = dev_descr};
@@ -372,15 +409,86 @@ static void list_devs(struct ao *ao, struct ao_device_list *list)
     }
 
     /* Auto detect. */
-    for (size_t i = 0, fail_cnt = 0; fail_cnt < 8; i ++, fail_cnt ++) {
-        snprintf(dev_path, sizeof(dev_path), PATH_DEV_DSP"%zu", i);
-        if (stat(dev_path, &st) != 0)
-            continue;
-        device_descr_get(i, dev_descr, sizeof(dev_descr));
+    rc = scandir("/dev", &dirp, scandir_filter_cb, mp_natural_sort_cmp_de);
+    if (rc == -1 || dirp == NULL)
+        return;
+    for (size_t i = 0; i < (size_t)rc; i ++) {
+        dev_idx = atoi((dirp[i]->d_name + 3));
+        snprintf(dev_path, sizeof(dev_path), PATH_DEV_DSP"%i", dev_idx);
+        device_descr_get((size_t)dev_idx, dev_descr, sizeof(dev_descr));
         ao_device_list_add(list, ao, &dev);
-        fail_cnt = 0; /* Reset fail counter. */
+        free(dirp[i]);
     }
+    free(dirp);
 }
+
+#ifdef DEVD_SOCK_PATH
+static void *hotplug_proc(void *data) {
+    struct ao *ao = data;
+    struct priv *p = ao->priv;
+    ssize_t ios;
+    uint8_t buf[4096];
+
+    mp_thread_set_name("ao/oss hotplug");
+    mp_thread_detach(mp_thread_current_id());
+
+    for (;;) {
+        ios = recv(p->hotplug_fd, buf, sizeof(buf), MSG_WAITALL);
+        if (ios <= 0) {
+            if (errno == EINTR)
+                continue;
+            break;
+        }
+        /* Check: is notify and system=DEVFS and subsystem=CDEV and cdev=dsp. */
+        if (DEVD_EVENT_NOTIFY == buf[0] &&
+            NULL != memmem(buf, (size_t)ios, "system=DEVFS", 12) &&
+            NULL != memmem(buf, (size_t)ios, "subsystem=CDEV", 14) &&
+            NULL != memmem(buf, (size_t)ios, "cdev=dsp", 8))
+        {
+            ao_hotplug_event(ao); /* Fire hotplug event! */
+        }
+    }
+
+    return NULL;
+}
+
+static int hotplug_init(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    static const struct sockaddr_un sun = {
+        .sun_len = sizeof(struct sockaddr_un),
+        .sun_family = AF_UNIX,
+        .sun_path = DEVD_SOCK_PATH
+    };
+    mp_thread tid;
+
+    p->hotplug_fd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    if (p->hotplug_fd == -1)
+        return -1;
+    /* Attempt to connect to devd socket. */
+    if (connect(p->hotplug_fd, (struct sockaddr*)&sun, sizeof(sun)) < 0 ||
+        mp_thread_create(&tid, hotplug_proc, (void*)ao))
+    {
+        close(p->hotplug_fd);
+        p->hotplug_fd = -1;
+        MP_WARN(ao, "%s: fail to connect to devd socket or thread create: err = %i: %s\n",
+            __FUNCTION__, errno, mp_strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+static void hotplug_uninit(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    if (p->hotplug_fd == -1)
+        return;
+    close(p->hotplug_fd);
+    p->hotplug_fd = -1;
+}
+#endif
 
 const struct ao_driver audio_out_oss = {
     .name      = "oss",
@@ -393,8 +501,13 @@ const struct ao_driver audio_out_oss = {
     .write     = audio_write,
     .get_state = get_state,
     .list_devs = list_devs,
+#ifdef DEVD_SOCK_PATH
+    .hotplug_init = hotplug_init,
+    .hotplug_uninit = hotplug_uninit,
+#endif
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .dsp_fd = -1,
+        .hotplug_fd = -1,
     },
 };
