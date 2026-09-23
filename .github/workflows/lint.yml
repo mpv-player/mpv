@@ -76,4 +76,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: pre-commit/action@v3.0.1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+      - run: |
+          python -m pip install pre-commit
+          pre-commit run --all-files --show-diff-on-failure --color=always
