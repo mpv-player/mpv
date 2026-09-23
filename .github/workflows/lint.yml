@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: python/mypy@master
+      - uses: python/mypy@v2.3.1
         with:
           install_project_dependencies: no
           options: '--check-untyped-defs'
