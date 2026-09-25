@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 #
-# Attaches the artifacts of the current workflow run to the rolling
-# "git-release" pre-release and rewrites its notes.
+# Attaches the artifacts of the current workflow run to a GitHub release.
+# A push to master updates the rolling "git-release" pre-release along with
+# its notes. A pushed release tag gets the assets attached to its release,
+# which is created as a draft when it does not exist yet, so the notes can be
+# filled in before publishing.
 #
 # Needs GH_REPO and GH_TOKEN on top of the GITHUB_* variables of the run.
 set -euo pipefail
@@ -13,15 +16,31 @@ artifacts=$(gh api "repos/{owner}/{repo}/actions/runs/$GITHUB_RUN_ID/artifacts")
 windows='mingw32-full|i686-w64-mingw32|windows-msvc'
 published="$windows|macos-|^libmpv-"
 
-tag=git-release
+if [[ $GITHUB_REF == refs/tags/* ]]; then
+    tag=$GITHUB_REF_NAME
+    # Release assets carry the version only, the run id is CI bookkeeping.
+    strip="-$GITHUB_RUN_ID"
+else
+    tag=git-release
+    strip=
+fi
 
 mkdir -p release
 jq -r --arg re "$published" '
     .artifacts[] | select(.name | test($re)) | "\(.id)\t\(.name)"
 ' <<< "$artifacts" |
 while IFS=$'\t' read -r id name; do
-    gh api "repos/{owner}/{repo}/actions/artifacts/$id/zip" > "release/$name.zip"
+    gh api "repos/{owner}/{repo}/actions/artifacts/$id/zip" > "release/${name/$strip/}.zip"
 done
+
+if [[ $tag != git-release ]]; then
+    if gh release view "$tag" >/dev/null 2>&1; then
+        gh release upload "$tag" --clobber release/*
+    else
+        gh release create "$tag" --draft --title "$tag" --notes-file RELEASE_NOTES release/*
+    fi
+    exit 0
+fi
 
 base_url="https://github.com/$GH_REPO/releases/download/$tag"
 
