@@ -6,6 +6,8 @@ on:
       - master
       - ci
       - 'release/**'
+    tags:
+      - 'v0.*'
     paths-ignore:
       - 'DOCS/**'
       - 'TOOLS/lua/**'
@@ -789,23 +791,24 @@ jobs:
           cat ./build/meson-logs/testlog.txt
 
   publish:
-    name: Publish git release
+    name: Publish release
     needs: [mingw, mingw64-full, win32, macos]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' &&
-        github.repository == 'mpv-player/mpv'
+    if: github.event_name == 'push' && github.repository == 'mpv-player/mpv' &&
+        (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v0.'))
     runs-on: ubuntu-slim
     permissions:
       contents: write
       actions: read
     concurrency:
-      group: publish-git
+      group: publish
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Publish to git release
+      - name: Publish
         env:
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
