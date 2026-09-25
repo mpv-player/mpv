@@ -218,7 +218,8 @@ static bool configure_lavrr(struct priv *p, bool verbose)
 
     AVChannelLayout in_layout, out_layout;
     mp_chmap_to_av_layout_custom(&in_layout, &map_in);
-    mp_chmap_to_av_layout(&out_layout, &out_lavc);
+    mp_chmap_to_av_layout(&out_layout,
+                          mp_chmap_is_unknown(&map_out) ? &map_out : &out_lavc);
     av_opt_set_chlayout(p->avrctx, "in_chlayout",  &in_layout, 0);
     av_opt_set_chlayout(p->avrctx, "out_chlayout", &out_layout, 0);
     av_channel_layout_uninit(&in_layout);
