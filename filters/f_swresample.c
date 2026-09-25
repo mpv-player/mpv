@@ -366,7 +366,9 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     // information, or if both sides are the very same map, for example
     // fl-fr-na -> fl-fr-na. libswresample is then told nothing about the
     // channels on either side. Two AV_CHANNEL_ORDER_UNSPEC layouts with the
-    // same channel count compare equal, so it never builds a mix matrix.
+    // same channel count compare equal, so it never builds a mix matrix. If
+    // the channel counts differ, the first channels that fit are copied and
+    // the rest is left silent, see the explicit matrix below.
     bool passthrough = mp_chmap_is_unknown(&map_in) ||
                        mp_chmap_is_unknown(&map_out) ||
                        mp_chmap_equals(&map_in, &map_out);
@@ -423,6 +425,23 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     av_opt_set_int(p->avrctx, "out_sample_rate",    p->out_rate, 0);
     av_opt_set_int(p->avrctx, "in_sample_fmt",      in_samplefmt, 0);
     av_opt_set_int(p->avrctx, "out_sample_fmt",     swr_samplefmt, 0);
+
+    if (passthrough && map_in.num != map_out.num) {
+        // Channels without meaning can only be copied by position. Keep the
+        // first channels that fit and leave the rest silent. libswresample
+        // needs an explicit matrix for this, as it has no layouts to derive
+        // one from. The matrix survives swr_close(), see swresample_reset().
+        int copied = MPMIN(map_in.num, map_out.num);
+        if (verbose)
+            MP_VERBOSE(p, "Copying %d of %d channels by position.\n", copied, map_in.num);
+        double *matrix = talloc_zero_array(NULL, double, map_out.num * map_in.num);
+        for (int n = 0; n < copied; n++)
+            matrix[n * map_in.num + n] = 1.0;
+        int r = swr_set_matrix(p->avrctx, matrix, map_in.num);
+        talloc_free(matrix);
+        if (r < 0)
+            goto error;
+    }
 
     p->is_resampling = false;
 
