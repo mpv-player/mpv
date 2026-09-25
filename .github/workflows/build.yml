@@ -790,7 +790,7 @@ jobs:
 
   publish:
     name: Publish git release
-    needs: [mingw, win32, macos]
+    needs: [mingw, mingw64-full, win32, macos]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' &&
         github.repository == 'mpv-player/mpv'
     runs-on: ubuntu-slim
