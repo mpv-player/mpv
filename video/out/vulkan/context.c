@@ -212,9 +212,6 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
          * headers and so we only activate them if the build time headers contain
          * them.
          */
-#ifdef VK_EXT_shader_object
-        VK_EXT_SHADER_OBJECT_EXTENSION_NAME, /* 1.3.246 */
-#endif
 #ifdef VK_KHR_cooperative_matrix
         VK_KHR_COOPERATIVE_MATRIX_EXTENSION_NAME, /* 1.3.255 */
 #endif
@@ -329,20 +326,10 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
     };
 #endif
 
-#ifdef VK_EXT_shader_object
-    VkPhysicalDeviceShaderObjectFeaturesEXT shader_object_feature = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT,
-#ifdef VK_KHR_cooperative_matrix
-        .pNext = &cooperative_matrix_feature,
-#endif
-        .shaderObject = true,
-    };
-#endif
-
     VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR zero_init_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES_KHR,
-#ifdef VK_EXT_shader_object
-        .pNext = &shader_object_feature,
+#ifdef VK_KHR_cooperative_matrix
+        .pNext = &cooperative_matrix_feature,
 #endif
        .shaderZeroInitializeWorkgroupMemory = true,
     };
