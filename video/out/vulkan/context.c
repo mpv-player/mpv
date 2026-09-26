@@ -200,7 +200,6 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
 #endif
         VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
-        VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
         VK_EXT_SHADER_REPLICATED_COMPOSITES_EXTENSION_NAME,
         VK_KHR_COOPERATIVE_MATRIX_EXTENSION_NAME,
         VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
@@ -365,15 +364,9 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .cooperativeMatrix = true,
     };
 
-    VkPhysicalDeviceShaderObjectFeaturesEXT shader_object_feature = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT,
-        .pNext = &cooperative_matrix_feature,
-        .shaderObject = true,
-    };
-
     VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR explicit_mem_layout_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_WORKGROUP_MEMORY_EXPLICIT_LAYOUT_FEATURES_KHR,
-        .pNext = &shader_object_feature,
+        .pNext = &cooperative_matrix_feature,
         .workgroupMemoryExplicitLayout = true,
         .workgroupMemoryExplicitLayoutScalarBlockLayout = true,
         .workgroupMemoryExplicitLayout8BitAccess = true,
