@@ -68,6 +68,36 @@ static const struct hwmap_pairs hwmap_pairs[] = {
     {0}
 };
 
+bool mp_hwupload_probe_hw_to_hw(struct mp_hwupload *u, struct mp_image *src)
+{
+    if (!u->f || !src || !src->hwctx)
+        return false;
+    struct priv *p = u->f->priv;
+
+    bool map_images = false;
+    for (int n = 0; n < p->num_map_fmts; n++) {
+        if (src->imgfmt == p->map_fmts[n]) {
+            map_images = true;
+            break;
+        }
+    }
+
+    // Mirror hwupload_process(): same device, same pool parameters, same
+    // map or transfer choice, so the test cannot diverge from what the
+    // uploader will do with the real frames.
+    AVBufferRef *frames = NULL;
+    if (!mp_update_av_hw_frames_pool(&frames, p->av_device_ctx, p->hw_imgfmt,
+                                     src->params.hw_subfmt, src->w, src->h,
+                                     src->imgfmt == IMGFMT_CUDA))
+        return false;
+    struct mp_image *dst = map_images ? mp_av_pool_image_hw_map(frames, src)
+                                      : mp_av_pool_image_hw_upload(frames, src);
+    bool ok = !!dst;
+    talloc_free(dst);
+    av_buffer_unref(&frames);
+    return ok;
+}
+
 /**
  * @brief Find the closest supported format when hw uploading
  *
