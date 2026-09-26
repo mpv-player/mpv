@@ -216,6 +216,7 @@ static const m_option_t mp_vo_opt_list[] = {
         {"photo", 1}, {"video", 2}, {"game", 3})},
     {"wayland-disable-vsync", OPT_BOOL(wl_disable_vsync),
         .deprecation_message = "replaced by --wayland-internal-vsync=no"},
+    {"wayland-display", OPT_STRING(wayland_display)},
     {"wayland-internal-vsync", OPT_CHOICE(wl_internal_vsync,
         {"no", 0}, {"auto", 1}, {"yes", 2})},
     {"wayland-edge-pixels-pointer", OPT_INT(wl_edge_pixels_pointer),

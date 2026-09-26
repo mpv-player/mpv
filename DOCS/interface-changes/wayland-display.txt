@@ -1,0 +1,1 @@
+add `--wayland-display` option to connect to a Wayland display other than the one given by `WAYLAND_DISPLAY`
