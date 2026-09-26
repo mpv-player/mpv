@@ -165,10 +165,12 @@ local special_cookie_field_names = Set {
 }
 
 -- parse single-line Set-Cookie syntax
-local function parse_cookies(cookies_line)
+local function parse_cookies(cookies_line, url)
     if not cookies_line then
         return {}
     end
+    local host = url and url:match("^https?://([^/?#]+)")
+    host = host and host:gsub("^.*@", ""):gsub(":%d*$", "")
     local cookies = {}
     local cookie = {}
     for stem in cookies_line:gmatch('[^;]+') do
@@ -179,19 +181,20 @@ local function parse_cookies(cookies_line)
             if special_cookie_field_names[cmp_name] then
                 cookie[cmp_name] = value
             else
-                if cookie.name and cookie.value then
+                if cookie.name and cookie.domain then
                     table.insert(cookies, cookie)
                 end
                 cookie = {
                     name = name,
                     value = value,
+                    -- without a Domain attribute it is a host-only cookie
+                    domain = host,
                 }
             end
         end
     end
-    if cookie.name and cookie.value then
-        local cookie_key = cookie.domain .. ":" .. cookie.name
-        cookies[cookie_key] = cookie
+    if cookie.name and cookie.domain then
+        table.insert(cookies, cookie)
     end
     return cookies
 end
@@ -200,8 +203,8 @@ end
 local function serialize_cookies(cookies)
     local result = ''
     for _, cookie in pairs(cookies) do
-        local domain = cookie.domain or ""
-        result = result .. ("%s\t%s\t%s\t%s\t%s\t%s\t%s\n"):format(
+        local domain = cookie.domain
+        result = result ..("%s\t%s\t%s\t%s\t%s\t%s\t%s\n"):format(
             domain,
             (domain:sub(1, 1) == ".") and "TRUE" or "FALSE",
             cookie.path or "/",
@@ -214,11 +217,11 @@ local function serialize_cookies(cookies)
 end
 
 -- set file-local cookies-file pointing at an in-memory cookies.txt
-local function set_cookies(cookies)
+local function set_cookies(cookies, url)
     if not cookies or cookies == "" then
         return
     end
-    local data = serialize_cookies(parse_cookies(cookies))
+    local data = serialize_cookies(parse_cookies(cookies, url))
     if data ~= "" then
         mp.set_property_bool("file-local-options/cookies", true)
         mp.set_property("file-local-options/cookies-file", "memory://" .. data)
@@ -863,7 +866,8 @@ local function add_single_video(json)
         mp.set_property("file-local-options/http-proxy", json.proxy)
     end
 
-    set_cookies(cookies)
+    set_cookies(cookies, has_requested_formats and requested_formats[1].url
+                         or json.url)
 
     local chunk_size = math.huge
     if has_requested_formats then
@@ -1073,7 +1077,8 @@ local function run_ytdl_hook(url)
 
             -- can't change the http headers for each entry, so use the 1st
             set_http_headers(json.entries[1].http_headers)
-            playlist_cookies[playlist] = json.entries[1].cookies or json.cookies
+            set_cookies(json.entries[1].cookies or json.cookies,
+                        json.entries[1].url)
 
             mp.set_property("stream-open-filename", playlist)
             if json.title and mp.get_property("force-media-title", "") == "" then
@@ -1205,7 +1210,7 @@ mp.add_hook("on_load", 20, function ()
     msg.verbose('playlist hook')
     local url = mp.get_property("stream-open-filename", "")
     if playlist_cookies[url] then
-        set_cookies(playlist_cookies[url])
+        set_cookies(playlist_cookies[url], url)
     end
 end)
 
