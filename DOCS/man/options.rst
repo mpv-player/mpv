@@ -6528,10 +6528,11 @@ them.
     setting this or setting it to the empty string uses the environment as
     usual. If ``WAYLAND_SOCKET`` is set, it takes precedence over this option.
 
-    This is useful for applications embedding mpv that proxy its Wayland
-    connection, since it redirects mpv without changing ``WAYLAND_DISPLAY``
-    for the whole process. Changes take effect the next time the VO is
-    created.
+    This applies to the VO and to the Wayland clipboard backend. It is useful
+    for applications embedding mpv that proxy its Wayland connection, since it
+    redirects mpv without changing ``WAYLAND_DISPLAY`` for the whole process.
+    Changes reconnect the clipboard immediately and take effect for the VO the
+    next time it is created.
 
 ``--wayland-edge-pixels-pointer=<value>``
     Defines the size of an edge border (default: 16) to initiate client side
