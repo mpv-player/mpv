@@ -6521,6 +6521,19 @@ them.
     (default) will automatically switch between telling the compositor the content
     is a photo, video or possibly none depending on internal heuristics.
 
+``--wayland-display=<string>``
+    Connect to this Wayland display instead of the one given by the
+    ``WAYLAND_DISPLAY`` environment variable (default: unset). This is either
+    a socket name relative to ``XDG_RUNTIME_DIR`` or an absolute path. Not
+    setting this or setting it to the empty string uses the environment as
+    usual. If ``WAYLAND_SOCKET`` is set, it takes precedence over this option.
+
+    This applies to the VO and to the Wayland clipboard backend. It is useful
+    for applications embedding mpv that proxy its Wayland connection, since it
+    redirects mpv without changing ``WAYLAND_DISPLAY`` for the whole process.
+    Changes reconnect the clipboard immediately and take effect for the VO the
+    next time it is created.
+
 ``--wayland-edge-pixels-pointer=<value>``
     Defines the size of an edge border (default: 16) to initiate client side
     resize events in the wayland contexts with the mouse or tablet. This is only
