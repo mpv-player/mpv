@@ -112,6 +112,15 @@ static const struct sd_filter_functions *const filters[] = {
     NULL,
 };
 
+// Return style options for subtitle; primary or secondary.
+static struct osd_style_opts *get_sub_style(struct sd *sd)
+{
+    if(sd->order == 1) {
+        return sd->opts->secondary_sub_style;
+    }
+    return sd->opts->sub_style;
+}
+
 // Add default styles, if the track does not have any styles yet.
 // Apply style overrides if the user provides any.
 static void mp_ass_add_default_styles(struct sd *sd, ASS_Track *track, struct mp_subtitle_opts *opts,
@@ -133,7 +142,7 @@ static void mp_ass_add_default_styles(struct sd *sd, ASS_Track *track, struct mp
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
-        mp_ass_set_style(style, track->PlayResY, opts->sub_style);
+        mp_ass_set_style(style, track->PlayResY, get_sub_style(sd));
     }
 
     if (shared_opts->ass_style_override[sd->order])
@@ -240,7 +249,7 @@ static void enable_output(struct sd *sd, bool enable)
     } else {
         ctx->ass_renderer = ass_renderer_init(ctx->ass_library);
 
-        mp_ass_configure_fonts(ctx->ass_renderer, sd->opts->sub_style,
+        mp_ass_configure_fonts(ctx->ass_renderer, get_sub_style(sd),
                                sd->global, sd->log);
     }
 }
@@ -251,7 +260,7 @@ static void assobjects_init(struct sd *sd)
     struct mp_subtitle_opts *opts = sd->opts;
     struct mp_subtitle_shared_opts *shared_opts = sd->shared_opts;
 
-    ctx->ass_library = mp_ass_init(sd->global, sd->opts->sub_style, sd->log);
+    ctx->ass_library = mp_ass_init(sd->global, get_sub_style(sd), sd->log);
     ass_set_extract_fonts(ctx->ass_library, opts->use_embedded_fonts);
 
     add_subtitle_fonts(sd);
@@ -591,13 +600,14 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_force_flags |= ASS_OVERRIDE_BIT_JUSTIFY;
 #endif
     ass_set_selective_style_override_enabled(priv, set_force_flags);
+    struct osd_style_opts *sub_style = get_sub_style(sd);
     ASS_Style style = {0};
-    mp_ass_set_style(&style, MP_ASS_FONT_PLAYRESY, opts->sub_style);
+    mp_ass_set_style(&style, MP_ASS_FONT_PLAYRESY, sub_style);
     ass_set_selective_style_override(priv, &style);
     free(style.FontName);
     if (converted && track->default_style < track->n_styles) {
         mp_ass_set_style(track->styles + track->default_style,
-                         track->PlayResY, opts->sub_style);
+                         track->PlayResY, sub_style);
     }
     ass_set_font_scale(priv, set_font_scale);
     ass_set_hinting(priv, set_hinting);

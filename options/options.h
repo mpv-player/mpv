@@ -110,6 +110,7 @@ struct mp_subtitle_opts {
     bool sub_scale_with_window;
     bool ass_scale_with_window;
     struct osd_style_opts *sub_style;
+    struct osd_style_opts *secondary_sub_style;
     bool sub_scale_signs;
     float sub_gauss;
     bool sub_gray;
