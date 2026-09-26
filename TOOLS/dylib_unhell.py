@@ -11,28 +11,44 @@ sys_re = re.compile("^/System")
 usr_re = re.compile("^/usr/lib/")
 exe_re = re.compile("@executable_path")
 
-def is_user_lib(objfile, libname):
+def is_user_lib(libname):
+    base = os.path.basename(libname)
     return not sys_re.match(libname) and \
            not usr_re.match(libname) and \
            not exe_re.match(libname) and \
-           "libobjc." not in libname and \
-           "libSystem." not in libname and \
-           "libc." not in libname and \
-           "libgcc." not in libname and \
-           os.path.basename(libname) != "Python" and \
-           os.path.basename(objfile) not in libname and \
-           "libswift" not in libname
+           "libobjc." not in base and \
+           "libSystem." not in base and \
+           "libc." not in base and \
+           "libgcc." not in base and \
+           base != "Python" and \
+           "libswift" not in base
+
+def otool_self_id(objfile):
+    # dylibs list their own LC_ID_DYLIB as the first `otool -L` entry;
+    # executables have none. Matching it exactly (via `otool -D`) avoids
+    # excluding real dependencies whose path merely happens to contain the
+    # binary's basename.
+    output = subprocess.check_output(
+        ["otool", "-D", objfile], universal_newlines=True,
+    )
+    lines = output.splitlines()
+    if len(lines) < 2:
+        return None
+    return lines[1].strip()
 
 def otool(objfile, rapths):
     output = subprocess.check_output(
         ["otool", "-L", objfile], universal_newlines=True,
     )
+    self_id = otool_self_id(objfile)
     libs = set()
     for line in output.splitlines():
         if not line.startswith("\t"):
             continue
         lib = line.split()[0]
-        if is_user_lib(objfile, lib):
+        if lib == self_id:
+            continue
+        if is_user_lib(lib):
             libs.add(lib)
 
     libs_resolved = set()
