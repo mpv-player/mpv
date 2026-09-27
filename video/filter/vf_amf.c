@@ -631,13 +631,9 @@ static void process(struct mp_filter *f)
     ICALL(Release, surface);
 
     if (res == AMF_INPUT_FULL) {
-        MP_WARN(f, "FRC input queue full...\n");
         frame = (struct mp_frame){MP_FRAME_VIDEO, mp_image_new_ref(p->ref_image)};
         mp_pin_out_unread(f->ppins[0], frame);
-        return;
-    }
-
-    if (res != AMF_OK && res != AMF_EOF) {
+    } else if (res != AMF_OK && res != AMF_EOF) {
         MP_WARN(f, "FRC SubmitInput failed: %d\n", res);
         mp_filter_internal_mark_failed(f);
         return;
@@ -662,6 +658,11 @@ read_out:;
     if (!amf_out && res == AMF_REPEAT) {
         MP_WARN(f, "FRC QueryOutput returned NULL surface with AMF_REPEAT\n");
         mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    if (!amf_out) {
+        mp_filter_internal_mark_progress(f);
         return;
     }
 
