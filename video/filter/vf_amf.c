@@ -417,7 +417,8 @@ static struct mp_image *mp_image_from_amf_surface(struct mp_filter *f, AMFSurfac
     struct mp_image *out = mp_image_new_custom_ref(p->ref_image, (void *)free_ctx, free_amf_surface);
     if (!out) {
         MP_ERR(f, "Unexpected error when creating mp_image.\n");
-        free_amf_surface(free_ctx);
+        ID3D11Texture2D_Release(tex);
+        talloc_free(free_ctx);
         return NULL;
     }
     mp_image_copy_attributes(out, p->ref_image);
@@ -601,6 +602,7 @@ static void process(struct mp_filter *f)
         p->params = in->params;
         if (init_frc(f, in, false) < 0) {
             MP_ERR(f, "FRC init failed\n");
+            talloc_free(in);
             mp_filter_internal_mark_failed(f);
             return;
         }
@@ -619,6 +621,7 @@ static void process(struct mp_filter *f)
         MP_ERR(f, "FRC SubmitInput returned AMF_EOF, reinitializing...\n");
         if (init_frc(f, p->ref_image, true) < 0) {
             MP_ERR(f, "FRC reinit failed\n");
+            ICALL(Release, surface);
             mp_filter_internal_mark_failed(f);
             return;
         }
