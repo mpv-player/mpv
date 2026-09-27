@@ -53,7 +53,6 @@
 
 #define EVT_RELEASE 1
 #define EVT_ACQUIRE 2
-#define EVT_INTERRUPT 255
 #define HANDLER_ACQUIRE 0
 #define HANDLER_RELEASE 1
 #define RELEASE_SIGNAL SIGUSR1
@@ -64,6 +63,7 @@
 #define DRM_MIN_LUMA_FACTOR 10000
 
 static int vt_switcher_pipe[2];
+static int vt_wakeup_pipe[2];
 
 static int drm_connector_opt_help(struct mp_log *log, const struct m_option *opt,
                                   struct bstr name);
@@ -217,9 +217,19 @@ static bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
     s->log = log;
     vt_switcher_pipe[0] = -1;
     vt_switcher_pipe[1] = -1;
+    vt_wakeup_pipe[0] = -1;
+    vt_wakeup_pipe[1] = -1;
 
     if (mp_make_cloexec_pipe(vt_switcher_pipe)) {
         mp_err(log, "Creating pipe failed: %s\n", mp_strerror(errno));
+        return false;
+    }
+    // Keep routine wakeups separate from VT signals: they can outnumber polls
+    // during playback, filling a blocking pipe and hanging the player.
+    if (mp_make_wakeup_pipe(vt_wakeup_pipe) < 0) {
+        mp_err(log, "Creating wakeup pipe failed: %s\n", mp_strerror(errno));
+        close(vt_switcher_pipe[0]);
+        close(vt_switcher_pipe[1]);
         return false;
     }
 
@@ -277,8 +287,7 @@ static bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
 
 static void vt_switcher_interrupt_poll(struct vt_switcher *s)
 {
-    unsigned char event = EVT_INTERRUPT;
-    (void)write(vt_switcher_pipe[1], &event, sizeof(event));
+    (void)write(vt_wakeup_pipe[1], &(char){0}, 1);
 }
 
 static void vt_switcher_destroy(struct vt_switcher *s)
@@ -295,14 +304,21 @@ static void vt_switcher_destroy(struct vt_switcher *s)
     close(s->tty_fd);
     close(vt_switcher_pipe[0]);
     close(vt_switcher_pipe[1]);
+    close(vt_wakeup_pipe[0]);
+    close(vt_wakeup_pipe[1]);
 }
 
 static void vt_switcher_poll(struct vt_switcher *s, int timeout_ns)
 {
-    struct pollfd fds[1] = {
+    struct pollfd fds[2] = {
         { .events = POLLIN, .fd = vt_switcher_pipe[0] },
+        { .events = POLLIN, .fd = vt_wakeup_pipe[0] },
     };
-    mp_poll(fds, 1, timeout_ns);
+    mp_poll(fds, 2, timeout_ns);
+    if (fds[1].revents & POLLIN) {
+        char buf[256];
+        while (read(vt_wakeup_pipe[0], buf, sizeof(buf)) > 0) {}
+    }
     if (!fds[0].revents)
         return;
 
@@ -322,8 +338,6 @@ static void vt_switcher_poll(struct vt_switcher *s, int timeout_ns)
         if (ioctl(s->tty_fd, VT_RELDISP, VT_ACKACQ) < 0) {
             MP_ERR(s, "Failed to acquire virtual terminal\n");
         }
-        break;
-    case EVT_INTERRUPT:
         break;
     }
 }
