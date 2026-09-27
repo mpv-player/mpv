@@ -631,6 +631,38 @@ fail:
     return u;
 }
 
+struct mp_filter *mp_hwmap_create(struct mp_filter *parent, int hw_imgfmt,
+                                  struct mp_image *src)
+{
+    struct mp_hwupload u = mp_hwupload_create(parent, hw_imgfmt,
+                                              src->params.hw_subfmt, false);
+    if (!u.successful_init)
+        return NULL;
+
+    struct priv *p = u.f->priv;
+    bool ok = false;
+    for (int n = 0; n < p->num_map_fmts; n++)
+        ok |= p->map_fmts[n] == src->imgfmt;
+
+    if (ok) {
+        ok = mp_update_av_hw_frames_pool(&p->hw_pool, p->av_device_ctx,
+                                         hw_imgfmt, src->params.hw_subfmt,
+                                         src->w, src->h, false);
+    }
+
+    if (ok) {
+        struct mp_image *dst = mp_av_pool_image_hw_map(p->hw_pool, src);
+        ok = dst && dst->imgfmt == hw_imgfmt;
+        talloc_free(dst);
+    }
+
+    if (!ok) {
+        talloc_free(u.f);
+        return NULL;
+    }
+    return u.f;
+}
+
 static void hwdownload_process(struct mp_filter *f)
 {
     struct mp_hwdownload *d = f->priv;

@@ -265,6 +265,22 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
         }
     }
 
+    for (int n = 0; hw_to_sw && !p->imgparams_set && n < num_fmts; n++) {
+        if (!IMGFMT_IS_HWACCEL(fmts[n]))
+            continue;
+        struct mp_filter *map = mp_hwmap_create(conv, fmts[n], img);
+        if (map) {
+            mp_info(log, "HW-mapping %s[%s] -> %s\n",
+                    mp_imgfmt_to_name(img->imgfmt),
+                    mp_imgfmt_to_name(img->params.hw_subfmt),
+                    mp_imgfmt_to_name(fmts[n]));
+            filters[0] = map;
+            hw_to_sw = false;
+            need_sws = false;
+            break;
+        }
+    }
+
     int src_fmt = img->imgfmt;
     if (hw_to_sw) {
         mp_info(log, "HW-downloading from %s\n", mp_imgfmt_to_name(img->imgfmt));

@@ -18,6 +18,11 @@ struct mp_hwupload {
 struct mp_hwupload mp_hwupload_create(struct mp_filter *parent, int hw_imgfmt,
                                        int sw_imgfmt, bool src_is_same_hw);
 
+// A filter which maps hw frames like src to hw_imgfmt. Returns NULL if this is
+// not possible, which is verified by mapping src.
+struct mp_filter *mp_hwmap_create(struct mp_filter *parent, int hw_imgfmt,
+                                  struct mp_image *src);
+
 // A filter which downloads sw frames from hw. Ignores sw frames.
 struct mp_hwdownload {
     struct mp_filter *f;
