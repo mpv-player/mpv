@@ -43,6 +43,7 @@ const struct m_sub_options ai_translate_conf = {
         {"ai-translate-translate", OPT_BOOL(translate), .flags = UPDATE_AI_TRANSLATE},
         {"ai-translate-window", OPT_DOUBLE(window), M_RANGE(2, 15), .flags = UPDATE_AI_TRANSLATE},
         {"ai-translate-lookahead", OPT_DOUBLE(lookahead), M_RANGE(5, 60), .flags = UPDATE_AI_TRANSLATE},
+        {"ai-translate-api-key", OPT_STRING(api_key), .flags = UPDATE_AI_TRANSLATE},
         {0}
     },
     .defaults = &(const struct ai_translate_opts) {
@@ -52,6 +53,7 @@ const struct m_sub_options ai_translate_conf = {
         .stt_url = "http://127.0.0.1:8080",
         .tr_url = "https://api.anthropic.com",
         .stt_key = "",
+        .api_key = "",
         .model = "claude-opus-4-8",
         .translate = true,
         .window = 5,
@@ -805,6 +807,7 @@ struct ai_translate *ai_translate_create(struct mpv_global *global,
     ai->opts.tr_url = talloc_strdup(ai, opts->tr_url ? opts->tr_url : "");
     ai->opts.stt_key = talloc_strdup(ai, opts->stt_key ? opts->stt_key : "");
     ai->opts.model = talloc_strdup(ai, opts->model ? opts->model : "");
+    ai->api_key = talloc_strdup(ai, opts->api_key ? opts->api_key : "");
 
     // Env overrides (match the documented distribution knobs).
     const char *e;
@@ -814,8 +817,6 @@ struct ai_translate *ai_translate_create(struct mpv_global *global,
         ai->opts.tr_url = talloc_strdup(ai, e);
     if ((e = getenv("MPLAYER_STT_KEY")) && e[0])
         ai->opts.stt_key = talloc_strdup(ai, e);
-    if ((e = getenv("ANTHROPIC_API_KEY")) && e[0])
-        ai->api_key = talloc_strdup(ai, e);
 
     ai->win_samples = (int)(MPCLAMP(opts->window, 2, 15) * OUT_RATE);
     atomic_init(&ai->quit, false);

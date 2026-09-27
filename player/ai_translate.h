@@ -28,6 +28,7 @@
 struct ai_translate_opts {
     bool enabled;
     char *lang;         // target language (e.g. "en", "vi")
+    char *api_key;      // optional Anthropic API key
     char *src;          // source language hint ("" = auto)
     char *stt_url;      // whisper-server base URL
     char *tr_url;       // translation API base URL (Anthropic-compatible)
