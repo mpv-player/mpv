@@ -18,7 +18,7 @@
 #include <stdatomic.h>
 
 #include <windows.h>
-#include <d3d11.h>
+#include <d3d11_1.h>
 
 #include <AMF/components/FRC.h>
 #include <AMF/components/VQEnhancer.h>
@@ -60,6 +60,10 @@ struct priv {
     struct mp_image *ref_image;
 
     ID3D11Device *d3d_dev;
+    ID3D11DeviceContext1 *d3d_ctx;
+    ID3D10Multithread *d3d_mt;
+    ID3DDeviceContextState *amf_state;
+    ID3DDeviceContextState *prev_state;
     ID3D11Texture2D *input_tex;
 
     bool has_frame;
@@ -85,6 +89,20 @@ static inline AMF_SURFACE_FORMAT imgfmt2amf(int fmt)
     default:
         return AMF_SURFACE_UNKNOWN;
     }
+}
+
+static void amf_lock(struct priv *p)
+{
+    ID3D10Multithread_Enter(p->d3d_mt);
+    ID3D11DeviceContext1_SwapDeviceContextState(p->d3d_ctx, p->amf_state,
+                                                &p->prev_state);
+}
+
+static void amf_unlock(struct priv *p)
+{
+    ID3D11DeviceContext1_SwapDeviceContextState(p->d3d_ctx, p->prev_state, NULL);
+    SAFE_RELEASE(p->prev_state);
+    ID3D10Multithread_Leave(p->d3d_mt);
 }
 
 static void unload_amf_library(struct amf_priv *a)
@@ -122,8 +140,11 @@ static void flush(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    if (p->amf->comp)
+    if (p->amf->comp) {
+        amf_lock(p);
         ICALL(Flush, p->amf->comp);
+        amf_unlock(p);
+    }
     p->has_frame = false;
     mp_image_unrefp(&p->ref_image);
 }
@@ -154,13 +175,19 @@ static void destroy(struct mp_filter *f)
 
     flush(f);
 
-    if (a->comp)
-        ICALL(Terminate, a->comp);
-
-    if (a->ctx)
-        ICALL(Terminate, a->ctx);
+    if (p->amf_state) {
+        amf_lock(p);
+        if (a->comp)
+            ICALL(Terminate, a->comp);
+        if (a->ctx)
+            ICALL(Terminate, a->ctx);
+        amf_unlock(p);
+    }
 
     SAFE_RELEASE(p->input_tex);
+    SAFE_RELEASE(p->amf_state);
+    SAFE_RELEASE(p->d3d_ctx);
+    SAFE_RELEASE(p->d3d_mt);
     SAFE_RELEASE(p->d3d_dev);
     av_buffer_unref(&p->av_device_ref);
 
@@ -203,10 +230,31 @@ static int create_amf_context(struct mp_filter *f)
     AVD3D11VADeviceContext *d3dctx = avhwctx->hwctx;
     ID3D11Device_QueryInterface(d3dctx->device, &IID_ID3D11Device, (void **)&p->d3d_dev);
 
-    // AMF uses its own separate D3D11 device. This avoids any conflicts with
-    // with our presentation device, as we run it on different thread. Things
-    // work well, until there is compute shader processing done on the same device.
-    res = ICALL(InitDX11, a->ctx, NULL, AMF_DX11_1);
+    ID3D11Device1 *dev1 = NULL;
+    HRESULT hr = ID3D11Device_QueryInterface(p->d3d_dev, &IID_ID3D11Device1,
+                                             (void **)&dev1);
+    if (SUCCEEDED(hr))
+        hr = ID3D11Device_QueryInterface(p->d3d_dev, &IID_ID3D10Multithread,
+                                         (void **)&p->d3d_mt);
+    if (SUCCEEDED(hr)) {
+        D3D_FEATURE_LEVEL level = ID3D11Device_GetFeatureLevel(p->d3d_dev);
+        hr = ID3D11Device1_CreateDeviceContextState(dev1, 0, &level, 1,
+                                                    D3D11_SDK_VERSION,
+                                                    &IID_ID3D11Device, NULL,
+                                                    &p->amf_state);
+    }
+    if (SUCCEEDED(hr))
+        ID3D11Device1_GetImmediateContext1(dev1, &p->d3d_ctx);
+    SAFE_RELEASE(dev1);
+    if (FAILED(hr)) {
+        MP_ERR(f, "Failed to set up the D3D11 device for AMF: %s\n",
+               mp_HRESULT_to_str(hr));
+        goto err;
+    }
+
+    amf_lock(p);
+    res = ICALL(InitDX11, a->ctx, p->d3d_dev, AMF_DX11_1);
+    amf_unlock(p);
     if (res != AMF_OK) {
         MP_ERR(f, "Failed to initialize AMF context with D3D11: %d\n", res);
         goto err;
@@ -291,7 +339,7 @@ static void free_amf_surface(void *arg)
 {
     struct amf_surface_free_ctx *ctx = arg;
     ICALL(Release, ctx->surface);
-    ID3D11Texture2D_Release(ctx->tex); // shared texture
+    ID3D11Texture2D_Release(ctx->tex);
     destroy_amf(ctx->a);
     talloc_free(ctx);
 }
@@ -309,47 +357,12 @@ static struct mp_image *mp_image_from_amf_surface(struct mp_filter *f, AMFSurfac
         return NULL;
     }
 
-    ID3D11Texture2D *amf_tex = ICALL(GetNative, plane);
-    if (!amf_tex) {
+    ID3D11Texture2D *tex = ICALL(GetNative, plane);
+    if (!tex) {
         MP_ERR(f, "Failed to get D3D11 texture from AMF plane.\n");
         return NULL;
     }
 
-    ID3D11Device *amf_dev = ICALL(GetDX11Device, a->ctx, AMF_DX11_1);
-    mp_require(amf_dev);
-
-    ID3D11DeviceContext *ctx = NULL;
-    ID3D11Device_GetImmediateContext(amf_dev, &ctx);
-    mp_require(ctx);
-    ID3D11DeviceContext_Flush(ctx);
-    SAFE_RELEASE(ctx);
-
-    IDXGIResource* amf_res;
-    HRESULT hr = ID3D11Texture2D_QueryInterface(amf_tex, &IID_IDXGIResource, (void **)&amf_res);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to query IDXGIResource from AMF texture: %#lx\n", hr);
-        return NULL;
-    }
-
-    HANDLE amf_shared;
-    hr = IDXGIResource_GetSharedHandle(amf_res, &amf_shared);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to get shared handle from IDXGIResource: %#lx\n", hr);
-        SAFE_RELEASE(amf_res);
-        return NULL;
-    }
-
-    ID3D11Texture2D *tex;
-    hr = ID3D11Device_OpenSharedResource(p->d3d_dev, amf_shared, &IID_ID3D11Texture2D, (void **)&tex);
-    SAFE_RELEASE(amf_res);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to open shared resource: %#lx\n", hr);
-        return NULL;
-    }
-
-    // At this point, we technically own a reference to a texture, but we have to
-    // keep also AMFSurface alive, as the implementation seems to reuse the same
-    // underlying texture for future frames.
     struct amf_surface_free_ctx *free_ctx = talloc(NULL, struct amf_surface_free_ctx);
     free_ctx->a = a;
     free_ctx->surface = src;
@@ -357,9 +370,10 @@ static struct mp_image *mp_image_from_amf_surface(struct mp_filter *f, AMFSurfac
     struct mp_image *out = mp_image_new_custom_ref(p->ref_image, (void *)free_ctx, free_amf_surface);
     if (!out) {
         MP_ERR(f, "Unexpected error when creating mp_image.\n");
-        free_amf_surface(free_ctx);
+        talloc_free(free_ctx);
         return NULL;
     }
+    ID3D11Texture2D_AddRef(tex);
     mp_image_copy_attributes(out, p->ref_image);
     // hwctx is not copied by mp_image_copy_attributes
     out->hwctx = av_buffer_ref(p->ref_image->hwctx);
@@ -384,7 +398,7 @@ static int copy_tex(ID3D11DeviceContext *ctx, ID3D11Device *dev,
         desc.ArraySize = 1;
         desc.Usage = D3D11_USAGE_DEFAULT;
         desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-        desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
+        desc.MiscFlags = 0;
 
         HRESULT hr = ID3D11Device_CreateTexture2D(dev, &desc, NULL, dst);
         if (FAILED(hr))
@@ -413,71 +427,39 @@ static AMFSurface *mp_image_to_amf_surface(struct mp_filter *f, struct mp_image 
 {
     struct priv *p = f->priv;
     struct amf_priv *a = p->amf;
-    IDXGIResource* resource = NULL;
-    ID3D11Texture2D *amf_tex = NULL;
-    AMFSurfaceObserver *dtor = talloc_dup(NULL, (AMFSurfaceObserver *)&amf_dtor);
-    talloc_steal(dtor, src); // release mp_image when no longer needed
 
     mp_require(src->imgfmt == IMGFMT_D3D11);
 
     ID3D11Texture2D *tex = (void *)src->planes[0];
     amf_int index = (intptr_t)src->planes[1];
 
-    ID3D11DeviceContext *ctx = NULL;
-    ID3D11Device_GetImmediateContext(p->d3d_dev, &ctx);
-    mp_require(ctx);
-    // Textures between AMF and our D3D11 device are shared using shared handles
-    // `D3D11_RESOURCE_MISC_SHARED`, which is also set on textures returned
-    // from AMF. These textures are implicitly synchronized, documentation states
-    // that after a shared texture is updated, `ID3D11DeviceContext::Flush()`
-    // must be called on the updating device. Flushing the command queue is
-    // sufficient for the driver to synchronize access to the shared resource.
-    // We intentionally do not use more explicit synchronization mechanisms such
-    // as `IDXGIKeyedMutex` or `D3D11_RESOURCE_MISC_SHARED_NTHANDLE`, as they
-    // are not supported by AMF, nor D3D11VA decoder and would require additional
-    // intermediate copies.
-    // However, resources created by a D3D11VA device are not implicitly
-    // synchronized, so we perform a GPU-GPU copy before sharing the texture
-    // with AMF. This ensures the video decoder has finished writing to the
-    // texture. A copy is faster than synchronizing through the CPU, without copies.
-    copy_tex(ctx, p->d3d_dev, &p->input_tex, tex, index);
-    tex = p->input_tex;
-    index = 0;
-    ID3D11DeviceContext_Flush(ctx);
-    SAFE_RELEASE(ctx);
-
-    HRESULT hr = ID3D11Texture2D_QueryInterface(tex, &IID_IDXGIResource, (void **)&resource);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to query IDXGIResource from texture: %#lx\n", hr);
-        goto err;
+    D3D11_TEXTURE2D_DESC desc;
+    ID3D11Texture2D_GetDesc(tex, &desc);
+    if (!(desc.BindFlags & D3D11_BIND_SHADER_RESOURCE)) {
+        if (copy_tex((ID3D11DeviceContext *)p->d3d_ctx, p->d3d_dev,
+                     &p->input_tex, tex, index) < 0) {
+            MP_ERR(f, "Failed to copy the input texture.\n");
+            talloc_free(src);
+            return NULL;
+        }
+        tex = p->input_tex;
+        index = 0;
     }
 
-    HANDLE shared;
-    hr = IDXGIResource_GetSharedHandle(resource, &shared);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to get shared handle from IDXGIResource: %#lx\n", hr);
-        goto err;
-    }
-
-    ID3D11Device *amf_dev = ICALL(GetDX11Device, a->ctx, AMF_DX11_1); // not refcounted
-    hr = ID3D11Device_OpenSharedResource(amf_dev, shared, &IID_ID3D11Texture2D, (void **)&amf_tex);
-    SAFE_RELEASE(resource);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to open shared resource: %#lx\n", hr);
-        goto err;
-    }
-
-    AMFSurface *out;
-    AMF_RESULT res = ICALL(CreateSurfaceFromDX11Native, a->ctx, amf_tex, &out, dtor);
-    if (res != AMF_OK) {
-        MP_ERR(f, "Failed to create AMF surface from D3D11: %d\n", res);
-        goto err;
-    }
+    AMFSurfaceObserver *dtor = talloc_dup(NULL, (AMFSurfaceObserver *)&amf_dtor);
+    talloc_steal(dtor, src); // release mp_image when no longer needed
 
     // Copied from <https://github.com/GPUOpen-LibrariesAndSDKs/AMF/blob/afed28d37aca1938da2eedc50599bb3535a987ec/amf/public/src/components/Capture/MediaFoundation/MFCaptureImpl.cpp#L64>
     static const GUID AMFTextureArrayIndexGUID = {0x28115527, 0xe7c3, 0x4b66, {0x99, 0xd3, 0x4f, 0x2a, 0xe6, 0xb4, 0x7f, 0xaf}};
-    ID3D11Resource_SetPrivateData(amf_tex, &AMFTextureArrayIndexGUID, sizeof(index), &index);
-    SAFE_RELEASE(amf_tex);
+    ID3D11Texture2D_SetPrivateData(tex, &AMFTextureArrayIndexGUID, sizeof(index), &index);
+
+    AMFSurface *out;
+    AMF_RESULT res = ICALL(CreateSurfaceFromDX11Native, a->ctx, tex, &out, dtor);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to create AMF surface from D3D11: %d\n", res);
+        talloc_free(dtor);
+        return NULL;
+    }
 
     if (src->pts != MP_NOPTS_VALUE)
         ICALL(SetPts, out, (amf_pts)(src->pts * AMF_SECOND));
@@ -485,12 +467,6 @@ static AMFSurface *mp_image_to_amf_surface(struct mp_filter *f, struct mp_image 
         MP_WARN(f, "Warning: source image has no PTS.\n");
 
     return out;
-
-err:
-    SAFE_RELEASE(resource);
-    SAFE_RELEASE(amf_tex);
-    talloc_free(dtor);
-    return NULL;
 }
 
 static AMF_RESULT amf_submit_image(struct mp_filter *f, struct mp_image *in,
@@ -498,6 +474,9 @@ static AMF_RESULT amf_submit_image(struct mp_filter *f, struct mp_image *in,
 {
     struct priv *p = f->priv;
     struct amf_priv *a = p->amf;
+    AMF_RESULT res = AMF_FAIL;
+
+    amf_lock(p);
 
     if (!mp_image_params_static_equal(&in->params, &p->params)) {
         MP_VERBOSE(f, "Input image parameters changed, reinitializing...\n");
@@ -505,24 +484,25 @@ static AMF_RESULT amf_submit_image(struct mp_filter *f, struct mp_image *in,
         p->params = in->params;
         if (init(f, in, false) < 0) {
             MP_ERR(f, "AMF component init failed\n");
-            return AMF_FAIL;
+            goto done;
         }
     }
 
     AMFSurface *surface = mp_image_to_amf_surface(f, in);
     if (!surface) {
         MP_WARN(f, "Failed to create AMF surface\n");
-        return AMF_FAIL;
+        goto done;
     }
 
-    AMF_RESULT res = ICALL(SubmitInput, a->comp, (AMFData *)surface);
+    res = ICALL(SubmitInput, a->comp, (AMFData *)surface);
     // This shouldn't happen according to docs, but it does...
     if (res == AMF_EOF) {
         MP_ERR(f, "SubmitInput returned AMF_EOF, reinitializing...\n");
         if (init(f, p->ref_image, true) < 0) {
             MP_ERR(f, "AMF component reinit failed\n");
             ICALL(Release, surface);
-            return AMF_FAIL;
+            res = AMF_FAIL;
+            goto done;
         }
         res = ICALL(SubmitInput, a->comp, (AMFData *)surface);
     }
@@ -531,10 +511,32 @@ static AMF_RESULT amf_submit_image(struct mp_filter *f, struct mp_image *in,
 
     if (res != AMF_OK && res != AMF_EOF && res != AMF_INPUT_FULL) {
         MP_WARN(f, "SubmitInput failed: %d\n", res);
-        return AMF_FAIL;
+        res = AMF_FAIL;
     }
 
+done:
+    amf_unlock(p);
     return res;
+}
+
+static AMF_RESULT amf_query_output(struct mp_filter *f, AMFSurface **out)
+{
+    struct priv *p = f->priv;
+
+    *out = NULL;
+    amf_lock(p);
+    AMF_RESULT res = ICALL(QueryOutput, p->amf->comp, (AMFData **)out);
+    amf_unlock(p);
+    return res;
+}
+
+static void amf_drain(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
+
+    amf_lock(p);
+    ICALL(Drain, p->amf->comp);
+    amf_unlock(p);
 }
 
 static struct mp_filter *amf_create(struct mp_filter *parent, void *options,
@@ -664,7 +666,6 @@ err:
 static void frc_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    struct amf_priv *a = p->amf;
 
     if (!mp_pin_in_needs_data(f->ppins[1]))
         return;
@@ -684,7 +685,7 @@ static void frc_process(struct mp_filter *f)
     }
 
     if (frame.type == MP_FRAME_EOF) {
-        ICALL(Drain, a->comp);
+        amf_drain(f);
         goto read_out;
     }
 
@@ -714,8 +715,8 @@ static void frc_process(struct mp_filter *f)
     }
 
 read_out:;
-    AMFSurface *amf_out = NULL;
-    res = ICALL(QueryOutput, a->comp, (AMFData **)&amf_out);
+    AMFSurface *amf_out;
+    res = amf_query_output(f, &amf_out);
 
     if (res == AMF_EOF) {
         p->has_frame = false;
@@ -850,7 +851,6 @@ err:
 static void vqe_process(struct mp_filter *f)
 {
     struct priv *p = f->priv;
-    struct amf_priv *a = p->amf;
 
     if (!mp_pin_in_needs_data(f->ppins[1]))
         return;
@@ -866,7 +866,7 @@ static void vqe_process(struct mp_filter *f)
     }
 
     if (frame.type == MP_FRAME_EOF) {
-        ICALL(Drain, a->comp);
+        amf_drain(f);
         goto read_out;
     }
 
@@ -892,8 +892,8 @@ static void vqe_process(struct mp_filter *f)
     }
 
 read_out:;
-    AMFSurface *amf_out = NULL;
-    res = ICALL(QueryOutput, a->comp, (AMFData **)&amf_out);
+    AMFSurface *amf_out;
+    res = amf_query_output(f, &amf_out);
 
     if (res == AMF_EOF) {
         mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_EOF, NULL));
