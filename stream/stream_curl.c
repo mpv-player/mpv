@@ -178,6 +178,7 @@ struct priv {
     int retry_count;           // consecutive failed attempts at request_start
     bool active;               // handle is currently active in the multi
     bool finished;             // current request has reached EOF
+    bool range_probe;          // response needs a range probe
 
     // Probe state. Set on the curl thread read by curl_open after.
     bool probed;
@@ -463,6 +464,7 @@ static void finalize_probe(struct priv *p)
     p->probed = true;
     mp_cond_broadcast(&p->cond);
     mp_mutex_unlock(&p->mtx);
+    p->range_probe = false;
 }
 
 // Empty line is the end of the header. Skip intermediate 1xx and 3xx responses,
@@ -514,6 +516,14 @@ static void probe_http(struct priv *p, struct bstr line)
     // so byte ranges from the server don't line up with consumer offsets.
     p->seekable = !compressed && !mp_icy_active(p->icy) &&
                   (resp == 206 || accept_ranges);
+    if (resp == 200 && !accept_ranges && !compressed && !mp_icy_active(p->icy) &&
+        !p->start_offset && !p->request_end && !p->opts->max_request_size &&
+        !p->range_probe)
+    {
+        p->range_probe = true;
+        MP_DBG(p, "Ambiguous response, retry with a range\n");
+        return;
+    }
 
     if (p->seekable) {
         // Content-Range carries the full size on a partial response. On any
@@ -656,7 +666,7 @@ static void start_request(struct priv *p)
             end = MPMIN(end, p->request_end - 1);
         snprintf(range, sizeof(range), "%" PRIu64 "-%" PRIu64, start, end);
         curl_easy_setopt(p->curl, CURLOPT_RANGE, range);
-    } else if (ranged) {
+    } else if (ranged && (start > 0 || p->range_probe)) {
         snprintf(range, sizeof(range), "%" PRIu64 "-", start);
         curl_easy_setopt(p->curl, CURLOPT_RANGE, range);
     } else {
@@ -687,6 +697,12 @@ static void on_done(struct priv *p, CURLcode code)
     bool aborted = atomic_load_explicit(&p->aborted, memory_order_relaxed);
 
     if (!p->probed) {
+        // Ambiguous response, retry with a range.
+        if (!aborted && p->range_probe && !p->retry_count++) {
+            start_request(p);
+            return;
+        }
+
         // Connection died before any headers arrived.
         if (code != CURLE_OK && !aborted)
             log_curl_error(p, "error", code);
