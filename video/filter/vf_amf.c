@@ -484,6 +484,7 @@ static AMF_RESULT amf_submit_image(struct mp_filter *f, struct mp_image *in,
         p->params = in->params;
         if (init(f, in, false) < 0) {
             MP_ERR(f, "AMF component init failed\n");
+            talloc_free(in);
             goto done;
         }
     }
