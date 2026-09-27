@@ -65,6 +65,10 @@ static const struct hwmap_pairs hwmap_pairs[] = {
         .first_fmt = IMGFMT_DRMPRIME,
         .second_fmt = IMGFMT_VAAPI,
     },
+    {
+        .first_fmt = IMGFMT_AMF,
+        .second_fmt = IMGFMT_D3D11,
+    },
     {0}
 };
 
