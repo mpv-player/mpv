@@ -704,13 +704,9 @@ static void frc_process(struct mp_filter *f)
     AMF_RESULT res = amf_submit_image(f, in, frc_init);
 
     if (res == AMF_INPUT_FULL) {
-        MP_WARN(f, "Input queue full...\n");
         frame = (struct mp_frame){MP_FRAME_VIDEO, mp_image_new_ref(p->ref_image)};
         mp_pin_out_unread(f->ppins[0], frame);
-        return;
-    }
-
-    if (res == AMF_FAIL) {
+    } else if (res == AMF_FAIL) {
         mp_filter_internal_mark_failed(f);
         return;
     }
@@ -734,6 +730,11 @@ read_out:;
     if (!amf_out && res == AMF_REPEAT) {
         MP_WARN(f, "QueryOutput returned NULL surface with AMF_REPEAT\n");
         mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    if (!amf_out) {
+        mp_filter_internal_mark_progress(f);
         return;
     }
 
