@@ -96,6 +96,13 @@ struct ra_hwdec_mapper_driver {
     int (*map)(struct ra_hwdec_mapper *mapper);
     // Unmap the frame. Does nothing if already unmapped. Optional.
     void (*unmap)(struct ra_hwdec_mapper *mapper);
+
+    // Optional. Group each use of the mapped textures by the renderer. A
+    // frame can stay mapped across several renders, so drivers whose mapping
+    // hands the image over to an external API for every use do that handover
+    // here instead of in map/unmap.
+    int (*begin_access)(struct ra_hwdec_mapper *mapper);
+    void (*end_access)(struct ra_hwdec_mapper *mapper);
 };
 
 struct ra_hwdec_driver {
@@ -149,6 +156,8 @@ struct ra_hwdec_mapper *ra_hwdec_mapper_create(struct ra_hwdec *hwdec,
 void ra_hwdec_mapper_free(struct ra_hwdec_mapper **mapper);
 void ra_hwdec_mapper_unmap(struct ra_hwdec_mapper *mapper);
 int ra_hwdec_mapper_map(struct ra_hwdec_mapper *mapper, struct mp_image *img);
+int ra_hwdec_mapper_begin_access(struct ra_hwdec_mapper *mapper);
+void ra_hwdec_mapper_end_access(struct ra_hwdec_mapper *mapper);
 
 // Get the primary image format for the given driver name.
 // Returns IMGFMT_NONE if the name doesn't get matched.

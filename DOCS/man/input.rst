@@ -904,7 +904,7 @@ OSD Commands
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD. ``no-osd`` has no effect on this command.
 
-``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride> <dw> <dh>``
+``overlay-add <id> <x> <y> <file> <offset> <fmt> <w> <h> <stride> [<dw> [<dh> [<video_colorspace> [<max_luma> [<primaries> [<transfer>]]]]]]``
     Add an OSD overlay sourced from raw data. This might be useful for scripts
     and applications controlling mpv, and which want to display things on top
     of the video window.
@@ -963,6 +963,24 @@ OSD Commands
     The overlay visible portion of the overlay (``w`` and ``h``) is scaled to
     in display to ``dw`` and ``dh``.  If parameters are not present, the
     values for ``w`` and ``h`` are used.
+
+    ``video_colorspace`` (default: no) interprets the overlay in the video's
+    colorspace, including HDR metadata, so it is tone mapped exactly like
+    the video.
+
+    ``max_luma`` specifies the (optional) luminance peak of the overlay in
+    cd/m². If unset, it is inferred from the overlay's colorspace, or taken
+    from the video for ``video_colorspace`` overlays.
+
+    ``primaries`` and ``transfer`` specify the (optional) colorspace the
+    overlay is encoded in, and accept the same values as ``--target-prim``
+    and ``--target-trc``. The default ``auto`` means sRGB (BT.709 primaries
+    and sRGB transfer). They are ignored if ``video_colorspace`` is set.
+
+    Currently only ``--vo=gpu-next`` honors these parameters. ``--vo=gpu``
+    always assumes the overlay is sRGB and adapts it to the display. Other
+    VOs ignore these parameters, and either blend the overlay without any
+    colorspace conversion or pass it to the system compositor.
 
     .. note::
 
@@ -1753,6 +1771,46 @@ Miscellaneous Commands
 ``context-menu``
     Show context menu on the video window. See `Context Menu`_ section for details.
 
+``discnav <action> [<x> <y>]``
+    Send a navigation command to the optical-disc stream that is currently
+    playing. The command does nothing when no disc is being played.
+
+    ``<action>`` is one of:
+
+    up, down, left, right
+        Move the on-disc button selection.
+    select
+        Activate the currently highlighted button.
+    menu
+        Jump to the root menu of the current title set (DVD: VTSM root menu,
+        BD: HDMV top menu).
+    title-menu
+        Jump to the disc's title menu (DVD: VMGM title menu, treated like
+        ``menu`` on BD).
+    popup
+        Show / dismiss the Blu-ray popup menu. For DVDs, falls back to the
+        chapter menu where available.
+    prev
+        Return from a menu to playback, or to the previous menu domain.
+    mouse-move
+        Forward a mouse position to the disc, so it can update the focused
+        button under the cursor. With no ``<x> <y>`` arguments, the position
+        is read from the ``mouse-pos`` property and mapped from window into
+        source-video coordinates automatically.
+    mouse-click
+        Like ``mouse-move`` but also activates the button under the cursor.
+
+    ``<x>`` and ``<y>`` are optional and only meaningful for the ``mouse-*``
+    actions. They are normalized coordinates in the range 0..1 (top-left at
+    ``0,0``), and are used instead of the live ``mouse-pos``.
+
+    mpv ships default bindings for this command in the ``{discnav}`` input
+    section (``UP``/``DOWN``/``LEFT``/``RIGHT`` for navigation, ``ENTER`` to
+    select, ``ESC`` / ``BS`` to leave, ``MBTN_LEFT`` / ``MOUSE_MOVE`` for
+    mouse). The player enables and disables that section automatically as
+    the menu appears and disappears, so the bindings only shadow the normal
+    ones while a menu is actually on screen.
+
 ``update-clipboard <type> [timeout]``
     Update the clipboard content so that the ``clipboard`` property reflects
     up-to-date value. This command is required to update the ``clipboard``
@@ -1986,7 +2044,7 @@ The following hooks are currently defined:
     For example, you could read and write the ``stream-open-filename``
     property to redirect an URL to something else (consider support for
     streaming sites which rarely give the user a direct media URL), or
-    you could set per-file options with by setting the property
+    you could set file-local options by setting the property
     ``file-local-options/<option name>``. The player will wait until all
     hooks are run.
 
@@ -2209,6 +2267,10 @@ Property list
     looks better for display purposes. Use the ``path`` property to get an
     unmodified filename.)
 
+    If the server reported a file name for the stream, as with the HTTP
+    ``Content-Disposition`` header, that name is returned instead of the one
+    derived from the URL.
+
     This has a sub-property:
 
     ``filename/no-ext``
@@ -2422,6 +2484,12 @@ Property list
     loaded, or the file has no editions. (Matroska files make a difference
     between having no editions and a single edition, which will be reflected by
     the property, although in practice it does not matter.)
+
+``disc-menu-active``
+    ``yes`` when the current optical-disc stream (DVD or Blu-ray) is showing
+    an interactive menu (a DVD menu domain, or a visible Blu-ray menu
+    overlay), and ``no`` otherwise. Unavailable when the currently playing
+    source is not an optical disc.
 
 ``chapters``
     Number of chapters.
@@ -4162,9 +4230,14 @@ Property list
 
 ``file-local-options/<name>`` (RW)
     Similar to ``options/<name>``, but when setting an option through this
-    property, the option is reset to its old value once the current file has
-    stopped playing. Trying to write an option while no file is playing (or
-    is being loaded) results in an error.
+    property, the option is marked as file-local, which causes it to reset to
+    its old value once the current file has stopped playing. Trying to write
+    an option while no file is playing (or is being loaded) results in an error.
+
+    If an option is applied through a file specific mechanism such as per-file
+    options, watch later, ``options`` parameter of the ``loadfile`` command,
+    or file-specific configuration files, the option is similarly marked as
+    file-local.
 
     (Note that if an option is marked as file-local, even ``options/`` will
     access the local value, and the ``old`` value, which will be restored on

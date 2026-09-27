@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   check-docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
       - name: Docs

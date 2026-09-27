@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <libplacebo/colorspace.h>
+
 #include "options/m_option.h"
 
 // NOTE: VOs must support at least SUBBITMAP_BGRA.
@@ -56,6 +58,15 @@ struct sub_bitmap {
         struct {
             const struct sbr_output_image *image;
         } subrandr;
+        struct {
+            enum pl_color_primaries primaries;
+            enum pl_color_transfer transfer;
+            // Only luminance for now, not using full pl_color_space to save on size.
+            float max_luma;
+            // The bitmap is in the video's colorspace, including HDR
+            // metadata. primaries and transfer are ignored.
+            bool video_color_space;
+        } bgra;
     };
 };
 
@@ -113,7 +124,7 @@ struct mp_osd_res {
 bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b);
 
 // 0 <= sub_bitmaps.render_index < MAX_OSD_PARTS
-#define MAX_OSD_PARTS 5
+#define MAX_OSD_PARTS 6
 
 // Start of OSD symbols in osd_font.pfb
 #define OSD_CODEPOINTS 0xE000
@@ -208,7 +219,7 @@ struct osd_progbar_state {
 };
 void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s);
 
-void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs);
+void osd_set_bitmaps(struct osd_state *osd, int type, struct sub_bitmaps *imgs);
 
 enum mp_osd_draw_flags {
     OSD_DRAW_SUB_FILTER = (1 << 0),

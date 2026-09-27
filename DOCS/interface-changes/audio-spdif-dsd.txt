@@ -1,0 +1,1 @@
+add `dsd` choice to `--audio-spdif` for DSD-over-PCM (DoP) passthrough

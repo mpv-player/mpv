@@ -103,6 +103,30 @@ struct ra *ra_create_pl(pl_gpu gpu, struct mp_log *log)
             rafmt->component_depth[c] = plfmt->component_depth[c];
         }
 
+        // Special formats for which libplacebo happens to have direct support.
+        if (strcmp(plfmt->name, "rgb10a2") == 0) {
+            rafmt->special_imgfmt = IMGFMT_X2BGR10;
+            struct ra_imgfmt_desc *desc = talloc_zero(rafmt, struct ra_imgfmt_desc);
+            rafmt->special_imgfmt_desc = desc;
+            desc->component_bits = 10;
+            desc->num_planes = 1;
+            desc->planes[0] = rafmt;
+            for (int c = 0; c < 3; c++)
+                desc->components[0][c] = c + 1;
+            desc->chroma_w = desc->chroma_h = 1;
+        }
+        if (strcmp(plfmt->name, "bgr10a2") == 0) {
+            rafmt->special_imgfmt = IMGFMT_X2RGB10;
+            struct ra_imgfmt_desc *desc = talloc_zero(rafmt, struct ra_imgfmt_desc);
+            rafmt->special_imgfmt_desc = desc;
+            desc->component_bits = 10;
+            desc->num_planes = 1;
+            desc->planes[0] = rafmt;
+            for (int c = 0; c < 3; c++)
+                desc->components[0][c] = 3 - c;
+            desc->chroma_w = desc->chroma_h = 1;
+        }
+
         MP_TARRAY_APPEND(ra, ra->formats, ra->num_formats, rafmt);
     }
 

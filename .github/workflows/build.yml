@@ -6,6 +6,8 @@ on:
       - master
       - ci
       - 'release/**'
+    tags:
+      - 'v0.*'
     paths-ignore:
       - 'DOCS/**'
       - 'TOOLS/lua/**'
@@ -129,6 +131,66 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ env.TARGET }}-${{ steps.get_time.outputs.timestamp }}
 
+  mingw64-full:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [win64, winarm64]
+        variant: [gpl, lgpl]
+    container:
+      image: ghcr.io/btbn/ffmpeg-builds/${{ matrix.target }}-${{ matrix.variant }}:latest
+      env:
+        WINEPREFIX: /tmp/wine
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build
+        id: build
+        run: |
+          ./ci/build-mingw64-full.sh
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Functional test
+        if: ${{ matrix.target == 'win64' }}
+        run: |
+          cd artifact && wine ./mpv.com -v --no-config
+
+      - name: Run meson tests
+        if: ${{ matrix.target == 'win64' }}
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
+
+      - name: Artifact name
+        id: artifact
+        run: |
+          VERSION_FILE=$(find . -path "*/common/version.h" -type f | head -n 1)
+          VER=$(grep VERSION "$VERSION_FILE" | cut -d'"' -f2)
+          PR=${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}
+          echo "mpv=mpv-$VER$PR-${{ github.run_id }}-$FFBUILD_TOOLCHAIN-full" >> "$GITHUB_OUTPUT"
+          echo "libmpv=libmpv-$VER$PR-${{ github.run_id }}-$FFBUILD_TOOLCHAIN-${{ matrix.variant }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        if: ${{ matrix.variant == 'gpl' }}
+        with:
+          name: ${{ steps.artifact.outputs.mpv }}
+          path: artifact/*
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.artifact.outputs.libmpv }}
+          path: artifact-libmpv/*
+
   win32:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -137,7 +199,7 @@ jobs:
         include:
           - target: x86_64-pc-windows-msvc
             arch: "x64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
           - target: aarch64-pc-windows-msvc
             arch: "arm64"
             os: "windows-11-arm"
@@ -275,9 +337,11 @@ jobs:
           - os: "macos-14"
             arch: "arm"
             xcode: "Xcode_15.0"
+            homebrew: "b1d3cbaeb724947c97bf0e334adb3db56e4b5438"
           - os: "macos-15"
             arch: "arm"
           - os: "macos-15-intel"
+            homebrew: "956fbd2598f7b0bc3c7ef72edaa622e19415f6c9"
           - os: "macos-26"
             arch: "arm"
           - os: "macos-26"
@@ -306,6 +370,7 @@ jobs:
           if [[ -n "${{ matrix.homebrew }}" ]]; then
             export HOMEBREW_NO_AUTO_UPDATE=1
             cd "$(brew --repo homebrew/core)"
+            git fetch --depth=1 origin ${{ matrix.homebrew }}
             git checkout --force ${{ matrix.homebrew }}
           else
             brew update
@@ -313,7 +378,7 @@ jobs:
           if brew list ffmpeg &> /dev/null; then brew unlink ffmpeg; fi
           brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
-            libarchive libbluray libcaca libcdio-paranoia libdvdnav rubberband zimg
+            libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread rubberband zimg
           brew link ffmpeg-full
 
       - name: Build with meson
@@ -324,6 +389,7 @@ jobs:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
           SWIFT_FLAGS: "${{ matrix.swift }}"
           MACOSX_DEPLOYMENT_TARGET: "${{ matrix.target }}"
+          MACOS_ARCH: "${{ matrix.arch }}"
 
       - name: Create App Bundle
         if: ${{ matrix.arch != 'test' }}
@@ -485,104 +551,149 @@ jobs:
   openbsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 15 # avoid any weirdness with the VM
+    defaults:
+      run:
+        shell: cpa.sh {0} --sync-files none
     steps:
-    - uses: actions/checkout@v7
-    - name: Test in OpenBSD VM
-      uses: cross-platform-actions/action@v1.3.0
-      with:
-        operating_system: openbsd
-        version: '7.8'
+      - uses: actions/checkout@v7
+
+      - name: Start OpenBSD VM
+        uses: cross-platform-actions/action@v1.6.0
+        with:
+          operating_system: openbsd
+          version: '7.8'
+          sync_files: runner-to-vm
+
+      - name: Install dependencies
         run: |
-            sudo pkg_add -U \
-                cmake \
-                curl \
-                ffmpeg \
-                git \
-                libarchive \
-                libbluray \
-                libcaca \
-                libcdio-paranoia \
-                libdvdnav \
-                libiconv \
-                libplacebo \
-                libv4l \
-                libxkbcommon \
-                luajit \
-                meson \
-                openal \
-                pkgconf \
-                pulseaudio \
-                python3 \
-                rubberband \
-                rust \
-                sdl2 \
-                shaderc \
-                spirv-cross \
-                spirv-headers \
-                uchardet \
-                vulkan-loader \
-                vulkan-headers \
-                zimg
-            ./ci/build-openbsd.sh
-            if ! meson test -C build; then
-                cat ./build/meson-logs/testlog.txt
-                exit 1
-            fi
+          sudo pkg_add -U \
+              cmake \
+              curl \
+              ffmpeg \
+              git \
+              libarchive \
+              libbluray \
+              libcaca \
+              libcdio-paranoia \
+              libdvdnav \
+              libiconv \
+              libplacebo \
+              libv4l \
+              libxkbcommon \
+              luajit \
+              meson \
+              openal \
+              pkgconf \
+              pulseaudio \
+              python3 \
+              rubberband \
+              rust \
+              sdl2 \
+              shaderc \
+              spirv-cross \
+              spirv-headers \
+              uchardet \
+              vulkan-loader \
+              vulkan-headers \
+              zimg
+
+      - name: Build with meson
+        id: build
+        run: |
+          ./ci/build-openbsd.sh
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
 
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
     timeout-minutes: 15 # avoid any weirdness with the VM
+    defaults:
+      run:
+        shell: cpa.sh {0} --sync-files none
     steps:
-    - uses: actions/checkout@v7
-    - name: Test in FreeBSD VM
-      uses: cross-platform-actions/action@v1.3.0
-      with:
-        operating_system: freebsd
-        version: '15.1'
+      - uses: actions/checkout@v7
+
+      - name: Start FreeBSD VM
+        uses: cross-platform-actions/action@v1.6.0
+        with:
+          operating_system: freebsd
+          version: '15.1'
+          sync_files: runner-to-vm
+
+      - name: Install dependencies
         run: |
-            sudo pkg update
-            sudo pkg install -y \
-                alsa-lib \
-                cmake \
-                curl \
-                evdev-proto \
-                ffmpeg \
-                git \
-                iconv \
-                jackit \
-                libarchive \
-                libbluray \
-                libcaca \
-                libcdio-paranoia \
-                libdvdnav \
-                libdisplay-info \
-                libplacebo \
-                libXinerama \
-                libxkbcommon \
-                libXpresent \
-                libXv \
-                luajit \
-                meson \
-                mujs \
-                openal-soft \
-                pipewire \
-                pkgconf \
-                pulseaudio \
-                python3 \
-                rubberband \
-                rust \
-                sekrit-twc-zimg \
-                sdl2 \
-                sndio \
-                uchardet \
-                v4l_compat \
-                vulkan-headers \
-                wayland-protocols
-            ./ci/build-freebsd.sh
-            if ! meson test -C build; then
-                cat ./build/meson-logs/testlog.txt
-                exit 1
-            fi
+          sudo pkg update
+          sudo pkg install -y \
+              alsa-lib \
+              cmake \
+              curl \
+              evdev-proto \
+              ffmpeg \
+              git \
+              iconv \
+              jackit \
+              libarchive \
+              libbluray \
+              libcaca \
+              libcdio-paranoia \
+              libdvdnav \
+              libdvdread \
+              libdisplay-info \
+              libplacebo \
+              libXinerama \
+              libxkbcommon \
+              libXpresent \
+              libXv \
+              luajit \
+              meson \
+              mujs \
+              openal-soft \
+              pipewire \
+              pkgconf \
+              pulseaudio \
+              python3 \
+              rubberband \
+              rust \
+              sekrit-twc-zimg \
+              sdl2 \
+              sndio \
+              uchardet \
+              v4l_compat \
+              vulkan-headers \
+              wayland-protocols
+
+      - name: Build with meson
+        id: build
+        run: |
+          ./ci/build-freebsd.sh
+
+      - name: Print meson log
+        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/meson-log.txt
+
+      - name: Run meson tests
+        id: tests
+        run: |
+          meson test -C build
+
+      - name: Print meson test log
+        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        run: |
+          cat ./build/meson-logs/testlog.txt
 
   msys2:
     runs-on: ${{ matrix.os }}
@@ -591,21 +702,21 @@ jobs:
       matrix:
         include:
           - sys: "clang64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
             auto-var-init: "uninitialized"
           - sys: "clang64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
             asan: true
           - sys: "clang64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
             auto-var-init: "zero"
           - sys: "clang64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
             auto-var-init: "pattern"
           - sys: "mingw64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
           - sys: "ucrt64"
-            os: "windows-2025-vs2026"
+            os: "windows-2025"
           - sys: "clangarm64"
             os: "windows-11-arm"
     defaults:
@@ -636,6 +747,7 @@ jobs:
             libass:p
             libcdio-paranoia:p
             libdvdnav:p
+            libdvdread:p
             libjpeg-turbo:p
             libplacebo:p
             lua51:p
@@ -679,108 +791,26 @@ jobs:
           cat ./build/meson-logs/testlog.txt
 
   publish:
-    name: Publish git release
-    needs: [mingw, win32, macos]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' &&
-        github.repository == 'mpv-player/mpv'
-    runs-on: ubuntu-latest
+    name: Publish release
+    needs: [mingw, mingw64-full, win32, macos]
+    if: github.event_name == 'push' && github.repository == 'mpv-player/mpv' &&
+        (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v0.'))
+    runs-on: ubuntu-slim
     permissions:
       contents: write
       actions: read
     concurrency:
-      group: publish-git
+      group: publish
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Publish to git release
+      - name: Publish
         env:
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -eu
-          tag=git-release
-          base_url="https://github.com/$GH_REPO/releases/download/$tag"
-
-          artifacts=$(gh api "repos/{owner}/{repo}/actions/runs/${{ github.run_id }}/artifacts")
-
-          # Attach every build artifact unchanged; the notes link to them with
-          # labels derived from the verbose names.
-          mkdir -p release
-          jq -r '.artifacts[] | "\(.id)\t\(.name)"' <<< "$artifacts" |
-          while IFS=$'\t' read -r id name; do
-            gh api "repos/{owner}/{repo}/actions/artifacts/$id/zip" > "release/$name.zip"
-          done
-
-          section() {
-            jq -r --arg url "$base_url" --arg re "$1" '
-              def pretty:
-                (if   test("i686")    then "i686"
-                 elif test("aarch64") then "arm64"
-                 elif test("-arm$")   then "arm64"
-                 elif test("intel")   then "x86_64"
-                 else "x86_64" end) as $arch
-                | [ (if test("mingw") then "GCC" elif test("msvc") then "Clang" else empty end),
-                    (if test("macos") then "macOS " + capture("macos-(?<v>[0-9]+)").v else empty end),
-                    (if test("-pdb") then "debug symbols" else empty end) ] as $q
-                | $arch + (if ($q | length) > 0 then " (" + ($q | join(", ")) + ")" else "" end);
-              # primary builds first (x86_64, arm64, i686; Clang before GCC), debug symbols last
-              def rank:
-                [ (if test("-pdb") then 1 else 0 end),
-                  (if test("x86_64|intel") then 0 elif test("i686") then 2 else 1 end),
-                  (if test("mingw") then 1 else 0 end),
-                  (if test("macos") then (capture("macos-(?<v>[0-9]+)").v | tonumber) else 0 end) ];
-              [ .artifacts[] | select(.name | test($re)) ] | sort_by(.name | rank)
-              | map("* [\(.name | pretty)](\($url)/\(.name).zip)") | join("\n")
-            ' <<< "$artifacts"
-          }
-
-          # Match the version string baked into the build (see common/meson.build).
-          version=$(git describe --abbrev=9 --tags --dirty --match "v0.*")
-          notes=$(cat <<EOF
-          Automated development build of the latest \`master\` branch.
-
-          - Version: \`$version\`
-          - Commit: ${{ github.sha }}
-          - Built: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
-
-          ### Windows
-
-          $(section 'w64|msvc')
-
-          ### macOS
-
-          $(section 'macos')
-
-          > [!WARNING]
-          > These are untested development builds of the very latest \`master\`.
-          > They are **not** official releases. For stable builds see the
-          > [latest release](https://github.com/$GH_REPO/releases/latest).
-          EOF
-          )
-
-          # Create the release once (which also creates the tag), then only edit
-          # it in place so watchers aren't notified on every master push. Stale
-          # assets are dropped first since their names embed the run id.
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release view "$tag" --json assets --jq '.assets[].name' |
-            while read -r asset; do
-              gh release delete-asset "$tag" "$asset" --yes
-            done
-            gh release edit "$tag" \
-              --prerelease \
-              --latest=false \
-              --title "mpv development build" \
-              --notes "$notes"
-            gh release upload "$tag" release/*
-          else
-            gh release create "$tag" \
-              --target "$GITHUB_SHA" \
-              --prerelease \
-              --latest=false \
-              --title "mpv development build" \
-              --notes "$notes" \
-              release/*
-          fi
+          ./ci/publish-release.sh

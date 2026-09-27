@@ -56,6 +56,8 @@ extern const stream_info_t stream_info_slice;
 extern const stream_info_t stream_info_fd;
 extern const stream_info_t stream_info_ifo_dvdnav;
 extern const stream_info_t stream_info_dvdnav;
+extern const stream_info_t stream_info_ifo_dvda;
+extern const stream_info_t stream_info_dvda;
 extern const stream_info_t stream_info_bdmv_dir;
 extern const stream_info_t stream_info_bluray;
 extern const stream_info_t stream_info_edl;
@@ -72,6 +74,10 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_avdevice,
 #if HAVE_DVBIN
     &stream_info_dvb,
+#endif
+#if HAVE_DVDA
+    &stream_info_ifo_dvda,
+    &stream_info_dvda,
 #endif
 #if HAVE_DVDNAV
     &stream_info_ifo_dvdnav,
@@ -362,6 +368,7 @@ static int stream_create_instance(const stream_info_t *sinfo,
         s->log = mp_log_new(s, s->global->log, sinfo->name);
     }
     s->info = sinfo;
+    s->autoprobed = !args->sinfo;
     s->cancel = args->cancel;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
@@ -422,6 +429,8 @@ static int stream_create_instance(const stream_info_t *sinfo,
 
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
+    if (s->server_filename)
+        MP_VERBOSE(s, "Server filename: '%s'\n", s->server_filename);
 
     MP_DBG(s, "Stream opened successfully.\n");
 
@@ -699,6 +708,15 @@ void stream_drop_buffers(stream_t *s)
     s->buf_start = s->buf_cur = s->buf_end = 0;
     s->eof = 0;
     stream_resize_buffer(s, 0, 0);
+}
+
+// Declare the current position the new logical start of the stream. Used for
+// streams whose content is replaced mid-stream (disc navigation jumps).
+// Discards buffered data and clears EOF.
+void stream_rebase_position(stream_t *s)
+{
+    stream_drop_buffers(s);
+    s->pos = 0;
 }
 
 // Seek function bypassing the local stream buffer.

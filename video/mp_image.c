@@ -26,6 +26,7 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/rational.h>
+#include <libavutil/stereo3d.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/mastering_display_metadata.h>
 #include <libplacebo/utils/libav.h>
@@ -901,12 +902,14 @@ void mp_image_params_update_dynamic(struct mp_image_params *dst,
 {
     dst->repr.dovi = src->repr.dovi;
     // Don't overwrite peak-detected HDR metadata if available.
-    float max_pq_y = dst->color.hdr.max_pq_y;
-    float avg_pq_y = dst->color.hdr.avg_pq_y;
-    dst->color.hdr = src->color.hdr;
+    struct pl_hdr_metadata *hdr = &dst->color.hdr;
+    const struct pl_hdr_metadata prev = *hdr;
+    *hdr = src->color.hdr;
     if (has_peak_detect_values) {
-        dst->color.hdr.max_pq_y = max_pq_y;
-        dst->color.hdr.avg_pq_y = avg_pq_y;
+        hdr->max_pq_y  = prev.max_pq_y;
+        hdr->avg_pq_y  = prev.avg_pq_y;
+        hdr->scene_avg = prev.scene_avg;
+        memcpy(hdr->scene_max, prev.scene_max, sizeof(hdr->scene_max));
     }
 }
 
@@ -1128,6 +1131,10 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
     };
 
     dst->params.chroma_location = pl_chroma_from_av(src->chroma_location);
+
+    sd = av_frame_get_side_data(src, AV_FRAME_DATA_STEREO3D);
+    if (sd)
+        dst->params.stereo3d = mp_stereo3d_from_av((const AVStereo3D *)sd->data);
 
     if (src->opaque_ref) {
         struct mp_image_params *p = (void *)src->opaque_ref->data;

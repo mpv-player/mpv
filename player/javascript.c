@@ -825,7 +825,7 @@ static void script_input_set_section_mouse_area(js_State *J)
     push_success(J);
 }
 
-// args: time-in-ms [,format-string]
+// args: time-in-seconds [,format-string]
 static void script_format_time(js_State *J, void *af)
 {
     double t = js_tonumber(J, 1);

@@ -23,6 +23,7 @@
 #include <math.h>
 #include <assert.h>
 #include <libavutil/common.h>
+#include <libavutil/stereo3d.h>
 #include <libavcodec/avcodec.h>
 
 #include "mp_image.h"
@@ -130,12 +131,12 @@ const struct m_opt_choice_alternatives pl_alpha_names[] = {
     {0}
 };
 
-// The short name _must_ match with what vf_stereo3d accepts (if supported).
+// The short names follow the input format names of the vf_stereo3d.
 // The long name in comments is closer to the Matroska spec (StereoMode element).
 // The numeric index matches the Matroska StereoMode value. If you add entries
 // that don't match Matroska, make sure demux_mkv.c rejects them properly.
 const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
-    {"no",     -1}, // disable/invalid
+    {"no",     -1}, // unset, vf_format keeps the source mode
     {"mono",    0},
     {"sbs2l",   1}, // "side_by_side_left"
     {"ab2r",    2}, // "top_bottom_right"
@@ -144,8 +145,8 @@ const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
     {"checkl",  5}, // "checkboard_left"  (unsupported by vf_stereo3d)
     {"irr",     6}, // "row_interleaved_right"
     {"irl",     7}, // "row_interleaved_left"
-    {"icr",     8}, // "column_interleaved_right" (unsupported by vf_stereo3d)
-    {"icl",     9}, // "column_interleaved_left" (unsupported by vf_stereo3d)
+    {"icr",     8}, // "column_interleaved_right"
+    {"icl",     9}, // "column_interleaved_left"
     {"arcc",   10}, // "anaglyph_cyan_red" (Matroska: unclear which mode)
     {"sbs2r",  11}, // "side_by_side_right"
     {"agmc",   12}, // "anaglyph_green_magenta" (Matroska: unclear which mode)
@@ -153,6 +154,29 @@ const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
     {"ar",     14}, // "alternating frames right first"
     {0}
 };
+
+enum mp_stereo3d_mode mp_stereo3d_from_av(const struct AVStereo3D *s3d)
+{
+    bool inv = s3d->flags & AV_STEREO3D_FLAG_INVERT;
+    switch (s3d->type) {
+    case AV_STEREO3D_SIDEBYSIDE:
+    case AV_STEREO3D_SIDEBYSIDE_QUINCUNX:
+        return inv ? MP_STEREO3D_SBS2R : MP_STEREO3D_SBS2L;
+    case AV_STEREO3D_TOPBOTTOM:
+        return inv ? MP_STEREO3D_AB2R : MP_STEREO3D_AB2L;
+    case AV_STEREO3D_CHECKERBOARD:
+        return inv ? MP_STEREO3D_CHECKR : MP_STEREO3D_CHECKL;
+    case AV_STEREO3D_LINES:
+        return inv ? MP_STEREO3D_IRR : MP_STEREO3D_IRL;
+    case AV_STEREO3D_COLUMNS:
+        return inv ? MP_STEREO3D_ICR : MP_STEREO3D_ICL;
+    case AV_STEREO3D_FRAMESEQUENCE:
+        return inv ? MP_STEREO3D_AR : MP_STEREO3D_AL;
+    default:
+        // AV_STEREO3D_2D and types mpv has no mode for.
+        return MP_STEREO3D_MONO;
+    }
+}
 
 void mp_get_3d_side_by_side(int stereo_mode, int div[2])
 {

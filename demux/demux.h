@@ -121,6 +121,7 @@ enum demux_event {
     DEMUX_EVENT_STREAMS = 1 << 1,   // a stream was added
     DEMUX_EVENT_METADATA = 1 << 2,  // metadata or stream_metadata changed
     DEMUX_EVENT_DURATION = 1 << 3,  // duration updated
+    DEMUX_EVENT_LISTS = 1 << 4,     // chapters / editions list changed
     DEMUX_EVENT_ALL = 0xFFFF,
 };
 
@@ -146,6 +147,8 @@ typedef struct demuxer_desc {
     // will be repeated.
     bool (*read_packet)(struct demuxer *demuxer, struct demux_packet **pkt);
     void (*drop_buffers)(struct demuxer *demuxer);
+    // Optional. Re-queue retained sticky packets (DVD menu subpicture).
+    void (*nav_refresh)(struct demuxer *demuxer);
     void (*close)(struct demuxer *demuxer);
     void (*seek)(struct demuxer *demuxer, double rel_seek_secs, int flags);
     void (*switched_tracks)(struct demuxer *demuxer);
@@ -227,12 +230,17 @@ typedef struct demuxer {
     int64_t filepos;  // input stream current pos.
     int64_t filesize;
     char *filename;  // same as stream->url
+    char *server_filename; // same as stream->server_filename
     bool seekable;
     bool partially_seekable; // true if _maybe_ seekable; implies seekable=true
     double start_time;
     double duration;  // -1 if unknown
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
+    // The underlying source can switch to different content at any time, and
+    // timestamps restart per title, so cached packet ranges become stale
+    // without notice and must never be used to satisfy seeks.
+    bool no_cache_seeking;
     // The file data was fully read, and there is no need to keep the stream
     // open, keep the cache active, or to run the demuxer thread. Generating
     // packets is not slow either (unlike e.g. libavdevice pseudo-demuxers).
@@ -320,8 +328,15 @@ void demux_start_thread(struct demuxer *demuxer);
 void demux_stop_thread(struct demuxer *demuxer);
 void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *ctx);
 void demux_start_prefetch(struct demuxer *demuxer);
+void demux_drive_nav(struct demuxer *demuxer);
+void demux_nav_refresh(struct demuxer *demuxer);
+void demux_set_stream_still_image(struct demuxer *demuxer,
+                                  struct sh_stream *sh, bool still_image);
+void demux_set_stream_absent(struct demuxer *demuxer, struct sh_stream *sh,
+                             bool absent);
 
 bool demux_cancel_test(struct demuxer *demuxer);
+bool demux_read_interrupted(struct demuxer *demuxer);
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);
@@ -348,6 +363,9 @@ void demux_stream_tags_changed(struct demuxer *demuxer, struct sh_stream *sh,
 void demux_close_stream(struct demuxer *demuxer);
 
 void demux_metadata_changed(demuxer_t *demuxer);
+void demux_set_duration(demuxer_t *demuxer, double duration);
+void demux_set_nav_active(demuxer_t *demuxer, bool active);
+void demux_lists_changed(demuxer_t *demuxer);
 void demux_update(demuxer_t *demuxer, double playback_pts);
 
 bool demux_cache_dump_set(struct demuxer *demuxer, double start, double end,

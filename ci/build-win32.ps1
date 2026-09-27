@@ -217,9 +217,11 @@ dep = declare_dependency(
     harfbuzz,
     # those deps are hardcoded, because parsing rustc native-static-libs, would
     # be lots of code for little benefit, those libs won't really change.
+    # Keep in sync with library/windows_link/src/lib.rs in the rust repo.
     cc.find_library('dbghelp', required: true),
     cc.find_library('kernel32', required: true),
     cc.find_library('ntdll', required: true),
+    cc.find_library('synchronization', required: true),
     cc.find_library('userenv', required: true),
     cc.find_library('ws2_32', required: true)
   ],
@@ -233,7 +235,7 @@ $projects = @(
     @{
         Path = "$subprojects/ffmpeg.wrap"
         URL = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
-        Revision = "meson-8.1"
+        Revision = "meson-9.0"
         Provides = @(
             "dependency_names = libavcodec, libavdevice, libavfilter, libavformat, libavutil, libswresample, libswscale"
             "program_names = ffmpeg"

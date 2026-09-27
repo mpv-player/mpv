@@ -216,3 +216,68 @@ struct mp_tags *mp_parse_icy_metadata(struct stream *s, bstr headers, bstr packe
 
     return res;
 }
+
+static bstr header_to_utf8(void *tmp, struct stream *s, bstr text, const char *cp)
+{
+    const char *charset = mp_charset_guess(tmp, s->log, text, cp, 0);
+    bstr conv = mp_iconv_to_utf8(s->log, text, charset, 0);
+    if (conv.start != text.start)
+        talloc_steal(tmp, conv.start);
+    return conv;
+}
+
+char *mp_parse_content_disposition(void *talloc_ctx, struct stream *s, bstr value)
+{
+    void *tmp = talloc_new(NULL);
+    bstr plain = {0}, ext = {0};
+
+    // disposition-type *( ";" disposition-parm ). A quoted value
+    // may contain ";" or "=", so find its closing quote before splitting.
+    while (value.len) {
+        int eq = bstrchr(value, '=');
+        int semi = bstrchr(value, ';');
+        if (eq < 0 || (semi >= 0 && semi < eq)) {
+            if (semi < 0)
+                break;
+            value = bstr_cut(value, semi + 1);
+            continue;
+        }
+        bstr name = bstr_strip(bstr_splice(value, 0, eq));
+        value = bstr_lstrip(bstr_cut(value, eq + 1));
+        bstr val;
+        if (bstr_eatstart0(&value, "\"")) {
+            int end = bstrchr(value, '"');
+            val = end < 0 ? value : bstr_splice(value, 0, end);
+            value = bstr_cut(value, val.len);
+            semi = bstrchr(value, ';');
+        } else {
+            semi = bstrchr(value, ';');
+            val = bstr_strip(semi < 0 ? value : bstr_splice(value, 0, semi));
+        }
+        value = semi < 0 ? (bstr){0} : bstr_cut(value, semi + 1);
+
+        if (bstrcasecmp0(name, "filename*") == 0) {
+            ext = val;
+        } else if (bstrcasecmp0(name, "filename") == 0) {
+            plain = val;
+        }
+    }
+
+    bstr name = {0};
+    bstr charset, rest;
+    if (bstr_split_tok(ext, "'", &charset, &rest) &&
+        bstr_split_tok(rest, "'", &(bstr){0}, &rest))
+    {
+        bstr decoded = bstr0(mp_url_unescape(tmp, bstrto0(tmp, rest)));
+        name = header_to_utf8(tmp, s, decoded, bstrto0(tmp, charset));
+    }
+    if (!name.len && plain.len) {
+        struct demux_opts *opts = mp_get_config_group(tmp, s->global, &demux_conf);
+        name = header_to_utf8(tmp, s, plain, opts->meta_cp);
+    }
+    int sep = MPMAX(bstrrchr(name, '/'), bstrrchr(name, '\\'));
+    name = bstr_strip(bstr_cut(name, sep + 1));
+    char *res = name.len ? bstrto0(talloc_ctx, name) : NULL;
+    talloc_free(tmp);
+    return res;
+}

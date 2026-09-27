@@ -71,6 +71,11 @@ struct sd_lavc_priv {
     struct seekpoint *seekpoints;
     int num_seekpoints;
     struct bitmap_packer *packer;
+
+    // DVD-nav menu/highlight overlay state.
+    bool menu_active;               // in-menu: gates the highlight overlay
+    struct mp_dvdnav_highlight hl;  // focused button rect + palette
+    uint32_t hli_change_id;
 };
 
 static int init(struct sd *sd)
@@ -229,7 +234,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         if (r->w <= 0 || r->h <= 0)
             continue;
 
-        b->bitmap = r; // save for later (dumb hack to avoid more complexity)
+        // save the rect for later (dumb hack to avoid more complexity)
+        *b = (struct sub_bitmap){ .bitmap = r };
 
         priv->packer->in[sub->count] = (struct pos){r->w + (align - 1), r->h};
         sub->count++;
@@ -294,6 +300,22 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         memcpy(pal, data[1], r->nb_colors * 4);
         convert_pal(pal, 256, opts->sub_gray);
 
+        // DVD navigation highlight
+        struct mp_rect hlr = priv->hl.rect;
+        bool hli_active = priv->menu_active &&
+                          mp_rect_w(hlr) > 0 && mp_rect_h(hlr) > 0 &&
+                          r->x < hlr.x1 && r->y < hlr.y1 &&
+                          r->x + r->w > hlr.x0 && r->y + r->h > hlr.y0;
+        uint32_t hli_pal[4] = {0};
+        if (hli_active) {
+            memcpy(hli_pal, priv->hl.palette, sizeof(hli_pal));
+            convert_pal(hli_pal, 4, opts->sub_gray);
+        }
+        int hli_x0 = hlr.x0 - r->x;
+        int hli_y0 = hlr.y0 - r->y;
+        int hli_x1 = hlr.x1 - r->x;
+        int hli_y1 = hlr.y1 - r->y;
+
         for (int y = -padding; y < b->h + padding; y++) {
             uint32_t *out = (uint32_t*)((char*)b->bitmap + y * b->stride);
             int start = 0;
@@ -301,8 +323,14 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
                 out[x] = 0;
             if (y >= 0 && y < b->h) {
                 uint8_t *in = data[0] + y * linesize[0];
-                for (int x = 0; x < b->w; x++)
-                    *out++ = pal[*in++];
+                bool y_in_hli = hli_active && y >= hli_y0 && y < hli_y1;
+                for (int x = 0; x < b->w; x++) {
+                    uint8_t pv = *in++;
+                    if (y_in_hli && x >= hli_x0 && x < hli_x1 && pv < 4)
+                        *out++ = hli_pal[pv];
+                    else
+                        *out++ = pal[pv];
+                }
                 start = b->w;
             }
             for (int x = start; x < b->w + padding; x++)
@@ -319,6 +347,21 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 
         if (apply_blur)
             mp_blur_rgba_sub_bitmap(b, opts->sub_gauss);
+    }
+}
+
+static void rerender_queued_subs(struct sd *sd)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+    for (int n = 0; n < MAX_QUEUE; n++) {
+        struct sub *sub = &priv->subs[n];
+        if (!sub->valid)
+            continue;
+        sub->count = 0;
+        sub->src_w = 0;
+        sub->src_h = 0;
+        sub->id = priv->new_id++;
+        read_sub_bitmaps(sd, sub);
     }
 }
 
@@ -465,6 +508,7 @@ static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res d,
     res->packed_w = current->bound_w;
     res->packed_h = current->bound_h;
     res->format = SUBBITMAP_BGRA;
+    res->video_color_space = true;
 
     double video_par = 0;
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
@@ -715,6 +759,23 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     case SD_CTRL_SET_VIDEO_PARAMS:
         priv->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;
+    case SD_CTRL_APPLY_DVDNAV: {
+        const struct stream_nav_state *nav = arg;
+        bool menu_closed = priv->menu_active && !nav->menu_active;
+        bool changed = priv->hli_change_id != nav->change_id;
+        priv->menu_active = nav->menu_active;
+        priv->hl = nav->hl;
+        priv->hli_change_id = nav->change_id;
+        // Don't let menu subpictures leak into title playback.
+        if (menu_closed) {
+            for (int n = 0; n < MAX_QUEUE; n++)
+                clear_sub(&priv->subs[n]);
+        }
+        // Re-render any decoded subtitles, after style update.
+        if (changed)
+            rerender_queued_subs(sd);
+        return CONTROL_OK;
+    }
     default:
         return CONTROL_UNKNOWN;
     }

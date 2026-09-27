@@ -30,6 +30,16 @@ cross-compiling environment. For a basic example, please refer to
 Alternatively, consider using [mpv-winbuild-cmake](https://github.com/shinchiro/mpv-winbuild-cmake),
 which bootstraps a MinGW-w64 toolchain and builds mpv along with its dependencies.
 
+The full Windows builds on the [release page](https://github.com/mpv-player/mpv/releases)
+are cross-compiled in the [FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds)
+container images, which provide a toolchain and all dependencies as static
+libraries. [ci/build-mingw64-full.sh](https://github.com/mpv-player/mpv/blob/master/ci/build-mingw64-full.sh)
+reproduces such a build from the mpv source tree:
+
+``` bash
+docker run --rm -v "$PWD:/mpv" -w /mpv ghcr.io/btbn/ffmpeg-builds/win64-gpl:latest ./ci/build-mingw64-full.sh
+```
+
 ### Example with Meson
 
 1. Create ``cross-file.txt`` with definitions for your toolchain and target platform.
@@ -76,7 +86,7 @@ which bootstraps a MinGW-w64 toolchain and builds mpv along with its dependencie
    cat <<EOF > subprojects/ffmpeg.wrap
    [wrap-git]
    url = https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git
-   revision = meson-8.1
+   revision = meson-9.0
    depth = 1
    [provide]
    libavcodec = libavcodec_dep

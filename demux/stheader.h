@@ -68,6 +68,7 @@ struct sh_stream {
     bool commentary_track;      // container flag
     bool image;                 // video stream is an image
     bool still_image;           // video consists of multiple sparse still images
+    bool absent;                // the media provides no data for this stream
     int hls_bitrate;
     int *program_ids;
     int num_program_ids;
@@ -111,7 +112,7 @@ static inline struct sh_stream *sh_stream_dependent_sibling(struct sh_stream *bl
     for (int i = 0; i < bl->group->num_members; i++) {
         struct sh_stream *m = bl->group->members[i];
         if (m && m != bl && m->dependent_track && m->type == bl->type)
-            return m;
+            return m->absent ? NULL : m;
     }
     return NULL;
 }

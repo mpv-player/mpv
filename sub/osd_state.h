@@ -10,6 +10,8 @@ enum mp_osdtype {
     OSDTYPE_SUB,
     OSDTYPE_SUB2, // IDs must be numerically successive
 
+    OSDTYPE_DISC_MENU,
+
     OSDTYPE_OSD,
 
     OSDTYPE_EXTERNAL,
@@ -44,8 +46,8 @@ struct osd_object {
     struct osd_external **externals;
     int num_externals;
 
-    // OSDTYPE_EXTERNAL2
-    struct sub_bitmaps *external2;
+    // OSDTYPE_EXTERNAL2 / OSDTYPE_DISC_MENU
+    struct sub_bitmaps *image_overlay;
 
     // VO cache state
     int vo_change_id;

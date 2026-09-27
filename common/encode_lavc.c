@@ -424,7 +424,7 @@ done:
         av_packet_unref(pkt);
 }
 
-AVRational encoder_get_mux_timebase_unlocked(struct encoder_context *p)
+AVRational mp_encoder_get_mux_timebase_unlocked(struct encoder_context *p)
 {
     return p->mux_stream->st->time_base;
 }
@@ -746,7 +746,7 @@ bool encode_lavc_stream_type_ok(struct encode_lavc_context *ctx,
     return !!find_codec_for(ctx, type, &auto_codec) || !auto_codec;
 }
 
-struct encoder_context *encoder_context_alloc(struct encode_lavc_context *ctx,
+struct encoder_context *mp_encoder_context_alloc(struct encode_lavc_context *ctx,
                                               enum stream_type type,
                                               struct mp_log *log)
 {
@@ -826,7 +826,7 @@ static void encoder_2pass_prepare(struct encoder_context *p)
     talloc_free(filename);
 }
 
-bool encoder_init_codec_and_muxer(struct encoder_context *p)
+bool mp_encoder_init_codec_and_muxer(struct encoder_context *p)
 {
     mp_assert(!avcodec_is_open(p->encoder));
 
@@ -893,7 +893,7 @@ fail:
     return false;
 }
 
-bool encoder_encode(struct encoder_context *p, AVFrame *frame)
+bool mp_encoder_encode(struct encoder_context *p, AVFrame *frame)
 {
     int status = avcodec_send_frame(p->encoder, frame);
     if (status < 0) {
@@ -929,7 +929,7 @@ fail:
     return false;
 }
 
-void encoder_update_log(struct mpv_global *global)
+void mp_encoder_update_log(struct mpv_global *global)
 {
     struct encode_opts *options = mp_get_config_group(NULL, global, &encode_config);
     if (options->file && (!strcmp(options->file, "-") ||

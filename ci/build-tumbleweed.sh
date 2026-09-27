@@ -7,6 +7,7 @@ meson setup build $common_args $@ \
   -Db_sanitize=address,undefined \
   -Dcdda=enabled \
   -Ddvbin=enabled \
+  -Ddvda=enabled \
   -Ddvdnav=enabled \
   -Dlibarchive=enabled \
   -Dmanpage-build=enabled \

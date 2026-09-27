@@ -68,6 +68,10 @@ end
 local function judge(label)
     -- get the metadata
     local result = mp.get_property_native(string.format("vf-metadata/%s", label))
+    if result == nil then
+        mp.msg.warn("no video metadata found; assuming 'progressive'")
+        return progressive
+    end
     local num_tff          = tonumber(result["lavfi.idet.multiple.tff"])
     local num_bff          = tonumber(result["lavfi.idet.multiple.bff"])
     local num_progressive  = tonumber(result["lavfi.idet.multiple.progressive"])

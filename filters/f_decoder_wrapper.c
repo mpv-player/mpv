@@ -233,6 +233,7 @@ struct priv {
     bool pts_reset;
     int attempt_framedrops; // try dropping this many frames
     int dropped_frames; // total frames _probably_ dropped
+    int extra_hw_frames; // extra surfaces retained outside the decoder
 
     // --- Decoder group.
     //     The group of decoders this wrapper manages. Decodes dependent streams
@@ -261,7 +262,7 @@ static int decoder_list_help(struct mp_log *log, const m_option_t *opt,
         return M_OPT_EXIT;
     }
     if (strcmp(opt->name, "audio-spdif") == 0) {
-        mp_info(log, "Choices: ac3,dts-hd,dts (and possibly more)\n");
+        mp_info(log, "Choices: ac3,dts-hd,dts,dsd (and possibly more)\n");
         return M_OPT_EXIT;
     }
     return 1;
@@ -453,6 +454,14 @@ static bool reinit_decoder(struct priv *p)
                 list = spdif;
             } else {
                 talloc_free(spdif);
+                struct mp_decoder_list *dsd =
+                    select_dsd_codec(p->codec->codec, p->opts->audio_spdif);
+                if (dsd->num_entries) {
+                    driver = &ad_dsd;
+                    list = dsd;
+                } else {
+                    talloc_free(dsd);
+                }
             }
         }
     }
@@ -495,6 +504,16 @@ static bool reinit_decoder(struct priv *p)
                p->codec->codec ? p->codec->codec : "<?>");
     }
 
+    if (p->decoder && p->decoder->control) {
+        mp_mutex_lock(&p->cache_lock);
+        int extra_hw_frames = p->extra_hw_frames;
+        mp_mutex_unlock(&p->cache_lock);
+        if (extra_hw_frames > 0) {
+            p->decoder->control(p->decoder->f, VDCTRL_SET_EXTRA_HW_FRAMES,
+                                &extra_hw_frames);
+        }
+    }
+
     update_cached_values(p);
 
     talloc_free(list);
@@ -521,6 +540,19 @@ bool mp_decoder_wrapper_reinit(struct mp_decoder_wrapper *d)
     bool res = reinit_decoder(p);
     thread_unlock(p);
     return res;
+}
+
+void mp_decoder_wrapper_set_extra_hw_frames(struct mp_decoder_wrapper *d, int n)
+{
+    struct priv *p = d->f->priv;
+    if (p->is_group) {
+        for (int i = 0; i < p->num_children; i++)
+            mp_decoder_wrapper_set_extra_hw_frames(p->children[i], n);
+        return;
+    }
+    mp_mutex_lock(&p->cache_lock);
+    p->extra_hw_frames = n;
+    mp_mutex_unlock(&p->cache_lock);
 }
 
 void mp_decoder_wrapper_set_frame_drops(struct mp_decoder_wrapper *d, int num)
@@ -646,7 +678,8 @@ static void fix_image_params(struct priv *p,
     if (m.p_w <= 0 || m.p_h <= 0)
         m.p_w = m.p_h = 1;
 
-    m.stereo3d = p->codec->stereo_mode;
+    if (!m.stereo3d)
+        m.stereo3d = p->codec->stereo_mode;
 
     if (!mp_rect_equals(&p->codec->crop, &(struct mp_rect){0})) {
         struct mp_rect crop = p->codec->crop;

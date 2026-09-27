@@ -296,6 +296,9 @@ static void relink_filter_list(struct chain *p)
             mp_pin_connect(f->pins[0], p->filters_out);
         p->filters_out = f->pins[1];
     }
+
+    mp_pin_set_manual_connection_for(p->filters_in, p->f);
+    mp_pin_set_manual_connection_for(p->filters_out, p->f);
 }
 
 static void output_chain_process(struct mp_filter *f)

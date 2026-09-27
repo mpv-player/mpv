@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   commit-msg:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
         with:
@@ -27,24 +27,28 @@ jobs:
 
   swift:
     runs-on: ubuntu-latest
+    container: ghcr.io/realm/swiftlint:0.65.1
     steps:
       - uses: actions/checkout@v7
 
-      - uses: norio-nomura/action-swiftlint@3.2.1
+      - run: swiftlint lint --strict --reporter github-actions-logging
 
   lua:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
-      - uses: lunarmodules/luacheck@v1
+      - run: |
+          curl -sSfL -o "$RUNNER_TEMP/luacheck" https://github.com/lunarmodules/luacheck/releases/download/v1.2.0/luacheck
+          chmod +x "$RUNNER_TEMP/luacheck"
+          "$RUNNER_TEMP/luacheck" .
 
   ruff:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
       - name: Check
         id: check
-        uses: astral-sh/ruff-action@v3
+        uses: astral-sh/ruff-action@v4.1.0
         with:
           src: ". TOOLS/umpv"
       - name: Suggested changes
@@ -52,24 +56,30 @@ jobs:
         run: ruff check . TOOLS/umpv --diff
 
   mypy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
-      - uses: python/mypy@master
+      - uses: python/mypy@v2.3.1
         with:
           install_project_dependencies: no
           options: '--check-untyped-defs'
           paths: ". TOOLS/umpv"
 
   editorconfig:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
-      - uses: editorconfig-checker/action-editorconfig-checker@main
+      - uses: editorconfig-checker/action-editorconfig-checker@v3.0.0
       - run: editorconfig-checker -config .editorconfig-checker.json
 
   pre-commit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v7
-      - uses: pre-commit/action@v3.0.1
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+      - run: |
+          python -m pip install pre-commit
+          pre-commit run --all-files --show-diff-on-failure --color=always

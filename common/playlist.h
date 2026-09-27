@@ -84,6 +84,8 @@ void playlist_entry_add_param(struct playlist_entry *e, bstr name, bstr value);
 void playlist_entry_add_params(struct playlist_entry *e,
                                struct playlist_param *params,
                                int params_count);
+void playlist_set_params(struct playlist *pl, struct playlist_param *params,
+                         int num_params);
 
 struct playlist_entry *playlist_entry_new(const char *filename);
 

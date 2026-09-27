@@ -39,14 +39,17 @@ struct priv {
     struct mp_log *log;
     bool is_resampling;
     struct SwrContext *avrctx;
-    struct mp_aframe *avrctx_fmt; // output format of avrctx
-    struct mp_aframe *pool_fmt; // format used to allocate frames for avrctx output
-    struct mp_aframe *pre_out_fmt; // format before final conversion
-    struct SwrContext *avrctx_out; // for output channel reordering
+    struct mp_aframe *out_fmt; // output format of the filter
+    struct mp_aframe *avrctx_fmt; // format of the frames avrctx writes into
     struct mp_resample_opts *opts; // opts requested by the user
+    struct mp_aframe_pool *out_pool;
+#if LIBSWRESAMPLE_VERSION_INT < AV_VERSION_INT(7, 3, 100)
+    struct SwrContext *avrctx_out; // sample format conversion in fixup_output()
+    // At least libswresample keeps a pointer around for this:
+    int reorder_in[MP_NUM_CHANNELS];
     int reorder_out[MP_NUM_CHANNELS];
     struct mp_aframe_pool *reorder_buffer;
-    struct mp_aframe_pool *out_pool;
+#endif
 
     int in_rate_user; // user input sample rate
     int in_rate;      // actual rate (used by lavr), adjusted for playback speed
@@ -95,11 +98,12 @@ static int get_out_samples(struct priv *p, int in_samples)
 static void close_lavrr(struct priv *p)
 {
     swr_free(&p->avrctx);
-    swr_free(&p->avrctx_out);
 
-    TA_FREEP(&p->pre_out_fmt);
+    TA_FREEP(&p->out_fmt);
     TA_FREEP(&p->avrctx_fmt);
-    TA_FREEP(&p->pool_fmt);
+#if LIBSWRESAMPLE_VERSION_INT < AV_VERSION_INT(7, 3, 100)
+    swr_free(&p->avrctx_out);
+#endif
 }
 
 static int rate_from_speed(int rate, double speed)
@@ -107,164 +111,126 @@ static int rate_from_speed(int rate, double speed)
     return lrint(rate * speed);
 }
 
-static bool configure_lavrr(struct priv *p, bool verbose)
+static int resample_frame(struct SwrContext *r,
+                          struct mp_aframe *out, struct mp_aframe *in,
+                          int consume_in)
 {
-    close_lavrr(p);
+    // The channel layout and count can be different for in and out frames,
+    // libswresample remixes between them. The sample rates can differ too.
+    AVFrame *av_i = in ? mp_aframe_get_raw_avframe(in) : NULL;
+    AVFrame *av_o = out ? mp_aframe_get_raw_avframe(out) : NULL;
+    return swr_convert(r,
+        av_o ? av_o->extended_data : NULL,
+        av_o ? av_o->nb_samples : 0,
+        (const uint8_t **)(av_i ? av_i->extended_data : NULL),
+        av_i ? MPMIN(av_i->nb_samples, consume_in) : 0);
+}
 
-    p->in_rate = rate_from_speed(p->in_rate_user, p->speed);
+// libswresample remixes custom channel orders since FFmpeg 8.0 and accepts
+// AV_CHAN_UNUSED in such layouts since 7.3.100. From there on it is given
+// mpv's exact channel maps on both sides, and produces the output order and
+// the NA channels itself. Older versions are given native layouts, and the
+// input order, the output order and the NA channels are handled here.
+#if LIBSWRESAMPLE_VERSION_INT < AV_VERSION_INT(7, 3, 100)
 
-    MP_VERBOSE(p, "%dHz %s %s -> %dHz %s %s\n",
-               p->in_rate, mp_chmap_to_str(&p->in_channels),
-               af_fmt_to_str(p->in_format),
-               p->out_rate, mp_chmap_to_str(&p->out_channels),
-               af_fmt_to_str(p->out_format));
-
-    p->avrctx = swr_alloc();
-    p->avrctx_out = swr_alloc();
-    if (!p->avrctx || !p->avrctx_out)
-        goto error;
-
-    enum AVSampleFormat in_samplefmt = af_to_avformat(p->in_format);
-    enum AVSampleFormat out_samplefmt = af_to_avformat(p->out_format);
-    enum AVSampleFormat out_samplefmtp = av_get_planar_sample_fmt(out_samplefmt);
-
-    if (in_samplefmt == AV_SAMPLE_FMT_NONE ||
-        out_samplefmt == AV_SAMPLE_FMT_NONE ||
-        out_samplefmtp == AV_SAMPLE_FMT_NONE)
-    {
-        MP_ERR(p, "unsupported conversion: %s -> %s\n",
-               af_fmt_to_str(p->in_format), af_fmt_to_str(p->out_format));
-        goto error;
+// mp_chmap_get_reorder() performs:
+//  to->speaker[n] = from->speaker[src[n]]
+// but libswresample does:
+//  to->speaker[dst[n]] = from->speaker[n]
+static void transpose_order(int *map, int num)
+{
+    int nmap[MP_NUM_CHANNELS] = {0};
+    for (int n = 0; n < num; n++) {
+        for (int i = 0; i < num; i++) {
+            if (map[n] == i)
+                nmap[i] = n;
+        }
     }
+    memcpy(map, nmap, sizeof(nmap));
+}
 
-    av_opt_set_int(p->avrctx, "filter_size",        p->opts->filter_size, 0);
-    av_opt_set_int(p->avrctx, "phase_shift",        p->opts->phase_shift, 0);
-    av_opt_set_int(p->avrctx, "linear_interp",      p->opts->linear, 0);
-
-    double cutoff = p->opts->cutoff;
-    if (cutoff <= 0.0)
-        cutoff = MPMAX(1.0 - 6.5 / (p->opts->filter_size + 8), 0.80);
-    av_opt_set_double(p->avrctx, "cutoff",          cutoff, 0);
-
-    int normalize = p->opts->normalize;
-    av_opt_set_double(p->avrctx, "rematrix_maxval", normalize ? 1 : 1000, 0);
-
-    if (mp_set_avopts(p->log, p->avrctx, p->opts->avopts) < 0)
-        goto error;
-
-    struct mp_chmap map_in = p->in_channels;
-    struct mp_chmap map_out = p->out_channels;
-
-    // Try not to do any remixing if at least one is "unknown". Some corner
-    // cases also benefit from disabling all channel handling logic if the
-    // src/dst layouts are the same (like fl-fr-na -> fl-fr-na).
-    if (mp_chmap_is_unknown(&map_in) || mp_chmap_is_unknown(&map_out) ||
-        mp_chmap_equals(&map_in, &map_out))
-    {
-        mp_chmap_set_unknown(&map_in, map_in.num);
-        mp_chmap_set_unknown(&map_out, map_out.num);
+static bool needs_reorder(const int *reorder, int num)
+{
+    for (int n = 0; n < num; n++) {
+        if (reorder[n] != n)
+            return true;
     }
-
-    // unchecked: don't take any channel reordering into account
-    uint64_t in_ch_layout = mp_chmap_to_lavc_unchecked(&map_in);
-    uint64_t out_ch_layout = mp_chmap_to_lavc_unchecked(&map_out);
-
-    struct mp_chmap in_lavc, out_lavc;
-    mp_chmap_from_lavc(&in_lavc, in_ch_layout);
-    mp_chmap_from_lavc(&out_lavc, out_ch_layout);
-
-    if (verbose && !mp_chmap_equals(&in_lavc, &out_lavc)) {
-        MP_VERBOSE(p, "Remix: %s -> %s\n", mp_chmap_to_str(&in_lavc),
-                                            mp_chmap_to_str(&out_lavc));
-    }
-
-    if (in_lavc.num != map_in.num) {
-        // For handling NA channels, we would have to add a planarization step.
-        MP_FATAL(p, "Unsupported input channel layout %s.\n",
-                 mp_chmap_to_str(&map_in));
-        goto error;
-    }
-
-    if (mp_chmap_equals(&out_lavc, &map_out)) {
-        // No intermediate step required - output new format directly.
-        out_samplefmtp = out_samplefmt;
-    } else {
-        // Verify that we really just reorder and/or insert NA channels.
-        struct mp_chmap withna = out_lavc;
-        mp_chmap_fill_na(&withna, map_out.num);
-        if (withna.num != map_out.num)
-            goto error;
-    }
-    mp_chmap_get_reorder(p->reorder_out, &out_lavc, &map_out);
-
-    p->pre_out_fmt = mp_aframe_create();
-    mp_aframe_set_rate(p->pre_out_fmt, p->out_rate);
-    mp_aframe_set_chmap(p->pre_out_fmt, &p->out_channels);
-    mp_aframe_set_format(p->pre_out_fmt, p->out_format);
-
-    p->avrctx_fmt = mp_aframe_create();
-    mp_aframe_config_copy(p->avrctx_fmt, p->pre_out_fmt);
-    mp_aframe_set_chmap(p->avrctx_fmt, &out_lavc);
-    mp_aframe_set_format(p->avrctx_fmt, af_from_avformat(out_samplefmtp));
-
-    // If there are NA channels, the final output will have more channels than
-    // the avrctx output. Also, avrctx will output planar (out_samplefmtp was
-    // not overwritten). Allocate the output frame with more channels, so the
-    // NA channels can be trivially added.
-    p->pool_fmt = mp_aframe_create();
-    mp_aframe_config_copy(p->pool_fmt, p->avrctx_fmt);
-    if (map_out.num > out_lavc.num)
-        mp_aframe_set_chmap(p->pool_fmt, &map_out);
-
-    AVChannelLayout in_layout, out_layout;
-    mp_chmap_to_av_layout_custom(&in_layout, &map_in);
-    mp_chmap_to_av_layout(&out_layout, &out_lavc);
-    av_opt_set_chlayout(p->avrctx, "in_chlayout",  &in_layout, 0);
-    av_opt_set_chlayout(p->avrctx, "out_chlayout", &out_layout, 0);
-    av_channel_layout_uninit(&in_layout);
-    av_channel_layout_uninit(&out_layout);
-    av_opt_set_int(p->avrctx, "in_sample_rate",     p->in_rate, 0);
-    av_opt_set_int(p->avrctx, "out_sample_rate",    p->out_rate, 0);
-    av_opt_set_int(p->avrctx, "in_sample_fmt",      in_samplefmt, 0);
-    av_opt_set_int(p->avrctx, "out_sample_fmt",     out_samplefmtp, 0);
-
-    AVChannelLayout fake_layout;
-    av_channel_layout_default(&fake_layout, map_out.num);
-    av_opt_set_chlayout(p->avrctx_out, "in_chlayout", &fake_layout, 0);
-    av_opt_set_chlayout(p->avrctx_out, "out_chlayout", &fake_layout, 0);
-    av_channel_layout_uninit(&fake_layout);
-    av_opt_set_int(p->avrctx_out, "in_sample_fmt",      out_samplefmtp, 0);
-    av_opt_set_int(p->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
-    av_opt_set_int(p->avrctx_out, "in_sample_rate",     p->out_rate, 0);
-    av_opt_set_int(p->avrctx_out, "out_sample_rate",    p->out_rate, 0);
-
-    p->is_resampling = false;
-
-    if (swr_init(p->avrctx) < 0 || swr_init(p->avrctx_out) < 0) {
-        MP_ERR(p, "Cannot open Libavresample context.\n");
-        goto error;
-    }
-    return true;
-
-error:
-    close_lavrr(p);
-    mp_filter_internal_mark_failed(p->public.f);
-    MP_FATAL(p, "libswresample failed to initialize.\n");
     return false;
 }
 
-static void swresample_reset(struct mp_filter *f)
+// Give libswresample map_in in its native order, by reordering the input
+// channels with swr_set_channel_mapping(). Sets in_layout accordingly.
+static bool setup_native_input(struct priv *p, const struct mp_chmap *map_in,
+                               AVChannelLayout *in_layout)
 {
-    struct priv *p = f->priv;
+    struct mp_chmap in_lavc = *map_in;
+    mp_chmap_reorder_to_lavc(&in_lavc);
+    if (in_lavc.num != map_in->num) {
+        // Dropping NA channels would need a planarization step.
+        MP_FATAL(p, "Unsupported input channel layout %s.\n",
+                 mp_chmap_to_str(map_in));
+        return false;
+    }
+    mp_chmap_to_av_layout(in_layout, &in_lavc);
 
-    p->current_pts = MP_NOPTS_VALUE;
-    TA_FREEP(&p->input);
+    mp_chmap_get_reorder(p->reorder_in, map_in, &in_lavc);
+    transpose_order(p->reorder_in, map_in->num);
+    // A channel mapping disables the direct conversion path in libswresample,
+    // so set one only if the order really differs.
+    if (needs_reorder(p->reorder_in, map_in->num))
+        swr_set_channel_mapping(p->avrctx, p->reorder_in);
+    return true;
+}
 
-    if (!p->avrctx)
-        return;
-    swr_close(p->avrctx);
-    if (swr_init(p->avrctx) < 0)
-        close_lavrr(p);
+// Prepare fixup_output() for avrctx producing the channels of swr_out, which
+// is either map_out itself, or map_out without NA channels in native order.
+// If any channel has to be touched, avrctx has to output planar samples, so
+// planes can be swapped and added without copying, and avrctx_out converts
+// to the final sample format afterwards. Returns the sample format avrctx
+// has to output, or AV_SAMPLE_FMT_NONE on error.
+static enum AVSampleFormat setup_output_fixup(struct priv *p,
+                                              const struct mp_chmap *swr_out,
+                                              const struct mp_chmap *map_out,
+                                              enum AVSampleFormat out_samplefmt)
+{
+    enum AVSampleFormat swr_samplefmt = out_samplefmt;
+
+    if (mp_chmap_equals(swr_out, map_out)) {
+        // Nothing to touch, NA channels included.
+        for (int n = 0; n < MP_NUM_CHANNELS; n++)
+            p->reorder_out[n] = n < map_out->num ? n : -1;
+    } else {
+        mp_chmap_get_reorder(p->reorder_out, swr_out, map_out);
+        swr_samplefmt = av_get_planar_sample_fmt(out_samplefmt);
+        if (swr_samplefmt == AV_SAMPLE_FMT_NONE)
+            return swr_samplefmt;
+    }
+
+    // The frames avrctx writes into have the final channel count, so the NA
+    // channels it does not produce can be added without copying.
+    mp_aframe_set_format(p->avrctx_fmt, af_from_avformat(swr_samplefmt));
+
+    if (swr_samplefmt == out_samplefmt)
+        return swr_samplefmt;
+
+    // The channels are positionally identical on both sides of avrctx_out.
+    p->avrctx_out = swr_alloc();
+    if (!p->avrctx_out)
+        return AV_SAMPLE_FMT_NONE;
+    AVChannelLayout layout = {
+        .order = AV_CHANNEL_ORDER_UNSPEC,
+        .nb_channels = map_out->num,
+    };
+    av_opt_set_chlayout(p->avrctx_out, "in_chlayout", &layout, 0);
+    av_opt_set_chlayout(p->avrctx_out, "out_chlayout", &layout, 0);
+    av_opt_set_int(p->avrctx_out, "in_sample_fmt",      swr_samplefmt, 0);
+    av_opt_set_int(p->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
+    av_opt_set_int(p->avrctx_out, "in_sample_rate",     p->out_rate, 0);
+    av_opt_set_int(p->avrctx_out, "out_sample_rate",    p->out_rate, 0);
+    if (swr_init(p->avrctx_out) < 0)
+        return AV_SAMPLE_FMT_NONE;
+
+    return swr_samplefmt;
 }
 
 // This relies on the tricky way mpa was allocated.
@@ -306,20 +272,204 @@ static bool reorder_planes(struct mp_aframe *mpa, int *reorder,
     return true;
 }
 
-static int resample_frame(struct SwrContext *r,
-                          struct mp_aframe *out, struct mp_aframe *in,
-                          int consume_in)
+// Restore the requested channel order and add the NA channels, then convert
+// to the final sample format if avrctx had to output planar samples for that.
+// Takes ownership of out. Returns the frame in the final format, or NULL.
+static struct mp_aframe *fixup_output(struct priv *p, struct mp_aframe *out,
+                                      int out_samples)
 {
-    // Be aware that the channel layout and count can be different for in and
-    // out frames. In some situations the caller will fix up the frames before
-    // or after conversion. The sample rates can also be different.
-    AVFrame *av_i = in ? mp_aframe_get_raw_avframe(in) : NULL;
-    AVFrame *av_o = out ? mp_aframe_get_raw_avframe(out) : NULL;
-    return swr_convert(r,
-        av_o ? av_o->extended_data : NULL,
-        av_o ? av_o->nb_samples : 0,
-        (const uint8_t **)(av_i ? av_i->extended_data : NULL),
-        av_i ? MPMIN(av_i->nb_samples, consume_in) : 0);
+    struct mp_chmap out_chmap;
+    if (!mp_aframe_get_chmap(p->out_fmt, &out_chmap) ||
+        !reorder_planes(out, p->reorder_out, &out_chmap))
+        goto error;
+
+    if (mp_aframe_config_equals(out, p->out_fmt))
+        return out;
+
+    struct mp_aframe *new = mp_aframe_create();
+    mp_aframe_config_copy(new, p->out_fmt);
+    if (mp_aframe_pool_allocate(p->reorder_buffer, new, out_samples) < 0) {
+        talloc_free(new);
+        goto error;
+    }
+    int got = 0;
+    if (out_samples)
+        got = resample_frame(p->avrctx_out, new, out, out_samples);
+    talloc_free(out);
+    if (got != out_samples) {
+        talloc_free(new);
+        return NULL;
+    }
+    return new;
+
+error:
+    talloc_free(out);
+    return NULL;
+}
+
+#endif
+
+static bool configure_lavrr(struct priv *p, bool verbose)
+{
+    close_lavrr(p);
+
+    p->in_rate = rate_from_speed(p->in_rate_user, p->speed);
+
+    MP_VERBOSE(p, "%dHz %s %s -> %dHz %s %s\n",
+               p->in_rate, mp_chmap_to_str(&p->in_channels),
+               af_fmt_to_str(p->in_format),
+               p->out_rate, mp_chmap_to_str(&p->out_channels),
+               af_fmt_to_str(p->out_format));
+
+    p->avrctx = swr_alloc();
+    if (!p->avrctx)
+        goto error;
+
+    enum AVSampleFormat in_samplefmt = af_to_avformat(p->in_format);
+    enum AVSampleFormat out_samplefmt = af_to_avformat(p->out_format);
+
+    if (in_samplefmt == AV_SAMPLE_FMT_NONE ||
+        out_samplefmt == AV_SAMPLE_FMT_NONE)
+    {
+        MP_ERR(p, "unsupported conversion: %s -> %s\n",
+               af_fmt_to_str(p->in_format), af_fmt_to_str(p->out_format));
+        goto error;
+    }
+
+    av_opt_set_int(p->avrctx, "filter_size",        p->opts->filter_size, 0);
+    av_opt_set_int(p->avrctx, "phase_shift",        p->opts->phase_shift, 0);
+    av_opt_set_int(p->avrctx, "linear_interp",      p->opts->linear, 0);
+
+    double cutoff = p->opts->cutoff;
+    if (cutoff <= 0.0)
+        cutoff = MPMAX(1.0 - 6.5 / (p->opts->filter_size + 8), 0.80);
+    av_opt_set_double(p->avrctx, "cutoff",          cutoff, 0);
+
+    int normalize = p->opts->normalize;
+    av_opt_set_double(p->avrctx, "rematrix_maxval", normalize ? 1 : 1000, 0);
+
+    if (mp_set_avopts(p->log, p->avrctx, p->opts->avopts) < 0)
+        goto error;
+
+    p->out_fmt = mp_aframe_create();
+    mp_aframe_set_rate(p->out_fmt, p->out_rate);
+    mp_aframe_set_chmap(p->out_fmt, &p->out_channels);
+    mp_aframe_set_format(p->out_fmt, p->out_format);
+
+    p->avrctx_fmt = mp_aframe_create();
+    mp_aframe_config_copy(p->avrctx_fmt, p->out_fmt);
+
+    struct mp_chmap map_in = p->in_channels;
+    struct mp_chmap map_out = p->out_channels;
+
+    // Positional pass-through happens if either side has no speaker
+    // information, or if both sides are the very same map, for example
+    // fl-fr-na -> fl-fr-na. libswresample is then told nothing about the
+    // channels on either side. Two AV_CHANNEL_ORDER_UNSPEC layouts with the
+    // same channel count compare equal, so it never builds a mix matrix. If
+    // the channel counts differ, the first channels that fit are copied and
+    // the rest is left silent, see the explicit matrix below.
+    bool passthrough = mp_chmap_is_unknown(&map_in) ||
+                       mp_chmap_is_unknown(&map_out) ||
+                       mp_chmap_equals(&map_in, &map_out);
+
+    // Channels avrctx produces, in this order.
+    struct mp_chmap swr_out = map_out;
+    AVChannelLayout in_layout = {0}, out_layout = {0};
+    if (passthrough) {
+        in_layout = (AVChannelLayout){
+            .order = AV_CHANNEL_ORDER_UNSPEC,
+            .nb_channels = map_in.num,
+        };
+        out_layout = (AVChannelLayout){
+            .order = AV_CHANNEL_ORDER_UNSPEC,
+            .nb_channels = map_out.num,
+        };
+    } else {
+#if LIBSWRESAMPLE_VERSION_INT >= AV_VERSION_INT(7, 3, 100)
+        // Both layouts carry mpv's exact channel order, with NA channels as
+        // AV_CHAN_UNUSED. libswresample remixes straight into the output
+        // order and leaves NA channels silent.
+        mp_chmap_to_av_layout_custom(&in_layout, &map_in);
+        mp_chmap_to_av_layout_custom(&out_layout, &swr_out);
+#else
+        // Older libswresample only remixes native layouts. Reorder the input
+        // channels into native order on the way in, request the speakers of
+        // map_out in native order without NA channels, and let fixup_output()
+        // restore the order and add the NA channels on the way out.
+        if (!setup_native_input(p, &map_in, &in_layout))
+            goto error;
+        mp_chmap_remove_na(&swr_out);
+        mp_chmap_reorder_to_lavc(&swr_out);
+        mp_chmap_to_av_layout(&out_layout, &swr_out);
+#endif
+
+        if (verbose && !mp_chmap_equals_reordered(&map_in, &map_out)) {
+            MP_VERBOSE(p, "Remix: %s -> %s\n", mp_chmap_to_str(&map_in),
+                       mp_chmap_to_str(&map_out));
+        }
+    }
+
+    enum AVSampleFormat swr_samplefmt = out_samplefmt; // what avrctx outputs
+#if LIBSWRESAMPLE_VERSION_INT < AV_VERSION_INT(7, 3, 100)
+    swr_samplefmt = setup_output_fixup(p, &swr_out, &map_out, out_samplefmt);
+    if (swr_samplefmt == AV_SAMPLE_FMT_NONE)
+        goto error;
+#endif
+
+    av_opt_set_chlayout(p->avrctx, "in_chlayout",  &in_layout, 0);
+    av_opt_set_chlayout(p->avrctx, "out_chlayout", &out_layout, 0);
+    av_channel_layout_uninit(&in_layout);
+    av_channel_layout_uninit(&out_layout);
+    av_opt_set_int(p->avrctx, "in_sample_rate",     p->in_rate, 0);
+    av_opt_set_int(p->avrctx, "out_sample_rate",    p->out_rate, 0);
+    av_opt_set_int(p->avrctx, "in_sample_fmt",      in_samplefmt, 0);
+    av_opt_set_int(p->avrctx, "out_sample_fmt",     swr_samplefmt, 0);
+
+    if (passthrough && map_in.num != map_out.num) {
+        // Channels without meaning can only be copied by position. Keep the
+        // first channels that fit and leave the rest silent. libswresample
+        // needs an explicit matrix for this, as it has no layouts to derive
+        // one from. The matrix survives swr_close(), see swresample_reset().
+        int copied = MPMIN(map_in.num, map_out.num);
+        if (verbose)
+            MP_VERBOSE(p, "Copying %d of %d channels by position.\n", copied, map_in.num);
+        double *matrix = talloc_zero_array(NULL, double, map_out.num * map_in.num);
+        for (int n = 0; n < copied; n++)
+            matrix[n * map_in.num + n] = 1.0;
+        int r = swr_set_matrix(p->avrctx, matrix, map_in.num);
+        talloc_free(matrix);
+        if (r < 0)
+            goto error;
+    }
+
+    p->is_resampling = false;
+
+    if (swr_init(p->avrctx) < 0) {
+        MP_ERR(p, "Cannot open Libavresample context.\n");
+        goto error;
+    }
+    return true;
+
+error:
+    close_lavrr(p);
+    mp_filter_internal_mark_failed(p->public.f);
+    MP_FATAL(p, "libswresample failed to initialize.\n");
+    return false;
+}
+
+static void swresample_reset(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
+
+    p->current_pts = MP_NOPTS_VALUE;
+    TA_FREEP(&p->input);
+
+    if (!p->avrctx)
+        return;
+    swr_close(p->avrctx);
+    if (swr_init(p->avrctx) < 0)
+        close_lavrr(p);
 }
 
 static struct mp_frame filter_resample_output(struct priv *p,
@@ -340,7 +490,7 @@ static struct mp_frame filter_resample_output(struct priv *p,
 
     int samples = get_out_samples(p, consume_in);
     out = mp_aframe_create();
-    mp_aframe_config_copy(out, p->pool_fmt);
+    mp_aframe_config_copy(out, p->avrctx_fmt);
     if (mp_aframe_pool_allocate(p->out_pool, out, samples) < 0)
         goto error;
 
@@ -352,27 +502,11 @@ static struct mp_frame filter_resample_output(struct priv *p,
         mp_aframe_set_size(out, out_samples);
     }
 
-    struct mp_chmap out_chmap;
-    if (!mp_aframe_get_chmap(p->pool_fmt, &out_chmap))
+#if LIBSWRESAMPLE_VERSION_INT < AV_VERSION_INT(7, 3, 100)
+    out = fixup_output(p, out, out_samples);
+    if (!out)
         goto error;
-    if (!reorder_planes(out, p->reorder_out, &out_chmap))
-        goto error;
-
-    if (!mp_aframe_config_equals(out, p->pre_out_fmt)) {
-        struct mp_aframe *new = mp_aframe_create();
-        mp_aframe_config_copy(new, p->pre_out_fmt);
-        if (mp_aframe_pool_allocate(p->reorder_buffer, new, out_samples) < 0) {
-            talloc_free(new);
-            goto error;
-        }
-        int got = 0;
-        if (out_samples)
-            got = resample_frame(p->avrctx_out, new, out, out_samples);
-        talloc_free(out);
-        out = new;
-        if (got != out_samples)
-            goto error;
-    }
+#endif
 
     if (in) {
         mp_aframe_copy_attributes(out, in);
@@ -613,8 +747,10 @@ struct mp_swresample *mp_swresample_create(struct mp_filter *parent,
         p->opts = mp_get_config_group(p, f->global, &resample_conf);
     }
 
-    p->reorder_buffer = mp_aframe_pool_create(p);
     p->out_pool = mp_aframe_pool_create(p);
+#if LIBSWRESAMPLE_VERSION_INT < AV_VERSION_INT(7, 3, 100)
+    p->reorder_buffer = mp_aframe_pool_create(p);
+#endif
 
     return &p->public;
 }

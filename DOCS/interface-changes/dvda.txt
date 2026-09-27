@@ -1,0 +1,2 @@
+add `dvda://` protocol for DVD-Audio playback
+add `--dvda-device` and `--dvda-page` options

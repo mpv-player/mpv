@@ -72,9 +72,21 @@ void mp_chmap_to_av_layout_custom(AVChannelLayout *dst,
 {
     *dst = (AVChannelLayout){0};
 
-    if (mp_chmap_is_unknown(src) || src->num <= 0 ||
-        custom_init(dst, src->num) < 0)
-    {
+    if (mp_chmap_is_unknown(src) || src->num <= 0) {
+        dst->order = AV_CHANNEL_ORDER_UNSPEC;
+        dst->nb_channels = src->num;
+        return;
+    }
+
+    // A map in canonical (libavutil) order is exactly a native layout, which
+    // every libswresample version can remix. A custom order is only needed to
+    // preserve a non-canonical order or NA channels.
+    if (mp_chmap_is_lavc(src)) {
+        av_channel_layout_from_mask(dst, mp_chmap_to_lavc(src));
+        return;
+    }
+
+    if (custom_init(dst, src->num) < 0) {
         dst->order = AV_CHANNEL_ORDER_UNSPEC;
         dst->nb_channels = src->num;
         return;

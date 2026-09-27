@@ -174,6 +174,15 @@ z and Z
 l
     Set/clear A-B loop points. See ``ab-loop`` command for details.
 
+Ctrl+m
+    Jump to the disc menu when playing a DVD or Blu-ray (see the ``discnav``
+    command). While a menu with a button highlight is on screen, the arrow
+    keys, ENTER, ESC/BACKSPACE and the mouse control the menu instead of
+    their usual functions.
+
+Ctrl+M
+    Show or hide the Blu-ray popup menu.
+
 L
     Toggle infinite looping.
 
@@ -622,7 +631,8 @@ reset when a new file is played.
 
 Sometimes, it is useful to change options per-file. This can be achieved by
 adding the special per-file markers ``--{`` and ``--}``. (Note that you must
-escape these on some shells.) Example::
+escape these on some shells.) When a file is loaded, the associated per-file
+options are applied and marked as file-local options. Example::
 
     mpv --a file1.mkv --b --\{ --c file2.mkv --d file3.mkv --e --\} file4.mkv --f
 
@@ -637,7 +647,8 @@ file4.mkv       ``--a --b --f``
 
 Additionally, any file-local option changed at runtime is reset when the current
 file stops playing. If option ``--c`` is changed during playback of
-``file2.mkv``, it is reset when advancing to ``file3.mkv``. This only affects
+``file2.mkv``, it is reset when advancing to ``file3.mkv``, or when restarting
+the current file with the ``playlist-play-index`` command. This only affects
 file-local options. The option ``--a`` is never reset here.
 
 
@@ -816,6 +827,8 @@ file-specific configuration is loaded from ``~/.config/mpv``. In addition, the
 ``--use-filedir-conf`` option enables directory-specific configuration files.
 For this, mpv first tries to load a mpv.conf from the same directory
 as the file played and then tries to load any file-specific configuration.
+The options loaded in this way are marked as file-local, which are reset when
+the current file stops playing.
 
 
 Profiles
@@ -1266,6 +1279,9 @@ modified after playback began, for example the volume and selected audio/subtitl
 and restores their values the next time the file is played. Which options are
 saved can be configured with the ``--watch-later-options`` option.
 
+The options applied in this way are marked as file-local, and they are reset when
+playback of the file associated with it stops.
+
 When playing multiple playlist entries, mpv checks if one them has a resume
 config file associated, and if it finds one it restarts playback from it. For
 example, if you use ``quit-watch-later`` on the 5th episode of a show, and
@@ -1320,8 +1336,12 @@ PROTOCOLS
     Play a Blu-ray disc. Since libbluray 1.0.1, you can read from ISO files
     by passing them to ``--bluray-device``.
 
+    A Blu-ray ``.iso`` image passed directly (e.g. ``mpv disc.iso``) is also
+    detected and opened.
+
     ``title`` can be: ``longest`` or ``first`` (selects the default
-    playlist); ``mpls/<number>`` (selects <number>.mpls playlist);
+    playlist); ``menu`` (starts in the disc menu, see ``--disc-menu`` and the
+    ``discnav`` command); ``mpls/<number>`` (selects <number>.mpls playlist);
     ``<number>`` (select playlist with the same index). mpv will list
     the available playlists on loading.
 
@@ -1329,12 +1349,31 @@ PROTOCOLS
 
 ``dvd://[title][/device]`` ``--dvd-device=PATH``
 
-    Play a DVD. DVD menus are not supported. If no title is given, the longest
-    title is auto-selected. Without ``--dvd-device``, it will probably try
-    to open an actual optical drive, if available and implemented for the OS.
+    Play a DVD. If no title is given, the longest title is auto-selected.
+    ``title`` can also be ``menu`` to start in the disc menu (see
+    ``--disc-menu`` and the ``discnav`` command). Without ``--dvd-device``,
+    it will probably try to open an actual optical drive, if available and
+    implemented for the OS.
+
+    A DVD-Video ``.iso`` image passed directly (e.g. ``mpv disc.iso``) is also
+    detected and opened.
 
     ``dvdnav://`` is an old alias for ``dvd://`` and does exactly the same
     thing.
+
+``dvda://[title][/device]`` ``--dvda-device=PATH``
+
+    Play the AUDIO_TS zone of a DVD-Audio disc. Titles correspond to the
+    disc's audio groups, tracks are exposed as chapters. If no title is
+    given, the longest title is auto-selected. Menus are not supported.
+
+    Still images (ASVS), such as cover art or booklet pages a disc associates
+    with its tracks, are exposed as a video track and shown by default. Can be
+    disabled with ``--vid=no``.
+
+    A DVD-Audio ``.iso`` image passed directly (e.g. ``mpv disc.iso``) is also
+    detected and opened. For hybrid discs, the DVD-Audio zone is preferred over
+    the DVD-Video zone.
 
 ``dvb://[cardnumber@]channel`` ``--dvbin-...``
 

@@ -43,6 +43,10 @@ struct mp_decoder_wrapper {
 struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
                                                      struct sh_stream *src);
 
+// Number of extra hw surfaces the player retains on top of the default budget.
+// Video only.
+void mp_decoder_wrapper_set_extra_hw_frames(struct mp_decoder_wrapper *d, int n);
+
 // Legacy decoder framedrop control.
 void mp_decoder_wrapper_set_frame_drops(struct mp_decoder_wrapper *d, int num);
 int mp_decoder_wrapper_get_frames_dropped(struct mp_decoder_wrapper *d);
@@ -74,6 +78,8 @@ enum dec_ctrl {
     VDCTRL_GET_BFRAMES,
     // framedrop mode: 0=none, 1=standard, 2=hrseek
     VDCTRL_SET_FRAMEDROP,
+    // int*: extra hw surfaces retained
+    VDCTRL_SET_EXTRA_HW_FRAMES,
     VDCTRL_CHECK_FORCED_EOF,
 };
 
@@ -106,6 +112,7 @@ struct mp_decoder_fns {
 extern const struct mp_decoder_fns vd_lavc;
 extern const struct mp_decoder_fns ad_lavc;
 extern const struct mp_decoder_fns ad_spdif;
+extern const struct mp_decoder_fns ad_dsd;
 
 // Convenience wrapper for lavc based decoders. Treat lavc_state as private;
 // init to all-0 on init and resets.
@@ -119,3 +126,6 @@ void lavc_process(struct mp_filter *f, struct lavc_state *state,
 
 // ad_spdif.c
 struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref);
+
+// ad_dsd.c
+struct mp_decoder_list *select_dsd_codec(const char *codec, const char *pref);

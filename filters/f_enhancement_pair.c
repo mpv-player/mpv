@@ -29,7 +29,7 @@
 #define PTS_MATCH_TOLERANCE 1e-6
 
 // Number of frames hold for matching.
-#define QUEUE_MAX 16
+#define QUEUE_MAX MP_ENHANCEMENT_PAIR_QUEUE_MAX
 
 struct priv {
     struct mp_decoder_wrapper *el_dec;
@@ -43,6 +43,7 @@ struct priv {
 
     bool bl_eof;
     bool el_eof;
+    bool el_seen;
 };
 
 static int pts_cmp(double a, double b)
@@ -122,6 +123,8 @@ static void pair_process(struct mp_filter *f)
 
     drain_pin(f, in, &p->bl_pending, &p->num_bl_pending, &p->bl_eof);
     drain_pin(f, p->el_in, &p->el_pending, &p->num_el_pending, &p->el_eof);
+    if (p->num_el_pending > 0)
+        p->el_seen = true;
 
     while (mp_pin_in_needs_data(out)) {
         if (p->num_bl_pending == 0) {
@@ -139,6 +142,8 @@ static void pair_process(struct mp_filter *f)
 
         // EL older than BL: its BL partner already left or never arrived.
         if (p->num_el_pending > 0 && cmp < 0) {
+            MP_VERBOSE(f, "dropping stale EL %.6f (oldest BL %.6f)\n",
+                       p->el_pending[0]->pts, bl->pts);
             pop_head(&p->el_pending, &p->num_el_pending);
             continue;
         }
@@ -160,9 +165,16 @@ static void pair_process(struct mp_filter *f)
         // evidence no EL is coming.
         bool give_up = p->el_eof ||
                        (p->num_el_pending > 0 && cmp > 0) ||
-                       p->num_bl_pending >= QUEUE_MAX;
+                       (p->num_bl_pending >= QUEUE_MAX && p->el_seen);
         if (!give_up)
             return;
+
+        MP_VERBOSE(f, "emitting BL %.6f alone (%s; bl_pending=%d el_pending=%d"
+                   " el head %.6f)\n", bl->pts,
+                   p->el_eof ? "el_eof" :
+                   (p->num_el_pending > 0 && cmp > 0) ? "el_newer" : "queue_full",
+                   p->num_bl_pending, p->num_el_pending,
+                   p->num_el_pending > 0 ? p->el_pending[0]->pts : -1.0);
 
         take_head(&p->bl_pending, &p->num_bl_pending);
         bl->enhancement_layer = NULL;
@@ -179,6 +191,7 @@ static void pair_reset(struct mp_filter *f)
         pop_head(&p->el_pending, &p->num_el_pending);
     p->bl_eof = false;
     p->el_eof = false;
+    p->el_seen = false;
 }
 
 static void pair_destroy(struct mp_filter *f)
@@ -213,6 +226,8 @@ struct mp_filter *mp_enhancement_pair_create(struct mp_filter *parent,
 
     struct priv *p = f->priv;
     p->el_dec = mp_decoder_wrapper_create(f, el_sh);
+    if (p->el_dec)
+        mp_decoder_wrapper_set_extra_hw_frames(p->el_dec, QUEUE_MAX);
     if (!p->el_dec || !mp_decoder_wrapper_reinit(p->el_dec)) {
         MP_WARN(f, "Failed to set up enhancement-layer decoder; "
                 "rendering base layer only.\n");

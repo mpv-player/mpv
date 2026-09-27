@@ -54,6 +54,13 @@ struct ebml_elem_desc {
     int size;
     int field_count;
     const struct ebml_field_desc *fields;
+    bool context_default; // default derives from other elements
+    union {
+        uint64_t u;
+        int64_t i;
+        double f;
+        const char *s;
+    } defval; // default value of a zero-length element
 };
 
 struct ebml_parse_ctx {

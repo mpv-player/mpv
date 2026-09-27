@@ -100,7 +100,7 @@ static void set_params(struct vf_format_opts *p, struct mp_image_params *out,
         out->light = p->light;
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
-    if (p->stereo_in)
+    if (p->stereo_in >= 0)
         out->stereo3d = p->stereo_in;
     if (p->rotate >= 0)
         out->rotate = p->rotate;
@@ -203,6 +203,10 @@ static void vf_format_process(struct mp_filter *f)
                    sizeof(img->params.color.hdr.scene_max));
             img->params.color.hdr.scene_avg = 0;
             img->params.color.hdr.ootf = (struct pl_hdr_bezier){0};
+            if (img->params.repr.sys != PL_COLOR_SYSTEM_DOLBYVISION) {
+                img->params.color.hdr.max_pq_y = 0;
+                img->params.color.hdr.avg_pq_y = 0;
+            }
         }
 
         if (priv->opts->min_luma)
@@ -300,6 +304,7 @@ const struct mp_user_filter_entry vf_format = {
         .name = "format",
         .priv_size = sizeof(OPT_BASE_STRUCT),
         .priv_defaults = &(const OPT_BASE_STRUCT){
+            .stereo_in = -1,
             .rotate = -1,
             .dovi = true,
             .enhancement_layer = true,

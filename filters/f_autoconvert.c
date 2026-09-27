@@ -435,6 +435,12 @@ static void handle_audio_frame(struct mp_filter *f)
     if (!out_afmt)
         out_afmt = afmt;
 
+    // Raw DSD can only be converted to PCM, not resampled.
+    if (p->resampling_forced && out_afmt == AF_FORMAT_DSD) {
+        MP_WARN(p, "ignoring request to resample DSD audio\n");
+        p->resampling_forced = false;
+    }
+
     // (The p->srates array is 0-terminated already.)
     int out_srate = af_select_best_samplerate(srate, p->srates);
     if (out_srate <= 0)

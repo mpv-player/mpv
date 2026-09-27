@@ -1,0 +1,2 @@
+add `video_colorspace`, `max_luma`, `primaries` and `transfer` arguments
+to the `overlay-add` command

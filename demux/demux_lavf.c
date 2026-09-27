@@ -37,6 +37,7 @@
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/replaygain.h>
+#include <libavutil/stereo3d.h>
 
 #include "audio/chmap_avchannel.h"
 
@@ -58,6 +59,7 @@
 #include "options/m_option.h"
 #include "options/options.h"
 #include "options/path.h"
+#include "video/csputils.h"
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
 #define PROBE_BUF_SIZE (10 * 1024 * 1024)
@@ -66,6 +68,11 @@
 // Should correspond to IO_BUFFER_SIZE in libavformat/aviobuf.c (not public)
 // libavformat (almost) always reads data in blocks of this size.
 #define BIO_BUFFER_SIZE 32768
+
+static void avcodec_par_destructor(void *p)
+{
+    avcodec_parameters_free(p);
+}
 
 #define OPT_BASE_STRUCT struct demux_lavf_opts
 struct demux_lavf_opts {
@@ -140,7 +147,7 @@ struct format_hack {
     unsigned int if_flags;      // additional AVInputFormat.flags flags
     bool max_probe : 1;         // use probescore only if max. probe size reached
     bool ignore : 1;            // blacklisted
-    bool no_stream : 1;         // do not wrap struct stream as AVIOContext
+    bool nested_network : 1;    // opens nested network URLs, needs the options
     bool use_stream_ids : 1;    // has a meaningful native stream IDs (export it)
     bool fully_read : 1;        // set demuxer.fully_read flag
     bool detect_charset : 1;    // format is a small text file, possibly not UTF8
@@ -170,8 +177,8 @@ static const struct format_hack format_hacks[] = {
     {"mp3", "audio/mpeg", 24, 0.5},
     {"mp3", NULL,         24, .max_probe = true},
 
-    {"hls", .no_stream = true, .clear_filepos = true, .no_ext_picky = true},
-    {"dash", .no_stream = true, .clear_filepos = true},
+    {"hls", .nested_network = true, .clear_filepos = true, .no_ext_picky = true},
+    {"dash", .nested_network = true, .clear_filepos = true},
     {"sdp", .clear_filepos = true, .is_network = true, .no_seek = true},
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
@@ -233,6 +240,7 @@ typedef struct lavf_priv {
     struct stream *stream;
     bool own_stream;
     bool is_dvd_bd;
+    bool is_dvd;
     char *filename;
     struct format_hack format_hack;
     const AVInputFormat *avif;
@@ -641,7 +649,7 @@ static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
     if (!track_data_available && !album_data_available)
         return;
 
-    struct replaygain_data *rgain = talloc_ptrtype(demuxer, rgain);
+    struct replaygain_data *rgain = talloc_ptrtype(sh->codec, rgain);
     rgain->track_gain = rgain->album_gain = 0;
     rgain->track_peak = rgain->album_peak = 1;
 
@@ -719,7 +727,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         sh->codec->samplerate = codec->sample_rate;
         sh->codec->bitrate = codec->bit_rate;
-        sh->codec->format_name = talloc_strdup(sh, av_get_sample_fmt_name(codec->format));
+        sh->codec->format_name = talloc_strdup(sh->codec, av_get_sample_fmt_name(codec->format));
 
         double delay = 0;
         if (codec->sample_rate > 0)
@@ -759,7 +767,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->codec->disp_w = codec->width;
         sh->codec->disp_h = codec->height;
         sh->codec->bitrate = codec->bit_rate;
-        sh->codec->format_name = talloc_strdup(sh, av_get_pix_fmt_name(codec->format));
+        sh->codec->format_name = talloc_strdup(sh->codec, av_get_pix_fmt_name(codec->format));
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
         if (is_image(st, sh->attached_picture, priv->avif)) {
@@ -776,6 +784,9 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             if (!isnan(r))
                 sh->codec->rotate = (((int)(-r) % 360) + 360) % 360;
         }
+
+        if ((sd = mp_av_stream_get_side_data(st, AV_PKT_DATA_STEREO3D)))
+            sh->codec->stereo_mode = mp_stereo3d_from_av((const AVStereo3D *)sd);
 
         if ((sd = mp_av_stream_get_side_data(st, AV_PKT_DATA_DOVI_CONF))) {
             const AVDOVIDecoderConfigurationRecord *cfg = (void *) sd;
@@ -796,7 +807,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh = demux_alloc_sh_stream(STREAM_SUB);
 
         if (codec->extradata_size) {
-            sh->codec->extradata = talloc_size(sh, codec->extradata_size);
+            sh->codec->extradata = talloc_size(sh->codec, codec->extradata_size);
             memcpy(sh->codec->extradata, codec->extradata, codec->extradata_size);
             sh->codec->extradata_size = codec->extradata_size;
         }
@@ -838,9 +849,11 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->ff_index = st->index;
         mp_codec_info_from_avcodecpar(codec, sh->codec);
         sh->codec->codec_tag = codec->codec_tag;
-        sh->codec->lav_codecpar = avcodec_parameters_alloc();
-        if (sh->codec->lav_codecpar)
-            avcodec_parameters_copy(sh->codec->lav_codecpar, codec);
+        AVCodecParameters **lavp = talloc_ptrtype(sh->codec, lavp);
+        talloc_set_destructor(lavp, avcodec_par_destructor);
+        *lavp = avcodec_parameters_alloc();
+        if (*lavp && avcodec_parameters_copy(*lavp, codec) >= 0)
+            sh->codec->lav_codecpar = *lavp;
         sh->codec->native_tb_num = st->time_base.num;
         sh->codec->native_tb_den = st->time_base.den;
         sh->codec->duration = st->duration * av_q2d(st->time_base);
@@ -880,6 +893,12 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
         mp_tags_move_from_av_dictionary(sh->tags, &st->metadata);
         demux_add_sh_stream(demuxer, sh);
+
+        // DVD routes the menu's button-graphics through an SPU
+        // substream lavf only discovers once the first SPU PES arrives
+        // mid-playback. Select it immediately to avoid missing menu highlights.
+        if (priv->is_dvd && sh->type == STREAM_SUB)
+            demuxer_select_track(demuxer, sh, MP_NOPTS_VALUE, true);
 
         // Unfortunately, there is no better way to detect PCM codecs, other
         // than listing them all manually. (Or other "frameless" codecs. Or
@@ -924,8 +943,7 @@ static void update_metadata(demuxer_t *demuxer)
 
 static int interrupt_cb(void *ctx)
 {
-    struct demuxer *demuxer = ctx;
-    return mp_cancel_test(demuxer->cancel);
+    return demux_read_interrupted(ctx);
 }
 
 static int block_io_open(struct AVFormatContext *s, AVIOContext **pb,
@@ -1039,6 +1057,7 @@ static void build_editions(demuxer_t *demuxer)
     // lavf happened to discover them.
     AVProgram **progs = talloc_memdup(NULL, avfc->programs, avfc->nb_programs * sizeof(progs[0]));
     qsort(progs, avfc->nb_programs, sizeof(progs[0]), cmp_avprogram);
+    bool *nonempty = talloc_zero_array(progs, bool, avfc->nb_programs);
 
     int first_nonempty = -1;
     for (unsigned i = 0; i < avfc->nb_programs; i++) {
@@ -1076,6 +1095,7 @@ static void build_editions(demuxer_t *demuxer)
             if (name_idx >= 0)
                 prefix = mp_tags_get_str(priv->streams[name_idx]->sh->tags, "comment");
         }
+        char buf[42];
         if (!prefix) {
             char *vb = mp_tags_get_str(ed.metadata, "variant_bitrate");
             char *end;
@@ -1083,8 +1103,8 @@ static void build_editions(demuxer_t *demuxer)
             if (rate > 0 && *end == '\0') {
                 rate /= 1000.0;
                 prefix = rate < 1000
-                    ? mp_tprintf(42, "Bitrate: %.f kbps", rate)
-                    : mp_tprintf(42, "Bitrate: %.3f Mbps", rate / 1000.0);
+                    ? mp_tprintf_buf(buf, sizeof(buf), "Bitrate: %.f kbps", rate)
+                    : mp_tprintf_buf(buf, sizeof(buf), "Bitrate: %.3f Mbps", rate / 1000.0);
             }
         }
 
@@ -1093,6 +1113,7 @@ static void build_editions(demuxer_t *demuxer)
         if (title)
             mp_tags_set_str(ed.metadata, "title", title);
 
+        nonempty[i] = track_count > 0;
         if (track_count > 0 && first_nonempty < 0)
             first_nonempty = demuxer->num_editions;
 
@@ -1105,39 +1126,24 @@ static void build_editions(demuxer_t *demuxer)
     if (edition_id >= 0 && edition_id < demuxer->num_editions)
         selected = edition_id;
 
-    // Select initial edition by best variant bitrate. Prefer the program's
-    // video stream as the representative, falling back to audio for
-    // audio-only variants (e.g. HLS audio-only renditions).
+    // Select initial edition by best variant bitrate from the program's
+    // metadata (HLS variant BANDWIDTH).
     if (selected < 0 && hls_bitrate >= 0) {
         int best = -1;
         int best_bitrate = 0;
         bool best_ok = false;
         for (int n = 0; n < demuxer->num_editions; n++) {
             AVProgram *prog = progs[n];
-            struct sh_stream *rep = NULL;
-            for (unsigned j = 0; j < prog->nb_stream_indexes; j++) {
-                unsigned idx = prog->stream_index[j];
-                if (idx >= priv->num_streams || !priv->streams[idx]->sh)
-                    continue;
-                struct sh_stream *sh = priv->streams[idx]->sh;
-                if (sh->hls_bitrate <= 0)
-                    continue;
-                if (sh->type == STREAM_VIDEO) {
-                    rep = sh;
-                    break;
-                }
-                if (sh->type == STREAM_AUDIO && !rep)
-                    rep = sh;
-            }
-            if (!rep)
+            int bitrate = dict_get_decimal(prog->metadata, "variant_bitrate", 0);
+            if (bitrate <= 0 || !nonempty[n])
                 continue;
-            bool ok = rep->hls_bitrate <= hls_bitrate;
+            bool ok = bitrate <= hls_bitrate;
             if (best < 0 || (ok && !best_ok) ||
-                (ok && best_ok && rep->hls_bitrate > best_bitrate) ||
-                (!ok && !best_ok && rep->hls_bitrate < best_bitrate))
+                (ok && best_ok && bitrate > best_bitrate) ||
+                (!ok && !best_ok && bitrate < best_bitrate))
             {
                 best = n;
-                best_bitrate = rep->hls_bitrate;
+                best_bitrate = bitrate;
                 best_ok = ok;
             }
         }
@@ -1444,12 +1450,14 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
             MP_VERBOSE(demuxer, "Option extension_picky=0 was set due to known FFmpeg bugs\n");
     }
 
-    if ((priv->avif_flags & AVFMT_NOFILE) || priv->format_hack.no_stream) {
+    if ((priv->avif_flags & AVFMT_NOFILE) || priv->format_hack.nested_network) {
         mp_setup_av_network_options(&dopts, priv->avif->name,
                                     demuxer->global, demuxer->log);
         // This might be incorrect.
         demuxer->seekable = true;
-    } else {
+    }
+
+    if (!(priv->avif_flags & AVFMT_NOFILE)) {
         void *buffer = av_malloc(lavfdopts->buffersize);
         if (!buffer)
             goto fail;
@@ -1551,7 +1559,20 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (demuxer->params && demuxer->params->skip_lavf_probing)
         probeinfo = false;
     if (probeinfo) {
-        if (avformat_find_stream_info(avfc, NULL) < 0) {
+        int nb_streams = avfc->nb_streams;
+        AVDictionary **opts = talloc_zero_array(NULL, AVDictionary *, nb_streams);
+#if LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(61, 7, 100)
+        for (int i = 0; i < nb_streams; i++) {
+            AVCodecParameters *par = avfc->streams[i]->codecpar;
+            if (par->codec_type == AVMEDIA_TYPE_AUDIO && par->format == AV_SAMPLE_FMT_DSD)
+                av_dict_set(&opts[i], "request_sample_fmt", "dsd", 0);
+        }
+#endif
+        int r = avformat_find_stream_info(avfc, opts);
+        for (int i = 0; i < nb_streams; i++)
+            av_dict_free(&opts[i]);
+        talloc_free(opts);
+        if (r < 0) {
             MP_ERR(demuxer, "av_find_stream_info() failed\n");
             goto fail;
         }
@@ -1639,8 +1660,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (priv->stream) {
         const char *sname = priv->stream->info->name;
-        priv->is_dvd_bd = strcmp(sname, "dvdnav") == 0 ||
-                          strcmp(sname, "ifo_dvdnav") == 0 ||
+        priv->is_dvd = strcmp(sname, "dvdnav") == 0 ||
+                       strcmp(sname, "ifo_dvdnav") == 0;
+        priv->is_dvd_bd = priv->is_dvd ||
                           strcmp(sname, "bd") == 0 ||
                           strcmp(sname, "bdnav") == 0 ||
                           strcmp(sname, "bdmv/bluray") == 0;
@@ -1676,8 +1698,10 @@ static bool demux_lavf_read_packet(struct demuxer *demux,
         av_packet_free(&pkt);
         if (r == AVERROR_EOF)
             return false;
-        if (mp_cancel_test(demux->cancel))
+        if (demux_read_interrupted(demux)) {
+            MP_VERBOSE(demux, "read interrupted: %s.\n", av_err2str(r));
             return false;
+        }
         MP_WARN(demux, "error reading packet: %s.\n", av_err2str(r));
         if (priv->retry_counter >= 10) {
             MP_ERR(demux, "...treating it as fatal error.\n");
@@ -1797,11 +1821,21 @@ static void reset_dovi_split_state(demuxer_t *demuxer)
 static void demux_drop_buffers_lavf(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
-    av_seek_frame(priv->avfc, -1, 0, 1);
+    if (!priv->stream || priv->stream->seekable)
+        av_seek_frame(priv->avfc, -1, 0, 1);
     demux_flush(demuxer);
     stream_drop_buffers(priv->stream);
     avio_flush(priv->avfc->pb);
+    if (priv->stream && !priv->stream->seekable) {
+        // The stream may have been repositioned externally (disc seeks).
+        // Resync the avio position so mpegts detects the jump and resets
+        // its packet state.
+        avio_seek(priv->avfc->pb, stream_tell(priv->stream), SEEK_SET);
+    }
     avformat_flush(priv->avfc);
+    // Clear sticky EOF/error to reuse this demuxer.
+    priv->avfc->pb->eof_reached = 0;
+    priv->avfc->pb->error = 0;
     reset_dovi_split_state(demuxer);
 }
 
@@ -1918,8 +1952,6 @@ static void demux_close_lavf(demuxer_t *demuxer)
         av_freep(&priv->pb);
         for (int n = 0; n < priv->num_streams; n++) {
             struct stream_info *info = priv->streams[n];
-            if (info->sh)
-                avcodec_parameters_free(&info->sh->codec->lav_codecpar);
             TA_FREEP(&info->dovi_split);
         }
         TA_FREEP(&priv->pending_pkt);

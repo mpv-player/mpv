@@ -49,17 +49,28 @@ extern const struct m_opt_choice_alternatives mp_csp_light_names[];
 // The numeric values (except -1) match the Matroska StereoMode element value.
 enum mp_stereo3d_mode {
     MP_STEREO3D_INVALID = -1,
-    /* only modes explicitly referenced in the code are listed */
     MP_STEREO3D_MONO = 0,
     MP_STEREO3D_SBS2L = 1,
     MP_STEREO3D_AB2R = 2,
     MP_STEREO3D_AB2L = 3,
+    MP_STEREO3D_CHECKR = 4,
+    MP_STEREO3D_CHECKL = 5,
+    MP_STEREO3D_IRR = 6,
+    MP_STEREO3D_IRL = 7,
+    MP_STEREO3D_ICR = 8,
+    MP_STEREO3D_ICL = 9,
+    MP_STEREO3D_ARCC = 10,
     MP_STEREO3D_SBS2R = 11,
-    /* no explicit enum entries for most valid values */
+    MP_STEREO3D_AGMC = 12,
+    MP_STEREO3D_AL = 13,
+    MP_STEREO3D_AR = 14,
     MP_STEREO3D_COUNT = 15, // 14 is last valid mode
 };
 
 extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
+
+struct AVStereo3D;
+enum mp_stereo3d_mode mp_stereo3d_from_av(const struct AVStereo3D *s3d);
 
 #define MP_STEREO3D_NAME_DEF(x, def) m_opt_choice_str_def(mp_stereo3d_names, x, def)
 
