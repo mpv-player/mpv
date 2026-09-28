@@ -191,6 +191,7 @@ sources = files(
     'stream/cookies.c',
     'stream/network.c',
     'stream/stream.c',
+    'stream/stream_aes_ctr.c',
     'stream/stream_avdevice.c',
     'stream/stream_cb.c',
     'stream/stream_concat.c',
