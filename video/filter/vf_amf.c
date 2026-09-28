@@ -262,7 +262,7 @@ static int init_frc(struct mp_filter *f, struct mp_image *src, bool reinit)
     if (reinit)
         goto init;
 
-    AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_ENGINE_TYPE, AMF_MEMORY_DX11);
+    AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_ENGINE_TYPE, FRC_ENGINE_DX11);
     if (res != AMF_OK) {
         MP_WARN(f, "Failed to set FRC engine type to DX11: %d\n", res);
         goto err;
