@@ -1503,6 +1503,27 @@ PROTOCOLS
         This starts reading from cap.ts after seeking 100MiB, then
         reads until end of file.
 
+``aes-ctr://key:iv@URL``
+
+    Decrypt a stream that was encrypted as a whole with AES in CTR mode.
+
+    ``key`` is the AES key as 32, 48 or 64 hex digits. ``iv`` is the initial
+    counter block as 32 hex digits. The counter block is incremented as a
+    128 bit big endian number, which is what ``openssl enc -aes-128-ctr``
+    does.
+
+    Seeking works if the stream behind ``URL`` is seekable.
+
+    .. admonition:: Example
+
+        ::
+
+            mpv aes-ctr://000102030405060708090a0b0c0d0e0f:f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff@video.mkv.enc
+
+        This plays a file that was encrypted with
+        ``openssl enc -aes-128-ctr -K 000102030405060708090a0b0c0d0e0f
+        -iv f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff -in video.mkv -out video.mkv.enc``.
+
 ``null://``
 
     Simulate an empty file. If opened for writing, it will discard all data.
