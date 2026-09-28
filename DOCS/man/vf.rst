@@ -778,9 +778,12 @@ Available mpv-only filters are:
     results from lower frame rate video inputs. The filter doubles the input
     frame rate by generating intermediate frames.
 
-    AMF FRC only supports D3D11 input currently. Use `--hwdec=d3d11va` or
-    `--vf-pre=format=d3d11` to upload the data. `--d3d11va-zero-copy` is also
-    recommended for better performance.
+    AMF FRC supports D3D11 and Vulkan input. Use ``--hwdec=d3d11va`` or
+    ``--vf-pre=format=d3d11`` to upload the data with ``--gpu-api=d3d11``, and
+    ``--hwdec=vulkan`` with ``--gpu-api=vulkan``. ``--d3d11va-zero-copy`` is
+    also recommended for better performance with D3D11. The Vulkan path
+    requires mpv to use the system Vulkan loader, because AMF looks up the
+    Vulkan functions for mpv's device through it.
 
     ``profile=<auto|low|high|super>``
         Selects the quality profile for frame rate conversion.
@@ -828,9 +831,12 @@ Available mpv-only filters are:
     AMF VQ Enhancer reduces the blocking artifacts introduced by AVC/HEVC
     compression at low bit rates, while preserving details.
 
-    AMF VQ Enhancer only supports D3D11 input currently. Use ``--hwdec=d3d11va``
-    or ``--vf-pre=format=d3d11`` to upload the data. ``--d3d11va-zero-copy`` is
-    also recommended for better performance.
+    AMF VQ Enhancer supports D3D11 and Vulkan input. Use ``--hwdec=d3d11va`` or
+    ``--vf-pre=format=d3d11`` to upload the data with ``--gpu-api=d3d11``, and
+    ``--hwdec=vulkan`` with ``--gpu-api=vulkan``. ``--d3d11va-zero-copy`` is
+    also recommended for better performance with D3D11. The Vulkan path
+    requires mpv to use the system Vulkan loader, because AMF looks up the
+    Vulkan functions for mpv's device through it.
 
     ``attenuation=<0.02-0.4>``
         Controls the strength of the enhancement. Higher values result in
