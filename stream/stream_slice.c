@@ -41,7 +41,7 @@ static int fill_buffer(struct stream *s, void *buffer, int len)
         if (s->pos + p->slice_start >= p->slice_max_end)
             return -1;
         // Avoid rading beyond p->slice_max_end
-        len = MPMIN(len, p->slice_max_end - s->pos);
+        len = MPMIN(len, p->slice_max_end - p->slice_start - s->pos);
     }
 
     return stream_read_partial(p->inner, buffer, len);
