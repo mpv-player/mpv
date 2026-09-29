@@ -321,6 +321,11 @@ static void handle_mp_event(smtc_ctx *ctx, mpv_event *event)
             auto &prop = *static_cast<mpv_event_property *>(event->data);
             if (!strcmp(prop.name, "time-pos") || !strcmp(prop.name, "duration"))
                 return;
+            if (!strcmp(prop.name, "media-controls")) {
+                mp_assert(prop.format == MPV_FORMAT_FLAG);
+                ctx->smtc.IsEnabled(*static_cast<int *>(prop.data));
+                return;
+            }
         }
         update_metadata(ctx->smtc, *ctx);
     } catch (const winrt::hresult_error& e) {
@@ -393,8 +398,6 @@ static MP_THREAD_VOID win_event_loop_fn(void *arg)
         if (FAILED(hr))
             winrt::throw_hresult(hr);
         SetWindowLongPtrW(ctx.hwnd, GWLP_USERDATA, LONG_PTR(&ctx));
-
-        smtc.IsEnabled(true);
 
         smtc.ButtonPressed([&](const SystemMediaTransportControls &,
                                const SystemMediaTransportControlsButtonPressedEventArgs &args) {
@@ -506,6 +509,7 @@ static MP_THREAD_VOID mpv_event_loop_fn(void *arg)
     mpv_observe_property(mpv, 0, "current-tracks", MPV_FORMAT_NODE_MAP);
     mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_INT64);
     mpv_observe_property(mpv, 0, "idle-active", MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv, 0, "media-controls", MPV_FORMAT_FLAG);
     mpv_observe_property(mpv, 0, "media-title", MPV_FORMAT_STRING);
     mpv_observe_property(mpv, 0, "metadata", MPV_FORMAT_NODE_MAP);
     mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG);
