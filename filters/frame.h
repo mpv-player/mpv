@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
 enum mp_frame_type {
     MP_FRAME_NONE = 0,  // NULL, placeholder, no frame available (_not_ EOF)
@@ -46,7 +47,7 @@ double mp_frame_get_pts(struct mp_frame frame);
 void mp_frame_set_pts(struct mp_frame frame, double pts);
 
 // Estimation of total size in bytes. This is for buffering purposes.
-int mp_frame_approx_size(struct mp_frame frame);
+size_t mp_frame_approx_size(struct mp_frame frame);
 
 struct AVFrame;
 struct AVRational;
