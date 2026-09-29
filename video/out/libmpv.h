@@ -80,4 +80,5 @@ struct render_backend_fns {
 };
 
 extern const struct render_backend_fns render_backend_gpu;
+extern const struct render_backend_fns render_backend_libplacebo;
 extern const struct render_backend_fns render_backend_sw;
