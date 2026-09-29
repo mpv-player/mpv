@@ -409,6 +409,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .early_flush = -1,
     .shader_cache = true,
     .hwdec_interop = "auto",
+    .sdr_adjust_gamma = 1, // yes
     .treat_srgb_as_power22 = 1|2|4, // auto
 };
 
