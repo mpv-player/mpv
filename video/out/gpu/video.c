@@ -1888,7 +1888,7 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     mp_assert(size <= stride);
 
     static const int lut_size = 256;
-    float *weights = talloc_array(NULL, float, lut_size * stride);
+    float *weights = talloc_zero_array(NULL, float, lut_size * stride);
     mp_compute_lut(scaler->kernel, lut_size, stride, weights);
 
     bool use_1d = scaler->kernel->polar && (p->ra->caps & RA_CAP_TEX_1D);
