@@ -61,6 +61,89 @@ static bool mac_vk_check_visible(struct ra_ctx *ctx)
     return [p->vo_mac isVisible];
 }
 
+static int mac_vk_device_score(VkPhysicalDeviceType type, VkDriverId driver)
+{
+    static const int priorities[] = {
+        [VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU]   = 5,
+        [VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU] = 4,
+        [VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU]    = 3,
+        [VK_PHYSICAL_DEVICE_TYPE_CPU]            = 2,
+        [VK_PHYSICAL_DEVICE_TYPE_OTHER]          = 1,
+    };
+
+    int score = type < MP_ARRAY_SIZE(priorities) ? priorities[type] : 0;
+
+    // prioritize none KosmicKrisp GPU drivers
+    if (score > 2 && driver != VK_DRIVER_ID_MESA_KOSMICKRISP) {
+        score += 10;
+    }
+
+    return score;
+}
+
+static VkPhysicalDevice mac_vk_choose_device(struct ra_ctx *ctx)
+{
+    char *device_name = ra_vk_ctx_get_device_name(ctx);
+    if (device_name) {
+        talloc_free(device_name);
+        return NULL;
+    }
+    talloc_free(device_name);
+
+    struct priv *p = ctx->priv;
+    struct mpvk_ctx *vk = &p->vk;
+    VkInstance inst = vk->vkinst->instance;
+    VkPhysicalDevice device = NULL;
+    uint32_t count = 0;
+    int best = -1;
+
+    VkResult res = vkEnumeratePhysicalDevices(inst, &count, NULL);
+    if (res != VK_SUCCESS) {
+        MP_VERBOSE(ctx, "No Vulkan Devices found.\n");
+        return NULL;
+    }
+
+    VkPhysicalDevice *devices = talloc_array(ctx, VkPhysicalDevice, count);
+    res = vkEnumeratePhysicalDevices(inst, &count, devices);
+    if (res != VK_SUCCESS) {
+        MP_VERBOSE(ctx, "Failed to enumerate Vulkan Devices.\n");
+        talloc_free(devices);
+        return NULL;
+    }
+
+    MP_VERBOSE(ctx, "Probing Vulkan Devices:\n");
+    for (uint32_t i = 0; i < count; i++) {
+        VkPhysicalDeviceDriverProperties driver_props = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES,
+        };
+        VkPhysicalDeviceProperties2 device_props = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2_KHR,
+            .pNext = &driver_props,
+        };
+
+        vkGetPhysicalDeviceProperties2(devices[i], &device_props);
+        VkPhysicalDeviceType type = device_props.properties.deviceType;
+        int score = mac_vk_device_score(type, driver_props.driverID);
+
+        MP_VERBOSE(ctx, "    %d: %s (%s %s) (score: %d)\n", i, device_props.properties.deviceName,
+                   driver_props.driverName, driver_props.driverInfo, score);
+
+        if (!ctx->opts.allow_sw && type == VK_PHYSICAL_DEVICE_TYPE_CPU) {
+            MP_VERBOSE(ctx, "       excluding sw Device\n");
+            continue;
+        }
+
+        if (score > best) {
+            best = score;
+            device = devices[i];
+        }
+    }
+
+    talloc_free(devices);
+
+    return device;
+}
+
 static bool mac_vk_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
@@ -100,7 +183,7 @@ static bool mac_vk_init(struct ra_ctx *ctx)
         goto error;
     }
 
-    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR, mac_vk_choose_device(ctx)))
         goto error;
 
     return true;

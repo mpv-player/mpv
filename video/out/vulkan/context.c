@@ -185,7 +185,8 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
                              pl_vk_inst vkinst,
                              pl_log pllog,
                              VkSurfaceKHR surface,
-                             bool allow_software)
+                             bool allow_software,
+                             VkPhysicalDevice device)
 {
     VkPhysicalDeviceFeatures2 features = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
@@ -427,6 +428,7 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .instance = vkinst->instance,
         .get_proc_addr = vkinst->get_proc_addr,
         .surface = surface,
+        .device = device,
         .allow_software = allow_software,
         .async_transfer = opts->async_transfer,
         .async_compute = opts->async_compute,
@@ -446,7 +448,8 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
 
 bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
                     struct ra_ctx_params params,
-                    VkPresentModeKHR preferred_mode)
+                    VkPresentModeKHR preferred_mode,
+                    VkPhysicalDevice device)
 {
     struct ra_swapchain *sw = ctx->swapchain = talloc_zero(NULL, struct ra_swapchain);
     sw->ctx = ctx;
@@ -458,7 +461,7 @@ bool ra_vk_ctx_init(struct ra_ctx *ctx, struct mpvk_ctx *vk,
     p->opts = mp_get_config_group(p, ctx->global, &vulkan_conf);
 
     vk->vulkan = mppl_create_vulkan(p->opts, vk->vkinst, vk->pllog, vk->surface,
-                                    ctx->opts.allow_sw);
+                                    ctx->opts.allow_sw, device);
     if (!vk->vulkan)
         goto error;
 
