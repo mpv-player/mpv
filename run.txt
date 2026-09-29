@@ -1,0 +1,2 @@
+./build/mpv.exe --input-conf=my-input.conf "C:\Users\kavin\Downloads\The_Rise_Of_Kirmada.mp4"
+
