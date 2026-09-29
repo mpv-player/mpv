@@ -15,12 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef _WIN32
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
-
 #include <libavutil/aes_ctr.h>
 
 #include <mpv/stream_cb.h>
@@ -222,25 +216,13 @@ static void compare(const char *name, const uint8_t *data, int64_t data_len,
     num_checks++;
 }
 
-// Like wrap_wait_event(), but for streams that log errors as they fail.
-static mpv_event *wait_event_with_errors(void)
-{
-    while (1) {
-        mpv_event *event = mpv_wait_event(ctx, -1);
-        if (event->event_id != MPV_EVENT_LOG_MESSAGE)
-            return event;
-        mpv_event_log_message *msg = event->data;
-        printf("[%s:%s] %s", msg->prefix, msg->level, msg->text);
-    }
-}
-
 // Load the URL and return the reason it ended with.
-static mpv_end_file_reason load(const char *url, mpv_event *(*wait)(void))
+static mpv_end_file_reason load(const char *url, bool fail_on_error)
 {
     const char *cmd[] = {"loadfile", url, NULL};
     command(cmd);
     while (1) {
-        mpv_event *event = wait();
+        mpv_event *event = wait_event(fail_on_error);
         if (event->event_id == MPV_EVENT_END_FILE)
             return ((mpv_event_end_file *)event->data)->reason;
     }
@@ -249,7 +231,7 @@ static mpv_end_file_reason load(const char *url, mpv_event *(*wait)(void))
 // Dump the stream and compare it with the expected data.
 static void check_stream(const char *url, const uint8_t *expected, int64_t len)
 {
-    if (load(url, wrap_wait_event) != MPV_END_FILE_REASON_EOF)
+    if (load(url, true) != MPV_END_FILE_REASON_EOF)
         fail("%s: dumping failed\n", url);
 
     // One byte more than expected shows a stream that is too long.
@@ -266,7 +248,7 @@ static void check_stream(const char *url, const uint8_t *expected, int64_t len)
 // Require that the stream fails to open.
 static void check_failure(const char *url)
 {
-    if (load(url, wait_event_with_errors) != MPV_END_FILE_REASON_ERROR)
+    if (load(url, false) != MPV_END_FILE_REASON_ERROR)
         fail("%s: did not fail\n", url);
     num_checks++;
 }
@@ -388,20 +370,7 @@ int main(int argc, char *argv[])
 
     atexit(cleanup);
 
-    static char path[] = "./testout.XXXXXX";
-
-#ifdef _WIN32
-    out_path = _mktemp(path);
-    if (!out_path || !*out_path)
-        fail("tmpfile failed\n");
-#else
-    int fd = mkstemp(path);
-    if (fd == -1)
-        fail("tmpfile failed\n");
-    close(fd);
-    out_path = path;
-#endif
-
+    out_path = temp_path();
     set_property_string("stream-dump", out_path);
     initialize();
 
@@ -422,7 +391,7 @@ int main(int argc, char *argv[])
     printf("%d checks\n", num_checks);
 
     command_string("quit");
-    while (wait_event_with_errors()->event_id != MPV_EVENT_SHUTDOWN) {}
+    while (wait_event(false)->event_id != MPV_EVENT_SHUTDOWN) {}
 
     return 0;
 }

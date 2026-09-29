@@ -22,6 +22,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 #include <mpv/client.h>
 
 #include "osdep/compiler.h"
@@ -58,7 +64,23 @@ static inline void exit_cleanup(void)
     ctx = NULL;
 }
 
-static inline mpv_event *wrap_wait_event(void)
+// Return the path for a temporary file.
+static inline const char *temp_path(void)
+{
+    static char path[] = "./testout.XXXXXX";
+#ifdef _WIN32
+    if (!_mktemp(path) || !*path)
+        fail("tmpfile failed\n");
+#else
+    int fd = mkstemp(path);
+    if (fd == -1)
+        fail("tmpfile failed\n");
+    close(fd);
+#endif
+    return path;
+}
+
+static inline mpv_event *wait_event(bool fail_on_error)
 {
     while (1) {
         mpv_event *ev = mpv_wait_event(ctx, 1);
@@ -68,12 +90,17 @@ static inline mpv_event *wrap_wait_event(void)
         if (ev->event_id == MPV_EVENT_LOG_MESSAGE) {
             mpv_event_log_message *msg = (mpv_event_log_message*)ev->data;
             printf("[%s:%s] %s", msg->prefix, msg->level, msg->text);
-            if (msg->log_level <= MPV_LOG_LEVEL_ERROR)
+            if (fail_on_error && msg->log_level <= MPV_LOG_LEVEL_ERROR)
                 fail("error was logged");
         } else {
             return ev;
         }
     }
+}
+
+static inline mpv_event *wrap_wait_event(void)
+{
+    return wait_event(true);
 }
 
 static inline void command_impl(const char *file, int line, const char *cmd[])
