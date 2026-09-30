@@ -990,14 +990,25 @@ static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
     drm->waiting_for_flip = false;
 }
 
+static void vo_drm_check_vt_events(struct vo_drm_state *drm)
+{
+    if (!drm->vt_switcher_active)
+        return;
+
+    struct pollfd fd = { .fd = vt_switcher_pipe[0], .events = POLLIN };
+    mp_poll(&fd, 1, 0);
+    if (fd.revents & POLLIN)
+        vt_switcher_handle_event(&drm->vt_switcher);
+}
+
 int vo_drm_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_drm_state *drm = vo->drm;
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
-        // Continuous rendering can skip the idle wait path. Process VT events
-        // on every event check too, without waiting or draining indefinitely.
-        vo_drm_wait_events(vo, mp_time_ns());
+        // Continuous rendering can skip the idle wait path. Check VT events
+        // here, but leave routine wakeups pending to interrupt that wait.
+        vo_drm_check_vt_events(drm);
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS: {
         double fps = vo_drm_get_display_fps(drm);
