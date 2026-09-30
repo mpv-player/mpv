@@ -335,6 +335,7 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
 
     drmModeAtomicFree(atomic_ctx->request);
     atomic_ctx->request = drmModeAtomicAlloc();
+    p->allow_modeset = false;
 }
 
 static void enqueue_bo(struct ra_ctx *ctx, struct gbm_bo *bo)
@@ -552,7 +553,11 @@ static pl_color_space_t drm_egl_preferred_csp(struct ra_ctx *ctx)
 static bool drm_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
 {
     struct priv *p = ctx->priv;
-    p->allow_modeset = vo_drm_set_color(ctx->vo, &params->color);
+    struct pl_color_space sdr = pl_color_space_srgb;
+    bool color_changed = vo_drm_set_color(ctx->vo, params ? &params->color : &sdr);
+    // Keep the modeset flag until the atomic request containing the color
+    // properties is submitted. Later unchanged hints must not clear it.
+    p->allow_modeset |= color_changed;
     return true;
 }
 
