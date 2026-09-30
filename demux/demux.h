@@ -334,6 +334,8 @@ void demux_set_stream_still_image(struct demuxer *demuxer,
                                   struct sh_stream *sh, bool still_image);
 void demux_set_stream_absent(struct demuxer *demuxer, struct sh_stream *sh,
                              bool absent);
+void demux_set_stream_group(struct demuxer *demuxer,
+                            struct sh_stream_group *group);
 
 bool demux_cancel_test(struct demuxer *demuxer);
 bool demux_read_interrupted(struct demuxer *demuxer);
