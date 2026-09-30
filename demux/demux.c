@@ -4290,6 +4290,23 @@ static bool select_track(struct demux_internal *in,
     return true;
 }
 
+// Apply the selection of a base stream to the dependent members of its group.
+static bool select_dependent_tracks(struct demux_internal *in,
+                                    struct sh_stream *stream,
+                                    double ref_pts, bool selected)
+{
+    bool changed = false;
+    if (stream->group && !stream->dependent_track) {
+        for (int i = 0; i < stream->group->num_members; i++) {
+            struct sh_stream *m = stream->group->members[i];
+            mp_assert(m);
+            if (m != stream && m->dependent_track)
+                changed |= select_track(in, m, ref_pts, selected);
+        }
+    }
+    return changed;
+}
+
 // Set whether the given stream should return packets.
 // ref_pts is used only if the stream is enabled. Then it serves as approximate
 // start pts for this stream (in the worst case it is ignored).
@@ -4299,20 +4316,29 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
     struct demux_internal *in = demuxer->in;
     mp_mutex_lock(&in->lock);
     bool changed = select_track(in, stream, ref_pts, selected);
-    if (stream->group && !stream->dependent_track) {
-        for (int i = 0; i < stream->group->num_members; i++) {
-            struct sh_stream *m = stream->group->members[i];
-            mp_assert(m);
-            if (m != stream && m->dependent_track)
-                changed |= select_track(in, m, ref_pts, selected);
-        }
-    }
+    changed |= select_dependent_tracks(in, stream, ref_pts, selected);
     if (changed) {
         if (in->threading) {
             mp_cond_signal(&in->wakeup);
         } else {
             execute_trackswitch(in);
         }
+    }
+    mp_mutex_unlock(&in->lock);
+}
+
+void demux_set_stream_group(struct demuxer *demuxer,
+                            struct sh_stream_group *group)
+{
+    struct demux_internal *in = demuxer->in;
+    mp_assert(demuxer == in->d_thread);
+
+    mp_mutex_lock(&in->lock);
+    for (int i = 0; i < group->num_members; i++)
+        group->members[i]->group = group;
+    for (int i = 0; i < group->num_members; i++) {
+        struct sh_stream *m = group->members[i];
+        select_dependent_tracks(in, m, MP_NOPTS_VALUE, m->ds->selected);
     }
     mp_mutex_unlock(&in->lock);
 }

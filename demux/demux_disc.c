@@ -434,6 +434,32 @@ static void sync_streams(struct demuxer *demuxer)
         p->slave_to_outer[n] = outer;
     }
 
+    // Mirror slave sh_stream_group onto the outer sh_streams. This is needed
+    // for the Dolby Vision BL+EL group, it's detected well by lavf. We could use
+    // the libbluray `dv_streams[]` info, but it's not available yet in release
+    // version, and mapping it through lavf is less code. The group has to form
+    // before the selection is propagated to the slave below.
+    for (int n = 0; n < num_slave; n++) {
+        struct sh_stream *outer = p->slave_to_outer[n];
+        if (!outer || outer->group)
+            continue;
+        struct sh_stream *src = demux_get_stream(p->slave, n);
+        if (!src || !src->group)
+            continue;
+        struct sh_stream_group *grp = talloc_zero(outer, struct sh_stream_group);
+        for (int m = 0; m < src->group->num_members; m++) {
+            struct sh_stream *member = src->group->members[m];
+            if (!member || member->index < 0 ||
+                member->index >= p->slave_to_outer_count)
+                continue;
+            struct sh_stream *outer_member = p->slave_to_outer[member->index];
+            if (!outer_member)
+                continue;
+            MP_TARRAY_APPEND(grp, grp->members, grp->num_members, outer_member);
+        }
+        demux_set_stream_group(demuxer, grp);
+    }
+
     // Outer demuxer may have seen PMT with track that is not longer present in
     // the stream. Mark such tracks as absent, so that they don't deliver packets.
     // For now limited to dependent_tracks, to work around a missing DV EL.
@@ -458,31 +484,6 @@ static void sync_streams(struct demuxer *demuxer)
         struct sh_stream *outer = p->slave_to_outer[n];
         demuxer_select_track(p->slave, demux_get_stream(p->slave, n),
             MP_NOPTS_VALUE, outer && slave_stream_enabled(p, outer));
-    }
-
-    // Mirror slave sh_stream_group onto the outer sh_streams. This is needed
-    // for the Dolby Vision BL+EL group, it's detected well by lavf. We could use
-    // the libbluray `dv_streams[]` info, but it's not available yet in release
-    // version, and mapping it through lavf is less code.
-    for (int n = 0; n < num_slave; n++) {
-        struct sh_stream *outer = p->slave_to_outer[n];
-        if (!outer || outer->group)
-            continue;
-        struct sh_stream *src = demux_get_stream(p->slave, n);
-        if (!src || !src->group)
-            continue;
-        struct sh_stream_group *grp = talloc_zero(outer, struct sh_stream_group);
-        for (int m = 0; m < src->group->num_members; m++) {
-            struct sh_stream *member = src->group->members[m];
-            if (!member || member->index < 0 ||
-                member->index >= p->slave_to_outer_count)
-                continue;
-            struct sh_stream *outer_member = p->slave_to_outer[member->index];
-            if (!outer_member)
-                continue;
-            MP_TARRAY_APPEND(grp, grp->members, grp->num_members, outer_member);
-            outer_member->group = grp;
-        }
     }
 }
 
