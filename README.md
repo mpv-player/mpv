@@ -172,7 +172,7 @@ reports or feature requests. Follow the template's instructions or the issue
 will likely be ignored or closed as invalid.
 
 Questions can be asked in the [discussions][discussions] or on IRC (see
-[Contact](#Contact) below).
+[Contact](#contact) below).
 
 ## Contributing
 
