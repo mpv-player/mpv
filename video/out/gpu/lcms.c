@@ -424,6 +424,9 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
             }
             size_t base = (b * s_r * s_g + g * s_r) * 4;
             cmsDoTransform(trafo, input, output + base, s_r);
+            // The transform does not write the extra channel
+            for (int r = 0; r < s_r; r++)
+                output[base + r * 4 + 3] = 0;
         }
     }
 
