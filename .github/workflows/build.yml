@@ -379,7 +379,7 @@ jobs:
           if brew list openssl@1.1 &> /dev/null; then brew rm openssl@1.1; fi
           brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
-            libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread rubberband zimg
+            libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread rubberband vapoursynth zimg
           brew link ffmpeg-full
 
       - name: Build with meson
@@ -673,6 +673,7 @@ jobs:
               sndio \
               uchardet \
               v4l_compat \
+              vapoursynth \
               vulkan-headers \
               wayland-protocols
 

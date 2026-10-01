@@ -102,7 +102,7 @@ mpv_args=(
     -Dmujs:default_library=static
     -Dlua=luajit
     -D{amf,d3d11,javascript,lcms2,libbluray,libcurl,shaderc,spirv-cross}=enabled
-    -D{subrandr,vulkan,win32-smtc,zimg}=enabled
+    -D{subrandr,vapoursynth,vulkan,win32-smtc,zimg}=enabled
 )
 if $gpl; then
     # Only the GPL image carries the dependencies of the GPL features.
