@@ -341,10 +341,16 @@ static bool is_aformat_ok(struct mp_aframe *a, struct mp_aframe *b)
 }
 static bool is_vformat_ok(struct mp_image *a, struct mp_image *b)
 {
+    struct mp_image_params pa = a->params, pb = b->params;
+    mp_image_params_restore_dovi_mapping(&pa);
+    mp_image_params_restore_dovi_mapping(&pb);
     return a->imgfmt == b->imgfmt &&
            a->w == b->w && a->h == b->h &&
            a->params.p_w == b->params.p_w && a->params.p_h == b->params.p_h &&
-           a->nominal_fps == b->nominal_fps;
+           a->nominal_fps == b->nominal_fps &&
+           pa.repr.sys == pb.repr.sys && pa.repr.levels == pb.repr.levels &&
+           pa.repr.alpha == pb.repr.alpha &&
+           pa.chroma_location == pb.chroma_location;
 }
 static bool is_format_ok(struct mp_frame a, struct mp_frame b)
 {
