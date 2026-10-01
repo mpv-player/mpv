@@ -13,6 +13,7 @@ meson setup build $common_args $@ \
   -Dmanpage-build=enabled \
   -Dpipewire=enabled \
   -Dsubrandr=enabled \
+  -Dvapoursynth=enabled \
   -Dvulkan=enabled
 meson compile -C build
 ./build/mpv -v --no-config

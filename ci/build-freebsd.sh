@@ -21,6 +21,7 @@ meson setup build $common_args \
   -Degl-drm=enabled \
   -Dopenal=enabled \
   -Dsndio=enabled \
+  -Dvapoursynth=enabled \
   -Dvdpau=enabled \
   -Dvulkan=enabled \
   -Doss-audio=enabled \

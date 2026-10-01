@@ -19,7 +19,7 @@ meson setup build $common_args \
   -Dobjc_args="${objc_args}" \
   -Dc_args="${c_args}" \
   -D{caca,cdda,dvda,dvdnav,gl,iconv,lcms2,libarchive,libbluray,lua,jpeg}=enabled \
-  -D{plain-gl,rubberband,zimg,zlib}=enabled \
+  -D{plain-gl,rubberband,vapoursynth,zimg,zlib}=enabled \
   -D{cocoa,coreaudio,gl-cocoa,videotoolbox-gl,videotoolbox-pl}=enabled \
   -D{swift-build,macos-cocoa-cb,macos-media-player,macos-touchbar,vulkan}=enabled \
   -Dswift-flags="${SWIFT_FLAGS}"
