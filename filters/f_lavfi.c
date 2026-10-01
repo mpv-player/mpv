@@ -494,6 +494,12 @@ static bool init_pads(struct lavfi *c)
             params->color_space = pl_system_to_av(p.repr.sys);
             params->color_range = pl_levels_to_av(p.repr.levels);
 #endif
+#if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(11, 8, 100)
+            params->alpha_mode = pl_alpha_to_av(p.repr.alpha);
+#endif
+#if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(12, 5, 100)
+            params->chroma_location = pl_chroma_to_av(p.chroma_location);
+#endif
             filter_name = "buffer";
         } else {
             MP_ASSERT_UNREACHABLE();
