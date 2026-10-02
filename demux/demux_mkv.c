@@ -1099,6 +1099,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     // Discard incremental index. (Keep the first entry, which must be the
     // start of the file - helps with files that miss the first index entry.)
     mkv_d->num_indexes = MPMIN(1, mkv_d->num_indexes);
+    size_t num_kept = mkv_d->num_indexes;
     mkv_d->index_has_durations = false;
 
     for (int i = 0; i < cues.n_cue_point; i++) {
@@ -1116,6 +1117,18 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
                      "offset %"PRIu64", duration %"PRIu64"\n",
                      trackpos->cue_track, time, pos,
                      trackpos->cue_relative_position, trackpos->cue_duration);
+        }
+    }
+
+    // The entry kept above is only needed if the Cues do not already cover
+    // the start of the file. Drop it otherwise: it belongs to whichever track
+    // happened to be read first, and would be the only entry for that track.
+    if (num_kept) {
+        for (size_t i = 1; i < mkv_d->num_indexes; i++) {
+            if (mkv_d->indexes[i].filepos <= mkv_d->indexes[0].filepos) {
+                MP_TARRAY_REMOVE_AT(mkv_d->indexes, mkv_d->num_indexes, 0);
+                break;
+            }
         }
     }
 
