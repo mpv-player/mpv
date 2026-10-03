@@ -1,0 +1,6 @@
+[wrap-file]
+directory = language-tags-0.3.2
+source_url =  https://crates.io/api/v1/crates/language-tags/0.3.2/download
+source_filename = language-tags-0.3.2.tar.gz
+source_hash = d4345964bb142484797b161f473a503a434de77149dd8c7427788c6e13379388
+patch_directory = language-tags
