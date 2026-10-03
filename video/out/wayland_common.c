@@ -4528,9 +4528,15 @@ bool vo_wayland_valid_format(struct vo_wayland_state *wl, uint32_t drm_format, u
 
 bool vo_wayland_init(struct vo *vo)
 {
-    if (vo->probing && !getenv("WAYLAND_DISPLAY") && !getenv("WAYLAND_SOCKET")) {
-        MP_VERBOSE(vo, "Skipping Wayland because neither WAYLAND_DISPLAY or "
-            "WAYLAND_SOCKET is set\n");
+    const char *display_name = vo->opts->wayland_display;
+    if (display_name && !display_name[0])
+        display_name = NULL;
+
+    if (vo->probing && !display_name && !getenv("WAYLAND_DISPLAY") &&
+        !getenv("WAYLAND_SOCKET"))
+    {
+        MP_VERBOSE(vo, "Skipping Wayland because neither --wayland-display, "
+            "WAYLAND_DISPLAY or WAYLAND_SOCKET is set\n");
         goto err;
     }
 
@@ -4558,7 +4564,13 @@ bool vo_wayland_init(struct vo *vo)
     wl_list_init(&wl->seat_list);
     wl_list_init(&wl->tranche_list);
 
-    wl->display = wl_display_connect(NULL);
+    if (display_name && getenv("WAYLAND_SOCKET")) {
+        MP_WARN(wl, "WAYLAND_SOCKET is set and takes precedence over "
+                "--wayland-display.\n");
+    }
+    MP_VERBOSE(wl, "Connecting to Wayland display: %s\n",
+               display_name ? display_name : "(default)");
+    wl->display = wl_display_connect(display_name);
     if (!wl->display) {
         MP_MSG(wl, vo->probing ? MSGL_V : MSGL_FATAL,
                "Couldn't connect to Wayland display: %s\n", strerror(errno));

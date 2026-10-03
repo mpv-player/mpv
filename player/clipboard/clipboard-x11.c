@@ -67,9 +67,12 @@ static void clipboard_x11_uninit(struct clipboard_x11_priv *x11)
         XCloseDisplay(x11->display);
 }
 
-static bool clipboard_x11_init(struct clipboard_x11_priv *x11, bool xwayland, bool monitor)
+static bool clipboard_x11_init(struct clipboard_x11_priv *x11, bool xwayland, bool monitor,
+                               const char *wayland_display)
 {
-    if (!xwayland && (getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET"))) {
+    bool wayland = (wayland_display && wayland_display[0]) ||
+                   getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET");
+    if (!xwayland && wayland) {
         MP_VERBOSE(x11, "Stopping init due to suspected wayland environment\n");
         goto err;
     }
@@ -279,7 +282,8 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
     if (mp_make_wakeup_pipe(priv->message_pipe) < 0)
         goto pipe_err;
     if (!clipboard_x11_init(priv, params->flags & CLIPBOARD_INIT_ENABLE_XWAYLAND,
-                            params->flags & CLIPBOARD_INIT_ENABLE_MONITORING))
+                            params->flags & CLIPBOARD_INIT_ENABLE_MONITORING,
+                            params->wayland_display))
         goto init_err;
     if (mp_thread_create(&priv->thread, clipboard_thread, cl->priv))
         goto thread_err;
