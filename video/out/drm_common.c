@@ -53,7 +53,6 @@
 
 #define EVT_RELEASE 1
 #define EVT_ACQUIRE 2
-#define EVT_INTERRUPT 255
 #define HANDLER_ACQUIRE 0
 #define HANDLER_RELEASE 1
 #define RELEASE_SIGNAL SIGUSR1
@@ -275,12 +274,6 @@ static bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
     return true;
 }
 
-static void vt_switcher_interrupt_poll(struct vt_switcher *s)
-{
-    unsigned char event = EVT_INTERRUPT;
-    (void)write(vt_switcher_pipe[1], &event, sizeof(event));
-}
-
 static void vt_switcher_destroy(struct vt_switcher *s)
 {
     struct vt_mode vt_mode = {0};
@@ -297,17 +290,10 @@ static void vt_switcher_destroy(struct vt_switcher *s)
     close(vt_switcher_pipe[1]);
 }
 
-static void vt_switcher_poll(struct vt_switcher *s, int timeout_ns)
+static void vt_switcher_handle_event(struct vt_switcher *s)
 {
-    struct pollfd fds[1] = {
-        { .events = POLLIN, .fd = vt_switcher_pipe[0] },
-    };
-    mp_poll(fds, 1, timeout_ns);
-    if (!fds[0].revents)
-        return;
-
     unsigned char event;
-    if (read(fds[0].fd, &event, sizeof(event)) != sizeof(event))
+    if (read(vt_switcher_pipe[0], &event, sizeof(event)) != sizeof(event))
         return;
 
     switch (event) {
@@ -322,8 +308,6 @@ static void vt_switcher_poll(struct vt_switcher *s, int timeout_ns)
         if (ioctl(s->tty_fd, VT_RELDISP, VT_ACKACQ) < 0) {
             MP_ERR(s, "Failed to acquire virtual terminal\n");
         }
-        break;
-    case EVT_INTERRUPT:
         break;
     }
 }
@@ -1006,10 +990,26 @@ static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
     drm->waiting_for_flip = false;
 }
 
+static void vo_drm_check_vt_events(struct vo_drm_state *drm)
+{
+    if (!drm->vt_switcher_active)
+        return;
+
+    struct pollfd fd = { .fd = vt_switcher_pipe[0], .events = POLLIN };
+    mp_poll(&fd, 1, 0);
+    if (fd.revents & POLLIN)
+        vt_switcher_handle_event(&drm->vt_switcher);
+}
+
 int vo_drm_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_drm_state *drm = vo->drm;
     switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        // Continuous rendering can skip the idle wait path. Check VT events
+        // here, but leave routine wakeups pending to interrupt that wait.
+        vo_drm_check_vt_events(drm);
+        return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS: {
         double fps = vo_drm_get_display_fps(drm);
         if (fps <= 0)
@@ -1044,7 +1044,15 @@ bool vo_drm_init(struct vo *vo)
         .crtc_id = -1,
         .card_no = -1,
         .fd = -1,
+        .wakeup_pipe = {-1, -1},
     };
+
+    drmModeRes *res = NULL;
+    // Routine wakeups must not fill the blocking VT signal pipe.
+    if (mp_make_wakeup_pipe(drm->wakeup_pipe) < 0) {
+        MP_ERR(drm, "Creating wakeup pipe failed: %s\n", mp_strerror(errno));
+        goto err;
+    }
 
     drm->vt_switcher_active = vt_switcher_init(&drm->vt_switcher, drm->log);
     if (drm->vt_switcher_active) {
@@ -1056,7 +1064,6 @@ bool vo_drm_init(struct vo *vo)
 
     drm->opts = mp_get_config_group(drm, drm->vo->global, &drm_conf);
 
-    drmModeRes *res = NULL;
     get_primary_device_path(drm);
 
     if (!drm->card_path) {
@@ -1157,6 +1164,11 @@ void vo_drm_uninit(struct vo *vo)
     if (drm->atomic_context)
         drm_atomic_destroy_context(drm->atomic_context);
 
+    for (int n = 0; n < 2; n++) {
+        if (drm->wakeup_pipe[n] >= 0)
+            close(drm->wakeup_pipe[n]);
+        drm->wakeup_pipe[n] = -1;
+    }
     if (drm->fd >= 0)
         close(drm->fd);
     talloc_free(drm);
@@ -1421,13 +1433,18 @@ void vo_drm_set_monitor_par(struct vo *vo)
 void vo_drm_wait_events(struct vo *vo, int64_t until_time_ns)
 {
     struct vo_drm_state *drm = vo->drm;
-    if (drm->vt_switcher_active) {
-        int64_t wait_ns = until_time_ns - mp_time_ns();
-        int64_t timeout_ns = MPCLAMP(wait_ns, 0, MP_TIME_S_TO_NS(10));
-        vt_switcher_poll(&drm->vt_switcher, timeout_ns);
-    } else {
-        vo_wait_default(vo, until_time_ns);
-    }
+    struct pollfd fds[2] = {
+        { .events = POLLIN, .fd = drm->wakeup_pipe[0] },
+        { .events = POLLIN,
+          .fd = drm->vt_switcher_active ? vt_switcher_pipe[0] : -1 },
+    };
+    int64_t wait_ns = until_time_ns - mp_time_ns();
+    int64_t timeout_ns = MPCLAMP(wait_ns, 0, MP_TIME_S_TO_NS(10));
+    mp_poll(fds, 2, timeout_ns);
+    if (fds[0].revents & POLLIN)
+        mp_flush_wakeup_pipe(drm->wakeup_pipe[0]);
+    if (fds[1].revents & POLLIN)
+        vt_switcher_handle_event(&drm->vt_switcher);
 }
 
 void vo_drm_wait_on_flip(struct vo_drm_state *drm)
@@ -1449,6 +1466,5 @@ void vo_drm_wait_on_flip(struct vo_drm_state *drm)
 void vo_drm_wakeup(struct vo *vo)
 {
     struct vo_drm_state *drm = vo->drm;
-    if (drm->vt_switcher_active)
-        vt_switcher_interrupt_poll(&drm->vt_switcher);
+    (void)write(drm->wakeup_pipe[1], &(char){0}, 1);
 }
