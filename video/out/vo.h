@@ -88,6 +88,7 @@ enum mp_voctrl {
     VOCTRL_SET_CURSOR_VISIBILITY,       // bool*
 
     VOCTRL_CONTENT_TYPE,                // enum mp_content_type*
+    VOCTRL_CONTENT_FRAME_RATE,          // struct voctrl_content_frame_rate*
 
     VOCTRL_KILL_SCREENSAVER,
     VOCTRL_RESTORE_SCREENSAVER,
@@ -140,6 +141,11 @@ enum mp_content_type {
     MP_CONTENT_NONE, // used for force-window
     MP_CONTENT_IMAGE,
     MP_CONTENT_VIDEO,
+};
+
+struct voctrl_content_frame_rate {
+    uint32_t numerator;
+    uint32_t denominator;
 };
 
 #define VO_TRUE         true
