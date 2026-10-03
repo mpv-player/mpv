@@ -21,13 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
-#include <sys/types.h>
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
-
 #include <mpv/client.h>
 
 #include "libmpv_common.h"
@@ -80,19 +73,7 @@ int main(int argc, char *argv[])
 
     atexit(cleanup);
 
-    static char path[] = "./testout.XXXXXX";
-
-#ifdef _WIN32
-    out_path = _mktemp(path);
-    if (!out_path || !*out_path)
-        fail("tmpfile failed\n");
-#else
-    int fd = mkstemp(path);
-    if (fd == -1)
-        fail("tmpfile failed\n");
-    out_path = path;
-#endif
-
+    out_path = temp_path();
     set_property_string("o", out_path);
     set_property_string("of", "matroska");
     set_property_string("end", "1.5");
