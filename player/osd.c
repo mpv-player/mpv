@@ -505,19 +505,25 @@ void update_osd_msg(struct MPContext *mpctx)
     struct osd_state *osd = mpctx->osd;
 
     double now = mp_time_sec();
+    // update the OSD and term at most this often
+    double delay = 1.0 / opts->status_msg_update_rate;
+    bool force_delay = opts->status_msg_update_rate_forced;
 
-    if (!mpctx->osd_force_update) {
+    // still force update when pausing/frame stepping
+    if (!(mpctx->osd_force_update && (mpctx->paused || !force_delay))) {
         // Assume nothing is going on at all.
         if (!mpctx->osd_idle_update)
             return;
 
-        double delay = 0.050; // update the OSD at most this often
         double diff = now - mpctx->osd_last_update;
         if (diff < delay) {
             mp_set_timeout(mpctx, delay - diff);
             return;
         }
+    } else {
+        MP_TRACE(mpctx, "Forcing OSD/term update\n");
     }
+
     mpctx->osd_force_update = false;
     mpctx->osd_idle_update = false;
     mpctx->osd_last_update = now;
