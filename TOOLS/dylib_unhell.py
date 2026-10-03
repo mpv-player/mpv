@@ -20,7 +20,7 @@ def is_user_lib(objfile, libname):
            "libc." not in libname and \
            "libgcc." not in libname and \
            os.path.basename(libname) != "Python" and \
-           os.path.basename(objfile) not in libname and \
+           not libname.endswith(os.path.basename(objfile)) and \
            "libswift" not in libname
 
 def otool(objfile, rapths):
