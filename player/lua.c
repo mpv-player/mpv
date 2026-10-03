@@ -68,6 +68,9 @@ static const char * const builtin_lua_scripts[][2] = {
     {"mp.options",
 #   include "player/lua/options.lua.inc"
     },
+    {"@osd.lua",
+#   include "player/lua/osd.lua.inc"
+    },
     {"@osc.lua",
 #   include "player/lua/osc.lua.inc"
     },
