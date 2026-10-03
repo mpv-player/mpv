@@ -246,7 +246,7 @@ static void uninit(struct ra_hwdec *hw)
     }
 }
 
-static int init(struct ra_hwdec *hw)
+static int pre_init(struct ra_hwdec *hw)
 {
     struct priv *p = hw->priv;
     int draw_plane, drmprime_video_plane;
@@ -267,15 +267,15 @@ static int init(struct ra_hwdec *hw)
                                            drm_params->connector_id, draw_plane, drmprime_video_plane);
         if (!p->ctx) {
             mp_err(p->log, "Failed to retrieve DRM atomic context.\n");
-            goto err;
+            return -1;
         }
         if (!p->ctx->drmprime_video_plane) {
             mp_warn(p->log, "No drmprime video plane. You might need to specify it manually using --drm-drmprime-video-plane\n");
-            goto err;
+            return -1;
         }
     } else {
         mp_verbose(p->log, "Failed to retrieve DRM fd from native display.\n");
-        goto err;
+        return -1;
     }
 
     drmModeCrtcPtr crtc;
@@ -289,7 +289,7 @@ static int init(struct ra_hwdec *hw)
     uint64_t has_prime;
     if (drmGetCap(p->ctx->fd, DRM_CAP_PRIME, &has_prime) < 0) {
         MP_ERR(hw, "Card does not support prime handles.\n");
-        goto err;
+        return -1;
     }
 
     if (has_prime) {
@@ -298,19 +298,30 @@ static int init(struct ra_hwdec *hw)
 
     disable_video_plane(hw);
 
+    return 0;
+}
+
+static int init_drmprime(struct ra_hwdec *hw)
+{
+    struct priv *p = hw->priv;
+
+    int ret = pre_init(hw);
+    if (ret < 0)
+        goto err;
+
     p->hwctx = (struct mp_hwdec_ctx) {
         .driver_name = hw->driver->name,
         .hw_imgfmt = IMGFMT_DRMPRIME,
     };
 
     char *device = drmGetDeviceNameFromFd2(p->ctx->fd);
-    int ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
-                                     AV_HWDEVICE_TYPE_DRM, device, NULL, 0);
+    ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                 AV_HWDEVICE_TYPE_DRM, device, NULL, 0);
 
     if (device)
         free(device);
 
-    if (ret != 0) {
+    if (ret < 0) {
         MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
         goto err;
     }
@@ -321,15 +332,65 @@ static int init(struct ra_hwdec *hw)
 
 err:
     uninit(hw);
-    return -1;
+    return ret;
 }
+
+#if HAVE_V4L2REQUEST
+static int init_v4l2request(struct ra_hwdec *hw)
+{
+    struct priv *p = hw->priv;
+
+    int ret = pre_init(hw);
+    if (ret < 0)
+        goto err;
+
+    p->hwctx = (struct mp_hwdec_ctx) {
+        .driver_name = hw->driver->name,
+        .hw_imgfmt = IMGFMT_DRMPRIME,
+    };
+
+    /*
+     * AVCodecHWConfig contains a combo of a pixel format and hwdevice type,
+     * correct type must be created here or hwaccel will fail.
+     *
+     * FIXME: Create hwdevice based on type in AVCodecHWConfig
+     */
+    ret = av_hwdevice_ctx_create(&p->hwctx.av_device_ref,
+                                 AV_HWDEVICE_TYPE_V4L2REQUEST,
+                                 NULL, NULL, 0);
+    if (ret < 0) {
+        MP_VERBOSE(hw, "Failed to create hwdevice_ctx: %s\n", av_err2str(ret));
+        goto err;
+    }
+
+    hwdec_devices_add(hw->devs, &p->hwctx);
+
+    return 0;
+
+err:
+    uninit(hw);
+    return ret;
+}
+#endif
 
 const struct ra_hwdec_driver ra_hwdec_drmprime_overlay = {
     .name = "drmprime-overlay",
     .priv_size = sizeof(struct priv),
     .imgfmts = {IMGFMT_DRMPRIME, 0},
     .device_type = AV_HWDEVICE_TYPE_DRM,
-    .init = init,
+    .init = init_drmprime,
     .overlay_frame = overlay_frame,
     .uninit = uninit,
 };
+
+#if HAVE_V4L2REQUEST
+const struct ra_hwdec_driver ra_hwdec_v4l2request_overlay = {
+    .name = "v4l2request-overlay",
+    .priv_size = sizeof(struct priv),
+    .imgfmts = {IMGFMT_DRMPRIME, 0},
+    .device_type = AV_HWDEVICE_TYPE_V4L2REQUEST,
+    .init = init_v4l2request,
+    .overlay_frame = overlay_frame,
+    .uninit = uninit,
+};
+#endif
