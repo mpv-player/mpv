@@ -341,10 +341,16 @@ static bool is_aformat_ok(struct mp_aframe *a, struct mp_aframe *b)
 }
 static bool is_vformat_ok(struct mp_image *a, struct mp_image *b)
 {
+    struct mp_image_params pa = a->params, pb = b->params;
+    mp_image_params_restore_dovi_mapping(&pa);
+    mp_image_params_restore_dovi_mapping(&pb);
     return a->imgfmt == b->imgfmt &&
            a->w == b->w && a->h == b->h &&
            a->params.p_w == b->params.p_w && a->params.p_h == b->params.p_h &&
-           a->nominal_fps == b->nominal_fps;
+           a->nominal_fps == b->nominal_fps &&
+           pa.repr.sys == pb.repr.sys && pa.repr.levels == pb.repr.levels &&
+           pa.repr.alpha == pb.repr.alpha &&
+           pa.chroma_location == pb.chroma_location;
 }
 static bool is_format_ok(struct mp_frame a, struct mp_frame b)
 {
@@ -488,9 +494,17 @@ static bool init_pads(struct lavfi *c)
             params->sample_aspect_ratio.den = fmt->params.p_h;
             params->hw_frames_ctx = fmt->hwctx;
             params->frame_rate = av_d2q(fmt->nominal_fps, 1000000);
+            struct mp_image_params p = fmt->params;
+            mp_image_params_restore_dovi_mapping(&p);
 #if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(9, 16, 100)
-            params->color_space = pl_system_to_av(fmt->params.repr.sys);
-            params->color_range = pl_levels_to_av(fmt->params.repr.levels);
+            params->color_space = pl_system_to_av(p.repr.sys);
+            params->color_range = pl_levels_to_av(p.repr.levels);
+#endif
+#if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(11, 8, 100)
+            params->alpha_mode = pl_alpha_to_av(p.repr.alpha);
+#endif
+#if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(12, 5, 100)
+            params->chroma_location = pl_chroma_to_av(p.chroma_location);
 #endif
             filter_name = "buffer";
         } else {
