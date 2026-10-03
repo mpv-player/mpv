@@ -334,10 +334,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: "macos-14"
-            arch: "arm"
-            xcode: "Xcode_15.0"
-            homebrew: "b1d3cbaeb724947c97bf0e334adb3db56e4b5438"
           - os: "macos-15"
             arch: "arm"
           - os: "macos-15-intel"
