@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <linux/input-event-codes.h>
 #include <poll.h>
+#include <systemd/sd-bus.h>
 #include <time.h>
 #include <unistd.h>
 #include <wayland-cursor.h>
@@ -3104,6 +3105,96 @@ static void begin_dragging(struct vo_wayland_state *wl)
     }
 }
 
+
+
+static void   get_urls_from_dbus(struct vo_wayland_state * wl,   bstr* content){
+    sd_bus_error error = SD_BUS_ERROR_NULL;
+    sd_bus_message *reply = NULL;
+    sd_bus *bus = NULL;
+    int r;
+
+    r = sd_bus_open_user(&bus);
+    if (r < 0) {
+        MP_ERR(  wl, "Failed to connect to Session Bus: %s\n", strerror(-r));
+        exit(2);
+    }
+
+    r = sd_bus_call_method(
+        bus,
+        "org.freedesktop.portal.Documents",       
+        "/org/freedesktop/portal/documents",      
+        "org.freedesktop.portal.FileTransfer", 
+        "RetrieveFiles",                        
+        &error,
+        &reply,
+        "sa{sv}",                               
+        content->start,
+        0                                       
+    );
+
+    if (r < 0) {
+        MP_ERR(wl, "D-Bus call failed: %s\n", error.message);
+        goto finish;
+    }
+
+    r = sd_bus_message_enter_container(reply, SD_BUS_TYPE_ARRAY, "s");
+    if (r < 0) {
+        MP_ERR(wl, "Failed to parse reply array: %s\n", strerror(-r));
+        goto finish;
+    }
+    char * file_path;
+    int total_len=0;
+    int abs_max = 500000;
+    int cur_sz = 256;
+    char * buf =  talloc_zero_size(wl, cur_sz);
+    while ((r = sd_bus_message_read(reply, "s", &file_path)) > 0) {
+        int path_len = strlen(file_path);  
+        if(total_len!=0 && total_len+2 <255 ){
+            memcpy(buf+total_len, "\r\n", 2);
+            total_len+=2;
+        }else if(total_len!=0){
+            if( cur_sz+256 < abs_max){
+                buf =  talloc_realloc_size(NULL, buf, cur_sz+256);
+            }else{
+                MP_ERR(wl,"max limit for DnD buffer reached\n");
+                talloc_free(buf);
+                goto finish;
+            }
+            memcpy(buf+total_len, "\r\n", 2);
+            total_len+=2;
+        }
+        if(total_len+path_len+7<255 ){
+            memcpy(buf+total_len, "file://", 7);
+            memcpy(buf+total_len+7, file_path, path_len);
+            total_len+=path_len+7;
+        }else {
+            if( cur_sz+256 < abs_max){
+                buf =  talloc_realloc_size(NULL, buf, cur_sz+256);
+            }else{
+                MP_ERR(wl, "max limit for DnD buffer reached\n");
+                talloc_free(buf);
+                goto finish;
+            }
+            memcpy(buf+total_len, "file://", 7);
+            memcpy(buf+total_len+7, file_path, path_len);
+            total_len+=path_len+7;
+        }
+    }
+    buf[total_len]='\0';
+    talloc_free(content->start);
+    content->start=buf;
+    content->len=total_len;
+    sd_bus_message_exit_container(reply);
+finish:
+
+    sd_bus_error_free(&error);
+    sd_bus_message_unref(reply);
+    sd_bus_close(bus);
+    sd_bus_unref(bus);
+
+    return ;
+
+}
 static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *o, bool is_dnd)
 {
     if (o->fd == -1)
@@ -3139,7 +3230,9 @@ static void check_fd(struct vo_wayland_state *wl, struct vo_wayland_data_offer *
             if (is_dnd) {
                 if (o->offer)
                     wl_data_offer_finish(o->offer);
-
+                if(! strcmp( o->mime_type, "application/vnd.portal.filetransfer")){
+                    get_urls_from_dbus(wl, &content);
+                }
                 if (o->action >= 0) {
                     mp_event_drop_mime_data(wl->vo->input_ctx, o->mime_type,
                                             content, o->action);
