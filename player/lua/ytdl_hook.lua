@@ -556,8 +556,11 @@ local function formats_to_edl(json, formats, use_all_formats)
                 elseif sub.media_type == "audio" then
                     props = props .. ",samplerate=" .. as_integer(track.asr)
                 end
-                hdr[#hdr + 1] = "!delay_open,media_type=" .. sub.media_type ..
-                    ",codec=" .. (sub.codec or "null") .. props
+
+                if not is_default then
+                    hdr[#hdr + 1] = "!delay_open,media_type=" .. sub.media_type ..
+                                    ",codec=" .. (sub.codec or "null") .. props
+                end
 
                 -- Add bitrate information etc. for better user selection.
                 local byterate = 0
