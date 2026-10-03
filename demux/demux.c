@@ -2367,7 +2367,13 @@ static bool read_packet(struct demux_internal *in)
         total_fw_bytes += get_forward_buffered_bytes(ds);
     }
 
-    if (in->hyst_bytes > 0 && total_fw_bytes <= in->hyst_bytes) {
+    // Gate on hyst_active like the hysteresis-secs path above: without this,
+    // the hysteresis level acts as an unconditional read-ahead target even
+    // before any demuxer limit was reached, which force-enables buffering
+    // despite --cache=no (see issue #18484).
+    if (in->hyst_active && in->hyst_bytes > 0 &&
+        total_fw_bytes <= in->hyst_bytes)
+    {
         in->hyst_active = false;
         prefetch_more |= true;
     }
