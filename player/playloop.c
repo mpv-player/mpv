@@ -907,8 +907,13 @@ static void handle_vo_events(struct MPContext *mpctx)
         mp_notify(mpctx, MP_EVENT_WIN_STATE, NULL);
     if (events & VO_EVENT_DPI)
         mp_notify(mpctx, MP_EVENT_WIN_STATE2, NULL);
-    if (events & VO_EVENT_FOCUS)
+    if (events & VO_EVENT_FOCUS) {
+        bool vo_focused;
+        if (vo_control(vo, VOCTRL_GET_FOCUSED, &vo_focused) < 1)
+            vo_focused = false;
+        mp_input_set_focused(mpctx->input, vo_focused);
         mp_notify(mpctx, MP_EVENT_FOCUS, NULL);
+    }
     if (events & VO_EVENT_AMBIENT_LIGHTING_CHANGED)
         mp_notify(mpctx, MP_EVENT_AMBIENT_LIGHTING_CHANGED, NULL);
 }

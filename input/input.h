@@ -90,9 +90,15 @@ void mp_input_put_key_artificial(struct input_ctx *ictx, int code, double value)
 // string as key events.
 void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t);
 
+// Like mp_input_put_key(), but only send commands if VO is focused/foreground
+void mp_input_put_key_focused(struct input_ctx *ictx, int code);
+
 // Process scrolling input. Support for precise scrolling. Scales the given
 // scroll amount add multiplies it with the command (seeking, sub-delay, etc)
 void mp_input_put_wheel(struct input_ctx *ictx, int direction, double value);
+
+// Update VO focused state
+void mp_input_set_focused(struct input_ctx *ictx, bool vo_focused);
 
 // Update mouse position (in window coordinates).
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y, bool quiet);
