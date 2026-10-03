@@ -334,7 +334,7 @@ class MenuBar: NSObject, EventSubscriber {
 
     @objc func openFiles() {
         guard let files = dialog.openFiles(path: currentDir) else { return }
-        appHub.input.open(files: files)
+        appHub.open(files: files)
     }
 
     @objc func openPlaylist() {
@@ -344,7 +344,7 @@ class MenuBar: NSObject, EventSubscriber {
 
     @objc func openUrl() {
         guard let file = dialog.openUrl() else { return }
-        appHub.input.open(files: [file])
+        appHub.open(files: [file])
     }
 
     @objc func command(_ menuItem: MenuItem) {

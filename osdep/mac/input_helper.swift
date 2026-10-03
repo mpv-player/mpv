@@ -249,20 +249,27 @@ class InputHelper: NSObject {
         return String(utf16CodeUnits: chars, count: length)
     }
 
-    @objc func open(files: [String], append: Bool = false) {
+    @objc func handleDnd(files: [String]) {
         lock.withLock {
             guard let input = input else { return }
 
-            var action = DND_APPEND
-            if !append {
-                action = NSEvent.modifierFlags.contains(.shift) ? DND_APPEND : DND_REPLACE
+            open(files: files) { (filesPtr, action) in
+                mp_input_drop_files(input, Int32(files.count), &filesPtr, action)
             }
-
-            let filesClean = files.map { $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }
-            var filesPtr = filesClean.map { UnsafeMutablePointer<CChar>(strdup($0)) }
-            mp_input_drop_files(input, Int32(files.count), &filesPtr, action)
-            for charPtr in filesPtr { free(UnsafeMutablePointer(mutating: charPtr)) }
         }
+    }
+
+    func open(files: [String], append: Bool = false,
+              completion: (inout [UnsafeMutablePointer<CChar>?], mp_dnd_action) -> Void) {
+        var action = DND_APPEND
+        if !append {
+            action = NSEvent.modifierFlags.contains(.shift) ? DND_APPEND : DND_REPLACE
+        }
+
+        let filesClean = files.map { $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }
+        var filesPtr = filesClean.map { UnsafeMutablePointer<CChar>(strdup($0)) }
+        completion(&filesPtr, action)
+        for charPtr in filesPtr { free(UnsafeMutablePointer(mutating: charPtr)) }
     }
 
     private func useAltGr() -> Bool {
