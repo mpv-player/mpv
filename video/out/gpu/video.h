@@ -99,6 +99,7 @@ enum tone_mapping {
     TONE_MAPPING_BT_2446A,
     TONE_MAPPING_ST2094_40,
     TONE_MAPPING_ST2094_10,
+    TONE_MAPPING_LINEARLIGHT,
 };
 
 enum gamut_mode {
