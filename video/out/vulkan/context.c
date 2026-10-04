@@ -251,6 +251,10 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
     };
 #endif
 
+    /*
+     * Newer libplacebo enables the video maintenance features itself, but
+     * our minimum accepted version 7.360.1 does not.
+     */
     VkPhysicalDeviceVideoMaintenance2FeaturesKHR video_maintenance_2_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_MAINTENANCE_2_FEATURES_KHR,
 #ifdef VK_KHR_video_decode_vp9
@@ -277,6 +281,10 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
        .shaderExpectAssume = true,
     };
 
+    /*
+     * Newer libplacebo enables the video maintenance features itself, but
+     * our minimum accepted version 7.360.1 does not.
+     */
     VkPhysicalDeviceVideoMaintenance1FeaturesKHR video_maintenance_1_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_MAINTENANCE_1_FEATURES_KHR,
         .pNext = &shader_expect_assume_feature,
@@ -295,15 +303,9 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .shaderObject = true,
     };
 
-    VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR zero_init_feature = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES_KHR,
-        .pNext = &shader_object_feature,
-       .shaderZeroInitializeWorkgroupMemory = true,
-    };
-
     VkPhysicalDeviceOpticalFlowFeaturesNV optical_flow_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_OPTICAL_FLOW_FEATURES_NV,
-        .pNext = &zero_init_feature,
+        .pNext = &shader_object_feature,
         .opticalFlow = true,
     };
 
