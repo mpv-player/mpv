@@ -784,11 +784,12 @@ static void gl_sc_generate(struct gl_shader_cache *sc,
     if (glsl_es) {
         ADD(header, "#ifdef GL_FRAGMENT_PRECISION_HIGH\n");
         ADD(header, "precision highp float;\n");
+        ADD(header, "precision highp sampler2D;\n");
         ADD(header, "#else\n");
         ADD(header, "precision mediump float;\n");
+        ADD(header, "precision mediump sampler2D;\n");
         ADD(header, "#endif\n");
 
-        ADD(header, "precision mediump sampler2D;\n");
         if (sc->ra->caps & RA_CAP_TEX_3D)
             ADD(header, "precision mediump sampler3D;\n");
     }
