@@ -201,9 +201,11 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
 #endif
         VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME,
         VK_EXT_SHADER_OBJECT_EXTENSION_NAME,
+        VK_EXT_SHADER_REPLICATED_COMPOSITES_EXTENSION_NAME,
         VK_KHR_COOPERATIVE_MATRIX_EXTENSION_NAME,
         VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
         VK_KHR_SHADER_EXPECT_ASSUME_EXTENSION_NAME,
+        VK_KHR_SHADER_MAXIMAL_RECONVERGENCE_EXTENSION_NAME,
         VK_KHR_SHADER_RELAXED_EXTENDED_INSTRUCTION_EXTENSION_NAME,
         VK_KHR_SHADER_SUBGROUP_ROTATE_EXTENSION_NAME,
         VK_KHR_VIDEO_DECODE_AV1_EXTENSION_NAME,
@@ -213,6 +215,7 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         VK_KHR_VIDEO_MAINTENANCE_1_EXTENSION_NAME,
         VK_KHR_VIDEO_MAINTENANCE_2_EXTENSION_NAME,
         VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
+        VK_KHR_WORKGROUP_MEMORY_EXPLICIT_LAYOUT_EXTENSION_NAME,
         VK_KHR_ZERO_INITIALIZE_WORKGROUP_MEMORY_EXTENSION_NAME,
         VK_NV_OPTICAL_FLOW_EXTENSION_NAME,
         /*
@@ -220,11 +223,23 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
          * headers and so we only activate them if the build time headers contain
          * them.
          */
+#ifdef VK_EXT_zero_initialize_device_memory
+        VK_EXT_ZERO_INITIALIZE_DEVICE_MEMORY_EXTENSION_NAME, /* 1.4.315 */
+#endif
 #ifdef VK_KHR_video_decode_vp9
         VK_KHR_VIDEO_DECODE_VP9_EXTENSION_NAME, /* 1.4.317 */
 #endif
 #ifdef VK_KHR_maintenance9
         VK_KHR_MAINTENANCE_9_EXTENSION_NAME, /* 1.4.317 */
+#endif
+#ifdef VK_KHR_unified_image_layouts
+        VK_KHR_UNIFIED_IMAGE_LAYOUTS_EXTENSION_NAME, /* 1.4.317 */
+#endif
+#ifdef VK_EXT_shader_long_vector
+        VK_EXT_SHADER_LONG_VECTOR_EXTENSION_NAME, /* 1.4.337 */
+#endif
+#ifdef VK_KHR_maintenance11
+        VK_KHR_MAINTENANCE_11_EXTENSION_NAME, /* 1.4.350 */
 #endif
     };
 
@@ -234,9 +249,40 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
      * the next extension that chains on to it will also be present.
      */
 
+#ifdef VK_KHR_maintenance11
+    VkPhysicalDeviceMaintenance11FeaturesKHR maintenance_11_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_11_FEATURES_KHR,
+        .maintenance11 = true,
+    };
+#endif
+
+#ifdef VK_EXT_shader_long_vector
+    VkPhysicalDeviceShaderLongVectorFeaturesEXT long_vector_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_LONG_VECTOR_FEATURES_EXT,
+#ifdef VK_KHR_maintenance11
+        .pNext = &maintenance_11_feature,
+#endif
+        .longVector = true,
+    };
+#endif
+
+#ifdef VK_KHR_unified_image_layouts
+    VkPhysicalDeviceUnifiedImageLayoutsFeaturesKHR unified_image_layouts_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFIED_IMAGE_LAYOUTS_FEATURES_KHR,
+#ifdef VK_EXT_shader_long_vector
+        .pNext = &long_vector_feature,
+#endif
+        .unifiedImageLayouts = true,
+        .unifiedImageLayoutsVideo = true,
+    };
+#endif
+
 #ifdef VK_KHR_maintenance9
     VkPhysicalDeviceMaintenance9FeaturesKHR maintenance_9_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_9_FEATURES_KHR,
+#ifdef VK_KHR_unified_image_layouts
+        .pNext = &unified_image_layouts_feature,
+#endif
         .maintenance9 = true,
     };
 #endif
@@ -251,14 +297,24 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
     };
 #endif
 
+#ifdef VK_EXT_zero_initialize_device_memory
+    VkPhysicalDeviceZeroInitializeDeviceMemoryFeaturesEXT zero_init_device_memory_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_DEVICE_MEMORY_FEATURES_EXT,
+#ifdef VK_KHR_video_decode_vp9
+        .pNext = &video_decode_vp9_feature,
+#endif
+        .zeroInitializeDeviceMemory = true,
+    };
+#endif
+
     /*
      * Newer libplacebo enables the video maintenance features itself, but
      * our minimum accepted version 7.360.1 does not.
      */
     VkPhysicalDeviceVideoMaintenance2FeaturesKHR video_maintenance_2_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_MAINTENANCE_2_FEATURES_KHR,
-#ifdef VK_KHR_video_decode_vp9
-        .pNext = &video_decode_vp9_feature,
+#ifdef VK_EXT_zero_initialize_device_memory
+        .pNext = &zero_init_device_memory_feature,
 #endif
         .videoMaintenance2 = true,
     };
@@ -269,9 +325,21 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .shaderRelaxedExtendedInstruction = true,
     };
 
+    VkPhysicalDeviceShaderReplicatedCompositesFeaturesEXT replicated_composites_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_REPLICATED_COMPOSITES_FEATURES_EXT,
+        .pNext = &shader_relaxed_feature,
+        .shaderReplicatedComposites = true,
+    };
+
+    VkPhysicalDeviceShaderMaximalReconvergenceFeaturesKHR maximal_reconvergence_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MAXIMAL_RECONVERGENCE_FEATURES_KHR,
+        .pNext = &replicated_composites_feature,
+        .shaderMaximalReconvergence = true,
+    };
+
     VkPhysicalDeviceShaderSubgroupRotateFeaturesKHR shader_subgroup_rotate_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_ROTATE_FEATURES_KHR,
-        .pNext = &shader_relaxed_feature,
+        .pNext = &maximal_reconvergence_feature,
        .shaderSubgroupRotate = true,
     };
 
@@ -303,22 +371,25 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
         .shaderObject = true,
     };
 
-    VkPhysicalDeviceOpticalFlowFeaturesNV optical_flow_feature = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_OPTICAL_FLOW_FEATURES_NV,
+    VkPhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR explicit_mem_layout_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_WORKGROUP_MEMORY_EXPLICIT_LAYOUT_FEATURES_KHR,
         .pNext = &shader_object_feature,
-        .opticalFlow = true,
+        .workgroupMemoryExplicitLayout = true,
+        .workgroupMemoryExplicitLayoutScalarBlockLayout = true,
+        .workgroupMemoryExplicitLayout8BitAccess = true,
+        .workgroupMemoryExplicitLayout16BitAccess = true,
     };
 
-    VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_rendering_feature = {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
-        .pNext = &optical_flow_feature,
-       .dynamicRendering = true,
+    VkPhysicalDeviceOpticalFlowFeaturesNV optical_flow_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_OPTICAL_FLOW_FEATURES_NV,
+        .pNext = &explicit_mem_layout_feature,
+        .opticalFlow = true,
     };
 
 #if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(60, 26, 0)
     VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptor_buffer_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT,
-        .pNext = &dynamic_rendering_feature,
+        .pNext = &optical_flow_feature,
         .descriptorBuffer = true,
         .descriptorBufferPushDescriptors = true,
     };
@@ -329,16 +400,30 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
 #if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(60, 26, 0)
         .pNext = &descriptor_buffer_feature,
 #else
-        .pNext = &dynamic_rendering_feature,
+        .pNext = &optical_flow_feature,
 #endif
         .shaderBufferFloat32Atomics = true,
         .shaderBufferFloat32AtomicAdd = true,
     };
 
+    /*
+     * Features that libplacebo does not request on its own. The core 1.1-1.3
+     * features it already enables (directly or through its required/recommended
+     * feature chains) are not repeated here.
+     */
+    VkPhysicalDeviceVulkan13Features recommended_vk13 = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+        .pNext = &atomic_float_feature,
+        .dynamicRendering = true,
+        .subgroupSizeControl = true,
+    };
+
     VkPhysicalDeviceVulkan12Features recommended_vk12 = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
-        .pNext = &atomic_float_feature,
+        .pNext = &recommended_vk13,
         .scalarBlockLayout = true,
+        .vulkanMemoryModelAvailabilityVisibilityChains = true,
+        .shaderSubgroupExtendedTypes = true,
         .shaderUniformBufferArrayNonUniformIndexing = true,
         .shaderSampledImageArrayNonUniformIndexing = true,
         .shaderStorageBufferArrayNonUniformIndexing = true,
