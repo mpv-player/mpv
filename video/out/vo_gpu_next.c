@@ -154,6 +154,8 @@ struct priv {
     bool flush_cache;
     bool frame_pending;
     bool paused;
+    int last_ref_white;
+    int last_srgb_power22;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -2988,6 +2990,13 @@ AV_NOWARN_DEPRECATED(
 
     MP_DBG(p, "Render options updated, flushing renderer cache.\n");
     p->flush_cache = p->paused || !p->next_opts->inter_preserve;
+
+    // These options are baked into mapped frames. Reset the queue to map the
+    // queued frames again.
+    p->want_reset = p->want_reset || p->last_ref_white != opts->hdr_reference_white;
+    p->want_reset = p->want_reset || ((p->last_srgb_power22 ^ opts->treat_srgb_as_power22) & 1);
+    p->last_ref_white = opts->hdr_reference_white;
+    p->last_srgb_power22 = opts->treat_srgb_as_power22;
 }
 
 const struct vo_driver video_out_gpu_next = {
