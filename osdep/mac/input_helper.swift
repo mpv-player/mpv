@@ -249,7 +249,7 @@ class InputHelper: NSObject {
         return String(utf16CodeUnits: chars, count: length)
     }
 
-    @objc func open(files: [String], append: Bool = false) {
+    @objc func handleDnd(files: [String], append: Bool = false) {
         lock.withLock {
             guard let input = input else { return }
 

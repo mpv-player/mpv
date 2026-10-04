@@ -113,7 +113,7 @@ class AppHub: NSObject {
             return strL.localizedStandardCompare(strR) == .orderedAscending
         }
         log.verbose("\(openEvents > 0 ? "Appending" : "Opening") dropped files: \(files)")
-        input.open(files: files, append: openEvents > 0)
+        input.handleDnd(files: files, append: openEvents > 0)
         openEvents += 1
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.openEvents -= 1 }
     }
