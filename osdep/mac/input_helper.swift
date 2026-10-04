@@ -249,6 +249,16 @@ class InputHelper: NSObject {
         return String(utf16CodeUnits: chars, count: length)
     }
 
+    func open(files: [String]) {
+        for (index, file) in files.enumerated() {
+            let action = index > 0 ? "append" :
+                (NSEvent.modifierFlags.contains(.shift) ? "append" : "replace")
+            let fileClean = cleanPath(file: file)
+
+            command("loadfile \"\(fileClean)\" \(action)")
+        }
+    }
+
     @objc func handleDnd(files: [String], append: Bool = false) {
         lock.withLock {
             guard let input = input else { return }
@@ -258,11 +268,15 @@ class InputHelper: NSObject {
                 action = NSEvent.modifierFlags.contains(.shift) ? DND_APPEND : DND_REPLACE
             }
 
-            let filesClean = files.map { $0.hasPrefix("file:///.file/id=") ? (URL(string: $0)?.path ?? $0) : $0 }
+            let filesClean = files.map { cleanPath(file: $0) }
             var filesPtr = filesClean.map { UnsafeMutablePointer<CChar>(strdup($0)) }
             mp_input_drop_files(input, Int32(files.count), &filesPtr, action)
             for charPtr in filesPtr { free(UnsafeMutablePointer(mutating: charPtr)) }
         }
+    }
+
+    private func cleanPath(file: String) -> String {
+        return file.hasPrefix("file:///.file/id=") ? (URL(string: file)?.path ?? file) : file
     }
 
     private func useAltGr() -> Bool {
