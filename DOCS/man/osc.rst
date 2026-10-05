@@ -709,6 +709,10 @@ continuously called while the mouse button is held down.
 
 ``maximize_mbtn_right_command=``
 
+``seekbar_wheel_down_command=seek -10``
+
+``seekbar_wheel_up_command=seek 10``
+
 Custom Buttons
 ~~~~~~~~~~~~~~
 

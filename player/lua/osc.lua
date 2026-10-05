@@ -153,6 +153,9 @@ local user_opts = {
     maximize_mbtn_left_command = "cycle ${?fullscreen==yes:fullscreen}${!fullscreen==yes:window-maximized}",
     maximize_mbtn_mid_command = "",
     maximize_mbtn_right_command = "",
+
+    seekbar_wheel_down_command = "seek -10",
+    seekbar_wheel_up_command = "seek 10",
     -- luacheck: pop
 }
 
@@ -2594,9 +2597,9 @@ local function osc_init()
 
     if user_opts.scrollcontrols then
         ne.eventresponder["wheel_up_press"] =
-            function () mp.commandv("osd-auto", "seek",  10) end
+            function () mp.command(user_opts.seekbar_wheel_up_command) end
         ne.eventresponder["wheel_down_press"] =
-            function () mp.commandv("osd-auto", "seek", -10) end
+            function () mp.command(user_opts.seekbar_wheel_down_command) end
     end
 
 
