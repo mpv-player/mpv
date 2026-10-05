@@ -456,7 +456,10 @@ static MP_THREAD_VOID win_event_loop_fn(void *arg)
         });
 
         MSG msg;
-        while(BOOL ret = GetMessageW(&msg, nullptr, 0, 0)) {
+        while (!ctx.close) {
+            BOOL ret = GetMessageW(&msg, nullptr, 0, 0);
+            if (!ret)
+                break;
             if (ret == -1)
                 winrt::throw_last_error();
             TranslateMessage(&msg);
@@ -522,6 +525,7 @@ static MP_THREAD_VOID mpv_event_loop_fn(void *arg)
         if (ctx.close)
             break;
         if (event->event_id == MPV_EVENT_SHUTDOWN) {
+            ctx.close = true;
             HWND hwnd = ctx.hwnd;
             if (hwnd)
                 PostMessageW(hwnd, WM_CLOSE, 0, 0);
