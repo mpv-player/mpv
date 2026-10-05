@@ -1,0 +1,1 @@
+add `osc-seekbar_wheel_down_command` and `osc-seekbar_wheel_up_command` script-opts
