@@ -6,7 +6,7 @@ set -e
 
 objc_args="-Wno-error=deprecated -Wno-error=deprecated-declarations"
 c_args=""
-if [[ "${MACOS_ARCH}" == "test" ]]; then
+if [[ "${MACOS_TARGET_OS}" == "test" ]]; then
     # remove -werror + tests and keep libmpv for test builds only
     common_args="-Dlibmpv=true"
     # add back -werror for compiling only, not for linking
