@@ -100,6 +100,7 @@ typedef struct wasapi_state {
     struct ao_convert_fmt convert_format;
 
     change_notify change;
+    CO_MTA_USAGE_COOKIE hotplug_mta; // the hotplug instance keeps the MTA alive
 } wasapi_state;
 
 char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey);
