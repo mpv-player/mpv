@@ -335,17 +335,18 @@ jobs:
       matrix:
         include:
           - os: "macos-15"
-            arch: "arm"
+            target-os: "macos-15-arm"
           - os: "macos-15-intel"
+            target-os: "macos-15-intel"
             homebrew: "956fbd2598f7b0bc3c7ef72edaa622e19415f6c9"
           - os: "macos-26"
-            arch: "arm"
+            target-os: "macos-26-arm"
           - os: "macos-26"
-            arch: "test"
+            target-os: "test"
             swift: "-target arm64-apple-macosx10.15"
             target: "10.15"
           - os: "xcode-27"
-            arch: "arm"
+            target-os: "macos-27-arm"
     steps:
       - uses: actions/checkout@v7
 
@@ -388,10 +389,10 @@ jobs:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
           SWIFT_FLAGS: "${{ matrix.swift }}"
           MACOSX_DEPLOYMENT_TARGET: "${{ matrix.target }}"
-          MACOS_ARCH: "${{ matrix.arch }}"
+          MACOS_TARGET_OS: "${{ matrix.target-os }}"
 
       - name: Create App Bundle
-        if: ${{ matrix.arch != 'test' }}
+        if: ${{ matrix.target-os != 'test' }}
         run: |
           meson compile -C build macos-bundle
           tar -czvf mpv.tar.gz -C build mpv.app
@@ -416,12 +417,11 @@ jobs:
         run: |
           VERSION_FILE=$(find . -path "*/common/version.h" -type f | head -n 1)
           VER=$(grep VERSION "$VERSION_FILE" | cut -d'"' -f2)
-          TARGET=${{ matrix.os }}${{ matrix.arch != '' && format('-{0}', matrix.arch) || '' }}
           PR=${{ github.event.pull_request.number && format('-pr{0}', github.event.pull_request.number) || '' }}
-          echo "name=mpv-$VER$PR-${{ github.run_id }}-$TARGET" >> "$GITHUB_OUTPUT"
+          echo "name=mpv-$VER$PR-${{ github.run_id }}-${{matrix.target-os}}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v7
-        if: ${{ matrix.arch != 'test' }}
+        if: ${{ matrix.target-os != 'test' }}
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: mpv.tar.gz
