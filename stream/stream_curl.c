@@ -16,6 +16,7 @@
  */
 
 #include <inttypes.h>
+#include <math.h>
 #include <stdatomic.h>
 #include <stdio.h>
 #include <string.h>
@@ -147,6 +148,10 @@ struct curl_ctx {
     struct mp_dispatch_queue *dispatch;
     CURLM *multi;
     bool exit;
+
+    // Set when libcurl cannot be used anymore.
+    const char *error;
+    atomic_bool failed;
 };
 
 // Per-stream state, owned by the curl thread.
@@ -266,6 +271,7 @@ static void run_cmd(void *arg)
         break;
     case CMD_EXIT:
         ctx->exit = true;
+        mp_dispatch_interrupt(ctx->dispatch);
         break;
     }
 }
@@ -297,18 +303,48 @@ static void curl_wakeup(void *arg)
     curl_multi_wakeup(ctx->multi);
 }
 
+static void set_failed(struct curl_ctx *ctx, const char *error)
+{
+    ctx->error = error;
+    atomic_store_explicit(&ctx->failed, true, memory_order_release);
+}
+
+static bool curl_failed(struct curl_ctx *ctx, struct mp_log *log, int level)
+{
+    if (!atomic_load_explicit(&ctx->failed, memory_order_acquire))
+        return false;
+    mp_msg(log, level, "libcurl failed (%s), falling back to lavf\n", ctx->error);
+    return true;
+}
+
 static MP_THREAD_VOID curl_thread(void *arg)
 {
     mp_thread_set_name("curl");
     struct curl_ctx *ctx = arg;
 
-    curl_global_init(CURL_GLOBAL_ALL);
-    ctx->multi = curl_multi_init();
-    curl_multi_setopt(ctx->multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-
-    mp_dispatch_set_wakeup_fn(ctx->dispatch, curl_wakeup, ctx);
+    CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+    if (res == CURLE_OK) {
+        ctx->multi = curl_multi_init();
+        if (!ctx->multi) {
+            res = CURLE_OUT_OF_MEMORY;
+            curl_global_cleanup();
+        }
+    }
+    if (res != CURLE_OK) {
+        set_failed(ctx, curl_easy_strerror(res));
+    } else {
+        curl_multi_setopt(ctx->multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+        mp_dispatch_set_wakeup_fn(ctx->dispatch, curl_wakeup, ctx);
+    }
 
     while (!ctx->exit) {
+        // libcurl is unusable, but commands are still sent to this thread, so
+        // keep serving them until CMD_EXIT, or their senders would wait forever.
+        if (atomic_load_explicit(&ctx->failed, memory_order_relaxed)) {
+            mp_dispatch_queue_process(ctx->dispatch, INFINITY);
+            continue;
+        }
+
         mp_dispatch_queue_process(ctx->dispatch, 0);
 
         // Stop early to avoid delays, this happens only when player is closing.
@@ -317,8 +353,10 @@ static MP_THREAD_VOID curl_thread(void *arg)
 
         int running = 0;
         CURLMcode mres = curl_multi_perform(ctx->multi, &running);
-        if (mres != CURLM_OK && mres != CURLM_CALL_MULTI_PERFORM)
-            break;
+        if (mres != CURLM_OK && mres != CURLM_CALL_MULTI_PERFORM) {
+            set_failed(ctx, curl_multi_strerror(mres));
+            continue;
+        }
 
         CURLMsg *msg;
         int left = 0;
@@ -336,8 +374,10 @@ static MP_THREAD_VOID curl_thread(void *arg)
         curl_multi_poll(ctx->multi, NULL, 0, 1000, NULL);
     }
 
-    curl_multi_cleanup(ctx->multi);
-    curl_global_cleanup();
+    if (ctx->multi) {
+        curl_multi_cleanup(ctx->multi);
+        curl_global_cleanup();
+    }
     MP_THREAD_RETURN();
 }
 
@@ -688,6 +728,11 @@ static void start_request(struct priv *p)
         p->stream_eof = true;
         mp_cond_broadcast(&p->cond);
         mp_mutex_unlock(&p->mtx);
+        return;
+    }
+
+    if (atomic_load_explicit(&p->ctx->failed, memory_order_relaxed)) {
+        request_failed(p);
         return;
     }
 
@@ -1077,6 +1122,8 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     struct curl_opts *opts = mp_get_config_group(s, s->global, &curl_conf);
     if (!opts->enabled)
         return STREAM_NO_MATCH;
+    if (curl_failed(s->global->curl, s->log, MSGL_ERR))
+        return STREAM_NO_MATCH;
 
     struct priv *p = talloc_zero(s, struct priv);
     s->priv = p;
@@ -1114,7 +1161,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
     p->curl = curl_easy_init();
     if (!p->curl) {
         MP_ERR(s, "curl_easy_init failed\n");
-        return STREAM_ERROR;
+        return STREAM_NO_MATCH;
     }
 
     if (!setup_curl(p))
@@ -1129,6 +1176,9 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
         mp_cond_wait(&p->cond, &p->mtx);
     mp_mutex_unlock(&p->mtx);
 
+    // libcurl may have failed while the request was in flight.
+    if (!p->stream_ok && curl_failed(s->global->curl, s->log, MSGL_ERR))
+        return STREAM_NO_MATCH;
     if (!p->stream_ok || atomic_load(&p->aborted))
         return STREAM_ERROR;
 
@@ -1293,6 +1343,8 @@ static int open_curl_transport(struct demuxer *demuxer, AVIOContext **pb_out,
 
     // The context is required to be initialized in global.
     mp_require(demuxer->global && demuxer->global->curl);
+    if (curl_failed(demuxer->global->curl, demuxer->log, MSGL_V))
+        return AVERROR(ENOSYS);
 
     struct curl_open_args oa = {0};
     if (options && *options) {
