@@ -344,6 +344,8 @@ jobs:
             arch: "test"
             swift: "-target arm64-apple-macosx10.15"
             target: "10.15"
+          - os: "xcode-27"
+            arch: "arm"
     steps:
       - uses: actions/checkout@v7
 
