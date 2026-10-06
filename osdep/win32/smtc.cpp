@@ -112,10 +112,18 @@ static inline int mp_set_property(mpv_handle *mpv, const char *name, T &&val)
 struct smtc_ctx {
     mp_log *log;
     mpv_handle *mpv;
+    CO_MTA_USAGE_COOKIE mta{ nullptr };
     SystemMediaTransportControls smtc{ nullptr };
     IAsyncOperation<FileProperties::StorageItemThumbnail> thumb_async{ nullptr };
     std::atomic_bool close{ false };
     std::atomic<HWND> hwnd{ nullptr };
+
+    ~smtc_ctx() {
+        thumb_async = nullptr;
+        smtc = nullptr;
+        if (mta)
+            CoDecrementMTAUsage(mta);
+    }
 };
 
 static void update_state(SystemMediaTransportControls &smtc, mpv_handle *mpv)
@@ -383,6 +391,8 @@ static MP_THREAD_VOID win_event_loop_fn(void *arg)
                                    nullptr, nullptr, wc.hInstance, nullptr);
         if (!ctx.hwnd)
             winrt::throw_last_error();
+
+        winrt::check_hresult(CoIncrementMTAUsage(&ctx.mta));
 
         SystemMediaTransportControls &smtc = ctx.smtc;
         auto interop = winrt::get_activation_factory<SystemMediaTransportControls,
