@@ -2340,6 +2340,10 @@ static bool read_packet(struct demux_internal *in)
     // safe-guards against packet queue overflow.
     bool read_more = false, prefetch_more = false, refresh_more = false;
     uint64_t total_fw_bytes = 0;
+    for (int n = 0; n < in->num_streams; n++)
+        total_fw_bytes += get_forward_buffered_bytes(in->streams[n]->ds);
+    if (in->hyst_bytes > 0 && total_fw_bytes <= in->hyst_bytes)
+        in->hyst_active = false;
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
         if (ds->eager) {
@@ -2364,14 +2368,6 @@ static bool read_packet(struct demux_internal *in)
             if (!in->hyst_active)
                 prefetch_more |= ds->queue->last_ts - ds->base_ts < in->min_secs;
         }
-        total_fw_bytes += get_forward_buffered_bytes(ds);
-    }
-
-    if (in->hyst_active && in->hyst_bytes > 0 &&
-        total_fw_bytes <= in->hyst_bytes)
-    {
-        in->hyst_active = false;
-        prefetch_more |= true;
     }
 
     // While interactive disc navigation is active, never read ahead. It would
