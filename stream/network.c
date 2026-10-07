@@ -93,10 +93,11 @@ void mp_icy_reset(struct mp_icy *i)
 void mp_icy_add_header(struct mp_icy *i, bstr line)
 {
     bstr name, val;
-    if (!bstr_split_tok(line, ": ", &name, &val))
+    if (!bstr_split_tok(line, ":", &name, &val))
         return;
     if (!bstr_case_startswith(name, bstr0("Icy-")))
         return;
+    val = bstr_strip(val);
 
     if (bstrcasecmp0(name, "Icy-MetaInt") == 0) {
         long long mi = bstrtoll(val, NULL, 10);
