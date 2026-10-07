@@ -187,7 +187,7 @@ static int overlay_frame(struct ra_hwdec *hw, struct mp_image *hw_image,
             int dstw = MP_ALIGN_UP(p->dst.x1 - p->dst.x0, 2);
             int dsth = MP_ALIGN_UP(p->dst.y1 - p->dst.y0, 2);
 
-            if (drm_prime_create_framebuffer(p->log, p->ctx->fd, desc, srcw, srch, &next_frame.fb, &p->handle_refs)) {
+            if (drm_prime_create_framebuffer(p->log, p->ctx->fd, desc, hw_image->w, hw_image->h, &next_frame.fb, &p->handle_refs)) {
                 ret = -1;
                 goto fail;
             }
