@@ -422,7 +422,7 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
     }
     // Subtract 1 for the header. If the status message itself contains this
     // list, the header was already counted upper, which leaves one spare line.
-    max_lines--;
+    max_lines = MPMAX(max_lines - 1, 0);
 
     int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
     char *head = skip_n_lines(text, start);
