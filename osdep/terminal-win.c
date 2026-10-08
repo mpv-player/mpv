@@ -104,8 +104,9 @@ void terminal_get_size(int *w, int *h)
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
     HANDLE hOut = hSTDOUT;
     if (GetConsoleScreenBufferInfo(hOut, &cinfo)) {
-        *w = cinfo.dwMaximumWindowSize.X - (is_native_out_vt(hOut) ? 0 : 1);
-        *h = cinfo.dwMaximumWindowSize.Y;
+        *w = cinfo.srWindow.Right - cinfo.srWindow.Left + 1 -
+             (is_native_out_vt(hOut) ? 0 : 1);
+        *h = cinfo.srWindow.Bottom - cinfo.srWindow.Top + 1;
     }
 }
 
