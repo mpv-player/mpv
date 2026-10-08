@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdatomic.h>
+
 #include "ao.h"
 #include "audio/format.h"
 #include "audio/out/ao_coreaudio_chmap.h"
@@ -45,6 +47,7 @@ struct priv {
     CMAudioFormatDescriptionRef format_description;
     AVObserver *observer;
     int64_t end_time_av;
+    atomic_bool paused;
 };
 
 static int64_t CMTimeGetNanoseconds(CMTime time)
@@ -153,6 +156,7 @@ static void start(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
+    atomic_store(&p->paused, false);
     p->end_time_av = -1;
     [p->synchronizer setRate:1];
     request_media_data(ao);
@@ -173,6 +177,7 @@ static bool set_pause(struct ao *ao, bool paused)
 {
     struct priv *p = ao->priv;
 
+    atomic_store(&p->paused, paused);
     if (paused) {
         [p->renderer stopRequestingMediaData];
         [p->synchronizer setRate:0];
@@ -219,8 +224,16 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     MP_WARN(ao, "restarting due to system notification; this will cause desync\n");
     MP_VERBOSE(ao, "notification name: %s\n", name);
     talloc_free(name);
+    struct priv *p = ao->priv;
     stop(ao);
-    start(ao);
+    if (atomic_load(&p->paused)) {
+        // Keep the renderer stopped; set_pause(false) requests media data
+        // again. The flushed buffers are gone, so enqueue from the current
+        // time on resume.
+        p->end_time_av = -1;
+    } else {
+        start(ao);
+    }
 }
 @end
 
