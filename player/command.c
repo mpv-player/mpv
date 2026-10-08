@@ -127,6 +127,9 @@ struct command_ctx {
     int hwdec_osd_mode;
 
     double cached_window_scale;
+
+    // Set while cut_osd_list() expands --term-status-msg to count its lines.
+    bool measuring_status_msg;
 };
 
 static const struct m_option script_props_type = {
@@ -390,30 +393,46 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
         return text;
 
     int max_lines;
+    char *new = talloc_asprintf(NULL, "%s [%d/%d]:", header, pos + 1, count);
+
     if (mpctx->video_out && mpctx->opts->video_osd) {
         int screen_h, font_h;
         osd_get_text_size(mpctx->osd, &screen_h, &font_h);
         max_lines = screen_h / MPMAX(font_h, 1);
+    } else if (mpctx->command_ctx->measuring_status_msg) {
+        // Called recursively from mp_property_expand_escaped_string() below, so
+        // we must not call it again here. Return only the header, so inner call
+        // expands this list with single line and outer call uses that to
+        // evaluate status_msg line count and add fill the list body.
+        //
+        // If a list shown elsewhere (e.g. show-text ${playlist}) measures a
+        // status message that contains another list property, it is counted as
+        // a single line and may exceed the terminal. (so as multiple list
+        // property added on status_msg)
+        goto done;
     } else {
         int w = -1;
         max_lines = 24;
         terminal_get_size(&w, &max_lines);
+        mpctx->command_ctx->measuring_status_msg = true;
         char *msg = mp_property_expand_escaped_string(mpctx, mpctx->opts->status_msg);
+        mpctx->command_ctx->measuring_status_msg = false;
         max_lines -= msg[0] ? count_lines(msg) : 1;
         talloc_free(msg);
     }
-    // Subtract 1 for the header.
+    // Subtract 1 for the header. If the status message itself contains this
+    // list, the header was already counted upper, which leaves one spare line.
     max_lines--;
 
-    char *new = talloc_asprintf(NULL, "%s [%d/%d]:\n", header, pos + 1, count);
     int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
     char *head = skip_n_lines(text, start);
     char *tail = skip_n_lines(head, max_lines);
-    new = talloc_asprintf_append_buffer(new, "%.*s",
+    new = talloc_asprintf_append_buffer(new, "\n%.*s",
                             (int)(tail ? tail - head : strlen(head)), head);
     // Strip the final newline to not print it in the terminal.
     new[strlen(new) - 1] = '\0';
 
+done:
     talloc_free(text);
     return new;
 }
