@@ -421,14 +421,16 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
         max_lines -= MPMAX(mpctx->term_osd_status ? count_lines(mpctx->term_osd_status) : 0, 1);
     }
     // Subtract 1 for the header.
-    max_lines--;
+    max_lines = MPMAX(max_lines - 1, 0);
 
     char *new = talloc_asprintf(NULL, "%s [%d/%d]:\n", header, pos + 1, count);
-    int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
-    char *head = skip_n_lines(text, start);
-    char *tail = skip_n_lines(head, max_lines);
-    new = talloc_asprintf_append_buffer(new, "%.*s",
-                            (int)(tail ? tail - head : strlen(head)), head);
+    if (max_lines > 0) {
+        int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
+        char *head = skip_n_lines(text, start);
+        char *tail = skip_n_lines(head, max_lines);
+        new = talloc_asprintf_append_buffer(new, "%.*s",
+                                (int)(tail ? tail - head : strlen(head)), head);
+    }
     // Strip the final newline to not print it in the terminal.
     new[strlen(new) - 1] = '\0';
 
