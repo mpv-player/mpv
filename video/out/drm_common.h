@@ -147,6 +147,7 @@ struct vo_drm_state {
     char *card_path;
     int card_no;
     int fd;
+    int wakeup_pipe[2];
 
     uint32_t crtc_id;
     uint32_t height;
