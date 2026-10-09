@@ -1,0 +1,1 @@
+add `--status-msg-update-rate` and `--status-msg-update-rate-forced options`
