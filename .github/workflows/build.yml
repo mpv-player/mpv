@@ -37,7 +37,8 @@ concurrency:
 
 jobs:
   mingw:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container: ubuntu:26.10
     env:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -54,6 +55,16 @@ jobs:
           - arch: x86_64
             wine: wine64
     steps:
+      - name: Install dependencies
+        run: |
+          dpkg --add-architecture i386
+          apt-get update
+          apt-get install --no-install-recommends -y ca-certificates ccache cmake g++-mingw-w64 gcc-multilib git make meson nasm ninja-build pkgconf rustup wget xz-utils ${{ matrix.wine }} wine
+          rustup default stable
+          rustup target add ${{ env.RUST_TARGET }}
+        env:
+          DEBIAN_FRONTEND: noninteractive
+
       - uses: actions/checkout@v7
 
       - name: Get time
@@ -66,14 +77,6 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ env.TARGET }}-${{ steps.get_time.outputs.timestamp }}
           restore-keys: ${{ env.TARGET }}-
-
-      - name: Install dependencies
-        run: |
-          rustup target add ${{ env.RUST_TARGET }}
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y ccache g++-mingw-w64 gcc-multilib python3-pip nasm ninja-build pkgconf ${{ matrix.wine }} wine
-          python -m pip install meson
 
       - name: Install Meson Wraps
         run: |
