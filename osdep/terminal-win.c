@@ -127,8 +127,10 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
     int w = 0, h = 0, fw = 0, fh = 0;
     terminal_get_size(&w, &h);
     if (get_font_size(&fw, &fh)) {
-        *px_width = fw * w;
-        *px_height = fh * h;
+        if (fw > 0 && fh > 0) {
+            *px_width = fw * w;
+            *px_height = fh * h;
+        }
         *rows = h;
         *cols = w;
     }
