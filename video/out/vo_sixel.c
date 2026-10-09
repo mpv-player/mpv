@@ -37,6 +37,7 @@
 #include "osdep/terminal.h"
 #include "osdep/threads.h"
 #include "sub/osd.h"
+#include "terminal_swapchain.h"
 #include "vo.h"
 #include "video/sws_utils.h"
 #include "video/mp_image.h"
@@ -85,7 +86,7 @@ struct slice {
     sixel_dither_t *indexed; // the same palette, encodes the dithered indices
     int palette_gen;        // priv->palette_gen the dithers were made for
     uint8_t *scratch;       // the slice with its extra rows, dithered here
-    char *buf;              // the encoded sequence
+    bstr raw;               // the encoded image
     SIXELSTATUS status;
 };
 
@@ -114,6 +115,7 @@ struct priv {
     mp_mutex lock;      // protects pending
     mp_cond cond;
     int pending;        // slices still being encoded
+    struct terminal_swapchain *swapchain;
 
     int previous_histogram_colors;
 
@@ -165,7 +167,7 @@ static void free_slices(struct priv *priv)
             sixel_dither_unref(s->indexed);
         if (s->allocator)
             sixel_allocator_unref(s->allocator);
-        talloc_free(s->buf);
+        talloc_free(s->raw.start);
     }
     talloc_free(priv->slices);
     priv->slices = NULL;
@@ -343,9 +345,10 @@ static void set_sixel_output_parameters(struct vo *vo)
     priv->left = (priv->opts.left > 0) ? priv->opts.left : 1;
 }
 
-static inline int sixel_buffer(char *data, int size, void *priv) {
-    char **out = (char **)priv;
-    *out = talloc_strndup_append_buffer(*out, data, size);
+// Collects the encoded image in a slice's buffer, which keeps its memory.
+static int sixel_buffer(char *data, int size, void *priv)
+{
+    bstr_xappend(NULL, priv, (bstr){data, size});
     return size;
 }
 
@@ -381,7 +384,7 @@ static int setup_slices(struct vo *vo)
         // slice frees them with the same one.
         SIXELSTATUS status = sixel_allocator_new(&s->allocator, NULL, NULL, NULL, NULL);
         if (SIXEL_SUCCEEDED(status))
-            status = sixel_output_new(&s->output, sixel_buffer, &s->buf, s->allocator);
+            status = sixel_output_new(&s->output, sixel_buffer, &s->raw, s->allocator);
         if (SIXEL_FAILED(status)) {
             MP_ERR(vo, "Failed to create a sixel output: %s\n",
                    sixel_helper_format_error(status));
@@ -477,8 +480,7 @@ static void encode_slice(void *ctx)
     struct vo *vo = s->vo;
     struct priv *priv = vo->priv;
 
-    talloc_free(s->buf);
-    s->buf = NULL;
+    s->raw.len = 0;
     s->status = slice_dither(s);
     if (SIXEL_SUCCEEDED(s->status)) {
         // Dither the slice with the rows around it, from a copy, since the
@@ -576,39 +578,6 @@ static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
     return setup_slices(vo);
 }
 
-static inline int sixel_write(char *data, int size, void *priv)
-{
-    FILE *p = (FILE *)priv;
-    // On POSIX platforms, write() is the fastest method. It also is the only
-    // one that allows atomic writes so mpv’s output will not be interrupted
-    // by other processes or threads that write to stdout, which would cause
-    // screen corruption. POSIX does not guarantee atomicity for writes
-    // exceeding PIPE_BUF, but at least Linux does seem to implement it that
-    // way.
-#if HAVE_POSIX
-    int remain = size;
-
-    while (remain > 0) {
-        ssize_t written = write(fileno(p), data, remain);
-        if (written < 0)
-            return written;
-        remain -= written;
-        data += written;
-    }
-
-    return size;
-#else
-    int ret = fwrite(data, 1, size, p);
-    fflush(p);
-    return ret;
-#endif
-}
-
-static inline void sixel_strwrite(char *s)
-{
-    sixel_write(s, strlen(s), stdout);
-}
-
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *priv = vo->priv;
@@ -620,9 +589,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     }
 
     if (priv->opts.config_clear) {
-        terminal_lock_output();
-        sixel_strwrite(TERM_ESC_CLEAR_SCREEN);
-        terminal_unlock_output();
+        bstr_xappend(NULL, terminal_swapchain_next(priv->swapchain),
+                     (bstr)bstr0_lit(TERM_ESC_CLEAR_SCREEN));
     }
     vo->want_redraw = true;
 
@@ -653,9 +621,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         update_sixel_swscaler(vo, vo->params);
 
         if (priv->opts.config_clear) {
-            terminal_lock_output();
-            sixel_strwrite(TERM_ESC_CLEAR_SCREEN);
-            terminal_unlock_output();
+            bstr_xappend(NULL, terminal_swapchain_next(priv->swapchain),
+                         (bstr)bstr0_lit(TERM_ESC_CLEAR_SCREEN));
         }
         resized = true;
     }
@@ -735,24 +702,16 @@ static void flip_page(struct vo *vo)
         return;
 
     // Go to the row and column of each slice, then display it
-    bstr out = {0};
-    terminal_lock_output();
+    bstr *out = terminal_swapchain_acquire(priv->swapchain);
     for (int i = 0; i < priv->num_slices; i++) {
         struct slice *s = &priv->slices[i];
-        if (SIXEL_FAILED(s->status) || !s->buf)
+        if (SIXEL_FAILED(s->status) || !s->raw.len)
             continue;
-        bstr_xappend_asprintf(NULL, &out, TERM_ESC_GOTO_YX,
+        bstr_xappend_asprintf(NULL, out, TERM_ESC_GOTO_YX,
                               priv->top + i * priv->slice_rows, priv->left);
-        bstr_xappend(NULL, &out, bstr0(s->buf));
-        if (!priv->opts.buffered) {
-            sixel_write(out.start, out.len, stdout);
-            out.len = 0;
-        }
+        bstr_xappend(NULL, out, s->raw);
     }
-    if (out.len)
-        sixel_write(out.start, out.len, stdout);
-    terminal_unlock_output();
-    talloc_free(out.start);
+    terminal_swapchain_present(priv->swapchain, out);
 }
 
 static int preinit(struct vo *vo)
@@ -775,17 +734,16 @@ static int preinit(struct vo *vo)
     }
     int threads = av_cpu_count() + 1;
     priv->pool = mp_thread_pool_create(priv, 0, 1, MPMAX(threads, 1));
+    priv->swapchain = terminal_swapchain_create(vo);
 
-    terminal_lock_output();
+    bstr *out = terminal_swapchain_acquire(priv->swapchain);
     if (priv->opts.alt_screen)
-        sixel_strwrite(TERM_ESC_ALT_SCREEN);
-
-    sixel_strwrite(TERM_ESC_HIDE_CURSOR);
-    terminal_set_mouse_input(true);
-
+        bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_ALT_SCREEN));
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_HIDE_CURSOR));
     /* don't use private color registers for each frame. */
-    sixel_strwrite(TERM_ESC_USE_GLOBAL_COLOR_REG);
-    terminal_unlock_output();
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_USE_GLOBAL_COLOR_REG));
+    terminal_swapchain_present(priv->swapchain, out);
+    terminal_set_mouse_input(true);
 
     priv->dither = NULL;
 
@@ -821,14 +779,14 @@ static void uninit(struct vo *vo)
 {
     struct priv *priv = vo->priv;
 
-    terminal_lock_output();
-    sixel_strwrite(TERM_ESC_RESTORE_CURSOR);
-    terminal_set_mouse_input(false);
-
+    bstr *out = terminal_swapchain_acquire(priv->swapchain);
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_RESTORE_CURSOR));
     if (priv->opts.alt_screen)
-        sixel_strwrite(TERM_ESC_NORMAL_SCREEN);
-    fflush(stdout);
-    terminal_unlock_output();
+        bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_NORMAL_SCREEN));
+    terminal_swapchain_present(priv->swapchain, out);
+    terminal_set_mouse_input(false);
+    terminal_swapchain_destroy(priv->swapchain);
+    priv->swapchain = NULL;
 
     talloc_free(priv->pool);
     priv->pool = NULL;
@@ -884,7 +842,8 @@ const struct vo_driver video_out_sixel = {
         {"cols", OPT_INT(opts.cols)},
         {"config-clear", OPT_BOOL(opts.config_clear), },
         {"alt-screen", OPT_BOOL(opts.alt_screen), },
-        {"buffered", OPT_BOOL(opts.buffered), },
+        {"buffered", OPT_BOOL(opts.buffered),
+            .deprecation_message = "frames are written in one piece"},
         {0}
     },
     .options_prefix = "vo-sixel",

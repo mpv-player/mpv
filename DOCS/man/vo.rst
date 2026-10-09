@@ -521,13 +521,6 @@ Available video output drivers are:
         ``--vo-sixel-exit-clear`` is a deprecated alias for this option and
         may be removed in the future.
 
-    ``--vo-sixel-buffered=<yes|no>`` (default: no)
-        Buffers the full output sequence before writing it to the terminal.
-        On POSIX platforms, this can help prevent interruption (including from
-        other applications) and thus broken images, but may come at a
-        performance cost with some terminals and is subject to implementation
-        details.
-
     Sixel image quality options:
 
     ``--vo-sixel-dither=<algo>``
