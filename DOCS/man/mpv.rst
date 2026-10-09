@@ -1621,6 +1621,8 @@ works like in older mpv releases:
 
 .. include:: javascript.rst
 
+.. include:: python.rst
+
 .. include:: ipc.rst
 
 .. include:: changes.rst
