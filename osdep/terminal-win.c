@@ -541,12 +541,10 @@ int mp_console_write(HANDLE wstream, bstr str)
     }
 
 done:;
-    int ret = buffers->write_console_buf.len;
-
     if (free_buf)
         talloc_free(buffers);
 
-    return ret;
+    return str.len;
 }
 
 static bool is_a_console(HANDLE h)
