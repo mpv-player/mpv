@@ -350,8 +350,12 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
     struct buffer *buf = &writebuf;
     init_buf(buf, length + 1); // with room for terminating '\0'
 
-    // pre-text headers into buf, rp is the (null-terminated) remaining text
-    char *ass = talloc_strndup(NULL, data, length), *rp = ass;
+    // pre-text headers into buf, rp is the (null-terminated) remaining text.
+    // toff indexes all of data, which is length delimited and may contain a
+    // '\0', so copy every byte instead of stopping at the first one.
+    char *ass = talloc_size(NULL, length + 1), *rp = ass;
+    memcpy(ass, data, length);
+    ass[length] = '\0';
     while (rp - ass < toff)
         append(sd, buf, *rp++);
 
