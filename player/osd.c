@@ -177,12 +177,12 @@ static bool is_busy(struct MPContext *mpctx)
     return !mpctx->restart_complete && mp_time_sec() - mpctx->start_timestamp > 0.3;
 }
 
-static char *get_term_status_msg(struct MPContext *mpctx)
+static char *get_term_status_msg(struct MPContext *mpctx, int max_lines)
 {
     struct MPOpts *opts = mpctx->opts;
 
     if (opts->status_msg)
-        return mp_property_expand_escaped_string(mpctx, opts->status_msg);
+        return mp_property_expand_status_msg(mpctx, opts->status_msg, max_lines);
 
     char *line = NULL;
 
@@ -295,12 +295,28 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
         return;
     }
 
-    char *line = get_term_status_msg(mpctx);
+    int w = 80, h = 24;
+    terminal_get_size(&w, &h);
+
+    // Reserve rows for subtitles, OSD text and term-osd-bar before expanding
+    // status message.
+    char *parts[] = {mpctx->term_osd_subs[0], mpctx->term_osd_subs[1],
+                     mpctx->term_osd_text};
+    for (int n = 0; n < MP_ARRAY_SIZE(parts); n++) {
+        char *text = parts[n];
+        if (term_osd_empty(text))
+            continue;
+        h--;
+        while ((text = strchr(text, '\n')))
+            text++, h--;
+    }
+    if (opts->term_osd_bar)
+        h--;
+
+    char *line = get_term_status_msg(mpctx, h);
 
     if (opts->term_osd_bar) {
         saddf(&line, "\n");
-        int w = 80, h = 24;
-        terminal_get_size(&w, &h);
         add_term_osd_bar(mpctx, &line, w);
     }
 
