@@ -27,13 +27,24 @@
 #include <libswscale/swscale.h>
 #include <sixel.h>
 
+#include <libavutil/cpu.h>
+
 #include "config.h"
+#include "misc/bstr.h"
+#include "misc/mp_assert.h"
+#include "misc/thread_pool.h"
 #include "options/m_config.h"
 #include "osdep/terminal.h"
+#include "osdep/threads.h"
 #include "sub/osd.h"
 #include "vo.h"
 #include "video/sws_utils.h"
 #include "video/mp_image.h"
+
+// Exported by every libsixel, but not in public headers.
+SIXELAPI sixel_index_t *sixel_dither_apply_palette(sixel_dither_t *dither,
+                                                   unsigned char *pixels,
+                                                   int width, int height);
 
 #define IMGFMT IMGFMT_RGB24
 
@@ -56,22 +67,53 @@ struct vo_sixel_opts {
     bool buffered;
 };
 
+// Rows above a slice that are dithered with it, so the error diffusion has
+// settled when it reaches the slice, and a band below it, so the slice's
+// last row diffuses its error like every other row instead of being the
+// last row of the image. The indices of both are dropped before the slice
+// is encoded.
+#define SLICE_WARMUP 12
+#define SLICE_TAIL 6
+
+// A horizontal part of the canvas, encoded as a sixel image of its own.
+struct slice {
+    struct vo *vo;
+    int y, h;               // pixel rows in the canvas
+    sixel_allocator_t *allocator;
+    sixel_output_t *output;
+    sixel_dither_t *dither; // same palette as priv->dither, dithers the rows
+    sixel_dither_t *indexed; // the same palette, encodes the dithered indices
+    int palette_gen;        // priv->palette_gen the dithers were made for
+    uint8_t *scratch;       // the slice with its extra rows, dithered here
+    char *buf;              // the encoded sequence
+    SIXELSTATUS status;
+};
+
 struct priv {
     // User specified options
     struct vo_sixel_opts opts;
 
     // Internal data
-    sixel_output_t *output;
     sixel_dither_t *dither;
     sixel_dither_t *testdither;
     uint8_t        *buffer;
-    char           *sixel_output_buf;
     bool            skip_frame_draw;
 
     int left, top;  // image origin cell (1 based)
     int width, height;  // actual image px size - always reflects dst_rect.
     int num_cols, num_rows;  // terminal size in cells
+    int cell_h;     // cell height in pixels, 0 if unknown
     int canvas_ok;  // whether canvas vo->dwidth and vo->dheight are positive
+
+    struct mp_thread_pool *pool;
+    struct slice *slices;
+    int num_slices;
+    int slice_rows;     // cell rows per slice
+    int palette_gen;    // counts the dithers priv->dither pointed to
+    uint8_t *calib;     // the centre of every 5-bit colour bucket
+    mp_mutex lock;      // protects pending
+    mp_cond cond;
+    int pending;        // slices still being encoded
 
     int previous_histogram_colors;
 
@@ -111,9 +153,30 @@ static int detect_scene_change(struct vo* vo)
 
 }
 
+static void free_slices(struct priv *priv)
+{
+    for (int i = 0; i < priv->num_slices; i++) {
+        struct slice *s = &priv->slices[i];
+        if (s->output)
+            sixel_output_unref(s->output);
+        if (s->dither)
+            sixel_dither_unref(s->dither);
+        if (s->indexed)
+            sixel_dither_unref(s->indexed);
+        if (s->allocator)
+            sixel_allocator_unref(s->allocator);
+        talloc_free(s->buf);
+    }
+    talloc_free(priv->slices);
+    priv->slices = NULL;
+    priv->num_slices = 0;
+}
+
 static void dealloc_dithers_and_buffers(struct vo* vo)
 {
     struct priv* priv = vo->priv;
+
+    free_slices(priv);
 
     if (priv->buffer) {
         talloc_free(priv->buffer);
@@ -146,6 +209,7 @@ static SIXELSTATUS prepare_static_palette(struct vo* vo)
             return SIXEL_FALSE;
 
         sixel_dither_set_diffusion_type(priv->dither, priv->opts.diffuse);
+        priv->palette_gen++;
     }
 
     sixel_dither_set_body_only(priv->dither, 0);
@@ -174,6 +238,7 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
         }
 
         priv->dither = priv->testdither;
+        priv->palette_gen++;
         status = sixel_dither_new(&priv->testdither, priv->opts.reqcolors, NULL);
 
         if (SIXEL_FAILED(status))
@@ -254,6 +319,7 @@ static void update_canvas_dimensions(struct vo *vo)
 
     priv->num_rows = num_rows;
     priv->num_cols = num_cols;
+    priv->cell_h = total_px_height % num_rows ? 0 : total_px_height / num_rows;
 
     priv->canvas_ok = vo->dwidth > 0 && vo->dheight > 0;
 }
@@ -275,6 +341,195 @@ static void set_sixel_output_parameters(struct vo *vo)
     // top/left values must be greater than 1. The canvas starts there.
     priv->top  = (priv->opts.top  > 0) ? priv->opts.top  : 1;
     priv->left = (priv->opts.left > 0) ? priv->opts.left : 1;
+}
+
+static inline int sixel_buffer(char *data, int size, void *priv) {
+    char **out = (char **)priv;
+    *out = talloc_strndup_append_buffer(*out, data, size);
+    return size;
+}
+
+// Slices start on a cell row, so they can be placed with the cursor, and
+// hold whole sixel bands of 6 rows.
+static int setup_slices(struct vo *vo)
+{
+    struct priv *priv = vo->priv;
+    free_slices(priv);
+
+    int px = vo->dheight;
+    int rows = 0;
+    if (priv->cell_h > 0) {
+        // Whole sixel bands, at least three times the rows dithered around a slice.
+        int unit = 6 / (priv->cell_h % 3 ? 1 : 3) / (priv->cell_h % 2 ? 1 : 2);
+        rows = unit;
+        while (rows * priv->cell_h < 3 * (SLICE_WARMUP + SLICE_TAIL))
+            rows += unit;
+        px = rows * priv->cell_h;
+    }
+    priv->slice_rows = rows;
+    priv->num_slices = (vo->dheight + px - 1) / px;
+    priv->slices = talloc_zero_array(NULL, struct slice, priv->num_slices);
+    for (int i = 0; i < priv->num_slices; i++) {
+        struct slice *s = &priv->slices[i];
+        s->vo = vo;
+        s->y = i * px;
+        s->h = MPMIN(px, vo->dheight - s->y);
+        s->palette_gen = -1;
+        s->scratch = talloc_array(priv->slices, uint8_t,
+                                  (SLICE_WARMUP + s->h + SLICE_TAIL) * vo->dwidth * depth);
+        // The dithered indices come from the dither's allocator, and the
+        // slice frees them with the same one.
+        SIXELSTATUS status = sixel_allocator_new(&s->allocator, NULL, NULL, NULL, NULL);
+        if (SIXEL_SUCCEEDED(status))
+            status = sixel_output_new(&s->output, sixel_buffer, &s->buf, s->allocator);
+        if (SIXEL_FAILED(status)) {
+            MP_ERR(vo, "Failed to create a sixel output: %s\n",
+                   sixel_helper_format_error(status));
+            return -1;
+        }
+        sixel_output_set_encode_policy(s->output, SIXEL_ENCODEPOLICY_FAST);
+    }
+    return 0;
+}
+
+static int sixel_discard(char *data, int size, void *priv)
+{
+    return size;
+}
+
+// libsixel caches the palette entry it chose for the first color it saw
+// in each 5-bit colour bucket, so two dithers can quantize the same colour
+// differently. Feed every bucket's centre first, so the slices, and all
+// frames, choose alike. The dither is left without diffusion.
+static SIXELSTATUS prime_cache(struct priv *priv, sixel_dither_t *dither)
+{
+    sixel_output_t *output = NULL;
+    SIXELSTATUS status = sixel_output_new(&output, sixel_discard, NULL, NULL);
+    if (SIXEL_FAILED(status))
+        return status;
+    sixel_dither_set_diffusion_type(dither, SIXEL_DIFFUSE_NONE);
+    status = sixel_encode(priv->calib, 32 * 32, 32, depth, dither, output);
+    sixel_output_unref(output);
+    return status;
+}
+
+// Give the slice its dithers with the palette priv->dither has.
+static SIXELSTATUS slice_dither(struct slice *s)
+{
+    struct vo *vo = s->vo;
+    struct priv *priv = vo->priv;
+    if (s->dither && s->palette_gen == priv->palette_gen)
+        return SIXEL_OK;
+    if (s->dither) {
+        sixel_dither_unref(s->dither);
+        s->dither = NULL;
+    }
+    if (s->indexed) {
+        sixel_dither_unref(s->indexed);
+        s->indexed = NULL;
+    }
+
+    // Only sixel_dither_initialize() gives a dither the colour cache of its
+    // fast lookup, and it takes the palette from an image: one pixel per
+    // colour, each in its own bucket of libsixel's 5-bit histogram, is kept
+    // as it is, and the frame's palette replaces it afterwards.
+    int ncolors = sixel_dither_get_num_of_palette_colors(priv->dither);
+    unsigned char *palette = sixel_dither_get_palette(priv->dither);
+    unsigned char buckets[SIXEL_PALETTE_MAX * 3];
+    for (int i = 0; i < ncolors; i++) {
+        buckets[i * 3] = (i >> 5) << 5;
+        buckets[i * 3 + 1] = ((i >> 2) & 7) << 5;
+        buckets[i * 3 + 2] = (i & 3) << 6;
+    }
+    SIXELSTATUS status = sixel_dither_new(&s->dither, ncolors, s->allocator);
+    if (SIXEL_FAILED(status))
+        return status;
+    status = sixel_dither_initialize(s->dither, buckets, ncolors, 1,
+                                     SIXEL_PIXELFORMAT_RGB888,
+                                     LARGE_NORM, REP_CENTER_BOX, QUALITY_LOW);
+    if (SIXEL_FAILED(status))
+        return status;
+    mp_assert(sixel_dither_get_num_of_palette_colors(s->dither) == ncolors);
+    sixel_dither_set_palette(s->dither, palette);
+    // A dynamic palette is rebuilt on every change, by default every
+    // frame, so only the fixed one is worth priming.
+    if (priv->opts.fixedpal) {
+        status = prime_cache(priv, s->dither);
+        if (SIXEL_FAILED(status))
+            return status;
+    }
+    sixel_dither_set_diffusion_type(s->dither, priv->opts.diffuse);
+
+    // The encoder takes the palette and the indices from this one.
+    status = sixel_dither_new(&s->indexed, ncolors, s->allocator);
+    if (SIXEL_FAILED(status))
+        return status;
+    sixel_dither_set_pixelformat(s->indexed, SIXEL_PIXELFORMAT_PAL8);
+    sixel_dither_set_palette(s->indexed, palette);
+    sixel_dither_set_body_only(s->indexed, 0);
+    s->palette_gen = priv->palette_gen;
+    return status;
+}
+
+static void encode_slice(void *ctx)
+{
+    struct slice *s = ctx;
+    struct vo *vo = s->vo;
+    struct priv *priv = vo->priv;
+
+    talloc_free(s->buf);
+    s->buf = NULL;
+    s->status = slice_dither(s);
+    if (SIXEL_SUCCEEDED(s->status)) {
+        // Dither the slice with the rows around it, from a copy, since the
+        // diffusion writes into the image and those rows belong to other
+        // slices being encoded at the same time, then encode the slice's
+        // own rows of the indices.
+        int warm = MPMIN(SLICE_WARMUP, s->y);
+        int tail = s->y + s->h < vo->dheight ? SLICE_TAIL : 0;
+        size_t stride = vo->dwidth * depth;
+        memcpy_pic(s->scratch,
+                   priv->frame->planes[0] + (s->y - warm) * priv->frame->stride[0],
+                   stride, warm + s->h + tail, stride, priv->frame->stride[0]);
+        sixel_index_t *indices = sixel_dither_apply_palette(s->dither, s->scratch,
+                                                            vo->dwidth,
+                                                            warm + s->h + tail);
+        if (indices) {
+            s->status = sixel_encode(indices + warm * vo->dwidth, vo->dwidth,
+                                     s->h, 1, s->indexed, s->output);
+            sixel_allocator_free(s->allocator, indices);
+        } else {
+            s->status = SIXEL_RUNTIME_ERROR;
+        }
+    }
+
+    mp_mutex_lock(&priv->lock);
+    priv->pending--;
+    mp_cond_broadcast(&priv->cond);
+    mp_mutex_unlock(&priv->lock);
+}
+
+static void encode_slices(struct vo *vo)
+{
+    struct priv *priv = vo->priv;
+
+    priv->pending = priv->num_slices;
+    for (int i = 0; i < priv->num_slices; i++) {
+        if (!mp_thread_pool_queue(priv->pool, encode_slice, &priv->slices[i]))
+            encode_slice(&priv->slices[i]);
+    }
+    mp_mutex_lock(&priv->lock);
+    while (priv->pending)
+        mp_cond_wait(&priv->cond, &priv->lock);
+    mp_mutex_unlock(&priv->lock);
+
+    for (int i = 0; i < priv->num_slices; i++) {
+        if (SIXEL_FAILED(priv->slices[i].status)) {
+            MP_WARN(vo, "Failed to encode the frame: %s\n",
+                    sixel_helper_format_error(priv->slices[i].status));
+            break;
+        }
+    }
 }
 
 static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
@@ -313,16 +568,12 @@ static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
         }
     }
 
-    priv->buffer =
-        talloc_array(NULL, uint8_t, depth * vo->dwidth * vo->dheight);
+    if (!priv->opts.fixedpal) {
+        priv->buffer =
+            talloc_array(NULL, uint8_t, depth * vo->dwidth * vo->dheight);
+    }
 
-    return 0;
-}
-
-static inline int sixel_buffer(char *data, int size, void *priv) {
-    char **out = (char **)priv;
-    *out = talloc_strndup_append_buffer(*out, data, size);
-    return size;
+    return setup_slices(vo);
 }
 
 static inline int sixel_write(char *data, int size, void *priv)
@@ -438,9 +689,12 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     osd_draw_on_image(vo->osd, priv->osd, mpi ? mpi->pts : 0, 0, priv->frame);
 
-    // Copy from mpv to RGB format as required by libsixel
-    memcpy_pic(priv->buffer, priv->frame->planes[0], priv->frame->w * depth,
-               priv->frame->h, priv->frame->w * depth, priv->frame->stride[0]);
+    // The slices read the image directly, only the histogram of the dynamic
+    // palette needs it as one packed buffer.
+    if (!priv->opts.fixedpal) {
+        memcpy_pic(priv->buffer, priv->frame->planes[0], priv->frame->w * depth,
+                   priv->frame->h, priv->frame->w * depth, priv->frame->stride[0]);
+    }
 
     // Even if either of these prepare palette functions fail, on re-running them
     // they should try to re-initialize the dithers, so it shouldn't dereference
@@ -455,6 +709,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (SIXEL_FAILED(status)) {
         MP_WARN(vo, "draw_frame: prepare_palette returned error: %s\n",
                 sixel_helper_format_error(status));
+    } else {
+        encode_slices(vo);
     }
 
     if (mpi)
@@ -475,28 +731,28 @@ static void flip_page(struct vo *vo)
         return;
 
     // Make sure that image and dither are valid before drawing
-    if (priv->buffer == NULL || priv->dither == NULL)
+    if (!priv->frame || !priv->dither)
         return;
 
-    // Go to the offset row and column, then display the image
-    priv->sixel_output_buf = talloc_asprintf(NULL, TERM_ESC_GOTO_YX,
-                                             priv->top, priv->left);
-    if (priv->opts.buffered) {
-        sixel_encode(priv->buffer, vo->dwidth, vo->dheight,
-                     depth, priv->dither, priv->output);
-        terminal_lock_output();
-        sixel_write(priv->sixel_output_buf,
-                    ta_get_size(priv->sixel_output_buf), stdout);
-        terminal_unlock_output();
-    } else {
-        terminal_lock_output();
-        sixel_strwrite(priv->sixel_output_buf);
-        sixel_encode(priv->buffer, vo->dwidth, vo->dheight,
-                     depth, priv->dither, priv->output);
-        terminal_unlock_output();
+    // Go to the row and column of each slice, then display it
+    bstr out = {0};
+    terminal_lock_output();
+    for (int i = 0; i < priv->num_slices; i++) {
+        struct slice *s = &priv->slices[i];
+        if (SIXEL_FAILED(s->status) || !s->buf)
+            continue;
+        bstr_xappend_asprintf(NULL, &out, TERM_ESC_GOTO_YX,
+                              priv->top + i * priv->slice_rows, priv->left);
+        bstr_xappend(NULL, &out, bstr0(s->buf));
+        if (!priv->opts.buffered) {
+            sixel_write(out.start, out.len, stdout);
+            out.len = 0;
+        }
     }
-
-    talloc_free(priv->sixel_output_buf);
+    if (out.len)
+        sixel_write(out.start, out.len, stdout);
+    terminal_unlock_output();
+    talloc_free(out.start);
 }
 
 static int preinit(struct vo *vo)
@@ -509,18 +765,16 @@ static int preinit(struct vo *vo)
     priv->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(priv->sws, vo->global);
 
-    if (priv->opts.buffered)
-        status = sixel_output_new(&priv->output, sixel_buffer,
-                                  &priv->sixel_output_buf, NULL);
-    else
-        status = sixel_output_new(&priv->output, sixel_write, stdout, NULL);
-    if (SIXEL_FAILED(status)) {
-        MP_ERR(vo, "preinit: Failed to create output file: %s\n",
-               sixel_helper_format_error(status));
-        return -1;
+    mp_mutex_init(&priv->lock);
+    mp_cond_init(&priv->cond);
+    priv->calib = talloc_array(priv, uint8_t, 32 * 32 * 32 * depth);
+    for (int i = 0; i < 32 * 32 * 32; i++) {
+        priv->calib[i * depth + 0] = (i >> 10) << 3 | 4;
+        priv->calib[i * depth + 1] = ((i >> 5) & 31) << 3 | 4;
+        priv->calib[i * depth + 2] = (i & 31) << 3 | 4;
     }
-
-    sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
+    int threads = av_cpu_count() + 1;
+    priv->pool = mp_thread_pool_create(priv, 0, 1, MPMAX(threads, 1));
 
     terminal_lock_output();
     if (priv->opts.alt_screen)
@@ -576,12 +830,11 @@ static void uninit(struct vo *vo)
     fflush(stdout);
     terminal_unlock_output();
 
-    if (priv->output) {
-        sixel_output_unref(priv->output);
-        priv->output = NULL;
-    }
-
+    talloc_free(priv->pool);
+    priv->pool = NULL;
     dealloc_dithers_and_buffers(vo);
+    mp_cond_destroy(&priv->cond);
+    mp_mutex_destroy(&priv->lock);
 }
 
 #define OPT_BASE_STRUCT struct priv
