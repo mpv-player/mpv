@@ -274,10 +274,24 @@ local function file_list(directory)
         directory = mp.command_native({"expand-path", directory})
     end
 
-    local files = utils.readdir(directory, "files") or {}
+    local files = {}
+
+    for i, file in pairs(utils.readdir(directory, "files")) do
+        if directory == "." and completion_append == "" and file:find("%s") then
+            files[i] = "'" .. file .. "'"
+        elseif completion_append ~= "" then
+            files[i] = file .. completion_append
+        else
+            files[i] = file
+        end
+    end
 
     for _, dir in pairs(utils.readdir(directory, "dirs") or {}) do
-        files[#files + 1] = dir .. path_separator
+        if directory == "." and completion_append == "" and dir:find("%s") then
+            files[#files + 1] = "'" .. dir .. path_separator
+        else
+            files[#files + 1] = dir .. path_separator
+        end
     end
 
     return files
@@ -289,11 +303,13 @@ local function handle_file_completion(before_cur)
 
     completion_pos = completion_pos + last_component_pos - 1
 
+    local files = file_list(directory)
+
     -- Don"t use completion_append for file completion to not add quotes after
     -- directories whose entries you may want to complete afterwards.
     completion_append = ""
 
-    return file_list(directory)
+    return files
 end
 
 local function handle_choice_completion(option, before_cur)
