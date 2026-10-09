@@ -35,6 +35,7 @@
 #include "audio/out/ao.h"
 #include "audio/format.h"
 #include "demux/demux.h"
+#include "input/input.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
 #include "video/hwdec.h"
@@ -132,6 +133,7 @@ void uninit_video_out(struct MPContext *mpctx)
     uninit_video_chain(mpctx);
     if (mpctx->video_out) {
         vo_destroy(mpctx->video_out);
+        mp_input_set_focused(mpctx->input, false);
         mpctx->video_out = NULL;
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }

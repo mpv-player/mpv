@@ -251,14 +251,14 @@ static void read_gamepad_thread(struct mp_input_src *src, void *param)
             case SDL_CONTROLLERBUTTONDOWN: {
                 const int key = lookup_button_mp_key(ev.cbutton.button);
                 if (key != INVALID_KEY) {
-                    mp_input_put_key(src->input_ctx, key | MP_KEY_STATE_DOWN);
+                    mp_input_put_key_focused(src->input_ctx, key | MP_KEY_STATE_DOWN);
                 }
                 continue;
             }
             case SDL_CONTROLLERBUTTONUP: {
                 const int key = lookup_button_mp_key(ev.cbutton.button);
                 if (key != INVALID_KEY) {
-                    mp_input_put_key(src->input_ctx, key | MP_KEY_STATE_UP);
+                    mp_input_put_key_focused(src->input_ctx, key | MP_KEY_STATE_UP);
                 }
                 continue;
             }
@@ -266,7 +266,7 @@ static void read_gamepad_thread(struct mp_input_src *src, void *param)
                 const int key =
                     lookup_analog_mp_key(ev.caxis.axis, ev.caxis.value);
                 if (key != INVALID_KEY) {
-                    mp_input_put_key(src->input_ctx, key);
+                    mp_input_put_key_focused(src->input_ctx, key);
                 }
                 continue;
             }
