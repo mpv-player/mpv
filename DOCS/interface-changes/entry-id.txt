@@ -1,0 +1,1 @@
+add support for using playlist entry id for `playlist-play-index/loadfile/loadlist/playlist-remove/playlist-move` commands
