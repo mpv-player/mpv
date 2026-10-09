@@ -31,6 +31,9 @@ struct mp_output_chain {
     struct mp_image_params input_params;
     struct mp_image_params output_params;
     double container_fps;
+    // container_fps as an exact rational, if the demuxer provided one (0/0 if
+    // not known).
+    int container_fps_num, container_fps_den;
     void (*update_subtitles)(void *ctx, double pts);
     void *update_subtitles_ctx;
 
