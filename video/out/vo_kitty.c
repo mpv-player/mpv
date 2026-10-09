@@ -222,11 +222,13 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     vo->want_redraw = true;
 
+    terminal_lock_output();
     write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
     write_bstr_passthrough(p, KITTY_ESC_END);
 
     if (p->opts.config_clear)
         write_str(TERM_ESC_CLEAR_SCREEN);
+    terminal_unlock_output();
 
     get_win_size(vo, &p->rows, &p->cols, &vo->dwidth, &vo->dheight);
     set_out_params(vo);
@@ -386,7 +388,9 @@ static void flip_page(struct vo *vo)
         }
     }
 
+    terminal_lock_output();
     write_bstr(p->cmd);
+    terminal_unlock_output();
 
 #if HAVE_POSIX
     if (p->opts.use_shm)
@@ -443,10 +447,12 @@ static int preinit(struct vo *vo)
             p->dcs_suffix = DCS_SUFFIX;
     }
 
+    terminal_lock_output();
     write_str(TERM_ESC_HIDE_CURSOR);
     terminal_set_mouse_input(true);
     if (p->opts.alt_screen)
         write_str(TERM_ESC_ALT_SCREEN);
+    terminal_unlock_output();
 
     return 0;
 }
@@ -471,6 +477,7 @@ static void uninit(struct vo *vo)
     sigaction(SIGWINCH, &saved_sigaction, NULL);
 #endif
 
+    terminal_lock_output();
     write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
     write_bstr_passthrough(p, KITTY_ESC_END);
 
@@ -483,6 +490,7 @@ static void uninit(struct vo *vo)
         char *cmd = talloc_asprintf(vo, TERM_ESC_GOTO_YX, p->cols, 0);
         write_str(cmd);
     }
+    terminal_unlock_output();
 
     free_bufs(vo);
 }

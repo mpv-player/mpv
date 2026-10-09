@@ -1,6 +1,19 @@
 #include "terminal.h"
 
 #include "misc/bstr.h"
+#include "osdep/threads.h"
+
+static mp_static_mutex output_lock = MP_STATIC_MUTEX_INITIALIZER;
+
+void terminal_lock_output(void)
+{
+    mp_mutex_lock(&output_lock);
+}
+
+void terminal_unlock_output(void)
+{
+    mp_mutex_unlock(&output_lock);
+}
 
 void terminal_init(void)
 {

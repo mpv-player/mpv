@@ -595,6 +595,18 @@ void terminal_set_mouse_input(bool enable)
     fflush(stdout);
 }
 
+static mp_static_mutex output_lock = MP_STATIC_MUTEX_INITIALIZER;
+
+void terminal_lock_output(void)
+{
+    mp_mutex_lock(&output_lock);
+}
+
+void terminal_unlock_output(void)
+{
+    mp_mutex_unlock(&output_lock);
+}
+
 void terminal_init(void)
 {
     mp_assert(!getch2_enabled);

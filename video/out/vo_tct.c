@@ -247,7 +247,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
+    terminal_lock_output();
     WRITE_STR(TERM_ESC_CLEAR_SCREEN);
+    terminal_unlock_output();
 
     vo->want_redraw = true;
     return 0;
@@ -276,6 +278,7 @@ static void flip_page(struct vo *vo)
     if (vo->dwidth != width || vo->dheight != height)
         reconfig(vo, vo->params);
 
+    terminal_lock_output();
     WRITE_STR(TERM_ESC_SYNC_UPDATE_BEGIN);
 
     p->frame_buf.len = 0;
@@ -297,6 +300,7 @@ static void flip_page(struct vo *vo)
 
     WRITE_STR(TERM_ESC_SYNC_UPDATE_END);
     fflush(stdout);
+    terminal_unlock_output();
 }
 
 static void uninit(struct vo *vo)

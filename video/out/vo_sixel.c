@@ -371,8 +371,11 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         ret = update_sixel_swscaler(vo, params);
     }
 
-    if (priv->opts.config_clear)
+    if (priv->opts.config_clear) {
+        terminal_lock_output();
         sixel_strwrite(TERM_ESC_CLEAR_SCREEN);
+        terminal_unlock_output();
+    }
     vo->want_redraw = true;
 
     return ret;
@@ -401,8 +404,11 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         // with a failed reconfig.
         update_sixel_swscaler(vo, vo->params);
 
-        if (priv->opts.config_clear)
+        if (priv->opts.config_clear) {
+            terminal_lock_output();
             sixel_strwrite(TERM_ESC_CLEAR_SCREEN);
+            terminal_unlock_output();
+        }
         resized = true;
     }
 
@@ -479,15 +485,20 @@ static void flip_page(struct vo *vo)
     // Go to the offset row and column, then display the image
     priv->sixel_output_buf = talloc_asprintf(NULL, TERM_ESC_GOTO_YX,
                                              priv->top, priv->left);
-    if (!priv->opts.buffered)
-        sixel_strwrite(priv->sixel_output_buf);
-
-    sixel_encode(priv->buffer, priv->width, priv->height,
-                 depth, priv->dither, priv->output);
-
-    if (priv->opts.buffered)
+    if (priv->opts.buffered) {
+        sixel_encode(priv->buffer, priv->width, priv->height,
+                     depth, priv->dither, priv->output);
+        terminal_lock_output();
         sixel_write(priv->sixel_output_buf,
                     ta_get_size(priv->sixel_output_buf), stdout);
+        terminal_unlock_output();
+    } else {
+        terminal_lock_output();
+        sixel_strwrite(priv->sixel_output_buf);
+        sixel_encode(priv->buffer, priv->width, priv->height,
+                     depth, priv->dither, priv->output);
+        terminal_unlock_output();
+    }
 
     talloc_free(priv->sixel_output_buf);
 }
@@ -515,6 +526,7 @@ static int preinit(struct vo *vo)
 
     sixel_output_set_encode_policy(priv->output, SIXEL_ENCODEPOLICY_FAST);
 
+    terminal_lock_output();
     if (priv->opts.alt_screen)
         sixel_strwrite(TERM_ESC_ALT_SCREEN);
 
@@ -523,6 +535,7 @@ static int preinit(struct vo *vo)
 
     /* don't use private color registers for each frame. */
     sixel_strwrite(TERM_ESC_USE_GLOBAL_COLOR_REG);
+    terminal_unlock_output();
 
     priv->dither = NULL;
 
@@ -558,12 +571,14 @@ static void uninit(struct vo *vo)
 {
     struct priv *priv = vo->priv;
 
+    terminal_lock_output();
     sixel_strwrite(TERM_ESC_RESTORE_CURSOR);
     terminal_set_mouse_input(false);
 
     if (priv->opts.alt_screen)
         sixel_strwrite(TERM_ESC_NORMAL_SCREEN);
     fflush(stdout);
+    terminal_unlock_output();
 
     if (priv->output) {
         sixel_output_unref(priv->output);

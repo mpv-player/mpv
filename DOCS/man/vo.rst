@@ -467,12 +467,6 @@ Available video output drivers are:
     Graphical output for the terminal, using sixels. Tested with ``mlterm`` and
     ``xterm``.
 
-    Note: the Sixel image output is not synchronized with other terminal
-    output from mpv, which can lead to broken images.
-    The option ``--really-quiet`` can help with that, and is recommended.
-    On some platforms, using the ``--vo-sixel-buffered`` option may work as
-    well.
-
     You may need to use ``--profile=sw-fast`` to get decent performance.
 
     Note: at the time of writing, ``xterm`` does not enable sixel by default -
