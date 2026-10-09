@@ -614,15 +614,28 @@ bool terminal_try_attach(void)
     return true;
 }
 
+static DWORD saved_input_mode;
+static bool have_saved_input_mode;
+
 void terminal_set_mouse_input(bool enable)
 {
     DWORD cmode;
     HANDLE in = hSTDIN;
-    if (GetConsoleMode(in, &cmode)) {
-        cmode = enable ? cmode | ENABLE_MOUSE_INPUT
-                       : cmode & (~ENABLE_MOUSE_INPUT);
-        SetConsoleMode(in, cmode);
+    if (!GetConsoleMode(in, &cmode))
+        return;
+    if (enable) {
+        if (!have_saved_input_mode) {
+            saved_input_mode = cmode;
+            have_saved_input_mode = true;
+        }
+        cmode = (cmode | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
+    } else if (have_saved_input_mode) {
+        cmode = saved_input_mode;
+        have_saved_input_mode = false;
+    } else {
+        cmode &= ~ENABLE_MOUSE_INPUT;
     }
+    SetConsoleMode(in, cmode);
 }
 
 static VOID NTAPI fls_free_cb(PVOID ptr)
