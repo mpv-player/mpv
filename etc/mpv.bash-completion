@@ -47,7 +47,10 @@ _mpv_get_args()
           # Without this, _filedir will try and complete files starting with '='
           cur=""
         fi
-        _filedir 2>/dev/null || COMPREPLY=($(compgen -f))
+        if ! _filedir 2>/dev/null; then
+          local IFS=$'\n'
+          COMPREPLY=($(compgen -f -- "$cur"))
+        fi
         return 0
       else
         candidates=($(mpv --no-config $1=help | grep -v ':' | awk '{print $1;}'))
@@ -146,7 +149,10 @@ _mpv()
         fi
         ;;
       *)
-        _filedir 2>/dev/null || COMPREPLY=($(compgen -f))
+        if ! _filedir 2>/dev/null; then
+          local IFS=$'\n'
+          COMPREPLY=($(compgen -f -- "$cur"))
+        fi
         ;;
     esac
   fi
