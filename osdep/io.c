@@ -390,14 +390,8 @@ size_t mp_fwrite(const void *restrict buffer, size_t size, size_t count,
 
     HANDLE wstream = get_handle(stream);
     if (mp_check_console(wstream)) {
-        unsigned char *start = (unsigned char *)buffer;
-        size_t c = 0;
-        for (; c < count; ++c) {
-            if (mp_console_write(wstream, (bstr){start, size}) <= 0)
-                break;
-            start += size;
-        }
-        return c;
+        bstr data = {(unsigned char *)buffer, size * count};
+        return mp_console_write(wstream, data) <= 0 ? 0 : count;
     }
 
 #undef fwrite
