@@ -56,6 +56,7 @@ struct clipboard_init_params {
     int flags;
     struct MPContext *mpctx; // For clipboard_vo only
     struct m_obj_settings *backends;
+    const char *wayland_display; // For clipboard_wayland and clipboard_x11
 };
 
 struct clipboard_access_params {
