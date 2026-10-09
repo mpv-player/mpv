@@ -160,7 +160,7 @@ static SIXELSTATUS prepare_dynamic_palette(struct vo *vo)
     /* create histogram and construct color palette
      * with median cut algorithm. */
     status = sixel_dither_initialize(priv->testdither, priv->buffer,
-                                     priv->width, priv->height,
+                                     vo->dwidth, vo->dheight,
                                      SIXEL_PIXELFORMAT_RGB888,
                                      LARGE_NORM, REP_CENTER_BOX,
                                      QUALITY_LOW);
@@ -267,18 +267,14 @@ static void set_sixel_output_parameters(struct vo *vo)
 
     vo_get_src_dst_rects(vo, &priv->src_rect, &priv->dst_rect, &priv->osd);
 
-    // priv->width and priv->height are the width and height of dst_rect
-    // and they are not changed anywhere else outside this function.
-    // It is the sixel image output dimension which is output by libsixel.
+    // priv->width and priv->height are the width and height of dst_rect,
+    // the scaled video inside the canvas that libsixel outputs.
     priv->width  = priv->dst_rect.x1 - priv->dst_rect.x0;
     priv->height = priv->dst_rect.y1 - priv->dst_rect.y0;
 
-    // top/left values must be greater than 1. If it is set, then
-    // the image will be rendered from there and no further centering is done.
-    priv->top  = (priv->opts.top  > 0) ?  priv->opts.top :
-                  priv->num_rows * priv->dst_rect.y0 / vo->dheight + 1;
-    priv->left = (priv->opts.left > 0) ?  priv->opts.left :
-                  priv->num_cols * priv->dst_rect.x0 / vo->dwidth  + 1;
+    // top/left values must be greater than 1. The canvas starts there.
+    priv->top  = (priv->opts.top  > 0) ? priv->opts.top  : 1;
+    priv->left = (priv->opts.left > 0) ? priv->opts.left : 1;
 }
 
 static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
@@ -298,9 +294,10 @@ static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
 
     dealloc_dithers_and_buffers(vo);
 
-    priv->frame = mp_image_alloc(IMGFMT, priv->width, priv->height);
+    priv->frame = mp_image_alloc(IMGFMT, vo->dwidth, vo->dheight);
     if (!priv->frame)
         return -1;
+    mp_image_clear(priv->frame, 0, 0, priv->frame->w, priv->frame->h);
 
     if (mp_sws_reinit(priv->sws) < 0)
         return -1;
@@ -317,7 +314,7 @@ static int update_sixel_swscaler(struct vo *vo, struct mp_image_params *params)
     }
 
     priv->buffer =
-        talloc_array(NULL, uint8_t, depth * priv->width * priv->height);
+        talloc_array(NULL, uint8_t, depth * vo->dwidth * vo->dheight);
 
     return 0;
 }
@@ -429,22 +426,21 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
         mp_image_crop_rc(mpi, src_rc);
 
-        // scale/pan to our dest rect
-        mp_sws_scale(priv->sws, priv->frame, mpi);
+        // scale/pan to our dest rect inside the canvas
+        mp_image_clear_rc_inv(priv->frame, priv->dst_rect);
+        struct mp_image dst = *priv->frame;
+        mp_image_crop_rc(&dst, priv->dst_rect);
+        mp_sws_scale(priv->sws, &dst, mpi);
     } else {
         // Image is NULL, so need to clear image and draw OSD
-        mp_image_clear(priv->frame, 0, 0, priv->width, priv->height);
+        mp_image_clear(priv->frame, 0, 0, priv->frame->w, priv->frame->h);
     }
 
-    struct mp_osd_res dim = {
-        .w = priv->width,
-        .h = priv->height
-    };
-    osd_draw_on_image(vo->osd, dim, mpi ? mpi->pts : 0, 0, priv->frame);
+    osd_draw_on_image(vo->osd, priv->osd, mpi ? mpi->pts : 0, 0, priv->frame);
 
     // Copy from mpv to RGB format as required by libsixel
-    memcpy_pic(priv->buffer, priv->frame->planes[0], priv->width * depth,
-               priv->height, priv->width * depth, priv->frame->stride[0]);
+    memcpy_pic(priv->buffer, priv->frame->planes[0], priv->frame->w * depth,
+               priv->frame->h, priv->frame->w * depth, priv->frame->stride[0]);
 
     // Even if either of these prepare palette functions fail, on re-running them
     // they should try to re-initialize the dithers, so it shouldn't dereference
@@ -486,7 +482,7 @@ static void flip_page(struct vo *vo)
     priv->sixel_output_buf = talloc_asprintf(NULL, TERM_ESC_GOTO_YX,
                                              priv->top, priv->left);
     if (priv->opts.buffered) {
-        sixel_encode(priv->buffer, priv->width, priv->height,
+        sixel_encode(priv->buffer, vo->dwidth, vo->dheight,
                      depth, priv->dither, priv->output);
         terminal_lock_output();
         sixel_write(priv->sixel_output_buf,
@@ -495,7 +491,7 @@ static void flip_page(struct vo *vo)
     } else {
         terminal_lock_output();
         sixel_strwrite(priv->sixel_output_buf);
-        sixel_encode(priv->buffer, priv->width, priv->height,
+        sixel_encode(priv->buffer, vo->dwidth, vo->dheight,
                      depth, priv->dither, priv->output);
         terminal_unlock_output();
     }

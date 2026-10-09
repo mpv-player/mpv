@@ -107,7 +107,6 @@ struct priv {
     bstr    dcs_suffix;
 
     int left, top, width, height, cols, rows;
-    double display_par;
 
     struct mp_rect src;
     struct mp_rect dst;
@@ -206,13 +205,10 @@ static void set_out_params(struct vo *vo)
 
     p->width  = p->dst.x1 - p->dst.x0;
     p->height = p->dst.y1 - p->dst.y0;
-    p->top  = p->opts.top > 0 ?
-        p->opts.top : p->rows * p->dst.y0 / vo->dheight;
-    p->left = p->opts.left > 0 ?
-        p->opts.left : p->cols * p->dst.x0 / vo->dwidth;
-    p->display_par = p->osd.display_par;
+    p->top  = p->opts.top > 0 ? p->opts.top : 0;
+    p->left = p->opts.left > 0 ? p->opts.left : 0;
 
-    p->buffer_size = 3 * p->width * p->height;
+    p->buffer_size = 3 * vo->dwidth * vo->dheight;
     p->output_size = AV_BASE64_SIZE(p->buffer_size);
 }
 
@@ -245,9 +241,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         .p_h = 1,
     };
 
-    p->frame = mp_image_alloc(IMGFMT, p->width, p->height);
+    p->frame = mp_image_alloc(IMGFMT, vo->dwidth, vo->dheight);
     if (!p->frame)
         return -1;
+    mp_image_clear(p->frame, 0, 0, p->frame->w, p->frame->h);
 
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
@@ -316,20 +313,21 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
         mp_image_crop_rc(mpi, src_rc);
 
-        mp_sws_scale(p->sws, p->frame, mpi);
+        mp_image_clear_rc_inv(p->frame, p->dst);
+        struct mp_image dst = *p->frame;
+        mp_image_crop_rc(&dst, p->dst);
+        mp_sws_scale(p->sws, &dst, mpi);
     } else {
-        mp_image_clear(p->frame, 0, 0, p->width, p->height);
+        mp_image_clear(p->frame, 0, 0, p->frame->w, p->frame->h);
     }
 
-    struct mp_osd_res res = { .w = p->width, .h = p->height, .display_par = p->display_par };
-    osd_draw_on_image(vo->osd, res, mpi ? mpi->pts : 0, 0, p->frame);
-
+    osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, p->frame);
 
     if (p->opts.use_shm && !create_shm(vo))
         goto done;
 
-    memcpy_pic(p->buffer, p->frame->planes[0], p->width * BYTES_PER_PX,
-               p->height, p->width * BYTES_PER_PX, p->frame->stride[0]);
+    memcpy_pic(p->buffer, p->frame->planes[0], p->frame->w * BYTES_PER_PX,
+               p->frame->h, p->frame->w * BYTES_PER_PX, p->frame->stride[0]);
 
     if (!p->opts.use_shm)
         av_base64_encode(p->output, p->output_size, p->buffer, p->buffer_size);
@@ -352,7 +350,7 @@ static void flip_page(struct vo *vo)
 
     if (p->opts.use_shm) {
         append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG_SHM,
-                                    p->width, p->height, p->shm_path_b64);
+                                    vo->dwidth, vo->dheight, p->shm_path_b64);
         append_passthrough(p, &p->cmd, KITTY_ESC_END);
     } else {
         if (!p->output) {
@@ -360,7 +358,7 @@ static void flip_page(struct vo *vo)
         }
 
         append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG,
-                                    p->width, p->height);
+                                    vo->dwidth, vo->dheight);
 
         int output_size = p->output_size - 1;
         int offset = 0;
