@@ -306,8 +306,20 @@ static int pa_init_boilerplate(struct ao *ao)
     pa_threaded_mainloop_lock(priv->mainloop);
     locked = true;
 
-    if (!(priv->context = pa_context_new(pa_threaded_mainloop_get_api(
-                                         priv->mainloop), ao->client_name)))
+    pa_proplist *props = pa_proplist_new();
+
+    pa_proplist_sets(props, PA_PROP_MEDIA_ROLE, ao->init_flags & AO_INIT_MEDIA_ROLE_MUSIC ?  "music" : "video");
+    pa_proplist_sets(props, PA_PROP_APPLICATION_NAME, ao->client_name);
+    pa_proplist_sets(props, PA_PROP_APPLICATION_ID, ao->client_name);
+    pa_proplist_sets(props, PA_PROP_APPLICATION_ICON_NAME, ao->client_name);
+
+    priv->context = pa_context_new_with_proplist(pa_threaded_mainloop_get_api(priv->mainloop),
+                                                 ao->client_name,
+                                                 props);
+
+    pa_proplist_free(props);
+
+    if (!priv->context)
     {
         MP_ERR(ao, "Failed to allocate context\n");
         goto fail;
