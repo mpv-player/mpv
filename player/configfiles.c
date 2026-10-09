@@ -372,7 +372,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     // archives of images, e.g. with mpv 1.zip 2.zip and quit-watch-later
     // on 2.zip, write redirect entries for 2.zip, not just for the archive://
     // URL.
-    if (cur->playlist_path && mp_is_url(bstr0(cur->filename))) {
+    if (cur->playlist_path && mp_is_url(bstr0(cur->filename)) &&
+        !bstr_startswith0(bstr0(cur->playlist_path), "archive://")) {
         write_redirect(mpctx, cur->playlist_path);
         write_redirects_for_parent_dirs(mpctx, cur->playlist_path);
     }
