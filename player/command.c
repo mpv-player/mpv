@@ -90,6 +90,12 @@
 #include <windows.h>
 #endif
 
+enum {
+    STATUS_LIST_MEASURING = -1,
+    STATUS_LIST_INACTIVE,
+    STATUS_LIST_ACTIVE,
+};
+
 struct command_ctx {
     // All properties, terminated with a {0} item.
     struct m_property *properties;
@@ -127,6 +133,10 @@ struct command_ctx {
     int hwdec_osd_mode;
 
     double cached_window_scale;
+
+    int *status_lists;
+    int num_status_lists;
+    int status_list_index;
 };
 
 static const struct m_option script_props_type = {
@@ -389,8 +399,18 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
     if (!count)
         return text;
 
+    struct command_ctx *ctx = mpctx->command_ctx;
+    if (ctx->status_list_index == STATUS_LIST_MEASURING) {
+        MP_TARRAY_APPEND(NULL, ctx->status_lists, ctx->num_status_lists, count);
+        talloc_free(text);
+        return talloc_strdup(NULL, " ");
+    }
+
     int max_lines;
-    if (mpctx->video_out && mpctx->opts->video_osd) {
+    if (ctx->status_list_index >= STATUS_LIST_ACTIVE) {
+        int n = ctx->status_list_index++ - 1;
+        max_lines = n < ctx->num_status_lists ? ctx->status_lists[n] + 1 : 1;
+    } else if (mpctx->video_out && mpctx->opts->video_osd) {
         int screen_h, font_h;
         osd_get_text_size(mpctx->osd, &screen_h, &font_h);
         max_lines = screen_h / MPMAX(font_h, 1);
