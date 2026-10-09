@@ -100,7 +100,7 @@ FILE *mp_fopen(const char *filename, const char *mode)
     }
 
     // Open a CRT file descriptor
-    int fd = open(filename, rwmode | oflags | O_CLOEXEC, 0600);
+    int fd = open(filename, rwmode | oflags | O_CLOEXEC, 0666);
     if (fd < 0)
         return NULL;
 
