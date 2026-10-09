@@ -673,6 +673,7 @@ void uninit_sub(struct MPContext *mpctx, struct track *track);
 void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
 bool update_subtitles(struct MPContext *mpctx, double video_pts);
+bool sub_pause_check(struct MPContext *mpctx, double cur_pts, double next_pts);
 
 // discnav.c
 struct stream;
