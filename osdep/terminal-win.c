@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdatomic.h>
 #include <string.h>
 #include <windows.h>
 #include <io.h>
@@ -133,6 +134,9 @@ void terminal_get_size(int *w, int *h)
     }
 }
 
+// Cell size the terminal reported, ConPTY has no font of its own
+static atomic_int term_cell_w, term_cell_h;
+
 static bool get_font_size(int *w, int *h)
 {
   CONSOLE_FONT_INFO finfo;
@@ -141,8 +145,22 @@ static bool get_font_size(int *w, int *h)
   if (res) {
       *w = finfo.dwFontSize.X;
       *h = finfo.dwFontSize.Y;
+      if (*w <= 0) {
+          *w = atomic_load_explicit(&term_cell_w, memory_order_acquire);
+          *h = atomic_load_explicit(&term_cell_h, memory_order_relaxed);
+      }
   }
   return res;
+}
+
+// XTWINOPS 16: the terminal answers with CSI 6 ; height ; width t, which
+// the input thread takes from its key events.
+static void request_cell_size(void)
+{
+    int fw = 0, fh = 0;
+    if (!is_vt[STDOUT_FILENO] || !get_font_size(&fw, &fh) || fw > 0)
+        return;
+    mp_console_write(hSTDOUT, (bstr)bstr0_lit("\033[16t"));
 }
 
 void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
@@ -169,6 +187,31 @@ static bool has_input_events(HANDLE h)
 
 static DWORD last_buttons;
 
+static bool take_reply(int c)
+{
+    static char reply[32];
+    static int len;
+    if (c == '\033') {
+        len = 0;
+    } else if (!len) {
+        return false;
+    }
+    reply[len++] = c;
+    if (len == sizeof(reply) - 1) {
+        len = 0;    // not a reply after all
+    } else if (len > 2 && c >= 0x40 && c <= 0x7e) {
+        reply[len] = '\0';
+        len = 0;
+        int w = 0, h = 0;
+        if (sscanf(reply, "\033[6;%d;%dt", &h, &w) == 2 && w > 0 && h > 0) {
+            atomic_store_explicit(&term_cell_h, h, memory_order_relaxed);
+            atomic_store_explicit(&term_cell_w, w, memory_order_release);
+            notify_resize();
+        }
+    }
+    return true;
+}
+
 static void read_input(HANDLE in)
 {
     // Process any input events in the buffer
@@ -186,6 +229,10 @@ static void read_input(HANDLE in)
         case KEY_EVENT: {
             KEY_EVENT_RECORD *record = &event.Event.KeyEvent;
             if (!record->bKeyDown)
+                continue;
+
+            // A reply comes as characters without a virtual key, unlike a pressed key.
+            if (!record->wVirtualKeyCode && take_reply(record->uChar.UnicodeChar))
                 continue;
 
             UINT vkey = record->wVirtualKeyCode;
@@ -305,6 +352,7 @@ void terminal_setup_getch(struct input_ctx *ictx)
             return;
         }
         running = true;
+        request_cell_size();
     }
 }
 
