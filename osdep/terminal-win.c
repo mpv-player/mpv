@@ -144,6 +144,8 @@ static bool has_input_events(HANDLE h)
     return !!num_events;
 }
 
+static DWORD last_buttons;
+
 static void read_input(HANDLE in)
 {
     // Process any input events in the buffer
@@ -196,15 +198,16 @@ static void read_input(HANDLE in)
             if (record->dwControlKeyState & SHIFT_PRESSED)
                 mods |= MP_KEY_MODIFIER_SHIFT;
 
-            switch (record->dwEventFlags) {
-            case MOUSE_MOVED: {
-                int w = 0, h = 0;
-                if (get_font_size(&w, &h)) {
-                    mp_input_set_mouse_pos(input_ctx, w * (record->dwMousePosition.X + 0.5),
-                                                      h * (record->dwMousePosition.Y + 0.5), false);
-                }
-                break;
+            // Every event carries the position, a terminal does not have to send motion.
+            int w = 0, h = 0;
+            if (get_font_size(&w, &h) && w > 0 && h > 0) {
+                mp_input_set_mouse_pos(input_ctx, w * (record->dwMousePosition.X + 0.5),
+                                                  h * (record->dwMousePosition.Y + 0.5), false);
             }
+
+            switch (record->dwEventFlags) {
+            case MOUSE_MOVED:
+                break;
             case MOUSE_HWHEELED: {
                 int button = (int16_t)HIWORD(record->dwButtonState) > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
                 mp_input_put_key(input_ctx, button | mods);
@@ -216,12 +219,23 @@ static void read_input(HANDLE in)
                 break;
             }
             default: {
-                int left_button_state = record->dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED ?
-                                        MP_KEY_STATE_DOWN : MP_KEY_STATE_UP;
-                mp_input_put_key(input_ctx, MP_MBTN_LEFT | mods | left_button_state);
-                int right_button_state = record->dwButtonState & RIGHTMOST_BUTTON_PRESSED ?
-                                        MP_KEY_STATE_DOWN : MP_KEY_STATE_UP;
-                mp_input_put_key(input_ctx, MP_MBTN_RIGHT | mods | right_button_state);
+                static const struct {
+                    DWORD flag;
+                    int key;
+                } buttons[] = {
+                    {FROM_LEFT_1ST_BUTTON_PRESSED, MP_MBTN_LEFT},
+                    {RIGHTMOST_BUTTON_PRESSED, MP_MBTN_RIGHT},
+                    {FROM_LEFT_2ND_BUTTON_PRESSED, MP_MBTN_MID},
+                };
+                DWORD changed = record->dwButtonState ^ last_buttons;
+                for (int i = 0; i < MP_ARRAY_SIZE(buttons); i++) {
+                    if (changed & buttons[i].flag) {
+                        int state = record->dwButtonState & buttons[i].flag ?
+                                    MP_KEY_STATE_DOWN : MP_KEY_STATE_UP;
+                        mp_input_put_key(input_ctx, buttons[i].key | mods | state);
+                    }
+                }
+                last_buttons = record->dwButtonState;
                 break;
             }
             }
