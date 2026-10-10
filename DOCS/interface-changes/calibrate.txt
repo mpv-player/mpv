@@ -1,0 +1,2 @@
+add `calibrate.lua` builtin script for visual display calibration
+add `--load-calibrate` option
