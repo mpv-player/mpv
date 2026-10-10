@@ -230,38 +230,50 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
             mp_err(log, "Failed to create HW uploader for format %s\n",
                    mp_imgfmt_to_name(src_fmt));
         }
-    } else if (dst_all_hw && num_fmts > 0) {
+    } else if ((dst_all_hw || !imgfmt_is_sw) && num_fmts > 0) {
+        // All targets are hw, or the source is hw and staying on the GPU may
+        // be possible, which beats downloading.
         bool upload_created = false;
         int sw_fmt = imgfmt_is_sw ? img->imgfmt : img->params.hw_subfmt;
-
         for (int i = 0; i < num_fmts; i++) {
+            if (!IMGFMT_IS_HWACCEL(fmts[i]))
+                continue;
             // We can probably use this! Very lazy and very approximate.
             struct mp_hwupload upload = mp_hwupload_create(conv, fmts[i],
                                                            sw_fmt, false);
-            if (upload.successful_init) {
-                mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[i]));
-                filters[2] = upload.f;
-                hwupload_fmt = upload.selected_sw_imgfmt;
-                fmts = &hwupload_fmt;
-                num_fmts = hwupload_fmt ? 1 : 0;
-                hw_to_sw = false;
-
-                // We cannot do format conversions when transferring between
-                // two hardware devices, so reject this format if that would be
-                // required.
-                if (!imgfmt_is_sw && hwupload_fmt != sw_fmt) {
-                    mp_err(log, "Format %s is not supported by %s\n",
-                           mp_imgfmt_to_name(sw_fmt),
-                           mp_imgfmt_to_name(p->imgfmts[i]));
-                    continue;
-                }
-                upload_created = true;
-                break;
+            if (!upload.successful_init)
+                continue;
+            // For a hw source this is a move between two devices, and the
+            // uploader cannot convert sw formats on the way. Whether the
+            // move works can only be tested with a real frame; do that when
+            // a sw target exists and the result decides against downloading.
+            // With only hw targets there is no alternative route, so insert
+            // the uploader untested and let the first frame decide.
+            if (!imgfmt_is_sw &&
+                (upload.selected_sw_imgfmt != sw_fmt ||
+                 (dst_have_sw && !mp_hwupload_probe_hw_to_hw(&upload, img)))) {
+                mp_verbose(log, "Cannot keep %s frames on the GPU as %s\n",
+                           mp_imgfmt_to_name(img->imgfmt),
+                           mp_imgfmt_to_name(fmts[i]));
+                talloc_free(upload.f);
+                continue;
             }
+            mp_info(log, "HW-uploading to %s\n", mp_imgfmt_to_name(fmts[i]));
+            filters[2] = upload.f;
+            hwupload_fmt = upload.selected_sw_imgfmt;
+            fmts = &hwupload_fmt;
+            num_fmts = hwupload_fmt ? 1 : 0;
+            hw_to_sw = false;
+            upload_created = true;
+            break;
         }
-        if (!upload_created) {
+        if (!upload_created && dst_all_hw) {
+            // Nothing else can produce the hw target formats. Failing here
+            // keeps the unconvertible frames away from consumers that would
+            // blindly dereference their native handles.
             mp_err(log, "Failed to create HW uploader for format %s\n",
                    mp_imgfmt_to_name(sw_fmt));
+            goto fail;
         }
     }
 
@@ -291,8 +303,8 @@ static bool build_image_converter(struct mp_autoconvert *c, struct mp_log *log,
         force_sws_params |= !mp_image_params_equal(&imgpar, &p->imgparams);
         need_sws |= force_sws_params;
     }
-    if (!imgfmt_is_sw && dst_all_hw) {
-        // This is a hw -> hw upload, so the sw format must already be
+    if (!imgfmt_is_sw && !hw_to_sw) {
+        // This is a direct hw -> hw upload, so the sw format must already be
         // mutually understood. No conversion can be done.
         need_sws = false;
     }
