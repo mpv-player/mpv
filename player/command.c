@@ -90,6 +90,12 @@
 #include <windows.h>
 #endif
 
+enum {
+    STATUS_LIST_MEASURING = -1,
+    STATUS_LIST_INACTIVE,
+    STATUS_LIST_ACTIVE,
+};
+
 struct command_ctx {
     // All properties, terminated with a {0} item.
     struct m_property *properties;
@@ -127,6 +133,10 @@ struct command_ctx {
     int hwdec_osd_mode;
 
     double cached_window_scale;
+
+    int *status_lists;
+    int num_status_lists;
+    int status_list_index;
 };
 
 static const struct m_option script_props_type = {
@@ -389,8 +399,18 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
     if (!count)
         return text;
 
+    struct command_ctx *ctx = mpctx->command_ctx;
+    if (ctx->status_list_index == STATUS_LIST_MEASURING) {
+        MP_TARRAY_APPEND(NULL, ctx->status_lists, ctx->num_status_lists, count);
+        talloc_free(text);
+        return talloc_strdup(NULL, " ");
+    }
+
     int max_lines;
-    if (mpctx->video_out && mpctx->opts->video_osd) {
+    if (ctx->status_list_index >= STATUS_LIST_ACTIVE) {
+        int n = ctx->status_list_index++ - 1;
+        max_lines = n < ctx->num_status_lists ? ctx->status_lists[n] + 1 : 1;
+    } else if (mpctx->video_out && mpctx->opts->video_osd) {
         int screen_h, font_h;
         osd_get_text_size(mpctx->osd, &screen_h, &font_h);
         max_lines = screen_h / MPMAX(font_h, 1);
@@ -398,19 +418,19 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
         int w = -1;
         max_lines = 24;
         terminal_get_size(&w, &max_lines);
-        char *msg = mp_property_expand_escaped_string(mpctx, mpctx->opts->status_msg);
-        max_lines -= msg[0] ? count_lines(msg) : 1;
-        talloc_free(msg);
+        max_lines -= MPMAX(mpctx->term_osd_status ? count_lines(mpctx->term_osd_status) : 0, 1);
     }
     // Subtract 1 for the header.
-    max_lines--;
+    max_lines = MPMAX(max_lines - 1, 0);
 
     char *new = talloc_asprintf(NULL, "%s [%d/%d]:\n", header, pos + 1, count);
-    int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
-    char *head = skip_n_lines(text, start);
-    char *tail = skip_n_lines(head, max_lines);
-    new = talloc_asprintf_append_buffer(new, "%.*s",
-                            (int)(tail ? tail - head : strlen(head)), head);
+    if (max_lines > 0) {
+        int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
+        char *head = skip_n_lines(text, start);
+        char *tail = skip_n_lines(head, max_lines);
+        new = talloc_asprintf_append_buffer(new, "%.*s",
+                                (int)(tail ? tail - head : strlen(head)), head);
+    }
     // Strip the final newline to not print it in the terminal.
     new[strlen(new) - 1] = '\0';
 
@@ -5055,6 +5075,56 @@ char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str
     char *r = mp_property_expand_string(mpctx, dst.start);
     talloc_free(tmp);
     return r;
+}
+
+// Expand the status message with list headers first, so other properties can
+// contribute their actual height.
+char *mp_property_expand_status_msg(struct MPContext *mpctx, const char *str,
+                                    int max_lines)
+{
+    if (mpctx->video_out && mpctx->opts->video_osd)
+        return mp_property_expand_escaped_string(mpctx, str);
+
+    struct command_ctx *ctx = mpctx->command_ctx;
+    ctx->num_status_lists = 0;
+
+    ctx->status_list_index = STATUS_LIST_MEASURING;
+    char *measured = mp_property_expand_escaped_string(mpctx, str);
+    ctx->status_list_index = STATUS_LIST_INACTIVE;
+
+    int num_lists = ctx->num_status_lists;
+    if (!num_lists)
+        return measured;
+
+    int remaining = MPMAX(max_lines - count_lines(measured), 0);
+    talloc_free(measured);
+
+    // Give each list the same number of rows, then distribute any leftovers.
+    int level = 0;
+    while (remaining > 0) {
+        int active = 0;
+        for (int n = 0; n < num_lists; n++)
+            active += ctx->status_lists[n] > level;
+        if (!active || active > remaining)
+            break;
+        remaining -= active;
+        level++;
+    }
+
+    for (int n = 0; n < num_lists; n++) {
+        int count = ctx->status_lists[n];
+        ctx->status_lists[n] = MPMIN(count, level);
+        if (count > level && remaining > 0) {
+            ctx->status_lists[n]++;
+            remaining--;
+        }
+    }
+
+    ctx->status_list_index = STATUS_LIST_ACTIVE;
+    char *result = mp_property_expand_escaped_string(mpctx, str);
+    ctx->status_list_index = STATUS_LIST_INACTIVE;
+    TA_FREEP(&ctx->status_lists);
+    return result;
 }
 
 void property_print_help(struct MPContext *mpctx)
