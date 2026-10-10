@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 
 #include "config.h"
 
@@ -87,10 +86,6 @@ struct priv {
     struct mp_sws_context *sws;
 };
 
-#if HAVE_POSIX
-static struct sigaction saved_sigaction = {0};
-static bool resized;
-#endif
 
 static inline void append_passthrough(struct priv *p, bstr *bs, bstr append)
 {
@@ -257,17 +252,13 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     struct priv *p = vo->priv;
     mp_image_t *mpi = NULL;
 
-#if !HAVE_POSIX
-    int prev_height = vo->dheight;
-    int prev_width = vo->dwidth;
-    get_win_size(vo, &p->rows, &p->cols, &vo->dwidth, &vo->dheight);
-    bool resized = (prev_width != vo->dwidth || prev_height != vo->dheight);
-#endif
-
-    if (resized)
-        reconfig(vo, vo->params);
-
-    resized = false;
+    if (terminal_swapchain_size_changed(p->swapchain)) {
+        int prev_height = vo->dheight;
+        int prev_width = vo->dwidth;
+        get_win_size(vo, &p->rows, &p->cols, &vo->dwidth, &vo->dheight);
+        if (prev_width != vo->dwidth || prev_height != vo->dheight)
+            reconfig(vo, vo->params);
+    }
 
     if (frame->current) {
         mpi = mp_image_new_ref(frame->current);
@@ -362,14 +353,6 @@ static void flip_page(struct vo *vo)
 #endif
 }
 
-#if HAVE_POSIX
-static void handle_winch(int sig) {
-    resized = true;
-    if (saved_sigaction.sa_handler)
-        saved_sigaction.sa_handler(sig);
-}
-#endif
-
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -377,13 +360,6 @@ static int preinit(struct vo *vo)
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
-
-#if HAVE_POSIX
-    struct sigaction sa = {
-        .sa_handler = handle_winch,
-    };
-    sigaction(SIGWINCH, &sa, &saved_sigaction);
-#endif
 
 #if HAVE_POSIX_SHM
     if (p->opts.use_shm) {
@@ -429,18 +405,20 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    if (request == VOCTRL_SET_PANSCAN)
+    struct priv *p = vo->priv;
+    switch (request) {
+    case VOCTRL_SET_PANSCAN:
         return (vo->config_ok && !reconfig(vo, vo->params)) ? VO_TRUE : VO_FALSE;
+    case VOCTRL_CHECK_EVENTS:
+        terminal_swapchain_check_events(p->swapchain);
+        return VO_TRUE;
+    }
     return VO_NOTIMPL;
 }
 
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-
-#if HAVE_POSIX
-    sigaction(SIGWINCH, &saved_sigaction, NULL);
-#endif
 
     bstr *out = terminal_swapchain_acquire(p->swapchain);
     append_passthrough(p, out, KITTY_ESC_DELETE_ALL);

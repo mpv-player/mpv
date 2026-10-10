@@ -80,6 +80,29 @@ static const unsigned char ansi2win32bg[8] = {
 static bool running;
 static HANDLE death;
 static mp_thread input_thread;
+static DWORD input_mode;
+static bool have_input_mode;
+
+static mp_static_mutex resize_lock = MP_STATIC_MUTEX_INITIALIZER;
+static void (*resize_cb)(void *ctx);
+static void *resize_ctx;
+
+bool terminal_set_resize_callback(void (*cb)(void *ctx), void *ctx)
+{
+    mp_mutex_lock(&resize_lock);
+    resize_cb = cb;
+    resize_ctx = ctx;
+    mp_mutex_unlock(&resize_lock);
+    return running;
+}
+
+static void notify_resize(void)
+{
+    mp_mutex_lock(&resize_lock);
+    if (resize_cb)
+        resize_cb(resize_ctx);
+    mp_mutex_unlock(&resize_lock);
+}
 static struct input_ctx *input_ctx;
 
 static bool is_native_out_vt_internal(HANDLE hOut)
@@ -154,9 +177,12 @@ static void read_input(HANDLE in)
         if (!ReadConsoleInputW(in, &event, 1, &(DWORD){0}))
             break;
 
-        // Only key-down events are interesting to us
         switch (event.EventType)
         {
+        case WINDOW_BUFFER_SIZE_EVENT:
+            notify_resize();
+            break;
+        // Only key-down events are interesting to us
         case KEY_EVENT: {
             KEY_EVENT_RECORD *record = &event.Event.KeyEvent;
             if (!record->bKeyDown)
@@ -267,6 +293,10 @@ void terminal_setup_getch(struct input_ctx *ictx)
     HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
     if (GetNumberOfConsoleInputEvents(in, &(DWORD){0})) {
         input_ctx = ictx;
+        // Resizes come in as input events with this
+        have_input_mode = GetConsoleMode(in, &input_mode);
+        if (have_input_mode)
+            SetConsoleMode(in, input_mode | ENABLE_WINDOW_INPUT);
         death = CreateEventW(NULL, TRUE, FALSE, NULL);
         if (!death)
             return;
@@ -291,6 +321,10 @@ void terminal_uninit(void)
         mp_thread_join(input_thread);
         input_ctx = NULL;
         running = false;
+    }
+    if (have_input_mode) {
+        SetConsoleMode(hSTDIN, input_mode);
+        have_input_mode = false;
     }
     FlsFree(tmp_buffers_key);
     tmp_buffers_key = FLS_OUT_OF_INDEXES;

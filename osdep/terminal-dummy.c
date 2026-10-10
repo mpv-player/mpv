@@ -59,3 +59,8 @@ bool terminal_try_attach(void)
 void terminal_set_mouse_input(bool enable)
 {
 }
+
+bool terminal_set_resize_callback(void (*cb)(void *ctx), void *ctx)
+{
+    return false;
+}

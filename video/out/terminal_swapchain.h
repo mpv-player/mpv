@@ -45,5 +45,11 @@ bstr *terminal_swapchain_next(struct terminal_swapchain *sc);
 // Blocks until everything queued so far has been written.
 void terminal_swapchain_wait(struct terminal_swapchain *sc);
 
+// For VOCTRL_CHECK_EVENTS, check if any event is pending.
+void terminal_swapchain_check_events(struct terminal_swapchain *sc);
+
+// Whether the terminal size has changed since the last call.
+bool terminal_swapchain_size_changed(struct terminal_swapchain *sc);
+
 // Writes what is queued, stops the thread and frees the swapchain.
 void terminal_swapchain_destroy(struct terminal_swapchain *sc);
