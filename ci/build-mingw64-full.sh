@@ -59,6 +59,16 @@ make TARGET_SYS=Windows PREFIX="$FFBUILD_PREFIX" HOST_CC="$HOST_CC" \
 popd
 endgroup
 
+group "Building libsixel"
+$gitclone https://github.com/saitoha/libsixel.git
+pushd libsixel
+./configure --prefix="$FFBUILD_PREFIX" --host="$FFBUILD_TOOLCHAIN" --disable-shared \
+            --disable-{img2sixel,sixel2png,python} --without-{jpeg,libcurl,png}
+make -j"$(nproc)"
+make install
+popd
+endgroup
+
 group "Building subrandr"
 build_subrandr "$FFBUILD_PREFIX" --target "$FFBUILD_RUST_TARGET" \
                --static-library true --shared-library false
@@ -101,8 +111,8 @@ mpv_args=(
     -Dmujs:werror=false
     -Dmujs:default_library=static
     -Dlua=luajit
-    -D{amf,d3d11,javascript,lcms2,libbluray,libcurl,shaderc,spirv-cross}=enabled
-    -D{subrandr,vapoursynth,vulkan,win32-smtc,zimg}=enabled
+    -D{amf,d3d11,javascript,lcms2,libbluray,libcurl,shaderc,sixel}=enabled
+    -D{spirv-cross,subrandr,vapoursynth,vulkan,win32-smtc,zimg}=enabled
 )
 if $gpl; then
     # Only the GPL image carries the dependencies of the GPL features.
