@@ -603,29 +603,31 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     SIXELSTATUS status;
     struct mp_image *mpi = NULL;
 
-    int  prev_rows   = priv->num_rows;
-    int  prev_cols   = priv->num_cols;
-    int  prev_height = vo->dheight;
-    int  prev_width  = vo->dwidth;
-    bool resized     = false;
-    update_canvas_dimensions(vo);
+    bool resized = false;
+    if (terminal_swapchain_size_changed(priv->swapchain)) {
+        int prev_rows   = priv->num_rows;
+        int prev_cols   = priv->num_cols;
+        int prev_height = vo->dheight;
+        int prev_width  = vo->dwidth;
+        update_canvas_dimensions(vo);
+        if (priv->canvas_ok &&
+            (prev_rows != priv->num_rows || prev_cols != priv->num_cols ||
+             prev_width != vo->dwidth || prev_height != vo->dheight))
+        {
+            set_sixel_output_parameters(vo);
+            // Not checking for vo->config_ok because draw_frame is never
+            // called with a failed reconfig.
+            update_sixel_swscaler(vo, vo->params);
+
+            if (priv->opts.config_clear) {
+                bstr_xappend(NULL, terminal_swapchain_next(priv->swapchain),
+                             (bstr)bstr0_lit(TERM_ESC_CLEAR_SCREEN));
+            }
+            resized = true;
+        }
+    }
     if (!priv->canvas_ok)
         goto done;
-
-    if (prev_rows != priv->num_rows || prev_cols != priv->num_cols ||
-        prev_width != vo->dwidth || prev_height != vo->dheight)
-    {
-        set_sixel_output_parameters(vo);
-        // Not checking for vo->config_ok because draw_frame is never called
-        // with a failed reconfig.
-        update_sixel_swscaler(vo, vo->params);
-
-        if (priv->opts.config_clear) {
-            bstr_xappend(NULL, terminal_swapchain_next(priv->swapchain),
-                         (bstr)bstr0_lit(TERM_ESC_CLEAR_SCREEN));
-        }
-        resized = true;
-    }
 
     if (frame->repeat && !frame->redraw && !resized) {
         // Frame is repeated, and no need to update OSD either
@@ -769,11 +771,16 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    if (request == VOCTRL_SET_PANSCAN)
+    struct priv *priv = vo->priv;
+    switch (request) {
+    case VOCTRL_SET_PANSCAN:
         return (vo->config_ok && !reconfig(vo, vo->params)) ? VO_TRUE : VO_FALSE;
+    case VOCTRL_CHECK_EVENTS:
+        terminal_swapchain_check_events(priv->swapchain);
+        return VO_TRUE;
+    }
     return VO_NOTIMPL;
 }
-
 
 static void uninit(struct vo *vo)
 {

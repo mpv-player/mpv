@@ -16,6 +16,7 @@
  */
 
 #include <errno.h>
+#include <stdatomic.h>
 #include <stdio.h>
 
 #include "config.h"
@@ -44,6 +45,9 @@ struct terminal_swapchain {
     bool acquired;
     bstr next;          // goes out at the start of the next acquired buffer
     bool exit;
+    bool resize_events;     // the terminal reports resizes
+    atomic_bool resized;    // set from the terminal input thread, for a redraw
+    atomic_bool size_dirty; // the same, for the VO to read the size again
 };
 
 static void write_terminal(bstr data)
@@ -93,15 +97,25 @@ static MP_THREAD_VOID writer_thread(void *ctx)
     MP_THREAD_RETURN();
 }
 
+static void on_resize(void *ctx)
+{
+    struct terminal_swapchain *sc = ctx;
+    atomic_store(&sc->resized, true);
+    atomic_store(&sc->size_dirty, true);
+    vo_wakeup(sc->vo);
+}
+
 struct terminal_swapchain *terminal_swapchain_create(struct vo *vo)
 {
     struct terminal_swapchain *sc = talloc_zero(NULL, struct terminal_swapchain);
     sc->vo = vo;
     mp_mutex_init(&sc->lock);
     mp_cond_init(&sc->cond);
+    atomic_store(&sc->size_dirty, true);
     sc->started = mp_thread_create(&sc->thread, writer_thread, sc) == 0;
     if (!sc->started)
         MP_WARN(vo, "Failed to create the terminal writer thread, writing inline.\n");
+    sc->resize_events = terminal_set_resize_callback(on_resize, sc);
     return sc;
 }
 
@@ -160,10 +174,24 @@ void terminal_swapchain_wait(struct terminal_swapchain *sc)
     mp_mutex_unlock(&sc->lock);
 }
 
+void terminal_swapchain_check_events(struct terminal_swapchain *sc)
+{
+    if (atomic_exchange(&sc->resized, false))
+        sc->vo->want_redraw = true;
+}
+
+bool terminal_swapchain_size_changed(struct terminal_swapchain *sc)
+{
+    if (!sc->resize_events)
+        return true;
+    return atomic_exchange(&sc->size_dirty, false);
+}
+
 void terminal_swapchain_destroy(struct terminal_swapchain *sc)
 {
     if (!sc)
         return;
+    terminal_set_resize_callback(NULL, NULL);
     if (sc->started) {
         mp_mutex_lock(&sc->lock);
         sc->exit = true;

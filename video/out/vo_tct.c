@@ -255,11 +255,12 @@ static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    int width, height;
-    get_win_size(vo, &width, &height);
-
-    if (vo->dwidth != width || vo->dheight != height)
-        reconfig(vo, vo->params);
+    if (terminal_swapchain_size_changed(p->swapchain)) {
+        int width, height;
+        get_win_size(vo, &width, &height);
+        if (vo->dwidth != width || vo->dheight != height)
+            reconfig(vo, vo->params);
+    }
 
     bstr *out = terminal_swapchain_acquire(p->swapchain);
     bstr_xappend0(NULL, out, TERM_ESC_SYNC_UPDATE_BEGIN);
@@ -330,6 +331,11 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    struct priv *p = vo->priv;
+    if (request == VOCTRL_CHECK_EVENTS) {
+        terminal_swapchain_check_events(p->swapchain);
+        return VO_TRUE;
+    }
     return VO_NOTIMPL;
 }
 
