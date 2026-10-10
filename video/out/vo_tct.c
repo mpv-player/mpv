@@ -137,7 +137,7 @@ static void write_plain(bstr *frame,
     const int ty = (dheight - sheight) / 2;
     for (int y = 0; y < sheight; y++) {
         const unsigned char *row = source + y * source_stride;
-        bstr_xappend_asprintf(NULL, frame, TERM_ESC_GOTO_YX, ty + y, tx);
+        bstr_xappend_asprintf(NULL, frame, TERM_ESC_GOTO_YX, ty + y + 1, tx + 1);
         for (int x = 0; x < swidth; x++) {
             unsigned char b = *row++;
             unsigned char g = *row++;
@@ -165,7 +165,7 @@ static void write_half_blocks(bstr *frame,
     for (int y = 0; y < sheight * 2; y += 2) {
         const unsigned char *row_up = source + y * source_stride;
         const unsigned char *row_down = source + (y + 1) * source_stride;
-        bstr_xappend_asprintf(NULL, frame, TERM_ESC_GOTO_YX, ty + y / 2, tx);
+        bstr_xappend_asprintf(NULL, frame, TERM_ESC_GOTO_YX, ty + y / 2 + 1, tx + 1);
         for (int x = 0; x < swidth; x++) {
             unsigned char b_up = *row_up++;
             unsigned char g_up = *row_up++;
@@ -197,6 +197,8 @@ static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
         *out_width = p->opts.width;
     if (p->opts.height > 0)
         *out_height = p->opts.height;
+    // The bottom row is left to the status line.
+    *out_height = MPMAX(*out_height - 1, 1);
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -275,7 +277,7 @@ static void flip_page(struct vo *vo)
             p->frame->planes[0], p->frame->stride[0],
             p->opts.term256, p->lut);
     }
-    bstr_xappend0(NULL, out, "\n");
+    bstr_xappend_asprintf(NULL, out, TERM_ESC_GOTO_YX, vo->dheight + 1, 1);
     bstr_xappend0(NULL, out, TERM_ESC_SYNC_UPDATE_END);
     terminal_swapchain_present(p->swapchain, out);
 }
