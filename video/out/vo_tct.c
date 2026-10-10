@@ -27,9 +27,9 @@
 #include "options/m_config.h"
 #include "config.h"
 #include "osdep/terminal.h"
-#include "osdep/io.h"
 #include "vo.h"
 #include "sub/osd.h"
+#include "terminal_swapchain.h"
 #include "video/sws_utils.h"
 #include "video/mp_image.h"
 
@@ -47,8 +47,6 @@ static const bstr TERM_ESC_COLOR24BIT_BG   = bstr0_lit("\033[48;2");
 static const bstr TERM_ESC_COLOR24BIT_FG   = bstr0_lit("\033[38;2");
 
 static const bstr UNICODE_LOWER_HALF_BLOCK = bstr0_lit("\xe2\x96\x84");
-
-#define WRITE_STR(str) fwrite((str), strlen(str), 1, stdout)
 
 enum vo_tct_buffering {
     VO_TCT_BUFFER_PIXEL,
@@ -78,7 +76,7 @@ struct priv {
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_sws_context *sws;
-    bstr frame_buf;
+    struct terminal_swapchain *swapchain;
     struct lut_item lut[256];
 };
 
@@ -128,17 +126,11 @@ static void print_seq1(bstr *frame, struct lut_item *lut, bstr prefix, uint8_t c
     bstr_xappend0(NULL, frame, "m");
 }
 
-static void print_buffer(bstr *frame)
-{
-    fwrite(frame->start, frame->len, 1, stdout);
-    frame->len = 0;
-}
-
 static void write_plain(bstr *frame,
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
     const unsigned char *source, const int source_stride,
-    bool term256, struct lut_item *lut, enum vo_tct_buffering buffering)
+    bool term256, struct lut_item *lut)
 {
     mp_assert(source);
     const int tx = (dwidth - swidth) / 2;
@@ -156,12 +148,8 @@ static void write_plain(bstr *frame,
                 print_seq3(frame, lut, TERM_ESC_COLOR24BIT_BG, r, g, b);
             }
             bstr_xappend0(NULL, frame, " ");
-            if (buffering <= VO_TCT_BUFFER_PIXEL)
-                print_buffer(frame);
         }
         bstr_xappend0(NULL, frame, TERM_ESC_CLEAR_COLORS);
-        if (buffering <= VO_TCT_BUFFER_LINE)
-            print_buffer(frame);
     }
 }
 
@@ -169,7 +157,7 @@ static void write_half_blocks(bstr *frame,
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
     unsigned char *source, int source_stride,
-    bool term256, struct lut_item *lut, enum vo_tct_buffering buffering)
+    bool term256, struct lut_item *lut)
 {
     mp_assert(source);
     const int tx = (dwidth - swidth) / 2;
@@ -193,12 +181,8 @@ static void write_half_blocks(bstr *frame,
                 print_seq3(frame, lut, TERM_ESC_COLOR24BIT_FG, r_down, g_down, b_down);
             }
             bstr_xappend(NULL, frame, UNICODE_LOWER_HALF_BLOCK);
-            if (buffering <= VO_TCT_BUFFER_PIXEL)
-                print_buffer(frame);
         }
         bstr_xappend0(NULL, frame, TERM_ESC_CLEAR_COLORS);
-        if (buffering <= VO_TCT_BUFFER_LINE)
-            print_buffer(frame);
     }
 }
 
@@ -247,9 +231,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
 
-    terminal_lock_output();
-    WRITE_STR(TERM_ESC_CLEAR_SCREEN);
-    terminal_unlock_output();
+    bstr_xappend(NULL, terminal_swapchain_next(p->swapchain),
+                 (bstr)bstr0_lit(TERM_ESC_CLEAR_SCREEN));
 
     vo->want_redraw = true;
     return 0;
@@ -278,39 +261,34 @@ static void flip_page(struct vo *vo)
     if (vo->dwidth != width || vo->dheight != height)
         reconfig(vo, vo->params);
 
-    terminal_lock_output();
-    WRITE_STR(TERM_ESC_SYNC_UPDATE_BEGIN);
-
-    p->frame_buf.len = 0;
+    bstr *out = terminal_swapchain_acquire(p->swapchain);
+    bstr_xappend0(NULL, out, TERM_ESC_SYNC_UPDATE_BEGIN);
     if (p->opts.algo == ALGO_PLAIN) {
-        write_plain(&p->frame_buf,
+        write_plain(out,
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts.term256, p->lut, p->opts.buffering);
+            p->opts.term256, p->lut);
     } else {
-        write_half_blocks(&p->frame_buf,
+        write_half_blocks(out,
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
             p->frame->planes[0], p->frame->stride[0],
-            p->opts.term256, p->lut, p->opts.buffering);
+            p->opts.term256, p->lut);
     }
-
-    bstr_xappend0(NULL, &p->frame_buf, "\n");
-    if (p->opts.buffering <= VO_TCT_BUFFER_FRAME)
-        print_buffer(&p->frame_buf);
-
-    WRITE_STR(TERM_ESC_SYNC_UPDATE_END);
-    fflush(stdout);
-    terminal_unlock_output();
+    bstr_xappend0(NULL, out, "\n");
+    bstr_xappend0(NULL, out, TERM_ESC_SYNC_UPDATE_END);
+    terminal_swapchain_present(p->swapchain, out);
 }
 
 static void uninit(struct vo *vo)
 {
-    WRITE_STR(TERM_ESC_RESTORE_CURSOR);
-    terminal_set_mouse_input(false);
-    WRITE_STR(TERM_ESC_NORMAL_SCREEN);
     struct priv *p = vo->priv;
+    bstr *out = terminal_swapchain_acquire(p->swapchain);
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_RESTORE_CURSOR));
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_NORMAL_SCREEN));
+    terminal_swapchain_present(p->swapchain, out);
+    terminal_set_mouse_input(false);
+    terminal_swapchain_destroy(p->swapchain);
     talloc_free(p->frame);
-    talloc_free(p->frame_buf.start);
 }
 
 static int preinit(struct vo *vo)
@@ -335,9 +313,12 @@ static int preinit(struct vo *vo)
         p->lut[i].width = out - p->lut[i].str;
     }
 
-    WRITE_STR(TERM_ESC_HIDE_CURSOR);
+    p->swapchain = terminal_swapchain_create(vo);
+    bstr *out = terminal_swapchain_acquire(p->swapchain);
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_HIDE_CURSOR));
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_ALT_SCREEN));
+    terminal_swapchain_present(p->swapchain, out);
     terminal_set_mouse_input(true);
-    WRITE_STR(TERM_ESC_ALT_SCREEN);
 
     return 0;
 }
@@ -379,7 +360,8 @@ const struct vo_driver video_out_tct = {
         {"buffering", OPT_CHOICE(opts.buffering,
             {"pixel", VO_TCT_BUFFER_PIXEL},
             {"line", VO_TCT_BUFFER_LINE},
-            {"frame", VO_TCT_BUFFER_FRAME})},
+            {"frame", VO_TCT_BUFFER_FRAME}),
+            .deprecation_message = "frames are written in one piece"},
         {0}
     },
     .options_prefix = "vo-tct",
