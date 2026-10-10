@@ -107,7 +107,7 @@ class AppHub: NSObject {
     func open(urls: [URL]) {
         let files = urls.map {
             if $0.isFileURL { return $0.path }
-            var path = $0.absoluteString
+            let path = $0.absoluteString
             return path.removingPercentEncoding ?? path
         }.sorted { (strL: String, strR: String) -> Bool in
             return strL.localizedStandardCompare(strR) == .orderedAscending
