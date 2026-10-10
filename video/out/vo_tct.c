@@ -207,6 +207,14 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     get_win_size(vo, &vo->dwidth, &vo->dheight);
 
+    // Fit the video to the cell aspect the terminal reports, 2:1 as a fallback.
+    int rows = 0, cols = 0, px_w = 0, px_h = 0;
+    terminal_get_size2(&rows, &cols, &px_w, &px_h);
+    double par = 2;
+    if (rows > 0 && cols > 0 && px_w > 0 && px_h > 0)
+        par = ((double)px_h / rows) / ((double)px_w / cols);
+    vo->monitor_par = vo->opts->monitor_pixel_aspect * par;
+
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &osd);
     p->swidth = p->dst.x1 - p->dst.x0;
@@ -296,10 +304,6 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo)
 {
-    // most terminal characters aren't 1:1, so we default to 2:1.
-    // if user passes their own value of choice, it'll be scaled accordingly.
-    vo->monitor_par = vo->opts->monitor_pixel_aspect * 2;
-
     struct priv *p = vo->priv;
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
