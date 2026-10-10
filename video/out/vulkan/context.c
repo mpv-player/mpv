@@ -238,6 +238,9 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
 #ifdef VK_EXT_shader_long_vector
         VK_EXT_SHADER_LONG_VECTOR_EXTENSION_NAME, /* 1.4.337 */
 #endif
+#ifdef VK_KHR_maintenance11
+        VK_KHR_MAINTENANCE_11_EXTENSION_NAME, /* 1.4.350 */
+#endif
     };
 
     /*
@@ -246,9 +249,19 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
      * the next extension that chains on to it will also be present.
      */
 
+#ifdef VK_KHR_maintenance11
+    VkPhysicalDeviceMaintenance11FeaturesKHR maintenance_11_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_11_FEATURES_KHR,
+        .maintenance11 = true,
+    };
+#endif
+
 #ifdef VK_EXT_shader_long_vector
     VkPhysicalDeviceShaderLongVectorFeaturesEXT long_vector_feature = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_LONG_VECTOR_FEATURES_EXT,
+#ifdef VK_KHR_maintenance11
+        .pNext = &maintenance_11_feature,
+#endif
         .longVector = true,
     };
 #endif
