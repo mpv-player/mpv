@@ -14,6 +14,7 @@ meson setup build $common_args \
   -Dlua=enabled \
   -Dopenal=enabled \
   -Dpulse=enabled \
+  -Dsixel=enabled \
   -Dvulkan=enabled \
   -Ddvdnav=enabled \
   -Dcdda=disabled
