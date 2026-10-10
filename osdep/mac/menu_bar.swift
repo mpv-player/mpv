@@ -24,6 +24,7 @@ extension MenuBar {
 
     enum `Type`: Comparable {
         case menu
+        case menuWindow
         case menuServices
         case separator
         case item
@@ -49,7 +50,7 @@ extension MenuBar {
             name: String = "",
             key: String = "",
             modifiers: NSEvent.ModifierFlags = .command,
-            type: Type = .item,
+            type: Type? = nil,
             action: Selector? = nil,
             target: AnyObject? = nil,
             command: String = "",
@@ -59,7 +60,7 @@ extension MenuBar {
             self.name = name
             self.key = key
             self.modifiers = modifiers
-            self.type = configs.isEmpty ? type : .menu
+            self.type = type ?? (configs.isEmpty ? .item : .menu)
             self.action = action
             self.target = target
             self.command = command
@@ -255,7 +256,7 @@ class MenuBar: NSObject, EventSubscriber {
             Config(name: "Audio", configs: audioMenuConfigs),
             Config(name: "Subtitle", configs: subtitleMenuConfigs),
             Config(name: "Playback", configs: playbackMenuConfigs),
-            Config(name: "Window", configs: windowMenuConfigs),
+            Config(name: "Window", type: .menuWindow, configs: windowMenuConfigs),
             Config(name: "Help", configs: helpMenuConfigs)
         ]
 
@@ -274,6 +275,10 @@ class MenuBar: NSObject, EventSubscriber {
                 let menu = config.type == .menuServices ? servicesMenu : NSMenu(title: config.name)
                 item.submenu = menu
                 createMenu(parentMenu: menu, configs: config.configs)
+
+                if config.type == .menuWindow {
+                    NSApp.windowsMenu = menu
+                }
             }
 
             if config.type > Type.item {
