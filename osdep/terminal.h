@@ -64,6 +64,13 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height);
 /* Enable/Disable mouse input. */
 void terminal_set_mouse_input(bool enable);
 
+/* Sets notification callback for when terminal is resized. */
+bool terminal_set_resize_callback(void (*cb)(void *ctx), void *ctx);
+
+/* Serialize writes to the terminal. */
+void terminal_lock_output(void);
+void terminal_unlock_output(void);
+
 // Windows only.
 int mp_console_vfprintf(void *wstream, const char *format, va_list args)
     MP_PRINTF_ATTRIBUTE(2, 0);

@@ -396,7 +396,7 @@ static void getch2_poll(void)
 static mp_thread input_thread;
 static struct input_ctx *input_ctx;
 static int death_pipe[2] = {-1, -1};
-enum { PIPE_STOP, PIPE_CONT };
+enum { PIPE_STOP, PIPE_CONT, PIPE_WINCH };
 static int stop_cont_pipe[2] = {-1, -1};
 
 static void stop_cont_sighandler(int signum)
@@ -405,6 +405,34 @@ static void stop_cont_sighandler(int signum)
     char sig = signum == SIGCONT ? PIPE_CONT : PIPE_STOP;
     (void)write(stop_cont_pipe[1], &sig, 1);
     errno = saved_errno;
+}
+
+static void winch_sighandler(int signum)
+{
+    int saved_errno = errno;
+    (void)write(stop_cont_pipe[1], &(char){PIPE_WINCH}, 1);
+    errno = saved_errno;
+}
+
+static mp_static_mutex resize_lock = MP_STATIC_MUTEX_INITIALIZER;
+static void (*resize_cb)(void *ctx);
+static void *resize_ctx;
+
+bool terminal_set_resize_callback(void (*cb)(void *ctx), void *ctx)
+{
+    mp_mutex_lock(&resize_lock);
+    resize_cb = cb;
+    resize_ctx = ctx;
+    mp_mutex_unlock(&resize_lock);
+    return input_ctx != NULL;
+}
+
+static void notify_resize(void)
+{
+    mp_mutex_lock(&resize_lock);
+    if (resize_cb)
+        resize_cb(resize_ctx);
+    mp_mutex_unlock(&resize_lock);
 }
 
 static void safe_close(int *p)
@@ -480,6 +508,8 @@ static MP_THREAD_VOID terminal_thread(void *ptr)
                 raise(SIGSTOP);
             } else if (c == PIPE_CONT) {
                 getch2_poll();
+            } else if (c == PIPE_WINCH) {
+                notify_resize();
             }
         }
         if (fds[2].revents) {
@@ -540,6 +570,7 @@ void terminal_uninit(void)
     // restore signals
     setsigaction(SIGCONT, SIG_DFL, 0, false);
     setsigaction(SIGTSTP, SIG_DFL, 0, false);
+    setsigaction(SIGWINCH, SIG_DFL, 0, false);
     setsigaction(SIGINT,  SIG_DFL, 0, false);
     setsigaction(SIGQUIT, SIG_DFL, 0, false);
     setsigaction(SIGTERM, SIG_DFL, 0, false);
@@ -595,6 +626,18 @@ void terminal_set_mouse_input(bool enable)
     fflush(stdout);
 }
 
+static mp_static_mutex output_lock = MP_STATIC_MUTEX_INITIALIZER;
+
+void terminal_lock_output(void)
+{
+    mp_mutex_lock(&output_lock);
+}
+
+void terminal_unlock_output(void)
+{
+    mp_mutex_unlock(&output_lock);
+}
+
 void terminal_init(void)
 {
     mp_assert(!getch2_enabled);
@@ -616,6 +659,7 @@ void terminal_init(void)
     // handlers to fix terminal settings
     setsigaction(SIGCONT, stop_cont_sighandler, 0, true);
     setsigaction(SIGTSTP, stop_cont_sighandler, 0, true);
+    setsigaction(SIGWINCH, winch_sighandler, 0, true);
     setsigaction(SIGTTIN, SIG_IGN, 0, true);
     setsigaction(SIGTTOU, SIG_IGN, 0, true);
 

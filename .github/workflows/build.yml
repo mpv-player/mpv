@@ -378,7 +378,7 @@ jobs:
           if brew list openssl@1.1 &> /dev/null; then brew rm openssl@1.1; fi
           brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass ffmpeg-full meson rust uchardet mujs libplacebo molten-vk vulkan-loader vulkan-headers \
-            libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread rubberband vapoursynth zimg
+            libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread libsixel rubberband vapoursynth zimg
           brew link ffmpeg-full
 
       - name: Build with meson
@@ -514,6 +514,7 @@ jobs:
               lua5.2-dev \
               pulseaudio-dev \
               libplacebo-dev \
+              libsixel-dev \
               libx11-dev \
               libxfixes-dev \
               libxkbcommon-dev \
@@ -577,6 +578,7 @@ jobs:
               libdvdnav \
               libiconv \
               libplacebo \
+              libsixel \
               libv4l \
               libxkbcommon \
               luajit \
@@ -652,6 +654,7 @@ jobs:
               libdvdread \
               libdisplay-info \
               libplacebo \
+              libsixel \
               libXinerama \
               libxkbcommon \
               libXpresent \

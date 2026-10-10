@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdatomic.h>
 #include <string.h>
 #include <windows.h>
 #include <io.h>
@@ -80,6 +81,29 @@ static const unsigned char ansi2win32bg[8] = {
 static bool running;
 static HANDLE death;
 static mp_thread input_thread;
+static DWORD input_mode;
+static bool have_input_mode;
+
+static mp_static_mutex resize_lock = MP_STATIC_MUTEX_INITIALIZER;
+static void (*resize_cb)(void *ctx);
+static void *resize_ctx;
+
+bool terminal_set_resize_callback(void (*cb)(void *ctx), void *ctx)
+{
+    mp_mutex_lock(&resize_lock);
+    resize_cb = cb;
+    resize_ctx = ctx;
+    mp_mutex_unlock(&resize_lock);
+    return running;
+}
+
+static void notify_resize(void)
+{
+    mp_mutex_lock(&resize_lock);
+    if (resize_cb)
+        resize_cb(resize_ctx);
+    mp_mutex_unlock(&resize_lock);
+}
 static struct input_ctx *input_ctx;
 
 static bool is_native_out_vt_internal(HANDLE hOut)
@@ -104,10 +128,14 @@ void terminal_get_size(int *w, int *h)
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
     HANDLE hOut = hSTDOUT;
     if (GetConsoleScreenBufferInfo(hOut, &cinfo)) {
-        *w = cinfo.dwMaximumWindowSize.X - (is_native_out_vt(hOut) ? 0 : 1);
-        *h = cinfo.dwMaximumWindowSize.Y;
+        *w = cinfo.srWindow.Right - cinfo.srWindow.Left + 1 -
+             (is_native_out_vt(hOut) ? 0 : 1);
+        *h = cinfo.srWindow.Bottom - cinfo.srWindow.Top + 1;
     }
 }
+
+// Cell size the terminal reported, ConPTY has no font of its own
+static atomic_int term_cell_w, term_cell_h;
 
 static bool get_font_size(int *w, int *h)
 {
@@ -117,8 +145,22 @@ static bool get_font_size(int *w, int *h)
   if (res) {
       *w = finfo.dwFontSize.X;
       *h = finfo.dwFontSize.Y;
+      if (*w <= 0) {
+          *w = atomic_load_explicit(&term_cell_w, memory_order_acquire);
+          *h = atomic_load_explicit(&term_cell_h, memory_order_relaxed);
+      }
   }
   return res;
+}
+
+// XTWINOPS 16: the terminal answers with CSI 6 ; height ; width t, which
+// the input thread takes from its key events.
+static void request_cell_size(void)
+{
+    int fw = 0, fh = 0;
+    if (!is_vt[STDOUT_FILENO] || !get_font_size(&fw, &fh) || fw > 0)
+        return;
+    mp_console_write(hSTDOUT, (bstr)bstr0_lit("\033[16t"));
 }
 
 void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
@@ -126,10 +168,12 @@ void terminal_get_size2(int *rows, int *cols, int *px_width, int *px_height)
     int w = 0, h = 0, fw = 0, fh = 0;
     terminal_get_size(&w, &h);
     if (get_font_size(&fw, &fh)) {
-        *px_width = fw * w;
-        *px_height = fh * h;
-        *rows = w;
-        *cols = h;
+        if (fw > 0 && fh > 0) {
+            *px_width = fw * w;
+            *px_height = fh * h;
+        }
+        *rows = h;
+        *cols = w;
     }
 }
 
@@ -141,6 +185,33 @@ static bool has_input_events(HANDLE h)
     return !!num_events;
 }
 
+static DWORD last_buttons;
+
+static bool take_reply(int c)
+{
+    static char reply[32];
+    static int len;
+    if (c == '\033') {
+        len = 0;
+    } else if (!len) {
+        return false;
+    }
+    reply[len++] = c;
+    if (len == sizeof(reply) - 1) {
+        len = 0;    // not a reply after all
+    } else if (len > 2 && c >= 0x40 && c <= 0x7e) {
+        reply[len] = '\0';
+        len = 0;
+        int w = 0, h = 0;
+        if (sscanf(reply, "\033[6;%d;%dt", &h, &w) == 2 && w > 0 && h > 0) {
+            atomic_store_explicit(&term_cell_h, h, memory_order_relaxed);
+            atomic_store_explicit(&term_cell_w, w, memory_order_release);
+            notify_resize();
+        }
+    }
+    return true;
+}
+
 static void read_input(HANDLE in)
 {
     // Process any input events in the buffer
@@ -149,12 +220,19 @@ static void read_input(HANDLE in)
         if (!ReadConsoleInputW(in, &event, 1, &(DWORD){0}))
             break;
 
-        // Only key-down events are interesting to us
         switch (event.EventType)
         {
+        case WINDOW_BUFFER_SIZE_EVENT:
+            notify_resize();
+            break;
+        // Only key-down events are interesting to us
         case KEY_EVENT: {
             KEY_EVENT_RECORD *record = &event.Event.KeyEvent;
             if (!record->bKeyDown)
+                continue;
+
+            // A reply comes as characters without a virtual key, unlike a pressed key.
+            if (!record->wVirtualKeyCode && take_reply(record->uChar.UnicodeChar))
                 continue;
 
             UINT vkey = record->wVirtualKeyCode;
@@ -193,15 +271,16 @@ static void read_input(HANDLE in)
             if (record->dwControlKeyState & SHIFT_PRESSED)
                 mods |= MP_KEY_MODIFIER_SHIFT;
 
-            switch (record->dwEventFlags) {
-            case MOUSE_MOVED: {
-                int w = 0, h = 0;
-                if (get_font_size(&w, &h)) {
-                    mp_input_set_mouse_pos(input_ctx, w * (record->dwMousePosition.X + 0.5),
-                                                      h * (record->dwMousePosition.Y + 0.5), false);
-                }
-                break;
+            // Every event carries the position, a terminal does not have to send motion.
+            int w = 0, h = 0;
+            if (get_font_size(&w, &h) && w > 0 && h > 0) {
+                mp_input_set_mouse_pos(input_ctx, w * (record->dwMousePosition.X + 0.5),
+                                                  h * (record->dwMousePosition.Y + 0.5), false);
             }
+
+            switch (record->dwEventFlags) {
+            case MOUSE_MOVED:
+                break;
             case MOUSE_HWHEELED: {
                 int button = (int16_t)HIWORD(record->dwButtonState) > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
                 mp_input_put_key(input_ctx, button | mods);
@@ -213,12 +292,23 @@ static void read_input(HANDLE in)
                 break;
             }
             default: {
-                int left_button_state = record->dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED ?
-                                        MP_KEY_STATE_DOWN : MP_KEY_STATE_UP;
-                mp_input_put_key(input_ctx, MP_MBTN_LEFT | mods | left_button_state);
-                int right_button_state = record->dwButtonState & RIGHTMOST_BUTTON_PRESSED ?
-                                        MP_KEY_STATE_DOWN : MP_KEY_STATE_UP;
-                mp_input_put_key(input_ctx, MP_MBTN_RIGHT | mods | right_button_state);
+                static const struct {
+                    DWORD flag;
+                    int key;
+                } buttons[] = {
+                    {FROM_LEFT_1ST_BUTTON_PRESSED, MP_MBTN_LEFT},
+                    {RIGHTMOST_BUTTON_PRESSED, MP_MBTN_RIGHT},
+                    {FROM_LEFT_2ND_BUTTON_PRESSED, MP_MBTN_MID},
+                };
+                DWORD changed = record->dwButtonState ^ last_buttons;
+                for (int i = 0; i < MP_ARRAY_SIZE(buttons); i++) {
+                    if (changed & buttons[i].flag) {
+                        int state = record->dwButtonState & buttons[i].flag ?
+                                    MP_KEY_STATE_DOWN : MP_KEY_STATE_UP;
+                        mp_input_put_key(input_ctx, buttons[i].key | mods | state);
+                    }
+                }
+                last_buttons = record->dwButtonState;
                 break;
             }
             }
@@ -250,6 +340,10 @@ void terminal_setup_getch(struct input_ctx *ictx)
     HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
     if (GetNumberOfConsoleInputEvents(in, &(DWORD){0})) {
         input_ctx = ictx;
+        // Resizes come in as input events with this
+        have_input_mode = GetConsoleMode(in, &input_mode);
+        if (have_input_mode)
+            SetConsoleMode(in, input_mode | ENABLE_WINDOW_INPUT);
         death = CreateEventW(NULL, TRUE, FALSE, NULL);
         if (!death)
             return;
@@ -258,6 +352,7 @@ void terminal_setup_getch(struct input_ctx *ictx)
             return;
         }
         running = true;
+        request_cell_size();
     }
 }
 
@@ -274,6 +369,10 @@ void terminal_uninit(void)
         mp_thread_join(input_thread);
         input_ctx = NULL;
         running = false;
+    }
+    if (have_input_mode) {
+        SetConsoleMode(hSTDIN, input_mode);
+        have_input_mode = false;
     }
     FlsFree(tmp_buffers_key);
     tmp_buffers_key = FLS_OUT_OF_INDEXES;
@@ -538,12 +637,10 @@ int mp_console_write(HANDLE wstream, bstr str)
     }
 
 done:;
-    int ret = buffers->write_console_buf.len;
-
     if (free_buf)
         talloc_free(buffers);
 
-    return ret;
+    return str.len;
 }
 
 static bool is_a_console(HANDLE h)
@@ -613,15 +710,40 @@ bool terminal_try_attach(void)
     return true;
 }
 
+static mp_static_mutex output_lock = MP_STATIC_MUTEX_INITIALIZER;
+
+void terminal_lock_output(void)
+{
+    mp_mutex_lock(&output_lock);
+}
+
+void terminal_unlock_output(void)
+{
+    mp_mutex_unlock(&output_lock);
+}
+
+static DWORD saved_input_mode;
+static bool have_saved_input_mode;
+
 void terminal_set_mouse_input(bool enable)
 {
     DWORD cmode;
     HANDLE in = hSTDIN;
-    if (GetConsoleMode(in, &cmode)) {
-        cmode = enable ? cmode | ENABLE_MOUSE_INPUT
-                       : cmode & (~ENABLE_MOUSE_INPUT);
-        SetConsoleMode(in, cmode);
+    if (!GetConsoleMode(in, &cmode))
+        return;
+    if (enable) {
+        if (!have_saved_input_mode) {
+            saved_input_mode = cmode;
+            have_saved_input_mode = true;
+        }
+        cmode = (cmode | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) & ~ENABLE_QUICK_EDIT_MODE;
+    } else if (have_saved_input_mode) {
+        cmode = saved_input_mode;
+        have_saved_input_mode = false;
+    } else {
+        cmode &= ~ENABLE_MOUSE_INPUT;
     }
+    SetConsoleMode(in, cmode);
 }
 
 static VOID NTAPI fls_free_cb(PVOID ptr)

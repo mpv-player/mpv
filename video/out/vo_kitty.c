@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 
 #include "config.h"
 
@@ -37,6 +36,7 @@
 #include "options/m_config.h"
 #include "osdep/terminal.h"
 #include "sub/osd.h"
+#include "terminal_swapchain.h"
 #include "vo.h"
 #include "video/sws_utils.h"
 #include "video/mp_image.h"
@@ -47,35 +47,6 @@
 #define DEFAULT_HEIGHT_PX 240
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
-
-static inline void write_bstr(bstr bs)
-{
-    // On POSIX platforms, write() is the fastest method. It also is the only
-    // one that allows atomic writes so mpv’s output will not be interrupted
-    // by other processes or threads that write to stdout, which would cause
-    // screen corruption. POSIX does not guarantee atomicity for writes
-    // exceeding PIPE_BUF, but at least Linux does seem to implement it that
-    // way.
-#if HAVE_POSIX
-    size_t remain = bs.len;
-    unsigned char *pos = bs.start;
-    while (remain > 0) {
-        ssize_t written = write(STDOUT_FILENO, pos, remain);
-        if (written < 0)
-            return;
-        remain -= written;
-        pos += written;
-    }
-#else
-    fwrite(bs.start, 1, bs.len, stdout);
-    fflush(stdout);
-#endif
-}
-
-static inline void write_str(unsigned char* s)
-{
-    write_bstr(bstr0(s));
-}
 
 #define KITTY_ESC_IMG        "\033_Ga=T,f=24,s=%d,v=%d,C=1,q=2,m=1;"
 #define KITTY_ESC_IMG_SHM    "\033_Ga=T,t=s,f=24,s=%d,v=%d,C=1,q=2,m=1;%s"
@@ -102,12 +73,11 @@ struct priv {
     char    *shm_path, *shm_path_b64;
     int     buffer_size, output_size;
     int     shm_fd;
-    bstr    cmd;
+    struct terminal_swapchain *swapchain;
     bstr    dcs_prefix;
     bstr    dcs_suffix;
 
     int left, top, width, height, cols, rows;
-    double display_par;
 
     struct mp_rect src;
     struct mp_rect dst;
@@ -116,37 +86,26 @@ struct priv {
     struct mp_sws_context *sws;
 };
 
-#if HAVE_POSIX
-static struct sigaction saved_sigaction = {0};
-static bool resized;
-#endif
-
-static inline void write_bstr_passthrough(struct priv *p, bstr bs)
-{
-    write_bstr(p->dcs_prefix);
-    write_bstr(bs);
-    write_bstr(p->dcs_suffix);
-}
 
 static inline void append_passthrough(struct priv *p, bstr *bs, bstr append)
 {
-    bstr_xappend(p, bs, p->dcs_prefix);
-    bstr_xappend(p, bs, append);
-    bstr_xappend(p, bs, p->dcs_suffix);
+    bstr_xappend(NULL, bs, p->dcs_prefix);
+    bstr_xappend(NULL, bs, append);
+    bstr_xappend(NULL, bs, p->dcs_suffix);
 }
 
 MP_PRINTF_ATTRIBUTE(3, 4)
 static inline void append_asprintf_passthrough(struct priv *p, bstr *bs,
                                                      const char *fmt, ...)
 {
-    bstr_xappend(p, bs, p->dcs_prefix);
+    bstr_xappend(NULL, bs, p->dcs_prefix);
 
     va_list ap;
     va_start(ap, fmt);
-    bstr_xappend_vasprintf(p, bs, fmt, ap);
+    bstr_xappend_vasprintf(NULL, bs, fmt, ap);
     va_end(ap);
 
-    bstr_xappend(p, bs, p->dcs_suffix);
+    bstr_xappend(NULL, bs, p->dcs_suffix);
 }
 
 static void close_shm(struct priv *p)
@@ -206,13 +165,10 @@ static void set_out_params(struct vo *vo)
 
     p->width  = p->dst.x1 - p->dst.x0;
     p->height = p->dst.y1 - p->dst.y0;
-    p->top  = p->opts.top > 0 ?
-        p->opts.top : p->rows * p->dst.y0 / vo->dheight;
-    p->left = p->opts.left > 0 ?
-        p->opts.left : p->cols * p->dst.x0 / vo->dwidth;
-    p->display_par = p->osd.display_par;
+    p->top  = p->opts.top > 0 ? p->opts.top : 0;
+    p->left = p->opts.left > 0 ? p->opts.left : 0;
 
-    p->buffer_size = 3 * p->width * p->height;
+    p->buffer_size = 3 * vo->dwidth * vo->dheight;
     p->output_size = AV_BASE64_SIZE(p->buffer_size);
 }
 
@@ -222,11 +178,11 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     vo->want_redraw = true;
 
-    write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
-    write_bstr_passthrough(p, KITTY_ESC_END);
-
+    bstr *next = terminal_swapchain_next(p->swapchain);
+    append_passthrough(p, next, KITTY_ESC_DELETE_ALL);
+    append_passthrough(p, next, KITTY_ESC_END);
     if (p->opts.config_clear)
-        write_str(TERM_ESC_CLEAR_SCREEN);
+        bstr_xappend(NULL, next, (bstr)bstr0_lit(TERM_ESC_CLEAR_SCREEN));
 
     get_win_size(vo, &p->rows, &p->cols, &vo->dwidth, &vo->dheight);
     set_out_params(vo);
@@ -243,9 +199,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         .p_h = 1,
     };
 
-    p->frame = mp_image_alloc(IMGFMT, p->width, p->height);
+    p->frame = mp_image_alloc(IMGFMT, vo->dwidth, vo->dheight);
     if (!p->frame)
         return -1;
+    mp_image_clear(p->frame, 0, 0, p->frame->w, p->frame->h);
 
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
@@ -295,17 +252,13 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     struct priv *p = vo->priv;
     mp_image_t *mpi = NULL;
 
-#if !HAVE_POSIX
-    int prev_height = vo->dheight;
-    int prev_width = vo->dwidth;
-    get_win_size(vo, &p->rows, &p->cols, &vo->dwidth, &vo->dheight);
-    bool resized = (prev_width != vo->dwidth || prev_height != vo->dheight);
-#endif
-
-    if (resized)
-        reconfig(vo, vo->params);
-
-    resized = false;
+    if (terminal_swapchain_size_changed(p->swapchain)) {
+        int prev_height = vo->dheight;
+        int prev_width = vo->dwidth;
+        get_win_size(vo, &p->rows, &p->cols, &vo->dwidth, &vo->dheight);
+        if (prev_width != vo->dwidth || prev_height != vo->dheight)
+            reconfig(vo, vo->params);
+    }
 
     if (frame->current) {
         mpi = mp_image_new_ref(frame->current);
@@ -314,20 +267,21 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
         mp_image_crop_rc(mpi, src_rc);
 
-        mp_sws_scale(p->sws, p->frame, mpi);
+        mp_image_clear_rc_inv(p->frame, p->dst);
+        struct mp_image dst = *p->frame;
+        mp_image_crop_rc(&dst, p->dst);
+        mp_sws_scale(p->sws, &dst, mpi);
     } else {
-        mp_image_clear(p->frame, 0, 0, p->width, p->height);
+        mp_image_clear(p->frame, 0, 0, p->frame->w, p->frame->h);
     }
 
-    struct mp_osd_res res = { .w = p->width, .h = p->height, .display_par = p->display_par };
-    osd_draw_on_image(vo->osd, res, mpi ? mpi->pts : 0, 0, p->frame);
-
+    osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, p->frame);
 
     if (p->opts.use_shm && !create_shm(vo))
         goto done;
 
-    memcpy_pic(p->buffer, p->frame->planes[0], p->width * BYTES_PER_PX,
-               p->height, p->width * BYTES_PER_PX, p->frame->stride[0]);
+    memcpy_pic(p->buffer, p->frame->planes[0], p->frame->w * BYTES_PER_PX,
+               p->frame->h, p->frame->w * BYTES_PER_PX, p->frame->stride[0]);
 
     if (!p->opts.use_shm)
         av_base64_encode(p->output, p->output_size, p->buffer, p->buffer_size);
@@ -343,22 +297,23 @@ static void flip_page(struct vo *vo)
     if (!p->buffer)
         return;
 
-    p->cmd.len = 0;
+    bstr *cmd = terminal_swapchain_acquire(p->swapchain);
 
     // Start with ESC to position the cursor
-    append_asprintf_passthrough(p, &p->cmd, TERM_ESC_GOTO_YX, p->top, p->left);
+    append_asprintf_passthrough(p, cmd, TERM_ESC_GOTO_YX, p->top, p->left);
 
     if (p->opts.use_shm) {
-        append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG_SHM,
-                                    p->width, p->height, p->shm_path_b64);
-        append_passthrough(p, &p->cmd, KITTY_ESC_END);
+        append_asprintf_passthrough(p, cmd, KITTY_ESC_IMG_SHM,
+                                    vo->dwidth, vo->dheight, p->shm_path_b64);
+        append_passthrough(p, cmd, KITTY_ESC_END);
     } else {
         if (!p->output) {
+            terminal_swapchain_present(p->swapchain, cmd);
             return;
         }
 
-        append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_IMG,
-                                    p->width, p->height);
+        append_asprintf_passthrough(p, cmd, KITTY_ESC_IMG,
+                                    vo->dwidth, vo->dheight);
 
         int output_size = p->output_size - 1;
         int offset = 0;
@@ -367,12 +322,12 @@ static void flip_page(struct vo *vo)
             int chunk = MPMIN(4096, output_size - offset);
 
             if (offset > 0)
-                append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_CONTINUE,
+                append_asprintf_passthrough(p, cmd, KITTY_ESC_CONTINUE,
                                             offset + chunk < output_size);
 
             // Append at max chunk bytes
-            bstr_xappend(p, &p->cmd, (bstr){p->output + offset, chunk});
-            append_passthrough(p, &p->cmd, KITTY_ESC_END);
+            bstr_xappend(NULL, cmd, (bstr){p->output + offset, chunk});
+            append_passthrough(p, cmd, KITTY_ESC_END);
             offset += chunk;
         }
 
@@ -381,26 +336,22 @@ static void flip_page(struct vo *vo)
         // This ensures that an escape sequence with `m=0` is sent and
         // terminals stay happy
         if (offset == 0) {
-            append_asprintf_passthrough(p, &p->cmd, KITTY_ESC_CONTINUE, 0);
-            append_passthrough(p, &p->cmd, KITTY_ESC_END);
+            append_asprintf_passthrough(p, cmd, KITTY_ESC_CONTINUE, 0);
+            append_passthrough(p, cmd, KITTY_ESC_END);
         }
     }
 
-    write_bstr(p->cmd);
+    terminal_swapchain_present(p->swapchain, cmd);
 
 #if HAVE_POSIX
-    if (p->opts.use_shm)
+    // The terminal reads the image from the shared memory when it gets the
+    // command, so that has to be written before the next frame replaces it.
+    if (p->opts.use_shm) {
+        terminal_swapchain_wait(p->swapchain);
         close_shm(p);
+    }
 #endif
 }
-
-#if HAVE_POSIX
-static void handle_winch(int sig) {
-    resized = true;
-    if (saved_sigaction.sa_handler)
-        saved_sigaction.sa_handler(sig);
-}
-#endif
 
 static int preinit(struct vo *vo)
 {
@@ -409,13 +360,6 @@ static int preinit(struct vo *vo)
     p->sws = mp_sws_alloc(vo);
     p->sws->log = vo->log;
     mp_sws_enable_cmdline_opts(p->sws, vo->global);
-
-#if HAVE_POSIX
-    struct sigaction sa = {
-        .sa_handler = handle_winch,
-    };
-    sigaction(SIGWINCH, &sa, &saved_sigaction);
-#endif
 
 #if HAVE_POSIX_SHM
     if (p->opts.use_shm) {
@@ -443,10 +387,13 @@ static int preinit(struct vo *vo)
             p->dcs_suffix = DCS_SUFFIX;
     }
 
-    write_str(TERM_ESC_HIDE_CURSOR);
-    terminal_set_mouse_input(true);
+    p->swapchain = terminal_swapchain_create(vo);
+    bstr *out = terminal_swapchain_acquire(p->swapchain);
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_HIDE_CURSOR));
     if (p->opts.alt_screen)
-        write_str(TERM_ESC_ALT_SCREEN);
+        bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_ALT_SCREEN));
+    terminal_swapchain_present(p->swapchain, out);
+    terminal_set_mouse_input(true);
 
     return 0;
 }
@@ -458,8 +405,14 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    if (request == VOCTRL_SET_PANSCAN)
+    struct priv *p = vo->priv;
+    switch (request) {
+    case VOCTRL_SET_PANSCAN:
         return (vo->config_ok && !reconfig(vo, vo->params)) ? VO_TRUE : VO_FALSE;
+    case VOCTRL_CHECK_EVENTS:
+        terminal_swapchain_check_events(p->swapchain);
+        return VO_TRUE;
+    }
     return VO_NOTIMPL;
 }
 
@@ -467,22 +420,18 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-#if HAVE_POSIX
-    sigaction(SIGWINCH, &saved_sigaction, NULL);
-#endif
-
-    write_bstr_passthrough(p, KITTY_ESC_DELETE_ALL);
-    write_bstr_passthrough(p, KITTY_ESC_END);
-
-    write_str(TERM_ESC_RESTORE_CURSOR);
-    terminal_set_mouse_input(false);
-
+    bstr *out = terminal_swapchain_acquire(p->swapchain);
+    append_passthrough(p, out, KITTY_ESC_DELETE_ALL);
+    append_passthrough(p, out, KITTY_ESC_END);
+    bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_RESTORE_CURSOR));
     if (p->opts.alt_screen) {
-        write_str(TERM_ESC_NORMAL_SCREEN);
+        bstr_xappend(NULL, out, (bstr)bstr0_lit(TERM_ESC_NORMAL_SCREEN));
     } else {
-        char *cmd = talloc_asprintf(vo, TERM_ESC_GOTO_YX, p->cols, 0);
-        write_str(cmd);
+        bstr_xappend_asprintf(NULL, out, TERM_ESC_GOTO_YX, p->cols, 0);
     }
+    terminal_swapchain_present(p->swapchain, out);
+    terminal_set_mouse_input(false);
+    terminal_swapchain_destroy(p->swapchain);
 
     free_bufs(vo);
 }
