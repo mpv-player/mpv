@@ -70,7 +70,7 @@ struct priv {
 
     int left, top;  // image origin cell (1 based)
     int width, height;  // actual image px size - always reflects dst_rect.
-    int num_cols, num_rows;  // terminal size in cells
+    int num_cols, num_rows;  // canvas size in cells
     int canvas_ok;  // whether canvas vo->dwidth and vo->dheight are positive
 
     int previous_histogram_colors;
@@ -194,53 +194,62 @@ static void update_canvas_dimensions(struct vo *vo)
     // this function sets the vo canvas size in pixels vo->dwidth, vo->dheight,
     // and the number of rows and columns available in priv->num_rows/cols
     struct priv *priv   = vo->priv;
-    int num_rows        = TERMINAL_FALLBACK_ROWS;
-    int num_cols        = TERMINAL_FALLBACK_COLS;
+    int term_rows       = TERMINAL_FALLBACK_ROWS;
+    int term_cols       = TERMINAL_FALLBACK_COLS;
     int total_px_width  = 0;
     int total_px_height = 0;
 
-    terminal_get_size2(&num_rows, &num_cols, &total_px_width, &total_px_height);
-
-    // If the user has specified rows/cols use them for further calculations
-    num_rows = (priv->opts.rows > 0) ? priv->opts.rows : num_rows;
-    num_cols = (priv->opts.cols > 0) ? priv->opts.cols : num_cols;
+    terminal_get_size2(&term_rows, &term_cols, &total_px_width, &total_px_height);
 
     // If the pad value is set in between 0 and width/2 - 1, then we
     // subtract from the detected width. Otherwise, we assume that the width
-    // output must be a integer multiple of num_cols and accordingly set
-    // total_width to be an integer multiple of num_cols. So in case the padding
-    // added by terminal is less than the number of cells in that axis, then rounding
-    // down will take care of correcting the detected width and remove padding.
-    if (priv->opts.width > 0) {
-        // option - set by the user, hard truth
-        total_px_width = priv->opts.width;
-    } else {
-        if (total_px_width <= 0) {
-                // ioctl failed to read terminal width
-                total_px_width = TERMINAL_FALLBACK_PX_WIDTH;
+    // output must be a integer multiple of the number of cells and accordingly
+    // set total_width to be an integer multiple of it. So in case the padding
+    // added by terminal is less than the number of cells in that axis, then
+    // rounding down will take care of correcting the detected width and remove
+    // padding. What is left gives the size of a cell.
+    int cell_w = 0, cell_h = 0;
+    if (total_px_width > 0) {
+        if (priv->opts.pad_x >= 0 && priv->opts.pad_x < total_px_width / 2) {
+            // explicit padding set by the user
+            total_px_width -= (2 * priv->opts.pad_x);
         } else {
-            if (priv->opts.pad_x >= 0 && priv->opts.pad_x < total_px_width / 2) {
-                // explicit padding set by the user
-                total_px_width -= (2 * priv->opts.pad_x);
-            } else {
-                // rounded "auto padding"
-                total_px_width = total_px_width / num_cols * num_cols;
-            }
+            // rounded "auto padding"
+            total_px_width = total_px_width / term_cols * term_cols;
         }
+        if (total_px_width % term_cols == 0)
+            cell_w = total_px_width / term_cols;
+    }
+    if (total_px_height > 0) {
+        if (priv->opts.pad_y >= 0 && priv->opts.pad_y < total_px_height / 2) {
+            total_px_height -= (2 * priv->opts.pad_y);
+        } else {
+            total_px_height = total_px_height / term_rows * term_rows;
+        }
+        if (total_px_height % term_rows == 0)
+            cell_h = total_px_height / term_rows;
     }
 
+    // The canvas is the terminal from where the image starts, unless the user
+    // gives its size in cells or in pixels.
+    int top  = (priv->opts.top  > 0) ? priv->opts.top  : 1;
+    int left = (priv->opts.left > 0) ? priv->opts.left : 1;
+    int num_rows = (priv->opts.rows > 0) ? priv->opts.rows : MPMAX(term_rows - (top - 1), 2);
+    int num_cols = (priv->opts.cols > 0) ? priv->opts.cols : MPMAX(term_cols - (left - 1), 1);
+    if (priv->opts.width > 0) {
+        total_px_width = priv->opts.width;
+    } else if (total_px_width <= 0) {
+        // ioctl failed to read terminal width
+        total_px_width = TERMINAL_FALLBACK_PX_WIDTH;
+    } else if (num_cols != term_cols && cell_w > 0) {
+        total_px_width = num_cols * cell_w;
+    }
     if (priv->opts.height > 0) {
         total_px_height = priv->opts.height;
-    } else {
-        if (total_px_height <= 0) {
-            total_px_height = TERMINAL_FALLBACK_PX_HEIGHT;
-        } else {
-            if (priv->opts.pad_y >= 0 && priv->opts.pad_y < total_px_height / 2) {
-                total_px_height -= (2 * priv->opts.pad_y);
-            } else {
-                total_px_height = total_px_height / num_rows * num_rows;
-            }
-        }
+    } else if (total_px_height <= 0) {
+        total_px_height = TERMINAL_FALLBACK_PX_HEIGHT;
+    } else if (num_rows != term_rows && cell_h > 0) {
+        total_px_height = num_rows * cell_h;
     }
 
     // use n-1 rows for height

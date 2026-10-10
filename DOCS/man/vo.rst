@@ -485,21 +485,20 @@ Available video output drivers are:
     Sixel size and alignment options:
 
     ``--vo-sixel-cols=<columns>``, ``--vo-sixel-rows=<rows>`` (default: 0)
-        Specify the terminal size in character cells, otherwise (0) read it
-        from the terminal, or fall back to 80x25. Note that mpv doesn't use the
-        the last row with sixel because this seems to result in scrolling.
+        Size of the area the image may use, in character cells. The default
+        (0) is the terminal size from the position the image starts at, or
+        80x25 if the terminal size cannot be read. The last row is left free
+        for the status line.
 
     ``--vo-sixel-width=<width>``, ``--vo-sixel-height=<height>`` (default: 0)
-        Specify the available size in pixels, otherwise (0) read it from the
-        terminal, or fall back to 320x240. Other than excluding the last line,
-        the height is also further rounded down to a multiple of 6 (sixel unit
-        height) to avoid overflowing below the designated size.
+        Size of the area the image may use, in pixels. The default (0) is what
+        the terminal reports for the rows and columns above, or 320x240 if it
+        reports nothing. Other than excluding the last row, the height is
+        rounded down to a multiple of 6, the height of a sixel band.
 
     ``--vo-sixel-left=<col>``, ``--vo-sixel-top=<row>`` (default: 0)
-        Specify the position in character cells where the image starts (1 is
-        the first column or row). If 0 (default) then try to automatically
-        determine it according to the other values and the image aspect ratio
-        and zoom.
+        Position in character cells where the area the image may use starts
+        (1 is the first column or row). 0 (default) is the same as 1.
 
     ``--vo-sixel-pad-x=<pad_x>``, ``--vo-sixel-pad-y=<pad_y>`` (default: -1)
         Used only when mpv reads the size in pixels from the terminal.
