@@ -636,8 +636,9 @@ bool mp_zimg_config_image_params(struct mp_zimg_context *ctx)
     if (ctx->num_states) {
         // All states are the same, so checking only one of them is sufficient.
         struct mp_zimg_state *st = ctx->states[0];
-        if (st->src && mp_image_params_equal(&ctx->src, &st->src->fmt) &&
-            st->dst && mp_image_params_equal(&ctx->dst, &st->dst->fmt) &&
+        if (st->src && mp_image_params_static_equal(&ctx->src, &st->src->fmt) &&
+            st->dst && mp_image_params_static_equal(&ctx->dst, &st->dst->fmt) &&
+            ctx->dst.color.hdr.max_luma == st->dst->fmt.color.hdr.max_luma &&
             (!ctx->opts_cache || !m_config_cache_update(ctx->opts_cache)) &&
             st->graph)
             return true;
