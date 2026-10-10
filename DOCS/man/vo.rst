@@ -498,9 +498,6 @@ Available video output drivers are:
         terminal to its previous state on exit. When set to no, the last
         sixel image stays on screen after quit, with the cursor following it.
 
-        ``--vo-sixel-exit-clear`` is a deprecated alias for this option and
-        may be removed in the future.
-
     Sixel image quality options:
 
     ``--vo-sixel-dither=<algo>``
