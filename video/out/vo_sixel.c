@@ -724,6 +724,9 @@ static void flip_page(struct vo *vo)
                               priv->top + i * priv->slice_rows, priv->left);
         bstr_xappend(NULL, out, s->raw);
     }
+    // Park the cursor on the bottom row, which the canvas leaves for status line.
+    bstr_xappend_asprintf(NULL, out, TERM_ESC_GOTO_YX,
+                          priv->top + priv->num_rows - 1, 1);
     terminal_swapchain_present(priv->swapchain, out);
 }
 
