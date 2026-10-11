@@ -77,7 +77,7 @@ static struct offscreen_ctx *vk_offscreen_ctx_create(struct mpv_global *global,
 
     struct vulkan_opts *vk_opts = mp_get_config_group(ctx, global, &vulkan_conf);
     vk->vulkan = mppl_create_vulkan(vk_opts, vk->vkinst, vk->pllog, VK_NULL_HANDLE,
-                                    ctx_opts->allow_sw);
+                                    ctx_opts->allow_sw, NULL);
     if (!vk->vulkan)
         goto error;
 

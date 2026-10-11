@@ -446,7 +446,7 @@ static bool display_init(struct ra_ctx *ctx)
     p->refresh_rate = mode->parameters.refreshRate;
 
     struct ra_ctx_params params = {0};
-    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR, NULL))
         goto error;
 
 #if HAVE_DRM

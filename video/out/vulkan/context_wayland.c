@@ -121,7 +121,7 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
      * avoid indefinite blocking. */
     struct vo_wayland_state *wl = ctx->vo->wl;
     p->use_fifo = wl->has_fifo && wl->present_v2 && wl->opts->wl_internal_vsync != 2;
-    if (!ra_vk_ctx_init(ctx, vk, params, p->use_fifo ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, p->use_fifo ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_MAILBOX_KHR, NULL))
         goto error;
 
     ra_add_native_resource(ctx->ra, "wl", ctx->vo->wl->display);

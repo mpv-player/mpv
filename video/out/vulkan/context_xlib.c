@@ -88,7 +88,7 @@ static bool xlib_init(struct ra_ctx *ctx)
         goto error;
     }
 
-    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR, NULL))
         goto error;
 
     ra_add_native_resource(ctx->ra, "x11", ctx->vo->x11->display);

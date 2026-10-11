@@ -62,7 +62,7 @@ static bool android_init(struct ra_ctx *ctx)
         goto fail;
     }
 
-    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR))
+    if (!ra_vk_ctx_init(ctx, vk, params, VK_PRESENT_MODE_FIFO_KHR, NULL))
         goto fail;
 
     return true;
