@@ -479,9 +479,20 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
             return 0;
         }
 
-        MP_ERR(mpctx, "Could not open/initialize audio device -> no sound.\n");
-        mpctx->error_playing = MPV_ERROR_AO_INIT_FAILED;
-        goto init_error;
+        // Fallback to null AO on transient failure to avoid permanently deselecting the track
+        if (!(ao_flags & AO_INIT_NULL_FALLBACK) && !spdif_fallback) {
+            MP_WARN(mpctx, "Audio device unavailable; falling back to null audio output until device is reconnected.\n");
+            ao_flags |= AO_INIT_NULL_FALLBACK;
+            mpctx->ao = ao_init_best(mpctx->global, ao_flags, mp_wakeup_core_cb,
+                                     mpctx, mpctx->encode_lavc_ctx, out_rate,
+                                     out_format, out_channels);
+        }
+
+        if (!mpctx->ao) {
+            MP_ERR(mpctx, "Could not open/initialize audio device -> no sound.\n");
+            mpctx->error_playing = MPV_ERROR_AO_INIT_FAILED;
+            goto init_error;
+        }
     }
 
     char tmp[192];

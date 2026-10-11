@@ -8255,8 +8255,11 @@ void handle_command_updates(struct MPContext *mpctx)
 
     // This is a bit messy: ao_hotplug wakes up the player, and then we have
     // to recheck the state. Then the client(s) will read the property.
-    if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug))
+    if (ctx->hotplug && ao_hotplug_check_update(ctx->hotplug)) {
         mp_notify_property(mpctx, "audio-device-list");
+        if (mpctx->ao && strcmp(mpctx->ao->driver->name, "null") == 0)
+            reload_audio_output(mpctx);
+    }
 
     // Depends on polling demuxer wakeup callback notifications.
     cache_dump_poll(mpctx);
