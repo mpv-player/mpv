@@ -97,7 +97,10 @@ class InputHelper: NSObject {
 
     @objc func processKey(event: NSEvent) -> Bool {
         if event.type != .keyDown && event.type != .keyUp { return false }
-        if NSApp.mainMenu?.performKeyEquivalent(with: event) ?? false || event.isARepeat { return true }
+        if NSApp.mainMenu?.performKeyEquivalent(with: event) ?? false ||
+           (event.type == .keyDown && event.isARepeat) {
+           return true
+        }
 
         return lock.withLock {
             let mpkey = lookup_keymap_table(keymap, Int32(event.keyCode))
