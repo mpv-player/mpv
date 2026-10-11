@@ -1,0 +1,1 @@
+make the `playlist/N/title` property writable

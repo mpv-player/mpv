@@ -3698,7 +3698,7 @@ static int mp_property_playlist_pos_1(void *ctx, struct m_property *prop,
     return mp_property_playlist_pos_x(ctx, prop, action, arg, 1);
 }
 
-static int get_playlist_entry(int item, int action, void *arg, void *ctx)
+static int do_playlist_entry(int item, int action, void *arg, void *ctx)
 {
     struct MPContext *mpctx = ctx;
 
@@ -3718,6 +3718,32 @@ static int get_playlist_entry(int item, int action, void *arg, void *ctx)
         {0}
     };
 
+    if (action != M_PROPERTY_KEY_ACTION)
+        goto prop_get;
+
+    struct m_property_action_arg *ka = arg;
+    if (strcmp(ka->key, "title") != 0)
+        goto prop_get;
+
+    // handle playlist/N/title writes
+    switch (ka->action) {
+    case M_PROPERTY_SET_NODE: {
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+    case M_PROPERTY_GET_TYPE: {
+        *(struct m_option *)ka->arg = (struct m_option){
+            .type = CONF_TYPE_STRING,
+        };
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET: {
+        talloc_replace(e, e->title, *(char **)ka->arg);
+        mp_notify_property(mpctx, "playlist");
+        return M_PROPERTY_OK;
+    }
+    }
+
+prop_get:
     return m_property_read_sub(props, action, arg);
 }
 
@@ -3767,7 +3793,7 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
     }
 
     return m_property_read_list(action, arg, playlist_entry_count(mpctx->playlist),
-                                get_playlist_entry, mpctx);
+                                do_playlist_entry, mpctx);
 }
 
 static char *print_obj_osd_list(struct m_obj_settings *list)
