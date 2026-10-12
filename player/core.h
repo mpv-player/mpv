@@ -207,6 +207,9 @@ struct ao_chain {
     bool start_pts_known;
 
     bool delaying_audio_start;
+    double delayed_start_gap;   // video left to play before the audio starts
+    int64_t delayed_start_last; // when the gap was last counted down
+    double delayed_start_speed; // playback speed since then, 0 if paused
 
     struct track *track;
     struct mp_pin *filter_src;
@@ -389,8 +392,6 @@ typedef struct MPContext {
     double last_frame_duration;
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
-    // For logging only.
-    double logged_async_diff;
 
     int last_chapter;
 
