@@ -29,6 +29,22 @@ _mpv_get_args()
   local partial="$2"
   local type=$(echo "$doc" | awk '{print $2;}')
 
+  # Complete aliases like their target (e.g. --sub-file -> --sub-files-append)
+  local opt="$1"
+  if [ "$type" = "alias" ]; then
+    opt=--$(echo "$doc" | awk '{sub(/^--/, "", $4); print $4;}')
+    doc=$(_mpv_options | grep -E "^\\s*$opt\\s")
+    type=$(echo "$doc" | awk '{print $2;}')
+  fi
+  # List actions are listed without a type; complete them like the list option
+  if [ -z "$type" ]; then
+    local list=$(echo "$opt" | sed -E 's/-(add|append|del|pre|remove|set|toggle)$//')
+    if [ "$list" != "$opt" ]; then
+      doc=$(_mpv_options | grep -E "^\\s*$list\\s")
+      type=$(echo "$doc" | awk '{print $2;}')
+    fi
+  fi
+
   # We special-case profiles to ensure we read the config
   if [ "$1" = "--show-profile" ]; then
     type="ShowProfile"
