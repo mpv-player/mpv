@@ -5,8 +5,13 @@
 args=(
   -D{amf,cdda,d3d-hwaccel,d3d11,dvda,dvdnav,jpeg,lcms2,libarchive}=enabled
   -D{libbluray,lua,shaderc,spirv-cross,uchardet,vapoursynth}=enabled
-  -D{egl-angle-lib,egl-angle-win32,pdf-build,rubberband,win32-smtc}=enabled
+  -D{egl-angle-lib,egl-angle-win32,rubberband,win32-smtc}=enabled
 )
+
+# MSYS2 no longer packages rst2pdf for mingw64
+if [[ "$SYS" != "mingw64" ]]; then
+    args+=(-Dpdf-build=enabled)
+fi
 
 if [[ -n "$ASAN" ]]; then
     args+=(
