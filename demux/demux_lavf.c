@@ -1157,6 +1157,29 @@ static void build_editions(demuxer_t *demuxer)
 }
 
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 19, 100)
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(63, 10, 100)
+static unsigned group_num_entries(const AVStreamGroup *stg)
+{
+    return stg->nb_entries;
+}
+
+static AVStream *group_entry_stream(const AVStreamGroup *stg, unsigned idx)
+{
+    const AVStreamGroupEntry *entry = stg->entries[idx];
+    return entry->type == AV_STREAM_GROUP_ENTRY_STREAM ? entry->stream : NULL;
+}
+#else
+static unsigned group_num_entries(const AVStreamGroup *stg)
+{
+    return stg->nb_streams;
+}
+
+static AVStream *group_entry_stream(const AVStreamGroup *stg, unsigned idx)
+{
+    return stg->streams[idx];
+}
+#endif
+
 #if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(60, 22, 100)
 // Synthesize a virtual track that assembles an AVStreamGroupTileGrid.
 static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stream_group)
@@ -1174,10 +1197,10 @@ static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stream_gro
 
     for (int i = 0; i < grid->nb_tiles; i++) {
         unsigned int group_idx = grid->offsets[i].idx;
-        if (group_idx >= stream_group->nb_streams) {
+        if (group_idx >= group_num_entries(stream_group)) {
             MP_ERR(demuxer, "Tile %d references out-of-range group "
                    "stream index %u (group has %u streams) – skipping.\n",
-                   i, group_idx, stream_group->nb_streams);
+                   i, group_idx, group_num_entries(stream_group));
             continue;
         }
 
@@ -1189,7 +1212,8 @@ static void handle_tile_grid_group(demuxer_t *demuxer, AVStreamGroup *stream_gro
             goto error;
         }
 
-        int ff_idx = stream_group->streams[group_idx]->index;
+        AVStream *st = group_entry_stream(stream_group, group_idx);
+        int ff_idx = st ? st->index : -1;
         if (ff_idx >= 0 && ff_idx < priv->num_streams && priv->streams[ff_idx] &&
             priv->streams[ff_idx]->sh) {
             vsh->group->members[vsh->group->num_members++] = priv->streams[ff_idx]->sh;
@@ -1255,10 +1279,10 @@ static void handle_iamf_audio_element_group(demuxer_t *demuxer,
 {
     lavf_priv_t *priv = demuxer->priv;
     MP_VERBOSE(demuxer, "IAMF audio element group %u: %u sub-streams\n",
-               stg->index, stg->nb_streams);
-    for (unsigned i = 0; i < stg->nb_streams; i++) {
-        AVStream *st = stg->streams[i];
-        if (st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
+               stg->index, group_num_entries(stg));
+    for (unsigned i = 0; i < group_num_entries(stg); i++) {
+        AVStream *st = group_entry_stream(stg, i);
+        if (!st || st->index < 0 || (unsigned)st->index >= (unsigned)priv->num_streams)
             continue;
         struct sh_stream *sh = priv->streams[st->index]->sh;
         if (sh)
@@ -1280,9 +1304,9 @@ static void handle_lcevc_group(demuxer_t *demuxer, AVStreamGroup *stg)
 #endif
     lavf_priv_t *priv = demuxer->priv;
 
-    if (el_index >= stg->nb_streams) {
+    if (el_index >= group_num_entries(stg)) {
         MP_WARN(demuxer, "LCEVC group %u: el_index %u out of range (%u streams)\n",
-                stg->index, el_index, stg->nb_streams);
+                stg->index, el_index, group_num_entries(stg));
         return;
     }
 
@@ -1290,8 +1314,8 @@ static void handle_lcevc_group(demuxer_t *demuxer, AVStreamGroup *stg)
                "final size %dx%d\n",
                stg->index, el_index, lcevc->width, lcevc->height);
 
-    AVStream *lcevc_st = stg->streams[el_index];
-    if ((unsigned)lcevc_st->index < (unsigned)priv->num_streams) {
+    AVStream *lcevc_st = group_entry_stream(stg, el_index);
+    if (lcevc_st && (unsigned)lcevc_st->index < (unsigned)priv->num_streams) {
         struct sh_stream *sh = priv->streams[lcevc_st->index]->sh;
         if (sh)
             sh->dependent_track = true;
@@ -1306,16 +1330,18 @@ static void handle_layered_video_group(demuxer_t *demuxer, AVStreamGroup *stg)
     lavf_priv_t *priv = demuxer->priv;
     AVStreamGroupLayeredVideo *layered = stg->params.layered_video;
 
-    if (stg->nb_streams != 2 || layered->el_index >= stg->nb_streams) {
+    if (group_num_entries(stg) != 2 || layered->el_index >= group_num_entries(stg)) {
         MP_WARN(demuxer, "Dolby Vision group %u: expected 2 streams with valid "
                 "el_index, got %u streams and el_index %u\n",
-                stg->index, stg->nb_streams, layered->el_index);
+                stg->index, group_num_entries(stg), layered->el_index);
         return;
     }
 
-    AVStream *el_st = stg->streams[layered->el_index];
-    AVStream *bl_st = stg->streams[layered->el_index ? 0 : 1];
+    AVStream *el_st = group_entry_stream(stg, layered->el_index);
+    AVStream *bl_st = group_entry_stream(stg, layered->el_index ? 0 : 1);
 
+    if (!el_st || !bl_st)
+        return;
     if ((size_t)el_st->index >= priv->num_streams || (size_t)bl_st->index >= priv->num_streams)
         return;
 
