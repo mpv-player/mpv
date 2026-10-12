@@ -849,7 +849,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     struct vo *vo = mpctx->video_out;
     int mode = vo->opts->video_sync;
 
-    if (!mpctx->display_sync_active) {
+    bool sync_start = !mpctx->display_sync_active;
+    if (sync_start) {
         mpctx->display_sync_error = 0.0;
         mpctx->audio_drift_compensation = 0.0;
         mpctx->avd_filtered = 0;
@@ -857,7 +858,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     mpctx->display_sync_active = false;
 
-    if (!VS_IS_DISP(mode) || !vo_is_visible(vo) || mpctx->vo_chain->is_sparse)
+    if (!VS_IS_DISP(mode) || !vo_is_visible(vo) || mpctx->vo_chain->is_sparse ||
+        mpctx->video_status < STATUS_PLAYING)
         return;
 
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
@@ -902,8 +904,9 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     MP_STATS(mpctx, "value %f avdiff", av_diff);
 
     // Estimate the video position, so we can calculate a good A/V difference
-    // value below. This is used to estimate A/V drift.
-    double time_left = vo_get_delay(vo);
+    // value below. This is used to estimate A/V drift. The first display
+    // synced frame is shown at its target time, time_frame from now.
+    double time_left = sync_start ? MPMAX(mpctx->time_frame, 0) : vo_get_delay(vo);
 
     // Intended number of additional display frames to drop (<0) or repeat (>0)
     int drop_repeat = 0;
@@ -932,12 +935,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     time_left += prev_error;
     // Likewise, we know sync is off, but is going to be compensated.
     time_left += drop_repeat * vsync;
-
-    // If syncing took too long, disregard timing of the first frame.
-    if (mpctx->num_past_frames == 2 && time_left < 0) {
-        vo_discard_timing_info(vo);
-        time_left = NAN;
-    }
 
     if (drop_repeat) {
         mpctx->mistimed_frames_total += 1;

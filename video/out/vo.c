@@ -928,7 +928,11 @@ static bool render_frame(struct vo *vo)
 
     mp_mutex_lock(&in->lock);
 
+    int64_t sync_target = 0;
     if (in->frame_queued) {
+        if (in->frame_queued->display_synced &&
+            !(in->current_frame && in->current_frame->display_synced))
+            sync_target = in->frame_queued->pts - in->flip_queue_offset;
         talloc_free(in->current_frame);
         in->current_frame = in->frame_queued;
         in->frame_queued = NULL;
@@ -953,7 +957,7 @@ static bool render_frame(struct vo *vo)
     int64_t end_time = pts + duration;
 
     // Time at which we should flip_page on the VO.
-    int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
+    int64_t target = frame->display_synced ? sync_target : pts - in->flip_queue_offset;
 
     // "normal" strict drop threshold.
     in->dropped_frame = duration >= 0 && end_time < now;
@@ -1404,14 +1408,6 @@ double vo_get_delay(struct vo *vo)
     int64_t res = get_display_synced_frame_end(vo);
     mp_mutex_unlock(&in->lock);
     return res ? MP_TIME_NS_TO_S(res - mp_time_ns()) : NAN;
-}
-
-void vo_discard_timing_info(struct vo *vo)
-{
-    struct vo_internal *in = vo->in;
-    mp_mutex_lock(&in->lock);
-    reset_vsync_timings(vo);
-    mp_mutex_unlock(&in->lock);
 }
 
 int64_t vo_get_delayed_count(struct vo *vo)
