@@ -915,6 +915,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // Tolerate some desync to avoid frame dropping due to jitter. Without
     // display timing the difference is stale, and only a shown frame brings
     // the timing back.
+    av_diff /= opts->playback_speed;
     if (drop && !isnan(time_left) && fabs(av_diff) >= 0.020 &&
         fabs(av_diff) / vsync >= 1)
         drop_repeat = -av_diff / vsync; // round towards 0
