@@ -716,8 +716,6 @@ jobs:
           - sys: "clang64"
             os: "windows-2025"
             auto-var-init: "pattern"
-          - sys: "mingw64"
-            os: "windows-2025"
           - sys: "ucrt64"
             os: "windows-2025"
           - sys: "clangarm64"
