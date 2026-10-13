@@ -32,6 +32,7 @@ API changes
 
 ::
 
+ 2.6    - add MPV_RENDER_API_TYPE_OPENGL_NEXT for the gpu-next renderer.
  --- mpv 0.40.0 ---
  2.5    - Deprecate MPV_RENDER_PARAM_AMBIENT_LIGHT. no replacement.
  --- mpv 0.39.0 ---
