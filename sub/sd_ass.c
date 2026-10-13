@@ -387,6 +387,10 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
     ass_process_chunk(ctx->ass_track, pkt->buffer, pkt->len,
                       floor(pkt->pts * 1000 + 1e-6),
                       floor(pkt->duration * 1000 + 1e-6));
+    if (pkt != orig_pkt)
+        talloc_free(pkt);
+    // the seen and animated state is kept on the original packet
+    pkt = orig_pkt;
 
     // This bookkeeping only has any practical use for ASS subs
     // over a VO with no video.
@@ -416,9 +420,6 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
             }
         }
     }
-
-    if (pkt != orig_pkt)
-        talloc_free(pkt);
 }
 
 // Test if the packet with the given file position and pts was already consumed.
