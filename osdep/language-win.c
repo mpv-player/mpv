@@ -31,6 +31,7 @@ static void apppend_langs(char ***ret, size_t *ret_count, wchar_t *buf, ULONG co
         char *item = mp_to_utf8(NULL, buf + pos);
         MP_TARRAY_APPEND(NULL, *ret, *ret_count, item);
         talloc_steal(*ret, item);
+        pos += wcslen(buf + pos) + 1;
     }
 }
 
