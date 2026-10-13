@@ -18,7 +18,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 #include <stddef.h>
 
 #include "misc/ctype.h"
@@ -35,11 +34,11 @@
 
 struct buffer {
     char *string;
-    int length;
-    int pos;
+    size_t length;
+    size_t pos;
 };
 
-static void init_buf(struct buffer *buf, int length)
+static void init_buf(struct buffer *buf, size_t length)
 {
     buf->string = talloc_size(NULL, length);
     buf->pos = 0;
@@ -48,7 +47,7 @@ static void init_buf(struct buffer *buf, int length)
 
 static inline int append(struct sd_filter *sd, struct buffer *buf, char c)
 {
-    if (buf->pos >= 0 && buf->pos < buf->length) {
+    if (buf->pos < buf->length) {
         buf->string[buf->pos++] = c;
     } else {
         // ensure that terminating \0 is always written
@@ -148,7 +147,7 @@ static void skip_speaker_label(struct sd_filter *sd, char **rpp, struct buffer *
 {
     int filter_harder = sd->opts->sub_filter_SDH_harder;
     char *rp = *rpp;
-    int old_pos = buf->pos;
+    size_t old_pos = buf->pos;
 
     copy_ass(sd, &rp, buf);
     // copy any leading "- "
@@ -238,7 +237,7 @@ static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
 {
     bool filter_harder = sd->opts->sub_filter_SDH_harder;
     char *rp = *rpp;
-    int old_pos = buf->pos;
+    size_t old_pos = buf->pos;
     bool parenthesis = is_parenthesis_pair(left, right);
 
     // skip past the left character
@@ -293,11 +292,11 @@ static bool skip_enclosed(struct sd_filter *sd, char **rpp, struct buffer *buf,
 //
 // when removing characters the following are moved back
 //
-static void remove_leading_hyphen_space(struct sd_filter *sd, int start_pos,
+static void remove_leading_hyphen_space(struct sd_filter *sd, size_t start_pos,
                                         struct buffer *buf)
 {
-    int old_pos = buf->pos;
-    if (start_pos < 0 || start_pos >= old_pos)
+    size_t old_pos = buf->pos;
+    if (start_pos >= old_pos)
         return;
     append(sd, buf, '\0');  // \0 terminate for reading
 
@@ -344,7 +343,8 @@ static void remove_leading_hyphen_space(struct sd_filter *sd, int start_pos,
 //
 // Returns NULL if filtering resulted in all of ASS data being removed so no
 // subtitle should be output
-static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t toff)
+static char *filter_SDH(struct sd_filter *sd, char *data, size_t length,
+                        ptrdiff_t toff)
 {
     struct buffer writebuf;
     struct buffer *buf = &writebuf;
@@ -357,8 +357,8 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
 
     bool contains_text = false;  // true if non SDH text was found
     bool line_with_text = false; // if last line contained text
-    int wp_line_start = buf->pos; // write pos to start of last line
-    int wp_line_end   = buf->pos; // write pos to end of previous line with text (\N)
+    size_t wp_line_start = buf->pos; // write pos to start of last line
+    size_t wp_line_end   = buf->pos; // write pos to end of previous line with text (\N)
 
     // go through the lines in the text
     // they are separated by \N
@@ -466,11 +466,11 @@ static struct demux_packet *sdh_filter(struct sd_filter *ft,
 {
     struct priv *p = ft->priv;
     bstr text = sd_ass_pkt_text(ft, pkt, p->offset);
-    if (!text.start || !text.len || pkt->len >= INT_MAX)
+    if (!text.start || !text.len)
         return pkt;  // we don't touch it
 
     ptrdiff_t toff = text.start - pkt->buffer;
-    char *line = filter_SDH(ft, (char *)pkt->buffer, (int)pkt->len, toff);
+    char *line = filter_SDH(ft, (char *)pkt->buffer, pkt->len, toff);
     if (!line)
         return NULL;
     if (0 == bstrcmp0((bstr){(char *)pkt->buffer, pkt->len}, line)) {
