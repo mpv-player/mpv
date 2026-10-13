@@ -330,35 +330,30 @@ static void remove_leading_hyphen_space(struct sd_filter *sd, size_t start_pos,
     }
 }
 
-// Filter ASS formatted string for SDH
+// Filter the "Text" field of an ASS event for SDH
 //
 // Parameters:
-//     data         ASS line
-//     length       length of ASS line
-//     toff         Text offset from data. required: 0 <= toff <= length
+//     text         "Text" field of the event
 //
-// Returns  a talloc allocated string with filtered ASS data (may be the same
-// content as original if no SDH was found) which must be released
-// by caller using talloc_free.
+// Returns the filtered text (may be the same content as original if no SDH
+// was found) in a talloc allocated buffer which must be released by caller
+// using talloc_free.
 //
-// Returns NULL if filtering resulted in all of ASS data being removed so no
-// subtitle should be output
-static char *filter_SDH(struct sd_filter *sd, char *data, size_t length,
-                        ptrdiff_t toff)
+// Returns start = NULL if filtering resulted in all of the text being removed
+// so no subtitle should be output
+static bstr filter_SDH(struct sd_filter *sd, bstr text)
 {
     struct buffer writebuf;
     struct buffer *buf = &writebuf;
-    init_buf(buf, length + 1); // with room for terminating '\0'
+    init_buf(buf, text.len + 1); // with room for terminating '\0'
 
-    // pre-text headers into buf, rp is the (null-terminated) remaining text
-    char *ass = talloc_strndup(NULL, data, length), *rp = ass;
-    while (rp - ass < toff)
-        append(sd, buf, *rp++);
+    // rp is the (null-terminated) remaining text
+    char *ass = bstrdup0(NULL, text), *rp = ass;
 
     bool contains_text = false;  // true if non SDH text was found
     bool line_with_text = false; // if last line contained text
-    size_t wp_line_start = buf->pos; // write pos to start of last line
-    size_t wp_line_end   = buf->pos; // write pos to end of previous line with text (\N)
+    size_t wp_line_start = 0; // write pos to start of last line
+    size_t wp_line_end   = 0; // write pos to end of previous line with text (\N)
 
     // go through the lines in the text
     // they are separated by \N
@@ -427,15 +422,12 @@ static char *filter_SDH(struct sd_filter *sd, char *data, size_t length,
     }
     talloc_free(ass);
 
-    if (contains_text) {
-        // the ASS data contained normal text after filtering
-        append(sd, buf, '\0'); // '\0' terminate
-        return buf->string;
-    } else {
-        // all data removed by filtering
+    if (!contains_text) {
+        // all text removed by filtering
         talloc_free(buf->string);
-        return NULL;
+        return (bstr){0};
     }
+    return (bstr){(unsigned char *)buf->string, buf->pos};
 }
 
 struct priv {
@@ -469,23 +461,22 @@ static struct demux_packet *sdh_filter(struct sd_filter *ft,
     if (!text.start || !text.len)
         return pkt;  // we don't touch it
 
-    ptrdiff_t toff = text.start - pkt->buffer;
-    char *line = filter_SDH(ft, (char *)pkt->buffer, pkt->len, toff);
-    if (!line)
-        return NULL;
-    if (0 == bstrcmp0((bstr){(char *)pkt->buffer, pkt->len}, line)) {
-        talloc_free(line);
-        return pkt;  // unmodified, no need to allocate new packet
+    bstr line = filter_SDH(ft, text);
+    if (!line.start)
+        return NULL;  // all text removed by filtering
+
+    struct demux_packet *npkt = pkt;  // unmodified, no need to allocate new packet
+    if (!bstr_equals(line, text)) {
+        // the event fields before the text are kept as they are
+        size_t hlen = text.start - pkt->buffer;
+        npkt = new_demux_packet(ft->packet_pool, hlen + line.len);
+        if (npkt) {
+            memcpy(npkt->buffer, pkt->buffer, hlen);
+            memcpy(npkt->buffer + hlen, line.start, line.len);
+            demux_packet_copy_attribs(npkt, pkt);
+        }
     }
-
-    // Stupidly, this copies it again. One could possibly allocate the packet
-    // for writing in the first place (new_demux_packet()) and use
-    // demux_packet_shorten().
-    struct demux_packet *npkt = new_demux_packet_from(ft->packet_pool, line, strlen(line));
-    if (npkt)
-        demux_packet_copy_attribs(npkt, pkt);
-
-    talloc_free(line);
+    talloc_free(line.start);
     return npkt;
 }
 
