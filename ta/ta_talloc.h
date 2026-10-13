@@ -142,7 +142,7 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
 #define MP_TARRAY_REMOVE_AT(p, idxvar, at)          \
     do {                                            \
         size_t at_ = (at);                          \
-        assert(at_ <= (idxvar));                    \
+        assert(at_ < (idxvar));                     \
         memmove((p) + at_, (p) + at_ + 1,           \
                 ((idxvar) - at_ - 1) * sizeof((p)[0])); \
         (idxvar)--;                                 \
