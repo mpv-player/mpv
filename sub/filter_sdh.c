@@ -438,6 +438,10 @@ static char *filter_SDH(struct sd_filter *sd, char *data, int length, ptrdiff_t 
     }
 }
 
+struct priv {
+    int offset;
+};
+
 static bool sdh_init(struct sd_filter *ft)
 {
     if (strcmp(ft->codec, "ass") != 0)
@@ -451,13 +455,17 @@ static bool sdh_init(struct sd_filter *ft)
         return false;
     }
 
+    struct priv *p = talloc_zero(ft, struct priv);
+    ft->priv = p;
+    p->offset = sd_ass_fmt_offset(ft->event_format);
     return true;
 }
 
 static struct demux_packet *sdh_filter(struct sd_filter *ft,
                                        struct demux_packet *pkt)
 {
-    bstr text = sd_ass_pkt_text(ft, pkt, sd_ass_fmt_offset(ft->event_format));
+    struct priv *p = ft->priv;
+    bstr text = sd_ass_pkt_text(ft, pkt, p->offset);
     if (!text.start || !text.len || pkt->len >= INT_MAX)
         return pkt;  // we don't touch it
 
