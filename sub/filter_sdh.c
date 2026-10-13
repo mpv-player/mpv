@@ -466,7 +466,8 @@ static struct demux_packet *sdh_filter(struct sd_filter *ft,
         return NULL;  // all text removed by filtering
 
     struct demux_packet *npkt = pkt;  // unmodified, no need to allocate new packet
-    if (!bstr_equals(line, text)) {
+    // the filter only removes bytes, so an unchanged length means an unchanged text
+    if (line.len != text.len) {
         // the event fields before the text are kept as they are
         size_t hlen = text.start - pkt->buffer;
         npkt = new_demux_packet(ft->packet_pool, hlen + line.len);
