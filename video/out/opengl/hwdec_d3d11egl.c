@@ -76,6 +76,7 @@ static void uninit(struct ra_hwdec *hw)
     struct priv_owner *p = hw->priv;
 
     hwdec_devices_remove(hw->devs, &p->hwctx);
+    av_buffer_unref(&p->hwctx.av_device_ref);
 
     if (p->d3d11_device)
         ID3D11Device_Release(p->d3d11_device);
