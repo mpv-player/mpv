@@ -173,13 +173,8 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
 {
 #if HAVE_GL && defined(PL_HAVE_OPENGL)
     struct priv *p = ctx->priv;
-    int w, h;
-    int err = get_target_size(ctx, params, &w, &h);
-    if (err < 0)
-        return err;
-
     struct ra_tex *ra_target;
-    err = p->context->fns->wrap_fbo(p->context, params, &ra_target);
+    int err = p->context->fns->wrap_fbo(p->context, params, &ra_target);
     if (err < 0)
         return err;
 
@@ -188,8 +183,8 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
     pl_gpu gpu = p->opengl->gpu;
     pl_tex target = pl_opengl_wrap(gpu, pl_opengl_wrap_params(
         .framebuffer = fbo->fbo,
-        .width = w,
-        .height = h,
+        .width = fbo->w,
+        .height = fbo->h,
         .iformat = fbo->internal_format,
     ));
     if (!target)

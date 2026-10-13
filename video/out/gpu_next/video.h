@@ -62,7 +62,6 @@ bool pl_video_set_paused(struct pl_video *p, bool paused);
 void pl_video_get_target_hint(struct pl_video *p, struct vo_frame *frame,
                               struct pl_video_target *target);
 // Render into a caller-owned target without acquiring, submitting or presenting it.
-// A NULL display uses the framebuffer's colorspace without native negotiation.
 // Returns whether rendering succeeded; an acquired target is flushed on failure too.
 bool pl_video_render_frame(struct pl_video *p, struct vo_frame *frame,
                             const struct pl_swapchain_frame *target, bool flip,

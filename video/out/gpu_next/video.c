@@ -1478,8 +1478,8 @@ bool pl_video_render_frame(struct pl_video *p, struct vo_frame *frame,
 {
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
-    p->reference_luma = display ? display->reference_luma : 0;
-    p->target_depth = display ? display->depth : 0;
+    p->reference_luma = display->reference_luma;
+    p->target_depth = display->depth;
     update_options(p);
 
     struct pl_render_params params = pars->params;
@@ -1569,15 +1569,6 @@ bool pl_video_render_frame(struct pl_video *p, struct vo_frame *frame,
         p->last_id = id;
     }
 
-    struct pl_video_target fallback = {
-        .color = target_frame ? target_frame->color_space : pl_color_space_srgb,
-        .color_known = target_frame &&
-                       target_frame->color_space.transfer != PL_COLOR_TRC_UNKNOWN,
-    };
-    if (!display) {
-        // Embedded targets have no native display colorspace negotiation.
-        display = &fallback;
-    }
     struct pl_color_space target_csp = display->color;
     struct pl_color_space hint = display->hint;
     bool target_hint = display->hint_enabled;
@@ -1828,9 +1819,6 @@ bool pl_video_set_icc_profile(struct pl_video *p, struct bstr icc)
     talloc_free(icc.start);
     return ok;
 }
-
-// Returns whether the ICC profile was updated (even on failure)
-
 
 void pl_video_screenshot(struct pl_video *p, struct voctrl_screenshot *args)
 {
