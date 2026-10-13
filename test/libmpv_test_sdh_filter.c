@@ -54,6 +54,10 @@ static void test_sdh_filter(char *file, char *path, char *harder)
         expect = "(No]　（filter) (should） (be） [applied)";
     } else if (strcmp(file, "sdh_mismatch") == 0) {
         expect = "(No]　（filter) (should） (be） [applied)";
+    } else if (strcmp(file, "sdh_null") == 0) {
+        expect = "";
+    } else if (strcmp(file, "sdh_null_text") == 0) {
+        expect = "real";
     }
 
     reload_file(path);

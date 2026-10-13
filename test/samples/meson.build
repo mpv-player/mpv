@@ -99,6 +99,18 @@ sdh_default = join_paths(source_root, 'test', 'samples', 'sdh_default.srt')
 sdh_mixed = join_paths(source_root, 'test', 'samples', 'sdh_mixed.srt')
 sdh_all = join_paths(source_root, 'test', 'samples', 'sdh_all.srt')
 sdh_mismatch = join_paths(source_root, 'test', 'samples', 'sdh_mismatch.srt')
+sdh_null = join_paths(source_root, 'test', 'samples', 'sdh_null.srt')
+sdh_null_text = join_paths(source_root, 'test', 'samples', 'sdh_null_text.srt')
+
+patch_null = '''
+import subprocess, sys
+out, needle, pos = sys.argv[1], sys.argv[2].encode(), int(sys.argv[3])
+subprocess.check_call(sys.argv[4:])
+with open(out, 'r+b') as f:
+    data = f.read()
+    f.seek(0)
+    f.write(data.replace(needle, needle[:pos] + bytes(1) + needle[pos + 1:], 1))
+'''
 
 sdh_samples = {
     'sdh_default':
@@ -116,6 +128,16 @@ sdh_samples = {
     'sdh_mismatch':
         [ffmpeg, '-v', 'error', '-y', '-i', audio, '-f', 'srt',
         '-i', sdh_mismatch, '-map', '0:0', '-map', '1:0', '-disposition:s:0',
+        'default', '@OUTPUT@'],
+    'sdh_null':
+        [python, '-c', patch_null, '@OUTPUT@', '0,0,Default,,', '7',
+        ffmpeg, '-v', 'error', '-y', '-i', audio, '-f', 'srt',
+        '-i', sdh_null, '-map', '0:0', '-map', '1:0', '-disposition:s:0',
+        'default', '@OUTPUT@'],
+    'sdh_null_text':
+        [python, '-c', patch_null, '@OUTPUT@', 'real text', '4',
+        ffmpeg, '-v', 'error', '-y', '-i', audio, '-f', 'srt',
+        '-i', sdh_null_text, '-map', '0:0', '-map', '1:0', '-disposition:s:0',
         'default', '@OUTPUT@'],
 }
 
