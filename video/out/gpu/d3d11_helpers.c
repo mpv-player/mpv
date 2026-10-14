@@ -31,10 +31,6 @@
 
 #include "d3d11_helpers.h"
 
-// D3D11.3 message IDs, not present in mingw-w64 v9
-#define D3D11_MESSAGE_ID_CREATE_FENCE  ((D3D11_MESSAGE_ID)0x300209)
-#define D3D11_MESSAGE_ID_DESTROY_FENCE ((D3D11_MESSAGE_ID)0x30020b)
-
 #define DECLARE_DLL_FUNCTION(name, dll, type)                     \
     static type p##name##_;                                       \
     static HMODULE name##_module_;                                \
@@ -1259,7 +1255,6 @@ static int map_msg_severity_by_id(D3D11_MESSAGE_ID id,
     OBJ_LIFETIME_MESSAGES(PROCESSORINPUTVIEW):
     OBJ_LIFETIME_MESSAGES(PROCESSOROUTPUTVIEW):
     OBJ_LIFETIME_MESSAGES(DEVICECONTEXTSTATE):
-    OBJ_LIFETIME_MESSAGES(FENCE):
         return MSGL_TRACE;
 
 #undef OBJ_LIFETIME_MESSAGES
