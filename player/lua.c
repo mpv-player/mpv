@@ -174,11 +174,11 @@ static void *mp_lua_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
     return ptr;
 }
 
+// The script context is the first upvalue of every C function registered by
+// this file, including the error handler and the loader.
 static struct script_ctx *get_ctx(lua_State *L)
 {
-    lua_getfield(L, LUA_REGISTRYINDEX, "ctx");
-    struct script_ctx *ctx = lua_touserdata(L, -1);
-    lua_pop(L, 1);
+    struct script_ctx *ctx = lua_touserdata(L, lua_upvalueindex(1));
     mp_assert(ctx);
     return ctx;
 }
@@ -347,10 +347,6 @@ static int run_lua(lua_State *L)
 
     luaL_openlibs(L);
 
-    // used by get_ctx()
-    lua_pushlightuserdata(L, ctx); // ctx
-    lua_setfield(L, LUA_REGISTRYINDEX, "ctx"); // -
-
     add_functions(ctx); // mp
 
     push_module_table(L, "mp"); // mp
@@ -398,8 +394,10 @@ static int run_lua(lua_State *L)
     mp_assert(lua_gettop(L) == 0);
 
     // run this under an error handler that can do backtraces
-    lua_pushcfunction(L, error_handler); // errf
-    lua_pushcfunction(L, load_scripts); // errf fn
+    lua_pushlightuserdata(L, ctx); // ctx
+    lua_pushcclosure(L, error_handler, 1); // errf
+    lua_pushlightuserdata(L, ctx); // errf ctx
+    lua_pushcclosure(L, load_scripts, 1); // errf fn
     if (lua_pcall(L, 0, 0, -2)) { // errf [error]
         const char *e = lua_tostring(L, -1);
         MP_FATAL(ctx, "Lua error: %s\n", e ? e : "(unknown)");
@@ -1272,12 +1270,14 @@ static const struct fn_entry utils_fns[] = {
     {0}
 };
 
-static void register_package_fns(lua_State *L, char *module,
+static void register_package_fns(struct script_ctx *ctx, char *module,
                                  const struct fn_entry *e)
 {
+    lua_State *L = ctx->state;
     push_module_table(L, module); // modtable
     for (int n = 0; e[n].name; n++) {
-        lua_pushcfunction(L, e[n].fn); // modtable fn
+        lua_pushlightuserdata(L, ctx); // modtable ctx
+        lua_pushcclosure(L, e[n].fn, 1); // modtable fn
         lua_setfield(L, -2, e[n].name); // modtable
     }
     lua_pop(L, 1); // -
@@ -1285,10 +1285,8 @@ static void register_package_fns(lua_State *L, char *module,
 
 static void add_functions(struct script_ctx *ctx)
 {
-    lua_State *L = ctx->state;
-
-    register_package_fns(L, "mp", main_fns);
-    register_package_fns(L, "mp.utils", utils_fns);
+    register_package_fns(ctx, "mp", main_fns);
+    register_package_fns(ctx, "mp.utils", utils_fns);
 }
 
 const struct mp_scripting mp_scripting_lua = {
