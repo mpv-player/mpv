@@ -156,14 +156,22 @@ struct m_property {
     bool is_noisy;
 };
 
-struct m_property *m_property_list_find(const struct m_property *list,
+// A set of properties, sorted by name with m_property_list_sort().
+struct m_property_list {
+    struct m_property *props;
+    int num;
+};
+
+void m_property_list_sort(struct m_property_list *list);
+
+struct m_property *m_property_list_find(const struct m_property_list *list,
                                         const char *name);
 
 // Access a property.
 // action: one of m_property_action
 // ctx: opaque value passed through to property implementation
 // returns: one of mp_property_return
-int m_property_do(struct mp_log *log, const struct m_property* prop_list,
+int m_property_do(struct mp_log *log, const struct m_property_list *prop_list,
                   const char* property_name, int action, void* arg, void *ctx);
 
 // Given a path of the form "a/b/c", this function will set *prefix to "a",
@@ -174,7 +182,7 @@ bool m_property_split_path(const char *path, bstr *prefix, const char **rem);
 
 // Print a list of properties.
 void m_properties_print_help_list(struct mp_log *log,
-                                  const struct m_property *list);
+                                  const struct m_property_list *list);
 
 // Expand a property string.
 // This function allows to print strings containing property values.
@@ -188,7 +196,7 @@ void m_properties_print_help_list(struct mp_log *log,
 // STR is recursively expanded using the same rules.
 // "$$" can be used to escape "$", and "$}" to escape "}".
 // "$>" disables parsing of "$" for the rest of the string.
-char* m_properties_expand_string(const struct m_property *prop_list,
+char* m_properties_expand_string(const struct m_property_list *prop_list,
                                  const char *str, void *ctx);
 
 // Trivial helpers for implementing properties.
