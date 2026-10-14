@@ -428,9 +428,8 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct m_config_option *opt =
-        m_config_get_co(mpctx->mconfig, bstr0(prop->name));
-
+    struct m_config_option *opt = prop->is_option ? prop->priv :
+                        m_config_get_co(mpctx->mconfig, bstr0(prop->name));
     if (!opt)
         return M_PROPERTY_UNKNOWN;
 
@@ -8163,6 +8162,7 @@ void command_init(struct MPContext *mpctx)
         struct m_property prop = {
             .name = co->name,
             .call = mp_property_generic_option,
+            .priv = co,
             .is_option = true,
         };
 
