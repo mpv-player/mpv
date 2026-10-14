@@ -111,6 +111,7 @@ struct script_ctx {
     lua_Alloc lua_allocf;
     void *lua_alloc_ud;
     struct stats_ctx *stats;
+    int ref_array, ref_map, ref_unknown;
 };
 
 #if LUA_VERSION_NUM <= 501
@@ -282,6 +283,16 @@ static void push_module_table(lua_State *L, const char *module)
     lua_remove(L, -2); // module
 }
 
+// Create a metatable for pushnode(), store it in the mp table at the top of
+// the stack under name, and return its registry reference.
+static int new_node_metatable(lua_State *L, const char *name)
+{
+    lua_newtable(L); // mp table
+    lua_pushvalue(L, -1); // mp table table
+    lua_setfield(L, -3, name); // mp table
+    return luaL_ref(L, LUA_REGISTRYINDEX); // mp
+}
+
 static int load_scripts(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -359,18 +370,9 @@ static int run_lua(lua_State *L)
     lua_setfield(L, -2, "script_name"); // mp
 
     // used by pushnode()
-    lua_newtable(L); // mp table
-    lua_pushvalue(L, -1); // mp table table
-    lua_setfield(L, LUA_REGISTRYINDEX, "UNKNOWN_TYPE"); // mp table
-    lua_setfield(L, -2, "UNKNOWN_TYPE"); // mp
-    lua_newtable(L); // mp table
-    lua_pushvalue(L, -1); // mp table table
-    lua_setfield(L, LUA_REGISTRYINDEX, "MAP"); // mp table
-    lua_setfield(L, -2, "MAP"); // mp
-    lua_newtable(L); // mp table
-    lua_pushvalue(L, -1); // mp table table
-    lua_setfield(L, LUA_REGISTRYINDEX, "ARRAY"); // mp table
-    lua_setfield(L, -2, "ARRAY"); // mp
+    ctx->ref_unknown = new_node_metatable(L, "UNKNOWN_TYPE"); // mp
+    ctx->ref_map = new_node_metatable(L, "MAP"); // mp
+    ctx->ref_array = new_node_metatable(L, "ARRAY"); // mp
 
     lua_pop(L, 1); // -
 
@@ -517,7 +519,7 @@ static int script_get_script_directory(lua_State *L)
     return 0;
 }
 
-static bool pushnode(lua_State *L, mpv_node *node);
+static bool pushnode(lua_State *L, struct script_ctx *ctx, mpv_node *node);
 
 static int script_wait_event(lua_State *L)
 {
@@ -528,7 +530,7 @@ static int script_wait_event(lua_State *L)
 
     struct mpv_node rn;
     mpv_event_to_node(&rn, event);
-    bool ok = pushnode(L, &rn); // event
+    bool ok = pushnode(L, ctx, &rn); // event
     mpv_free_node_contents(&rn);
     if (!ok)
         return node_error(L, NULL);
@@ -847,7 +849,7 @@ static int script_get_property_number(lua_State *L)
     }
 }
 
-static bool pushnode(lua_State *L, mpv_node *node)
+static bool pushnode(lua_State *L, struct script_ctx *ctx, mpv_node *node)
 {
     if (!lua_checkstack(L, 6)) {
         lua_pushliteral(L, "stack overflow (pushnode)");
@@ -872,21 +874,21 @@ static bool pushnode(lua_State *L, mpv_node *node)
         break;
     case MPV_FORMAT_NODE_ARRAY:
         lua_createtable(L, node->u.list->num, 0); // table
-        lua_getfield(L, LUA_REGISTRYINDEX, "ARRAY"); // table mt
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->ref_array); // table mt
         lua_setmetatable(L, -2); // table
         for (int n = 0; n < node->u.list->num; n++) {
-            if (!pushnode(L, &node->u.list->values[n])) // table value
+            if (!pushnode(L, ctx, &node->u.list->values[n])) // table value
                 return false;
             lua_rawseti(L, -2, n + 1); // table
         }
         break;
     case MPV_FORMAT_NODE_MAP:
         lua_createtable(L, 0, node->u.list->num); // table
-        lua_getfield(L, LUA_REGISTRYINDEX, "MAP"); // table mt
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->ref_map); // table mt
         lua_setmetatable(L, -2); // table
         for (int n = 0; n < node->u.list->num; n++) {
             lua_pushstring(L, node->u.list->keys[n]); // table key
-            if (!pushnode(L, &node->u.list->values[n])) // table key value
+            if (!pushnode(L, ctx, &node->u.list->values[n])) // table key value
                 return false;
             lua_rawset(L, -3);
         }
@@ -898,7 +900,7 @@ static bool pushnode(lua_State *L, mpv_node *node)
         // unknown value - what do we do?
         // for now, set a unique dummy value
         lua_newtable(L); // table
-        lua_getfield(L, LUA_REGISTRYINDEX, "UNKNOWN_TYPE");
+        lua_rawgeti(L, LUA_REGISTRYINDEX, ctx->ref_unknown); // table mt
         lua_setmetatable(L, -2); // table
         break;
     }
@@ -914,7 +916,7 @@ static int script_get_property_native(lua_State *L)
     mpv_node node;
     int err = mpv_get_property(ctx->client, name, MPV_FORMAT_NODE, &node);
     if (err >= 0) {
-        bool ok = pushnode(L, &node);
+        bool ok = pushnode(L, ctx, &node);
         mpv_free_node_contents(&node);
         if (!ok)
             return node_error(L, NULL);
@@ -970,7 +972,7 @@ static int script_command_native(lua_State *L)
     int err = mpv_command_node(ctx->client, &node, &result);
     talloc_free(tmp);
     if (err >= 0) {
-        bool ok = pushnode(L, &result);
+        bool ok = pushnode(L, ctx, &result);
         mpv_free_node_contents(&result);
         if (!ok)
             return node_error(L, NULL);
@@ -1161,7 +1163,8 @@ static int script_parse_json(lua_State *L)
     mp_lua_optarg(L, 2);
     const char *str = luaL_checkstring(L, 1);
     bool trail = lua_toboolean(L, 2);
-    void *tmp = talloc_new(get_ctx(L));
+    struct script_ctx *ctx = get_ctx(L);
+    void *tmp = talloc_new(ctx);
     char *text = talloc_strdup(tmp, str);
     bool ok = false;
     struct mpv_node node;
@@ -1170,7 +1173,7 @@ static int script_parse_json(lua_State *L)
         ok = !text[0] || trail;
     }
     if (ok) {
-        if (!pushnode(L, &node))
+        if (!pushnode(L, ctx, &node))
             return node_error(L, tmp);
         lua_pushnil(L);
     } else {
