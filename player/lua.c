@@ -238,8 +238,7 @@ static void load_file(lua_State *L, const char *fname)
 static int load_builtin(lua_State *L)
 {
     const char *name = luaL_checkstring(L, 1);
-    char dispname[80];
-    snprintf(dispname, sizeof(dispname), "@%s", name);
+    const char *dispname = mp_tprintf(80, "@%s", name);
     for (int n = 0; builtin_lua_scripts[n][0]; n++) {
         if (strcmp(name, builtin_lua_scripts[n][0]) == 0) {
             const char *script = builtin_lua_scripts[n][1];
