@@ -38,3 +38,7 @@ struct libmpv_gpu_context_fns {
 };
 
 extern const struct libmpv_gpu_context_fns libmpv_gpu_context_gl;
+
+// Initialize the context and register native resources for hardware decoding.
+int libmpv_gpu_context_init(struct libmpv_gpu_context *ctx,
+                           mpv_render_param *params);

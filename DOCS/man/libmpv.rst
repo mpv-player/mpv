@@ -6,6 +6,11 @@ recommended way to do so is using libmpv. See ``include/mpv/client.h`` in the mp
 source code repository. This provides a C API. Bindings for other languages
 might be available (see wiki).
 
+When using the rendering API, set ``MPV_RENDER_PARAM_API_TYPE`` to
+``MPV_RENDER_API_TYPE_OPENGL_NEXT`` to select the libplacebo-based ``gpu-next``
+renderer. It uses the same OpenGL initialization and framebuffer parameters
+as ``MPV_RENDER_API_TYPE_OPENGL``. See ``include/mpv/render_gl.h`` for details.
+
 Since libmpv merely allows access to underlying mechanisms that can control
 mpv, further documentation is spread over a few places:
 

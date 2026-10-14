@@ -156,6 +156,13 @@ if get_option('libmpv')
                      include_directories: incdir, dependencies: libmpv_dep)
     test('libmpv-test-options', exe, suite: 'libmpv')
 
+    if darwin and features['gl'] and libplacebo.get_variable('pl_has_opengl', default_value: '0') == '1'
+        exe = executable('libmpv-render-gl', 'libmpv_render_gl.c',
+                         include_directories: incdir,
+                         dependencies: [libmpv_dep, GL])
+        test('libmpv-render-gl', exe, suite: 'libmpv')
+    endif
+
     # Old versions of ffmpeg are bugged when setting forced tracks and older
     # versions of meson don't support the custom version checking argument.
     if meson.version().version_compare('>= 1.5.0')
