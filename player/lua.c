@@ -722,7 +722,8 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
         // Lua uses the same type for arrays and maps, so guess the correct one.
         int format = MPV_FORMAT_NONE;
         if (lua_getmetatable(L, t)) { // mt
-            lua_getfield(L, -1, "type"); // mt val
+            lua_pushstring(L, "type"); // mt "type"
+            lua_rawget(L, -2); // mt val
             if (lua_type(L, -1) == LUA_TSTRING) {
                 const char *type = lua_tostring(L, -1);
                 if (strcmp(type, "MAP") == 0) {
@@ -731,62 +732,59 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
                     format = MPV_FORMAT_NODE_ARRAY;
                 }
             }
-            lua_pop(L, 2);
+            lua_pop(L, 2); // -
         }
-        if (format == MPV_FORMAT_NONE) {
-            // If all keys are integers, and they're in sequence, take it
-            // as an array.
-            int count = 0;
-            for (int n = 1; ; n++) {
-                lua_pushinteger(L, n); // n
-                lua_gettable(L, t); // t[n]
-                bool empty = lua_isnil(L, -1); // t[n]
+        int num = 0;
+        if (format == MPV_FORMAT_NODE_ARRAY) {
+            // The array ends at the first nil.
+            for (;; num++) {
+                lua_rawgeti(L, t, num + 1); // t[num+1]
+                bool end = lua_isnil(L, -1);
                 lua_pop(L, 1); // -
-                if (empty) {
-                    count = n - 1;
+                if (end)
                     break;
-                }
             }
-            if (count > 0)
-                format = MPV_FORMAT_NODE_ARRAY;
+        } else {
+            // num keys are exactly the integers 1..num if all of them are
+            // positive integers and the largest one is num.
+            bool seq = true;
+            lua_Number max_key = 0;
             lua_pushnil(L); // nil
-            while (lua_next(L, t) != 0) { // key value
-                count--;
-                lua_pop(L, 1); // key
-                if (count < 0) {
-                    lua_pop(L, 1); // -
-                    format = MPV_FORMAT_NODE_MAP;
-                    break;
+            while (lua_next(L, t)) { // key value
+                num++;
+                if (seq) {
+                    lua_Number k = lua_type(L, -2) == LUA_TNUMBER ?
+                                   lua_tonumber(L, -2) : 0;
+                    seq = k >= 1 && k == floor(k);
+                    max_key = MPMAX(max_key, k);
                 }
+                lua_pop(L, 1); // key
+            }
+            if (format == MPV_FORMAT_NONE) {
+                format = seq && max_key == num ? MPV_FORMAT_NODE_ARRAY
+                                               : MPV_FORMAT_NODE_MAP;
             }
         }
-        if (format == MPV_FORMAT_NONE)
-            format = MPV_FORMAT_NODE_ARRAY; // probably empty table; assume array
         mpv_node_list *list = talloc_zero(tmp, mpv_node_list);
+        list->values = talloc_array(tmp, mpv_node, num);
         dst->format = format;
         dst->u.list = list;
         if (format == MPV_FORMAT_NODE_ARRAY) {
-            for (int n = 0; ; n++) {
-                lua_pushinteger(L, n + 1); // n1
-                lua_gettable(L, t); // t[n1]
-                if (lua_isnil(L, -1))
-                    break;
-                MP_TARRAY_GROW(tmp, list->values, list->num);
+            for (int n = 0; n < num; n++) {
+                lua_rawgeti(L, t, n + 1); // t[n+1]
                 makenode(tmp, &list->values[n], L, -1);
                 list->num++;
                 lua_pop(L, 1); // -
             }
-            lua_pop(L, 1); // -
         } else {
+            list->keys = talloc_array(tmp, char *, num);
             lua_pushnil(L); // nil
-            while (lua_next(L, t) != 0) { // key value
-                MP_TARRAY_GROW(tmp, list->values, list->num);
-                MP_TARRAY_GROW(tmp, list->keys, list->num);
-                makenode(tmp, &list->values[list->num], L, -1);
+            while (lua_next(L, t)) { // key value
                 if (lua_type(L, -2) != LUA_TSTRING) {
                     luaL_error(L, "key must be a string, but got %s",
-                               lua_typename(L, lua_type(L, -2)));
+                               luaL_typename(L, -2));
                 }
+                makenode(tmp, &list->values[list->num], L, -1);
                 list->keys[list->num] = talloc_strdup(tmp, lua_tostring(L, -2));
                 list->num++;
                 lua_pop(L, 1); // key
