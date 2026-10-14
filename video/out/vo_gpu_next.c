@@ -154,6 +154,8 @@ struct priv {
     bool flush_cache;
     bool frame_pending;
     bool paused;
+    int last_ref_white;
+    int last_srgb_power22;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -1510,6 +1512,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         // sets target_trc to PQ, but the hint(source) is SDR, we want to fill
         // in SDR luminance values instead of the default PQ range.
         struct pl_color_space source_csp = *source;
+        bool min_luma_known = hint.hdr.min_luma > 0;
         pl_color_space_infer_map(&source_csp, &hint);
         // Always prefer target luminance and transfer for inverse tone mapping
         if (pl_color_transfer_is_hdr(target->transfer) && opts->tone_map.inverse) {
@@ -1529,6 +1532,11 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             hint.hdr.max_luma = opts->target_peak;
         if (target_ref_luma && use_ref_luma(&hint, &target_csp))
             hint.hdr.max_luma = target_ref_luma;
+        // The SDR black point was inferred from the peak known before the
+        // overrides above, keep the assumed contrast relative to the final
+        // peak instead of the one it was inferred from.
+        if (!min_luma_known && !pl_color_transfer_is_hdr(hint.transfer))
+            hint.hdr.min_luma = hint.hdr.max_luma / PL_COLOR_SDR_CONTRAST;
         // Always set maxCLL, display uses this metadata and we shouldn't let it
         // fallback to default value.
         if (!hint.hdr.max_cll)
@@ -2988,6 +2996,13 @@ AV_NOWARN_DEPRECATED(
 
     MP_DBG(p, "Render options updated, flushing renderer cache.\n");
     p->flush_cache = p->paused || !p->next_opts->inter_preserve;
+
+    // These options are baked into mapped frames. Reset the queue to map the
+    // queued frames again.
+    p->want_reset = p->want_reset || p->last_ref_white != opts->hdr_reference_white;
+    p->want_reset = p->want_reset || ((p->last_srgb_power22 ^ opts->treat_srgb_as_power22) & 1);
+    p->last_ref_white = opts->hdr_reference_white;
+    p->last_srgb_power22 = opts->treat_srgb_as_power22;
 }
 
 const struct vo_driver video_out_gpu_next = {

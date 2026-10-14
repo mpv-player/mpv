@@ -1115,6 +1115,10 @@ Program Behavior
     Enable the builtin script that provides various keybindings to pan videos
     and images (default: yes).
 
+``--load-calibrate=<yes|no>``
+    Enable the builtin script for visual display calibration (default: yes).
+    See the `CALIBRATE`_ section for details.
+
 ``--player-operation-mode=<cplayer|pseudo-gui>``
     For enabling "pseudo GUI mode", which means that the defaults for some
     options are changed. This option should not normally be used directly, but
