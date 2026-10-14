@@ -740,11 +740,11 @@ endif
 lua = dependency('', required: false)
 lua_opt = get_option('lua')
 if lua_opt != 'disabled'
-    lua_version = [['lua', ['>=5.1.0', '<5.3.0']], # generic lua.pc
+    lua_version = [['luajit', '>= 2.0.0'],
+                   ['lua', ['>=5.1.0', '<5.3.0']], # generic lua.pc
                    ['lua52', '>= 5.2.0'],
                    ['lua5.2', '>= 5.2.0'],
                    ['lua-5.2', '>= 5.2.0'],
-                   ['luajit', '>= 2.0.0'],
                    ['lua51', '>= 5.1.0'],
                    ['lua5.1', '>= 5.1.0'],
                    ['lua-5.1', '>= 5.1.0']]
