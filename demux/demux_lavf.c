@@ -236,8 +236,15 @@ struct stream_info {
     struct mp_dovi_split *dovi_split;
 };
 
+struct avio_cookie {
+    const AVClass *av_class;
+    struct demuxer *demuxer;
+    const char *location;
+};
+
 typedef struct lavf_priv {
     struct stream *stream;
+    struct avio_cookie avio_cookie;
     bool own_stream;
     bool is_dvd_bd;
     bool is_dvd;
@@ -306,9 +313,34 @@ static bool matches_avinputformat_name(struct lavf_priv *priv,
     }
 }
 
+static const AVClass avio_cookie_class = {
+    .class_name = "mpv_avio",
+    .item_name  = av_default_item_name,
+    .option     = (const AVOption[]) {
+        {"location", "The actual location of the data received",
+         offsetof(struct avio_cookie, location),
+         AV_OPT_TYPE_STRING, {.str = NULL}, 0, 0, AV_OPT_FLAG_DECODING_PARAM},
+        {0}
+    },
+    .version = LIBAVUTIL_VERSION_INT,
+};
+
+static void *avio_child_next(void *obj, void *prev)
+{
+    AVIOContext *pb = obj;
+    return prev ? NULL : pb->opaque;
+}
+
+static const AVClass avio_class = {
+    .class_name = "mpv_avio",
+    .item_name  = av_default_item_name,
+    .child_next = avio_child_next,
+    .version    = LIBAVUTIL_VERSION_INT,
+};
+
 static int mp_read(void *opaque, uint8_t *buf, int size)
 {
-    struct demuxer *demuxer = opaque;
+    struct demuxer *demuxer = ((struct avio_cookie *)opaque)->demuxer;
     lavf_priv_t *priv = demuxer->priv;
     struct stream *stream = priv->stream;
     if (!stream)
@@ -323,7 +355,7 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
 
 static int64_t mp_seek(void *opaque, int64_t pos, int whence)
 {
-    struct demuxer *demuxer = opaque;
+    struct demuxer *demuxer = ((struct avio_cookie *)opaque)->demuxer;
     lavf_priv_t *priv = demuxer->priv;
     struct stream *stream = priv->stream;
     if (!stream)
@@ -365,7 +397,7 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
 
 static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
 {
-    struct demuxer *demuxer = opaque;
+    struct demuxer *demuxer = ((struct avio_cookie *)opaque)->demuxer;
     lavf_priv_t *priv = demuxer->priv;
     struct stream *stream = priv->stream;
 
@@ -1487,12 +1519,20 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         void *buffer = av_malloc(lavfdopts->buffersize);
         if (!buffer)
             goto fail;
+        const char *location = priv->stream->effective_url;
+        priv->avio_cookie = (struct avio_cookie){
+            .av_class = &avio_cookie_class,
+            .demuxer = demuxer,
+            .location = location ? location : priv->filename,
+        };
         priv->pb = avio_alloc_context(buffer, lavfdopts->buffersize, 0,
-                                      demuxer, mp_read, NULL, mp_seek);
+                                      &priv->avio_cookie, mp_read, NULL,
+                                      mp_seek);
         if (!priv->pb) {
             av_free(buffer);
             goto fail;
         }
+        priv->pb->av_class = &avio_class;
         priv->pb->read_seek = mp_read_seek;
         priv->pb->seekable = demuxer->seekable ? AVIO_SEEKABLE_NORMAL : 0;
         avfc->pb = priv->pb;
