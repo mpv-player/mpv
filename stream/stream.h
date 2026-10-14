@@ -243,6 +243,7 @@ typedef struct stream {
     void *priv; // used for DVD, TV, RTSP etc
     char *url;  // filename/url (possibly including protocol prefix)
     char *path; // filename (url without protocol prefix)
+    char *effective_url; // url after redirects, if known
     char *mime_type; // when HTTP streaming is used
     char *server_filename; // file name reported by the server, if any
     char *demuxer; // request demuxer to be used

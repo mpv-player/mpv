@@ -167,7 +167,6 @@ struct priv {
     CURL *curl;
     struct curl_slist *headers;
     char *url;
-    const char *effective_url;
     const struct curl_scheme *scheme;
 
     // Stream parameters
@@ -1191,7 +1190,7 @@ static int curl_open(stream_t *s, const struct stream_open_args *args)
 
     const char *effective_url = NULL;
     curl_easy_getinfo(p->curl, CURLINFO_EFFECTIVE_URL, &effective_url);
-    p->effective_url = effective_url ? effective_url : p->url;
+    s->effective_url = talloc_strdup(s, effective_url);
 
     s->seekable = p->seekable;
     s->is_network = true;
@@ -1387,7 +1386,7 @@ static int open_curl_transport(struct demuxer *demuxer, AVIOContext **pb_out,
     c->av_class = &curl_avio_cookie_class;
     c->stream = s;
     c->cancel = cancel;
-    c->location = ((struct priv *)s->priv)->effective_url;
+    c->location = s->effective_url ? s->effective_url : s->url;
 
     void *buffer = av_malloc(64 * 1024);
     if (!buffer) {
