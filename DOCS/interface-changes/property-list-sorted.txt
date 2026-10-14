@@ -1,0 +1,1 @@
+sort the `property-list` property and `--list-properties` output by name
