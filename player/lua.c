@@ -238,17 +238,14 @@ static int load_builtin(lua_State *L)
     return 0;
 }
 
-// Execute "require " .. name
+// Execute require(name)
 static void require(lua_State *L, const char *name)
 {
     struct script_ctx *ctx = get_ctx(L);
     MP_DBG(ctx, "loading %s\n", name);
-    // Lazy, but better than calling the "require" function manually
-    char buf[80];
-    snprintf(buf, sizeof(buf), "require '%s'", name);
-    if (luaL_loadstring(L, buf))
-        lua_error(L);
-    lua_call(L, 0, 0);
+    lua_getglobal(L, "require"); // require
+    lua_pushstring(L, name); // require name
+    lua_call(L, 1, 0); // -
 }
 
 // Push the table of a module. If it doesn't exist, it's created.
