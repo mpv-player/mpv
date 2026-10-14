@@ -221,7 +221,8 @@ static void pl_add(struct pl_parser *p, bstr entry)
     if (!mp_is_url(entry) && bstrcasecmp0(proto, "memory") &&
         bstrcasecmp0(proto, "lavf") && bstrcasecmp0(proto, "hex") &&
         bstrcasecmp0(proto, "data") && bstrcasecmp0(proto, "fd")) {
-        path = mp_path_join_bstr(ctx, mp_dirname(p->s->url), bstr0(path));
+        const char *base = p->s->effective_url ? p->s->effective_url : p->s->url;
+        path = mp_path_join_bstr(ctx, mp_dirname(base), bstr0(path));
     }
 
     playlist_append_file(p->pl, path);
