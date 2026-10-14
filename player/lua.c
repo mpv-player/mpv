@@ -515,6 +515,8 @@ static int script_log(lua_State *L)
     struct script_ctx *ctx = get_ctx(L);
 
     int msgl = check_loglevel(L, 1);
+    if (!mp_msg_test(ctx->log, msgl))
+        return 0;
 
     int last = lua_gettop(L);
     lua_getglobal(L, "tostring"); // args... tostring
