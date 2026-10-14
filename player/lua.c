@@ -794,7 +794,7 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
     }
     default:
         // unknown type
-        luaL_error(L, "disallowed Lua type found: %s\n", lua_typename(L, t));
+        luaL_error(L, "disallowed Lua type found: %s\n", luaL_typename(L, t));
     }
 }
 
