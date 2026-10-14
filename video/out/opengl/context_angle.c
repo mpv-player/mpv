@@ -209,6 +209,7 @@ static void d3d11_device_destroy(struct ra_ctx *ctx)
         eglReleaseDeviceANGLE(p->egl_device);
     p->egl_device = 0;
 
+    SAFE_RELEASE(p->d3d11_context);
     SAFE_RELEASE(p->d3d11_device);
 }
 
