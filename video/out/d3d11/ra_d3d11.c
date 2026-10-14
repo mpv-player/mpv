@@ -1,7 +1,6 @@
 #include <windows.h>
 #include <versionhelpers.h>
 #include <d3d11_1.h>
-#include <d3d11sdklayers.h>
 #include <dxgi1_2.h>
 #include <d3dcompiler.h>
 #include <spirv_cross_c.h>
@@ -21,10 +20,6 @@
 #define D3D11_1_UAV_SLOT_COUNT (64)
 #endif
 #define D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE (0x80)
-
-// D3D11.3 message IDs, not present in mingw-w64 v9
-#define D3D11_MESSAGE_ID_CREATE_FENCE  ((D3D11_MESSAGE_ID)0x300209)
-#define D3D11_MESSAGE_ID_DESTROY_FENCE ((D3D11_MESSAGE_ID)0x30020b)
 
 struct dll_version {
     uint16_t major;
@@ -2107,123 +2102,10 @@ static uint64_t timer_stop(struct ra *ra, ra_timer *ratimer)
     return timer->result;
 }
 
-static int map_msg_severity(DXGI_INFO_QUEUE_MESSAGE_SEVERITY sev)
-{
-    switch (sev) {
-    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION:
-        return MSGL_FATAL;
-    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR:
-        return MSGL_ERR;
-    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_WARNING:
-        return MSGL_WARN;
-    default:
-    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_INFO:
-    case DXGI_INFO_QUEUE_MESSAGE_SEVERITY_MESSAGE:
-        return MSGL_DEBUG;
-    }
-}
-
-static int map_msg_severity_by_id(D3D11_MESSAGE_ID id,
-                                  DXGI_INFO_QUEUE_MESSAGE_SEVERITY sev)
-{
-    switch (id) {
-    // These are normal. The RA timer queue habitually reuses timer objects
-    // without retrieving the results.
-    case D3D11_MESSAGE_ID_QUERY_BEGIN_ABANDONING_PREVIOUS_RESULTS:
-    case D3D11_MESSAGE_ID_QUERY_END_ABANDONING_PREVIOUS_RESULTS:
-        return MSGL_TRACE;
-
-    // D3D11 writes log messages every time an object is created or
-    // destroyed. That results in a lot of log spam, so force MSGL_TRACE.
-#define OBJ_LIFETIME_MESSAGES(obj)          \
-    case D3D11_MESSAGE_ID_CREATE_ ## obj:   \
-    case D3D11_MESSAGE_ID_DESTROY_ ## obj
-
-    OBJ_LIFETIME_MESSAGES(CONTEXT):
-    OBJ_LIFETIME_MESSAGES(BUFFER):
-    OBJ_LIFETIME_MESSAGES(TEXTURE1D):
-    OBJ_LIFETIME_MESSAGES(TEXTURE2D):
-    OBJ_LIFETIME_MESSAGES(TEXTURE3D):
-    OBJ_LIFETIME_MESSAGES(SHADERRESOURCEVIEW):
-    OBJ_LIFETIME_MESSAGES(RENDERTARGETVIEW):
-    OBJ_LIFETIME_MESSAGES(DEPTHSTENCILVIEW):
-    OBJ_LIFETIME_MESSAGES(VERTEXSHADER):
-    OBJ_LIFETIME_MESSAGES(HULLSHADER):
-    OBJ_LIFETIME_MESSAGES(DOMAINSHADER):
-    OBJ_LIFETIME_MESSAGES(GEOMETRYSHADER):
-    OBJ_LIFETIME_MESSAGES(PIXELSHADER):
-    OBJ_LIFETIME_MESSAGES(INPUTLAYOUT):
-    OBJ_LIFETIME_MESSAGES(SAMPLER):
-    OBJ_LIFETIME_MESSAGES(BLENDSTATE):
-    OBJ_LIFETIME_MESSAGES(DEPTHSTENCILSTATE):
-    OBJ_LIFETIME_MESSAGES(RASTERIZERSTATE):
-    OBJ_LIFETIME_MESSAGES(QUERY):
-    OBJ_LIFETIME_MESSAGES(PREDICATE):
-    OBJ_LIFETIME_MESSAGES(COUNTER):
-    OBJ_LIFETIME_MESSAGES(COMMANDLIST):
-    OBJ_LIFETIME_MESSAGES(CLASSINSTANCE):
-    OBJ_LIFETIME_MESSAGES(CLASSLINKAGE):
-    OBJ_LIFETIME_MESSAGES(COMPUTESHADER):
-    OBJ_LIFETIME_MESSAGES(UNORDEREDACCESSVIEW):
-    OBJ_LIFETIME_MESSAGES(VIDEODECODER):
-    OBJ_LIFETIME_MESSAGES(VIDEOPROCESSORENUM):
-    OBJ_LIFETIME_MESSAGES(VIDEOPROCESSOR):
-    OBJ_LIFETIME_MESSAGES(DECODEROUTPUTVIEW):
-    OBJ_LIFETIME_MESSAGES(PROCESSORINPUTVIEW):
-    OBJ_LIFETIME_MESSAGES(PROCESSOROUTPUTVIEW):
-    OBJ_LIFETIME_MESSAGES(DEVICECONTEXTSTATE):
-    OBJ_LIFETIME_MESSAGES(FENCE):
-        return MSGL_TRACE;
-
-#undef OBJ_LIFETIME_MESSAGES
-
-    default:
-        return map_msg_severity(sev);
-    }
-}
-
 static void debug_marker(struct ra *ra, const char *msg)
 {
     struct ra_d3d11 *p = ra->priv;
-    void *talloc_ctx = talloc_new(NULL);
-    HRESULT hr;
-
-    if (!p->iqueue)
-        goto done;
-
-    // Copy debug-layer messages to mpv's log output
-    bool printed_header = false;
-    uint64_t messages = IDXGIInfoQueue_GetNumStoredMessages(p->iqueue,
-                                                            DXGI_DEBUG_ALL);
-    for (uint64_t i = 0; i < messages; i++) {
-        SIZE_T len;
-        hr = IDXGIInfoQueue_GetMessage(p->iqueue, DXGI_DEBUG_ALL, i, NULL, &len);
-        if (FAILED(hr) || !len)
-            goto done;
-
-        DXGI_INFO_QUEUE_MESSAGE *dxgimsg = talloc_size(talloc_ctx, len);
-        hr = IDXGIInfoQueue_GetMessage(p->iqueue, DXGI_DEBUG_ALL, i, dxgimsg, &len);
-        if (FAILED(hr))
-            goto done;
-
-        int msgl = IsEqualGUID(&dxgimsg->Producer, &DXGI_DEBUG_D3D11)
-                        ? map_msg_severity_by_id(dxgimsg->ID, dxgimsg->Severity)
-                        : map_msg_severity(dxgimsg->Severity);
-
-        if (mp_msg_test(ra->log, msgl)) {
-            if (!printed_header)
-                MP_INFO(ra, "%s:\n", msg);
-            printed_header = true;
-
-            MP_MSG(ra, msgl, "%d: %.*s\n", (int)dxgimsg->ID,
-                (int)dxgimsg->DescriptionByteLength, dxgimsg->pDescription);
-            talloc_free(dxgimsg);
-        }
-    }
-
-    IDXGIInfoQueue_ClearStoredMessages(p->iqueue, DXGI_DEBUG_ALL);
-done:
-    talloc_free(talloc_ctx);
+    mp_d3d11_debug_marker(ra->log, p->iqueue, msg);
 }
 
 static void destroy(struct ra *ra)
@@ -2254,14 +2136,8 @@ static void destroy(struct ra *ra)
     }
     SAFE_RELEASE(p->ctx);
 
-    if (p->debug) {
-        // Report any leaked objects
-        debug_marker(ra, "after destroy");
-        IDXGIDebug_ReportLiveObjects(p->debug, DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
-        debug_marker(ra, "after leak check");
-        IDXGIDebug_ReportLiveObjects(p->debug, DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_SUMMARY);
-        debug_marker(ra, "after leak summary");
-    }
+    if (p->debug)
+        mp_d3d11_report_live_objects(ra->log, p->debug, p->iqueue);
     SAFE_RELEASE(p->debug);
     SAFE_RELEASE(p->iqueue);
 
