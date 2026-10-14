@@ -176,7 +176,7 @@ static void *mp_lua_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
 }
 
 // The script context is the first upvalue of every C function registered by
-// this file, including the error handler and the loader.
+// this file, including the loader.
 static struct script_ctx *get_ctx(lua_State *L)
 {
     struct script_ctx *ctx = lua_touserdata(L, lua_upvalueindex(1));
@@ -187,20 +187,6 @@ static struct script_ctx *get_ctx(lua_State *L)
 static struct MPContext *get_mpctx(lua_State *L)
 {
     return get_ctx(L)->mpctx;
-}
-
-static int error_handler(lua_State *L)
-{
-    struct script_ctx *ctx = get_ctx(L);
-
-    if (luaL_loadstring(L, "return debug.traceback('', 3)") == 0) { // e fn|err
-        lua_call(L, 0, 1); // e backtrace
-        const char *tr = lua_tostring(L, -1);
-        MP_WARN(ctx, "%s\n", tr ? tr : "(unknown)");
-    }
-    lua_pop(L, 1); // e
-
-    return 1;
 }
 
 // Check client API error code:
@@ -350,6 +336,16 @@ static void fuck_lua(lua_State *L, const char *search_path, const char *extra)
     talloc_free(tmp);
 }
 
+static int error_handler(lua_State *L)
+{
+    lua_getglobal(L, "debug"); // e debug
+    lua_getfield(L, -1, "traceback"); // e debug traceback
+    lua_pushvalue(L, 1); // e debug traceback e
+    lua_pushinteger(L, 2); // e debug traceback e 2
+    lua_call(L, 2, 1); // e debug traceback(e, 2)
+    return 1;
+}
+
 static int run_lua(lua_State *L)
 {
     struct script_ctx *ctx = lua_touserdata(L, -1);
@@ -395,8 +391,7 @@ static int run_lua(lua_State *L)
     mp_assert(lua_gettop(L) == 0);
 
     // run this under an error handler that can do backtraces
-    lua_pushlightuserdata(L, ctx); // ctx
-    lua_pushcclosure(L, error_handler, 1); // errf
+    lua_pushcfunction(L, error_handler); // errf
     lua_pushlightuserdata(L, ctx); // errf ctx
     lua_pushcclosure(L, load_scripts, 1); // errf fn
     if (lua_pcall(L, 0, 0, -2)) { // errf [error]
