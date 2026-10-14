@@ -176,7 +176,7 @@ static void *mp_lua_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
 }
 
 // The script context is the first upvalue of every C function registered by
-// this file, including the loader.
+// this file.
 static struct script_ctx *get_ctx(lua_State *L)
 {
     struct script_ctx *ctx = lua_touserdata(L, lua_upvalueindex(1));
@@ -205,20 +205,46 @@ static int check_error(lua_State *L, int err)
 
 static void add_functions(struct script_ctx *ctx);
 
-static void load_file(lua_State *L, const char *fname)
+// Print the error on top of the stack and pop it.
+static void print_error(struct script_ctx *ctx)
 {
-    struct script_ctx *ctx = get_ctx(L);
+    lua_State *L = ctx->state;
+    const char *e = lua_tostring(L, -1);
+    MP_FATAL(ctx, "Lua error: %s\n", e ? e : "(unknown)");
+    lua_pop(L, 1);
+}
+
+// Call the function on top of the stack with nargs arguments under the error
+// handler below them. Returns false after printing the error if it failed.
+static bool protected_call(struct script_ctx *ctx, int nargs)
+{
+    lua_State *L = ctx->state;
+    // errf fn n*args
+    if (lua_pcall(L, nargs, 0, -nargs - 2)) { // errf [error]
+        print_error(ctx); // errf
+        return false;
+    }
+    return true; // errf
+}
+
+static bool load_file(struct script_ctx *ctx, const char *fname)
+{
+    lua_State *L = ctx->state;
     MP_DBG(ctx, "loading file %s\n", fname);
     void *tmp = talloc_new(ctx);
     // according to Lua manual chunkname should be '@' plus the filename
     char *dispname = talloc_asprintf(tmp, "@%s", fname);
     struct bstr s = stream_read_file(fname, tmp, ctx->mpctx->global, 100000000);
-    if (!s.start)
-        luaL_error(L, "Could not read file.");
-    if (luaL_loadbuffer(L, s.start, s.len, dispname))
-        lua_error(L);
-    lua_call(L, 0, 1);
+    bool ok = false;
+    if (!s.start) {
+        MP_FATAL(ctx, "Could not read file.\n");
+    } else if (luaL_loadbuffer(L, s.start, s.len, dispname)) { // errf [error]
+        print_error(ctx); // errf
+    } else { // errf chunk
+        ok = protected_call(ctx, 0); // errf
+    }
     talloc_free(tmp);
+    return ok;
 }
 
 static int load_builtin(lua_State *L)
@@ -239,13 +265,13 @@ static int load_builtin(lua_State *L)
 }
 
 // Execute require(name)
-static void require(lua_State *L, const char *name)
+static bool require(struct script_ctx *ctx, const char *name)
 {
-    struct script_ctx *ctx = get_ctx(L);
+    lua_State *L = ctx->state;
     MP_DBG(ctx, "loading %s\n", name);
-    lua_getglobal(L, "require"); // require
-    lua_pushstring(L, name); // require name
-    lua_call(L, 1, 0); // -
+    lua_getglobal(L, "require"); // errf require
+    lua_pushstring(L, name); // errf require name
+    return protected_call(ctx, 1); // errf
 }
 
 // Push the table of a module. If it doesn't exist, it's created.
@@ -275,25 +301,28 @@ static int new_node_metatable(lua_State *L, const char *name)
     return luaL_ref(L, LUA_REGISTRYINDEX); // mp
 }
 
-static int load_scripts(lua_State *L)
+// Load mp.defaults and the script, then run its event loop, each under the
+// error handler on top of the stack. This runs outside of any Lua call, so no
+// C function of this file is on the Lua stack below the script and tracebacks
+// end at its own frames.
+static void load_scripts(struct script_ctx *ctx)
 {
-    struct script_ctx *ctx = get_ctx(L);
+    lua_State *L = ctx->state;
     const char *fname = ctx->filename;
 
-    require(L, "mp.defaults");
+    if (!require(ctx, "mp.defaults"))
+        return;
 
-    if (fname[0] == '@') {
-        require(L, fname);
-    } else {
-        load_file(L, fname);
+    bool ok = fname[0] == '@' ? require(ctx, fname) : load_file(ctx, fname);
+    if (!ok)
+        return;
+
+    lua_getglobal(L, "mp_event_loop"); // errf fn
+    if (lua_isnil(L, -1)) {
+        MP_FATAL(ctx, "Lua error: no event loop function\n");
+        return;
     }
-
-    lua_getglobal(L, "mp_event_loop"); // fn
-    if (lua_isnil(L, -1))
-        luaL_error(L, "no event loop function");
-    lua_call(L, 0, 0); // -
-
-    return 0;
+    protected_call(ctx, 0); // errf
 }
 
 static void fuck_lua(lua_State *L, const char *search_path, const char *extra)
@@ -387,15 +416,6 @@ static int run_lua(lua_State *L)
     fuck_lua(L, "cpath", NULL);
     mp_assert(lua_gettop(L) == 0);
 
-    // run this under an error handler that can do backtraces
-    lua_pushcfunction(L, error_handler); // errf
-    lua_pushlightuserdata(L, ctx); // errf ctx
-    lua_pushcclosure(L, load_scripts, 1); // errf fn
-    if (lua_pcall(L, 0, 0, -2)) { // errf [error]
-        const char *e = lua_tostring(L, -1);
-        MP_FATAL(ctx, "Lua error: %s\n", e ? e : "(unknown)");
-    }
-
     return 0;
 }
 
@@ -439,6 +459,9 @@ static int load_lua(struct mp_script_args *args)
         MP_FATAL(ctx, "Lua error: %s\n", err);
         goto error_out;
     }
+
+    lua_pushcfunction(L, error_handler); // errf
+    load_scripts(ctx); // errf
 
     r = 0;
 
