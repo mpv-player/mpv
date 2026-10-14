@@ -411,6 +411,12 @@ static int open_f(stream_t *stream)
             stream->mime_type = talloc_strdup(stream, mt);
             av_free(mt);
         }
+        uint8_t *location = NULL;
+        if (av_opt_get(avio, "location", AV_OPT_SEARCH_CHILDREN, &location) >= 0) {
+            if (*location)
+                stream->effective_url = talloc_strdup(stream, location);
+            av_free(location);
+        }
     }
 
     stream->priv = avio;
