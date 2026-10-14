@@ -267,7 +267,7 @@ static void load_file(lua_State *L, const char *fname)
     char *dispname = talloc_asprintf(tmp, "@%s", fname);
     struct bstr s = stream_read_file(fname, tmp, ctx->mpctx->global, 100000000);
     if (!s.start)
-        luaL_error(L, "Could not read file.\n");
+        luaL_error(L, "Could not read file.");
     if (luaL_loadbuffer(L, s.start, s.len, dispname))
         lua_error(L);
     lua_call(L, 0, 1);
@@ -288,7 +288,7 @@ static int load_builtin(lua_State *L)
             return 1;
         }
     }
-    luaL_error(L, "builtin module '%s' not found\n", name);
+    luaL_error(L, "builtin module '%s' not found", name);
     return 0;
 }
 
@@ -337,7 +337,7 @@ static int load_scripts(lua_State *L)
 
     lua_getglobal(L, "mp_event_loop"); // fn
     if (lua_isnil(L, -1))
-        luaL_error(L, "no event loop function\n");
+        luaL_error(L, "no event loop function");
     lua_call(L, 0, 0); // -
 
     return 0;
@@ -794,7 +794,7 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
     }
     default:
         // unknown type
-        luaL_error(L, "disallowed Lua type found: %s\n", luaL_typename(L, t));
+        luaL_error(L, "disallowed Lua type found: %s", luaL_typename(L, t));
     }
 }
 
