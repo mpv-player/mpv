@@ -534,22 +534,10 @@ static struct mp_image *render(struct mp_filter *vf)
     UINT num_past = 0;
     UINT num_future = 0;
 
-    out = alloc_out(vf);
-    if (!out) {
-        MP_WARN(vf, "failed to allocate frame\n");
-        goto cleanup;
-    }
-
-    ID3D11Texture2D *d3d_out_tex = (void *)out->planes[0];
-
     in = mp_refqueue_get(p->queue, 0);
     if (!in)
         goto cleanup;
     ID3D11Texture2D *d3d_tex = (void *)in->planes[0];
-
-    mp_image_copy_attributes(out, in);
-    // TODO: sanitize out_params based the processing enabled.
-    out->params = p->out_params;
 
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
     if (!mp_refqueue_should_deint(p->queue)) {
@@ -572,6 +560,18 @@ static struct mp_image *render(struct mp_filter *vf)
         if (recreate_video_proc(vf) < 0)
             goto cleanup;
     }
+
+    out = alloc_out(vf);
+    if (!out) {
+        MP_WARN(vf, "failed to allocate frame\n");
+        goto cleanup;
+    }
+
+    ID3D11Texture2D *d3d_out_tex = (void *)out->planes[0];
+
+    mp_image_copy_attributes(out, in);
+    // TODO: sanitize out_params based the processing enabled.
+    out->params = p->out_params;
 
     ID3D11VideoContext_VideoProcessorSetStreamFrameFormat(p->video_ctx,
                                                           p->video_proc,
