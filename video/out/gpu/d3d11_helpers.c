@@ -1160,7 +1160,8 @@ void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
                                    IDXGIInfoQueue **iqueue)
 {
     *iqueue = NULL;
-    *debug = NULL;
+    if (debug)
+        *debug = NULL;
 
     PFN_DXGI_GET_DEBUG_INTERFACE pDXGIGetDebugInterface = get_DXGIGetDebugInterface();
     if (!pDXGIGetDebugInterface)
@@ -1182,6 +1183,9 @@ void mp_d3d11_get_debug_interfaces(struct mp_log *log, IDXGIDebug **debug,
     // Push empty filter to get everything
     DXGI_INFO_QUEUE_FILTER filter = {0};
     IDXGIInfoQueue_PushStorageFilter(*iqueue, DXGI_DEBUG_ALL, &filter);
+
+    if (!debug)
+        return;
 
     hr = pDXGIGetDebugInterface(&IID_IDXGIDebug, (void **) debug);
     if (FAILED(hr)) {

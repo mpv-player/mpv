@@ -472,6 +472,11 @@ static void d3d11_uninit(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
 
+    IDXGIDebug *debug = NULL;
+    IDXGIInfoQueue *iqueue = NULL;
+    if (p->device && (ID3D11Device_GetCreationFlags(p->device) & D3D11_CREATE_DEVICE_DEBUG))
+        mp_d3d11_get_debug_interfaces(ctx->log, &debug, &iqueue);
+
     if (p->swapchain)
         IDXGISwapChain_SetFullscreenState(p->swapchain, FALSE, NULL);
 
@@ -490,6 +495,11 @@ static void d3d11_uninit(struct ra_ctx *ctx)
     // leak checker
     if (ctx->ra)
         ctx->ra->fns->destroy(ctx->ra);
+
+    if (debug)
+        mp_d3d11_report_live_objects(ctx->log, debug, iqueue);
+    SAFE_RELEASE(debug);
+    SAFE_RELEASE(iqueue);
 }
 
 static const struct ra_swapchain_fns d3d11_swapchain = {
