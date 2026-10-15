@@ -177,12 +177,73 @@ static bool is_busy(struct MPContext *mpctx)
     return !mpctx->restart_complete && mp_time_sec() - mpctx->start_timestamp > 0.3;
 }
 
-static char *get_term_status_msg(struct MPContext *mpctx)
+// Number of terminal rows of text, ignoring line wrapping.
+static int term_rows(const char *text)
+{
+    int rows = 1;
+    for (const char *p = text; (p = strchr(p, '\n')); p++)
+        rows++;
+    return rows;
+}
+
+// https://en.wikipedia.org/wiki/Max-min_fairness
+static void share_rows(int *alloc, const int *need, int num, int rows)
+{
+    int left = num;
+    for (int n = 0; n < num; n++)
+        alloc[n] = -1;
+    rows = MPMAX(rows, 0);
+
+    bool progress = true;
+    while (left && progress) {
+        progress = false;
+        for (int n = 0; n < num; n++) {
+            if (alloc[n] < 0 && need[n] <= rows / left) {
+                alloc[n] = need[n];
+                rows -= need[n];
+                left--;
+                progress = true;
+            }
+        }
+    }
+
+    // The others need more than an equal share. Split the rest evenly, and
+    // give the remainder to the first ones.
+    int extra = left ? rows % left : 0;
+    for (int n = 0; n < num; n++) {
+        if (alloc[n] < 0)
+            alloc[n] = rows / left + (extra-- > 0);
+    }
+}
+
+// Expand the status message, letting the lists in it share max_lines rows.
+static char *expand_status_msg(struct MPContext *mpctx, const char *str,
+                               int max_lines)
+{
+    // Print only the headers of the lists to measure everything else.
+    struct m_property_line_budget b = {0};
+    char *msg = mp_property_expand_escaped_string_limited(mpctx, str, &b);
+    if (!b.num)
+        return msg;
+
+    int *alloc = talloc_array(NULL, int, b.num);
+    share_rows(alloc, b.num_lines, b.num, max_lines - term_rows(msg));
+    talloc_free(msg);
+
+    b.max_lines = alloc;
+    b.idx = 0;
+    msg = mp_property_expand_escaped_string_limited(mpctx, str, &b);
+    talloc_free(alloc);
+    talloc_free(b.num_lines);
+    return msg;
+}
+
+static char *get_term_status_msg(struct MPContext *mpctx, int max_lines)
 {
     struct MPOpts *opts = mpctx->opts;
 
     if (opts->status_msg)
-        return mp_property_expand_escaped_string(mpctx, opts->status_msg);
+        return expand_status_msg(mpctx, opts->status_msg, max_lines);
 
     char *line = NULL;
 
@@ -295,12 +356,20 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
         return;
     }
 
-    char *line = get_term_status_msg(mpctx);
+    int w = 80, h = 24;
+    terminal_get_size(&w, &h);
+
+    // Leave room for the subtitles and OSD text printed above, and the bar.
+    char *above[] = {mpctx->term_osd_subs[0], mpctx->term_osd_subs[1],
+                     mpctx->term_osd_text};
+    for (int n = 0; n < MP_ARRAY_SIZE(above); n++) {
+        if (!term_osd_empty(above[n]))
+            h -= term_rows(above[n]);
+    }
+    char *line = get_term_status_msg(mpctx, h - opts->term_osd_bar);
 
     if (opts->term_osd_bar) {
         saddf(&line, "\n");
-        int w = 80, h = 24;
-        terminal_get_size(&w, &h);
         add_term_osd_bar(mpctx, &line, w);
     }
 

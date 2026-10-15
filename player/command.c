@@ -416,9 +416,9 @@ static char *cut_osd_list(struct MPContext *mpctx, const char *header,
         int w = -1;
         max_lines = 24;
         terminal_get_size(&w, &max_lines);
-        char *msg = mp_property_expand_escaped_string(mpctx, mpctx->opts->status_msg);
-        max_lines -= msg[0] ? count_lines(msg) : 1;
-        talloc_free(msg);
+        // Leave room for the last printed terminal status message.
+        char *status = mpctx->term_osd_status;
+        max_lines -= status && status[0] ? count_lines(status) : 1;
     }
     // Subtract 1 for the header.
     return cut_osd_lines(header, text, pos, max_lines - 1);
