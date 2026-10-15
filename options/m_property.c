@@ -294,8 +294,24 @@ static void append_str(char **s, int *len, bstr append)
     *len = *len + append.len;
 }
 
+static char *print_limited(const struct m_property_list *prop_list, bstr prop,
+                           void *ctx, struct m_property_line_budget *b)
+{
+    struct m_property_print_limited p = {0};
+    if (b->max_lines)
+        p.max_lines = b->idx < b->num ? b->max_lines[b->idx] : 0;
+    if (m_property_do_bstr(prop_list, prop, M_PROPERTY_PRINT_LIMITED, &p, ctx)
+        != M_PROPERTY_OK)
+        return NULL;
+    if (!b->max_lines)
+        MP_TARRAY_APPEND(NULL, b->num_lines, b->num, p.num_lines);
+    b->idx++;
+    return p.out;
+}
+
 static int expand_property(const struct m_property_list *prop_list, char **ret,
-                           int *ret_len, bstr prop, bool silent_error, void *ctx)
+                           int *ret_len, bstr prop, bool silent_error, void *ctx,
+                           struct m_property_line_budget *budget)
 {
     bool cond_yes = bstr_eatstart0(&prop, "?");
     bool cond_no = !cond_yes && bstr_eatstart0(&prop, "!");
@@ -310,7 +326,11 @@ static int expand_property(const struct m_property_list *prop_list, char **ret,
     method = fixed_len ? M_PROPERTY_FIXED_LEN_PRINT : method;
 
     char *s = NULL;
-    int r = m_property_do_bstr(prop_list, prop, method, &s, ctx);
+    int r = M_PROPERTY_OK;
+    if (budget && method == M_PROPERTY_PRINT)
+        s = print_limited(prop_list, prop, ctx, budget);
+    if (!s)
+        r = m_property_do_bstr(prop_list, prop, method, &s, ctx);
     bool skip;
     if (comp) {
         skip = ((s && bstr_equals0(comp_with, s)) != cond_yes);
@@ -329,6 +349,13 @@ static int expand_property(const struct m_property_list *prop_list, char **ret,
 
 char *m_properties_expand_string(const struct m_property_list *prop_list,
                                  const char *str0, void *ctx)
+{
+    return m_properties_expand_string_limited(prop_list, str0, ctx, NULL);
+}
+
+char *m_properties_expand_string_limited(const struct m_property_list *prop_list,
+                                         const char *str0, void *ctx,
+                                         struct m_property_line_budget *budget)
 {
     char *ret = NULL;
     int ret_len = 0;
@@ -362,7 +389,7 @@ char *m_properties_expand_string(const struct m_property_list *prop_list,
 
             if (!skip) {
                 skip = expand_property(prop_list, &ret, &ret_len, name,
-                                       have_fallback, ctx);
+                                       have_fallback, ctx, budget);
                 if (skip)
                     skip_level = level;
             }
