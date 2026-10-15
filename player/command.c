@@ -377,18 +377,36 @@ static int count_lines(char *text)
     return count;
 }
 
-// Given a huge string separated by new lines, attempts to cut off text above
-// the current line to keep the line visible, and below to keep rendering
-// performance up. pos gives the current line (0 for the first line).
+// Given a huge string separated by new lines, cuts off text above the current
+// line to keep the line visible, and below to keep at most max_lines lines, and
+// prepends a header line. pos gives the current line (0 for the first line).
 // "text" might be returned as is, or it can be freed and a new allocation is
 // returned.
-// This is only a heuristic - we can't deal with line breaking.
-static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int pos)
+static char *cut_osd_lines(const char *header, char *text, int pos, int max_lines)
 {
     int count = count_lines(text);
     if (!count)
         return text;
 
+    max_lines = MPMAX(max_lines, 0);
+    char *new = talloc_asprintf(NULL, "%s [%d/%d]:\n", header, pos + 1, count);
+    int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
+    char *head = skip_n_lines(text, start);
+    char *tail = skip_n_lines(head, max_lines);
+    new = talloc_asprintf_append_buffer(new, "%.*s",
+                            (int)(tail ? tail - head : strlen(head)), head);
+    // Strip the final newline to not print it in the terminal.
+    new[strlen(new) - 1] = '\0';
+
+    talloc_free(text);
+    return new;
+}
+
+// Like cut_osd_lines(), but guess max_lines from the OSD or terminal size.
+// This is only a heuristic - we can't deal with line breaking.
+static char *cut_osd_list(struct MPContext *mpctx, const char *header,
+                          char *text, int pos)
+{
     int max_lines;
     if (mpctx->video_out && mpctx->opts->video_osd) {
         int screen_h, font_h;
@@ -403,19 +421,20 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
         talloc_free(msg);
     }
     // Subtract 1 for the header.
-    max_lines--;
+    return cut_osd_lines(header, text, pos, max_lines - 1);
+}
 
-    char *new = talloc_asprintf(NULL, "%s [%d/%d]:\n", header, pos + 1, count);
-    int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
-    char *head = skip_n_lines(text, start);
-    char *tail = skip_n_lines(head, max_lines);
-    new = talloc_asprintf_append_buffer(new, "%.*s",
-                            (int)(tail ? tail - head : strlen(head)), head);
-    // Strip the final newline to not print it in the terminal.
-    new[strlen(new) - 1] = '\0';
-
-    talloc_free(text);
-    return new;
+// Finish M_PROPERTY_PRINT or M_PROPERTY_PRINT_LIMITED of a list property.
+static void print_osd_list(struct MPContext *mpctx, int action, void *arg,
+                           const char *header, char *text, int pos)
+{
+    if (action == M_PROPERTY_PRINT_LIMITED) {
+        struct m_property_print_limited *p = arg;
+        p->num_lines = count_lines(text);
+        p->out = cut_osd_lines(header, text, pos, p->max_lines);
+    } else {
+        *(char **)arg = cut_osd_list(mpctx, header, text, pos);
+    }
 }
 
 static char *format_delay(double time)
@@ -1096,7 +1115,8 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     int count = get_chapter_count(mpctx);
     switch (action) {
-    case M_PROPERTY_PRINT: {
+    case M_PROPERTY_PRINT:
+    case M_PROPERTY_PRINT_LIMITED: {
         int cur = mpctx->playback_initialized ? get_current_chapter(mpctx) : -1;
         char *res = NULL;
         int n;
@@ -1116,7 +1136,14 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
             talloc_free(time);
         }
 
-        *(char **)arg = count ? cut_osd_list(mpctx, "Chapters", res, cur) : res;
+        if (count) {
+            print_osd_list(mpctx, action, arg, "Chapters", res, cur);
+        } else if (action == M_PROPERTY_PRINT_LIMITED) {
+            *(struct m_property_print_limited *)arg =
+                (struct m_property_print_limited){ .out = res };
+        } else {
+            *(char **)arg = res;
+        }
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET: {
@@ -3586,7 +3613,8 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
         talloc_free(lines);
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_PRINT: {
+    case M_PROPERTY_PRINT:
+    case M_PROPERTY_PRINT_LIMITED: {
         struct sub_lines *lines = sub_get_lines(sub);
         if (!lines)
             return M_PROPERTY_UNAVAILABLE;
@@ -3610,7 +3638,7 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
                 pos += count_lines(lines->entries[i - 1].text);
         }
 
-        *(char **)arg = cut_osd_list(mpctx, "Subtitle lines", res, pos);
+        print_osd_list(mpctx, action, arg, "Subtitle lines", res, pos);
         talloc_free(lines);
         return M_PROPERTY_OK;
     }
@@ -3736,7 +3764,7 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (action == M_PROPERTY_PRINT) {
+    if (action == M_PROPERTY_PRINT || action == M_PROPERTY_PRINT_LIMITED) {
         struct playlist *pl = mpctx->playlist;
         char *res = talloc_strdup(NULL, "");
 
@@ -3761,8 +3789,8 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
             }
         }
 
-        *(char **)arg = cut_osd_list(mpctx, "Playlist", res,
-                                     playlist_entry_to_index(pl, pl->current));
+        print_osd_list(mpctx, action, arg, "Playlist", res,
+                       playlist_entry_to_index(pl, pl->current));
         return M_PROPERTY_OK;
     }
 
@@ -5044,6 +5072,13 @@ char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
 // Before expanding properties, parse C-style escapes like "\n"
 char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str)
 {
+    return mp_property_expand_escaped_string_limited(mpctx, str, NULL);
+}
+
+char *mp_property_expand_escaped_string_limited(struct MPContext *mpctx,
+                                                const char *str,
+                                                struct m_property_line_budget *budget)
+{
     void *tmp = talloc_new(NULL);
     bstr strb = bstr0(str);
     bstr dst = {0};
@@ -5057,7 +5092,9 @@ char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str
             break;
         bstr_xappend(tmp, &dst, bstr0("\""));
     }
-    char *r = mp_property_expand_string(mpctx, dst.start);
+    struct command_ctx *ctx = mpctx->command_ctx;
+    char *r = m_properties_expand_string_limited(&ctx->properties, dst.start,
+                                                 mpctx, budget);
     talloc_free(tmp);
     return r;
 }
