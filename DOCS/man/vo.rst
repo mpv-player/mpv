@@ -646,12 +646,13 @@ Available video output drivers are:
         lower resolution (the video when handled by the hwdec will be on the
         drmprime-video plane and at full 4K resolution)
 
-    ``--drm-format=<xrgb8888|xbgr8888|xrgb2101010|xbgr2101010|yuyv>``
+    ``--drm-format=<xrgb8888|xbgr8888|xrgb2101010|xbgr2101010|rgb565|yuyv>``
         Select the DRM format to use (default: xrgb8888). This allows you to
         choose the bit depth and color type of the DRM mode.
 
         xrgb8888 is your usual 24bpp packed RGB format with 8 bits of padding.
         xrgb2101010 is a 30bpp packed RGB format with 2 bits of padding.
+        rgb565 is a 16bpp packed RGB format with reduced colour accuracy.
         yuyv is a 32bpp packed YUV 4:2:2 format. No planar formats are currently
         supported.
 

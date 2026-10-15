@@ -109,6 +109,10 @@ static struct framebuffer *setup_framebuffer(struct vo *vo)
         p->drm_format = DRM_FORMAT_XBGR8888;
         p->imgfmt = IMGFMT_RGB0;
         break;
+    case DRM_OPTS_FORMAT_RGB565:
+        p->drm_format = DRM_FORMAT_RGB565;
+        p->imgfmt = IMGFMT_RGB565;
+        break;
     case DRM_OPTS_FORMAT_YUYV:
         p->drm_format = DRM_FORMAT_YUYV;
         p->imgfmt = pixfmt2imgfmt(AV_PIX_FMT_YUYV422);
