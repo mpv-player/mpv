@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <inttypes.h>
 #include <stdlib.h>
 
 #include "error_diffusion.h"
@@ -135,7 +136,7 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
     GLSL("vec3 pix = texelFetch(texture%d, ivec2(x, y), 0).rgb;\n", tex);
 
     // The dithering will quantize pixel value into multiples of 1/dither_quant.
-    int dither_quant = (1 << depth) - 1;
+    uint32_t dither_quant = UINT32_MAX >> (32 - depth);
 
     // We encode errors in RGB components into a single 32-bit unsigned integer.
     // The error we propagate from the current pixel is in range of
@@ -165,7 +166,7 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
     // in the buffer.
     GLSL("uint err_u32 = err_rgb8[idx] + %uu;\n",
          (128u << bitshift_r) | (128u << bitshift_g) | 128u);
-    GLSL("pix = pix * %d.0 + vec3("
+    GLSL("pix = pix * %" PRIu32 ".0 + vec3("
          "int((err_u32 >> %d) & 255u) - 128,"
          "int((err_u32 >> %d) & 255u) - 128,"
          "int( err_u32        & 255u) - 128"
@@ -174,8 +175,8 @@ void pass_error_diffusion(struct gl_shader_cache *sc,
 
     // Write the dithered pixel.
     GLSL("vec3 dithered = round(pix);\n");
-    GLSL("imageStore(out_image, ivec2(x, y), vec4(dithered / %d.0, 0.0));\n",
-         dither_quant);
+    GLSL("imageStore(out_image, ivec2(x, y), "
+         "vec4(dithered / %" PRIu32 ".0, 0.0));\n", dither_quant);
 
     GLSL("vec3 err_divided = (pix - dithered) * %d.0 / %d.0;\n",
          uint8_mul, k->divisor);
