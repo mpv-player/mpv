@@ -1423,6 +1423,14 @@ if options.populate_menu_data then
     mp.observe_property("vo-configured", "native", parse_menu_conf)
 end
 
+-- The native menu can't be shown over a D3D11 exclusive fullscreen output.
+local function use_context_menu_lua()
+    return mp.get_property_native("load-context-menu") or
+           (mp.get_property("current-gpu-context") == "d3d11" and
+            mp.get_property_native("fullscreen") and
+            mp.get_property_native("d3d11-exclusive-fs"))
+end
+
 mp.add_key_binding(nil, "context-menu", function (info)
     if info.event == "repeat" then
         return
@@ -1430,11 +1438,11 @@ mp.add_key_binding(nil, "context-menu", function (info)
 
     if not info.is_mouse then
         if info.event == "down" or info.event == "press" then
-            mp.command(mp.get_property_native("load-context-menu")
+            mp.command(use_context_menu_lua()
                            and "script-message-to context_menu open"
                            or "context-menu")
         end
-    elseif mp.get_property_native("load-context-menu") then
+    elseif use_context_menu_lua() then
         mp.commandv("script-message-to", "context_menu",
                     info.event == "down" and "open" or "select")
     elseif info.event == (platform == "windows" and "up" or "down") then
