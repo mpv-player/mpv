@@ -120,6 +120,7 @@ struct priv {
     ID3D11Device *device;
     IDXGISwapChain *swapchain;
     struct pl_color_space swapchain_csp;
+    BOOL fullscreen_state;
 
     int64_t perf_freq;
     unsigned last_sync_refresh_count;
@@ -290,7 +291,21 @@ static void d3d11_swap_buffers(struct ra_swapchain *sw)
     QueryPerformanceCounter(&perf_count);
     p->last_submit_qpc = perf_count.QuadPart;
 
-    IDXGISwapChain_Present(p->swapchain, p->opts->sync_interval, 0);
+    HRESULT hr = IDXGISwapChain_Present(p->swapchain, p->opts->sync_interval, 0);
+    if (hr == S_OK)
+        return;
+
+    // DXGI leaves exclusive fullscreen by itself during Present(), e.g. when the
+    // window loses the focus, and returns a status then. The buffers must be
+    // resized after that, or the next Present() fails.
+    BOOL fullscreen = FALSE;
+    IDXGISwapChain_GetFullscreenState(p->swapchain, &fullscreen, NULL);
+    if (fullscreen != p->fullscreen_state) {
+        MP_VERBOSE(sw->ctx, "Full-screen exclusive mode was %s by DXGI\n",
+                   fullscreen ? "enabled" : "disabled");
+        p->fullscreen_state = fullscreen;
+        resize(sw->ctx);
+    }
 }
 
 static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
@@ -410,6 +425,7 @@ static bool d3d11_set_fullscreen(struct ra_ctx *ctx)
                                            enable_exclusive_fs, NULL);
     if (FAILED(hr))
         return false;
+    p->fullscreen_state = enable_exclusive_fs;
 
     if (!resize(ctx))
         return false;
@@ -466,6 +482,17 @@ static int d3d11_control(struct ra_ctx *ctx, int *events, int request, void *arg
         if (!resize(ctx))
             return VO_ERROR;
     }
+
+    if (!ctx->opts.composition && (*events & VO_EVENT_FOCUS) &&
+        !p->fullscreen_state && p->vo_opts->fullscreen && p->opts->exclusive_fs)
+    {
+        bool focused = false;
+        int focus_events = 0;
+        vo_w32_control(ctx->vo, &focus_events, VOCTRL_GET_FOCUSED, &focused);
+        if (focused)
+            d3d11_set_fullscreen(ctx);
+    }
+
     return ret;
 }
 
