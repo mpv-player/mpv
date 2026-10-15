@@ -39,8 +39,7 @@ struct ra_d3d11 {
 
     struct dll_version d3d_compiler_ver;
 
-    // Debug interfaces (--gpu-debug)
-    IDXGIDebug *debug;
+    // Debug layer messages (--gpu-debug)
     IDXGIInfoQueue *iqueue;
 
     // Device capabilities
@@ -2118,7 +2117,6 @@ static void destroy(struct ra *ra)
 {
     struct ra_d3d11 *p = ra->priv;
 
-    // Release everything except the interfaces needed to perform leak checking
     SAFE_RELEASE(p->clear_ps);
     SAFE_RELEASE(p->clear_vs);
     SAFE_RELEASE(p->clear_layout);
@@ -2142,10 +2140,6 @@ static void destroy(struct ra *ra)
         ID3D11DeviceContext_Flush(p->ctx);
     }
     SAFE_RELEASE(p->ctx);
-
-    if (p->debug)
-        mp_d3d11_report_live_objects(ra->log, p->debug, p->iqueue);
-    SAFE_RELEASE(p->debug);
     SAFE_RELEASE(p->iqueue);
 
     talloc_free(ra);
@@ -2339,7 +2333,7 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
     }
 
     if (ID3D11Device_GetCreationFlags(p->dev) & D3D11_CREATE_DEVICE_DEBUG)
-        mp_d3d11_get_debug_interfaces(ra->log, &p->debug, &p->iqueue);
+        mp_d3d11_get_debug_interfaces(ra->log, NULL, &p->iqueue);
 
     // Some level 9_x devices don't have timestamp queries
     hr = ID3D11Device_CreateQuery(p->dev,
