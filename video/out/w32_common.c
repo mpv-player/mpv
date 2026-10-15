@@ -1582,6 +1582,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     case WM_ENTERMENULOOP:
         mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
         break;
+    case WM_EXITMENULOOP:
+        signal_events(w32, VO_EVENT_FOCUS);
+        break;
     case WM_KILLFOCUS:
         mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
         w32->focused = false;
