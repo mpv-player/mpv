@@ -49,6 +49,9 @@ struct ra_d3d11 {
     bool has_timestamp_queries;
     int max_uavs;
 
+    // Rasterizer state, which is used for all draws
+    ID3D11RasterizerState *rstate;
+
     // Streaming dynamic vertex buffer, which is used for all renderpasses
     ID3D11Buffer *vbuf;
     size_t vbuf_size;
@@ -1037,6 +1040,7 @@ static void clear_rpass(struct ra *ra, struct ra_tex *tex, float color[4],
 
     ID3D11DeviceContext_VSSetShader(p->ctx, p->clear_vs, NULL, 0);
 
+    ID3D11DeviceContext_RSSetState(p->ctx, p->rstate);
     ID3D11DeviceContext_RSSetViewports(p->ctx, 1, (&(D3D11_VIEWPORT) {
         .Width = params->w,
         .Height = params->h,
@@ -1216,6 +1220,7 @@ static void blit_rpass(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
 
     ID3D11DeviceContext_VSSetShader(p->ctx, p->blit_vs, NULL, 0);
 
+    ID3D11DeviceContext_RSSetState(p->ctx, p->rstate);
     ID3D11DeviceContext_RSSetViewports(p->ctx, 1, (&(D3D11_VIEWPORT) {
         .TopLeftX = dst_rc->x0,
         .TopLeftY = dst_rc->y0,
@@ -1826,6 +1831,7 @@ static void renderpass_run_raster(struct ra *ra,
 
     ID3D11DeviceContext_VSSetShader(p->ctx, pass_p->vs, NULL, 0);
 
+    ID3D11DeviceContext_RSSetState(p->ctx, p->rstate);
     ID3D11DeviceContext_RSSetViewports(p->ctx, 1, (&(D3D11_VIEWPORT) {
         .TopLeftX = params->viewport.x0,
         .TopLeftY = params->viewport.y0,
@@ -2124,6 +2130,7 @@ static void destroy(struct ra *ra)
     SAFE_RELEASE(p->blit_vbuf);
     SAFE_RELEASE(p->blit_sampler);
     SAFE_RELEASE(p->vbuf);
+    SAFE_RELEASE(p->rstate);
     SAFE_RELEASE(p->ctx1);
     SAFE_RELEASE(p->dev1);
     SAFE_RELEASE(p->dev);
@@ -2364,8 +2371,6 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
 
     setup_formats(ra);
 
-    // The rasterizer state never changes, so set it up here
-    ID3D11RasterizerState *rstate;
     D3D11_RASTERIZER_DESC rdesc = {
         .FillMode = D3D11_FILL_SOLID,
         .CullMode = D3D11_CULL_NONE,
@@ -2373,13 +2378,11 @@ struct ra *ra_d3d11_create(ID3D11Device *dev, struct mp_log *log,
         .DepthClipEnable = TRUE, // Required for 10level9
         .ScissorEnable = TRUE,
     };
-    hr = ID3D11Device_CreateRasterizerState(p->dev, &rdesc, &rstate);
+    hr = ID3D11Device_CreateRasterizerState(p->dev, &rdesc, &p->rstate);
     if (FAILED(hr)) {
         MP_ERR(ra, "Failed to create rasterizer state: %s\n", mp_HRESULT_to_str(hr));
         goto error;
     }
-    ID3D11DeviceContext_RSSetState(p->ctx, rstate);
-    SAFE_RELEASE(rstate);
 
     // If the device doesn't support ClearView, we have to set up a
     // shader-based clear() implementation
