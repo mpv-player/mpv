@@ -3694,14 +3694,12 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
         goto nosupport;
 
     struct wp_image_description_v1 *image_description;
-#if PL_API_VER >= 362
     // scRGB has dedicated creator, and not using the generic one.
     if (color->transfer == PL_COLOR_TRC_SCRGB && wl->supports_scrgb) {
         image_description = wp_color_manager_v1_create_windows_scrgb(wl->color_manager);
         cm_dispatch_color_queue(wl, image_description);
         return;
     }
-#endif
 
     int primaries = wl->primaries_map[color->primaries];
     int transfer = wl->transfer_map[color->transfer];

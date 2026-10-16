@@ -871,7 +871,6 @@ static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
     slot_release(&p->hwdec);
 }
 
-#if PL_API_VER >= 367
 static bool hwdec_acquire_el(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *bl_mpi = frame->user_data;
@@ -890,7 +889,6 @@ static void hwdec_release_el(pl_gpu gpu, struct pl_frame *frame)
     struct priv *p = fp->vo->priv;
     slot_release(&p->el_hwdec);
 }
-#endif
 
 static bool format_supported(struct vo *vo, int format, bool use_uint)
 {
@@ -916,15 +914,10 @@ static float get_ref_luma(struct priv *p)
     if (opts->hdr_reference_white)
         return opts->hdr_reference_white;
 
-#if PL_API_VER >= 371
     // auto: follow the system reference white, if available
-    // Use auto mode only on libplacebo >= 371, to avoid luminance mismatches,
-    // on SDR->SDR in some corner cases. User override is still respected, to
-    // preserve previous behavior.
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
     if (sw->fns->target_ref_luma)
         return sw->fns->target_ref_luma(sw);
-#endif
 
     return 0;
 }
@@ -933,10 +926,8 @@ static bool use_ref_luma(const struct pl_color_space *csp, const struct pl_color
 {
     if (!pl_color_transfer_is_hdr(csp->transfer))
         return true;
-#if PL_API_VER >= 362
     if (csp->transfer == PL_COLOR_TRC_SCRGB && target_csp && !pl_color_transfer_is_hdr(target_csp->transfer))
         return true;
-#endif
     return false;
 }
 
@@ -1069,7 +1060,6 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     // Update chroma location, must be done after initializing planes
     pl_frame_set_chroma_location(frame, par.chroma_location);
 
-#if PL_API_VER >= 367
     if (mpi->enhancement_layer) {
         struct mp_image *el = mpi->enhancement_layer;
         fp->el_hwdec = ra_hwdec_get(&p->hwdec_ctx, el->imgfmt);
@@ -1109,7 +1099,6 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
                     "rendering base layer only.\n");
         }
     }
-#endif
 
     if (mpi->film_grain)
         pl_film_grain_from_av(&frame->film_grain, (AVFilmGrainParams *) mpi->film_grain->data);
@@ -1260,11 +1249,9 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
         struct ra_swapchain *sw = p->ra_ctx->swapchain;
         dither_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
     }
-#if PL_API_VER >= 362
     // Don't dither scRGB, assume downstream will handle quantization properly.
     if (target->color.transfer == PL_COLOR_TRC_SCRGB)
         dither_depth = -1;
-#endif
     if (dither_depth > 0) {
         struct pl_bit_encoding *tbits = &target->repr.bits;
         tbits->color_depth += dither_depth - tbits->sample_depth;
@@ -1618,9 +1605,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params,
                          target_ref_luma, &target_csp);
     bool clip_gamut = pl_primaries_valid(&target.color.hdr.prim);
-#if PL_API_VER >= 362
     clip_gamut = clip_gamut && target.color.transfer != PL_COLOR_TRC_SCRGB;
-#endif
     if (clip_gamut) {
         // Ensure resulting gamut still fits inside container
         target.color.hdr.prim = pl_primaries_clip(&target.color.hdr.prim,
