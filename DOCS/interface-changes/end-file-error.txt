@@ -1,1 +1,0 @@
-remove the deprecated `error` field from `end-file`

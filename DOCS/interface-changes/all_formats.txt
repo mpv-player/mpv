@@ -1,1 +1,0 @@
-change `ytdl_hook-all_formats` default to `yes`

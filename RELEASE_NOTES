@@ -1,139 +1,391 @@
-Release 0.41.0
+Release 0.42.0
 ==============
 
-We are excited to announce the release of mpv 0.41.0.
+We are excited to announce the release of mpv 0.42.0.
 
 Key highlights:
 
-* The libplacebo based `gpu-next` is now the default, over `gpu`
-* Vulkan hardware decoding is preferred over other APIs
-* New context_menu.lua script for right-click context menus
-* AAudio backend for modern, HNI-free audio output on Android
-* Improved default color management for gpu-next, and handling on Wayland
-* Color representation protocol support for Wayland
-* Tablet input support for Wayland
-* Clipboard writing support for Wayland and a clipboard backend for X11
-* Ambient light support on Linux (using sysfs ALS)
-* Built-in helpers to register mpv as a media app on Windows
+* libcurl based network backend with HTTP/2, HTTP/3 and connection reuse
+* DVD-Video, Blu-ray HDMV and BD-J menu navigation
+* DVD-Audio playback
+* Direct playback of .iso images of DVD-Video, DVD-Audio and Blu-ray discs
+* Dolby Vision Profile 7 enhancement layer support in `gpu-next`
+* MPEG-TS programs and HLS variants are exposed as editions
+* DSD-over-PCM (DoP) passthrough with `--audio-spdif=dsd`
+* subrandr renderer for SRV3 (YouTube) subtitles
+* Context menu populated from the new `menu.conf`, bound to right click
+* `floating` OSC layout with Fluent icons (`--script-opts=osc-layout=floating`)
+* Preview API between the OSC and thumbnailer scripts
+* Wayland session management
+* Wayland color management through the protocol instead of the Vulkan API
+* scRGB output with `--target-trc=scrgb`
+* Improved HDR colorspace signalling on DRM
+* D3D11 render API backend for libmpv
+* Reworked terminal video outputs (`sixel`, `kitty` and `tct`)
+* AMD Frame Rate Conversion filter (`--vf=amf_frc`)
+* Rewritten display-sync audio drift compensation
+* `--tls-verify` is enabled by default
 
-This release requires FFmpeg 6.1 or newer and libplacebo 6.338.2 or newer.
+This release requires FFmpeg 6.1 or newer and libplacebo 7.360.1 or newer.
 
 # Features
 
 ## New
 
-- clipboard-wayland: support clipboard writing
-- wayland: add support for wp-color-representation-v1
-- wayland: tablet input support
-- vo_gpu_next: add support for blend-subtitles=video
-- meson: add mpv-register and mpv-unregister helpers on Windows
-- context_menu.lua: add this script
-- select.lua: add edit-config-file and edit-input-conf
-- osc.lua: add indicator for buffering/loading
-- osdep/linux-als: support 'ambient-light' property on Linux
-- clipboard-x11: add x11 clipboard backend
-- ao/aaudio: implement native AAudio backend for Android
+- sub: add subrandr renderer support
+- video/filter/vf_amf: add AMD Frame Rate Conversion filter
+- mac/common: add support for transparent rendering
+- context_menu.lua: implement key hints
+- menu.conf: add this file
+- select.lua: populate the context menu
+- input.conf: add context menu bindings
+- vo_gpu_next: add scRGB support
+- video/out/opengl/context_wayland: export preferred colorspace
+- vo_dmabuf_wayland: add BT.2100 mapping
+- wayland_common: add scRGB support
+- mpv-osd-symbols: add some Fluent UI System Icons to mpv font
+- osc.lua: add `floating` layout
+- vo_gpu_next: add stereo osd support
+- demux_lavf: add support for programs
+- demux_timeline: add support for programs
+- vo_gpu: initial support for tunable parameters
+- vo_gpu: add support for DEFINE parameters
+- vo_gpu: add support for ENUM parameters
+- osc: define and add support for "preview" api
+- demux/packet: add support for SMPTE 2094-50 metadata
+- vo_gpu: support parameters in RPN expressions
+- demux_playlist: add support for 'strm' playlist
+- wayland: implement session management
+- demux/packet: add support for LCEVC ITU-T35 payloads
+- demux_lavf: add support for stream groups
+- video: merge the tiles of grid heif and avif images
+- stream_curl: add libcurl-based stream backend
+- demux_lavf: route nested HTTP opens through the curl backend
+- stream_curl: use for ftp/ftps
+- video/out/x11_common: add --focus-on support in X11
+- hwdec_d3d11va: support 4:4:4 and high bit depth zero-copy formats
+- demux_mkv: support demuxing native VC-1 streams
+- stream_curl: add support for Icecast metadata
+- f_enhancement_pair: add filter to match frames of separate video tracks
+- vo_gpu_next: upload/map EL frame
+- demux_lavf: add support for splitting EL track from in-band
+- demux_mkv: add support for splitting EL track from in-band
+- stream_env: add new stream to read from environment variables
+- audio/filter: implement lavfi-tempo leveraging lavfi's atempo/ascale
+- sd_lavc: add support for DVD sub highlight
+- stream_dvdnav: implement DVD menu navigation
+- stream_bluray: implement HDMV menu navigation
+- demux_disc: add a synthetic "Disc Menu" edition
+- stream_bluray: add BD-J menu support
+- stream_dvdnav: add support for still frames
+- stream_bluray: add support for still frames
+- stream_dvda: add DVD-Audio playback support
+- stream_dvda: expose DVD-Audio still images as a cover-art video track
+- stream: auto-detect .iso DVD-Video, DVD-Audio and Blu-ray images
+- vo_gpu[_next]/vulkan: enable extensions required for vf_fruc_vulkan
+- audio/format: add raw DSD sample format
+- ao_wasapi: add DSD-over-PCM (DoP) output support
+- audio: add DSD-over-PCM pass-through
+- mp_image: read stereo 3D layout from AV_FRAME_DATA_STEREO3D
+- demux_lavf: read the stereo 3D mode from the stream side data
+- video/out: add a swapchain for terminal VOs
+- vo_{sixel,tct,kitty}: present frames through the terminal swapchain
+- stream_aes_ctr: add aes-ctr:// protocol
+- libmpv: add D3D11 render API backend
+- vo_drm: add support for RGB565
+- mp_image: support linear light XYZ
 
 ## Changed
 
-- vd_lavc: prefer Vulkan hwdec when available
-- vd_lavc: prefer non-copy hwdec before falling back to -copy variant
-- vo: move vo_mediacodec_embed to not be the default on Android
-- sub/osd_libass: don't rerender OSD if not changed
-- vo: prefer vo_gpu_next over vo_gpu by default
-- vo_gpu_next: respect ICC profile color space over any metadata
-- vo_gpu_next: linearize sRGB as a pure 2.2 power function
-- meson: warn if building with SDL2 due to known problems
-- osxbundle: make bundle category configurable and default to video
-- ao_pipewire: avoid setting any media.role by default
+- wayland: bump libwayland minimum version to 1.22
+- wayland: bump wayland-protocols minimum version to 1.38
+- common/msg: allow only SGR sequence in terminal output
+- video/out/vulkan/context_wayland: implement color_depth
+- vo_gpu_next: undo dither-depth=auto meaning 8bpc for SDR when undetected
+- common/playlist: store normalized playlist filenames
+- player/loadfile: never autoselect tracks with wrong PID
+- context_drm_egl: use target_csp to signal HDR
+- vo_gpu_next: set color directly using Wayland protocol
+- wayland_common: set luminances
+- meson: bump min libplacebo version to v7.360.1
+- meson: bump minimum libdrm version to 2.4.114
+- vd_lavc: remove Vulkan hwdec from auto-safe selection
+- player/video: rewrite display-sync audio drift compensation
+- player/command: hide dependent tracks
+- input/dnd: move built-in drag and drop handling to mpv client
+- video/decode: enable APV hwdec by default
+- input.conf: bind right click to context menu
+- stream_curl: require libcurl 7.88.0
+- vo_gpu_next: follow reference white system setting
+- vo: prefer dmabuf_wayland over other fallback VOs
+- vo_gpu_next: make subtitles / osd also follow system reference white
+- f_decoder_wrapper: prefer bitstream stereo 3D layout over container tag
+- vulkan: bump minimum required Vulkan headers to 1.4.309
+- meson: prefer LuaJIT over PUC Lua
+
+## Removed
+
+- options.lua: stop searching in lua-settings
+- context_angle: remove the D3D9 renderer
 
 
 # Options and Commands
 
 ## Added
 
-- sub: add control for libass caching options (glyph-limit, bitmap-max-size)
-- vo: add options to control background tile appearance (transparency)
-- command: add default and forced flags to the track add commands
-- vo_gpu_next: add options to control subtitle peak for HDR output
-- video/out/d3d11: add d3d11 composition mode support
-- vd_lavc: add --hwdec-threads
-- stream_bluray: add --bluray-angle
-- vo_gpu_next: add options to control output colorspace metadata more precisely
-- sub: make --sub-fix-timing configurable
-- vo_gpu_next: add --hdr-reference-white
-- audio/out: add --audio-set-media-role
+- player/command: add subrandr-version property
+- command: add libplacebo-version property
+- command: add the default-menu property
+- stats.lua: add track_info_selected_only script option
+- command: add track-list/N/demux-duration property
+- mp.input: allow async completions
+- command: let playlist-play-index current preserve file-local-options
+- mp.input: allow clients to override console.lua script-opts
+- player/loadfile: add on_loaded hook
+- osc.lua: add audioonlyscreen script option
+- osc.lua: add `dynamic_margins` option
+- osc.lua: add `sub-margin` option
+- osc.lua: add `osd-margin` option
+- osc.lua: add `osc-icon_style` option
+- command: add update-clipboard command
+- player/command: add env property
+- player/command: add default-value/choices arg fields to command-list
+- vo_gpu_next: add image-subs-hdr-peak=video-dynamic/video-static
+- context_menu.lua: set user-data/mpv/context-menu/open
+- command: allow metadata to be set manually
+- player/{lua,javascript}: add `mp.utils.terminal_display_width` function
+- osc.lua: add option to configure skip_forward/backward buttons
+- osc.lua: make window control buttons action customizable
+- context_menu.lua: add background_alpha script-opt
+- sub: add sub-lines property
+- osc.lua: add box width option for box and slimbox layouts
+- demux_{lavf,timeline}: add `--flatten-editions`
+- input: add --input-builtin-drag-and-drop option
+- command: add dropped-file property
+- demux: add `--demuxer-hysteresis-bytes`
+- stream_curl: add `--curl-enabled` option
+- select.lua: add keep-open argument to select bindings
+- vf_format: add `vf=format=enhancement-layer` option
+- options: add secondary-sub-scale
+- options: add --playlist-inherit-options option
+- command: add colorspace and luminance arguments to overlay-add
+- options: add `disc-menu` option
+- player/command: add `disc-menu-active` property
+- player/command: add discnav command and bind default keys
+- osc.lua: make wheel commands on the seekbar configurable
 
 ## Changed
 
-- options: revert --prefetch-playlist default back to 'no'
-- vo_gpu_next: change --target-colorspace-hint to 'auto' by default
-- options: handle runtime --wid change
-- options: reduce swapchain-depth to 2 by default
-- screenshot: add osd and scaled flags to screenshot commands
+- player/command: refactor loadfile and loadlist commands to use flags
+- f_auto_filters: rework --deinterlace=auto option
+- player: make effective image_display_duration playback_speed aware
+- builtin.conf: enable antiringing in high quality profile
+- vf_d3d11vpp: rename `ivctc` to `ivtc`
+- player/command: apply `expand-properties` modifier also for string lists
+- video/out/win_state: don't move window when force-window-position=no
+- options: target-gamut now accepts custom CIE xy primaries
+- options/m_option: allow /WS geometry parameter usable without XYWH
+- player/screenshot: validate strftime format string
+- input/cmd: use _name for command name in mpv_command_node
+- demux_playlist: only autocreate on regular file
+- ytdl_hook.lua: default to all_formats=yes
+- etc/builtin.conf: change gui mode to idle=yes
+- options: make player-operation-mode readable as a property
+- options: enable `tls-verify` by default
+- demux_lavf: change demuxer-lavf-{probesize,buffersize} to OPT_BYTE_SIZE
+- player/command: make `track-list/N/ff-index` optional
+- input/ipc-win: allow Windows handles for --input-ipc-client
+- vd_lavc: derive hwdec surface pool size from VO requirements
+- stream_bluray: use 1-based angle, same as in DVD
+- stream_curl: use the Content-Disposition file name as the filename
+- ytdl_hook: pass a default format again
+- vf_format: make stereo-in=mono override the source mode
+
+## Deprecated
+
+- vf_format: deprecate `--vf=format=sig-peak`
+- mp.input: deprecate log_error()
+- vo: officially deprecate vo_vaapi
+
+## Removed
+
+- console.lua: remove selected_color and selected_back_color
+- console.lua: remove undocumented `dont_bind_up_down` option
+- osc.lua: use window title for window controls from mpv core
+- command: remove the deprecated time-start property
+- lua: remove the deprecated error field from end-file
 
 
 # Fixes and Minor Enhancements
 
-- vo_kitty: add auto-multiplexer-passthrough option
-- vd_lavc: enable FFv1 hwaccel by default
-- clipboard-wayland: prevent reading from hung up fd
-- demux_mkv: fix compilation after deprecated definitions removal
-- filters: handle flipping video if displaymatrix indicates so
-- player/scripting: fix race condition when destroying clients
-- {osd,msg}: use PU codepoints for escape codes instead of invalid UTF-8
-- vo_dmabuf_wayland: only load needed hardware decoding drivers
-- video/image_writer: tag accurate bit depth
-- demux_lavf: fix unconstrained cache size with wrapped AVFrame packets
-- libarchive: fix reading name of certain UTF-8 files
-- sub/sd_lavc: fix decoding with libaribb24
-- ao_avfoundation: fix memory leak
-- osc.lua: fix volume icon not updating while paused
-- context_wayland: implement target_csp for wayland
-- vo_gpu: fix target colorspace for redrawn frames
-- vo_dmabuf_wayland: don't set HDR metadata on SDR transfers
-- vo_gpu_next: don't do partial updates on hint luminance
-- sub/ass_mp: add missing padding for ass packer
-- stream_dvb: allow to enforce DVB-S/T for old zap format channels.conf
-- demux_libarchive: fix reading archives with '%' in stream URL path
-- vo_gpu_next: allow UINT upload if no other format is supported
-- ytdl_hook.lua: fix incorrect default format used with yt-dlp
-- vo_gpu_next: allow unsetting LUTs
-- stream_bluray: use bd_get_main_title() to get main title
-- vo_gpu_next: when tone-mapping, set better maxCLL value
-- stream_libarchive: seek source stream to 0 before probing
-- path-unix: support ~~desktop path expansion
-- ytdl_hook.lua: don't crash if playlist entries don't have an usable URL
-- mac/vulkan: fix frame not displayed when paused
-- mac/common: render first frame on init if possible
-- video/out/w32_common: support --wid=0
-- demux_mkv: map and expose hearing/visual impaired flags
-- player/misc: show percentage progress for --stream-dump
-- command: fix null dereference for invalid command in input-commands
-- cplugin: fix missing init of pfn_mpv_get_time_ns
-- vo_dmabuf_wayland: actually reuse OSD buffers
-- mp_image: add support for AVAlphaMode
-- vo_gpu_next: add --border-background=blur and --background-blur-radius
-- demux/cue: fix crash when there are no tracks
-- vf_format: add some basic HDR10 metadata
-- vo/context_android: fix surface tearing on resize
-- meson: remove redundant 'sdl2' option
-- mac/common: fix window position on multi monitor setups
-- vo_gpu_next: limit min_luma to 1000:1 contrast ratio in SDR mode
-- ao_pipewire: fix some incorrect channel mappings
-- wayland: correct geometry handling for rotated outputs
-- demux: clear packet pool when upper memory limit is lowered
-- mp_image: add ycgco-{re,ro} support
-- wayland: convert luminance values to libplacebo space
-- vo: trigger manual redraws at most at slightly over display fps
-- osxbundle: add new macOS 26 compatible App icon
-- wayland: support color-management-v1 version 2
+- mac/{remote,touchbar}: remove manual 1 second rate limit of position property
+- screenshot: correctly detect hardware frame
+- sub/draw_bmp: fix rgba alpha blending
+- playloop: unset last_chapter_flag when queueing non-chapter seeks
+- console.lua: implement horizontal scroll
+- demux_playlist: add base paths when adding playlist entries
+- demux_playlist: expand tilde placeholders in playlist files
+- ao_pipewire: remove the `node.always-process` attribute
+- mp.input: use unique event handlers for input.get requests
+- command: set the language of added tracks from the filename
+- command: remember the language when reloading tracks
+- vo_gpu{,_next}: fix overriding scaling parameters for inherited kernels
+- player/command: fix repeatable frame stepping with the seek argument
+- sub/draw_bmp: limit memset to available width in last slice
+- d3d11: support `--d3d11-output-format` fully for `gpu-next`
+- wayland: handle all outputs disappearing without segfaulting
+- select.lua: sort the track submenu
+- vf_d3d11vpp: fix deinterlacing
+- vf_d3d11vpp: set output format for NVIDIA RTX Video HDR
+- {demux,player}: expose original and commentary track flags
+- demux_lavf: get codec info from AVCodecParameters
+- screenshot: percent decode filename if it's a URI
+- input.conf: bind Ctrl+r to reload the current file
+- osc.lua: make top/bottom bar show independently on mouse proximity
+- vo_gpu_next: always clip hdr.prim to container primaries
+- auto_profiles.lua: evaluate conditional profiles on on_loaded hook
+- player/playloop: clear demux packet pool on idle
+- command: avoid crashing the player with mmap
+- w32_common: refactor window resizing
+- video/vaapi: mark nvidia-vaapi-driver as emulated driver
+- wayland: guess best containing primary from raw primaries
+- mac/window: fix white lines around screen with non-native fullscreen
+- vd_lavc: ensure decoder state is valid after reinit
+- osc.lua: show window controls in idle
+- Meson: add appropriate install_tag to each target
+- video/out/x11_common: fix BadAtom error when getting atom name
+- options: preparse --shuffle
+- input: fix out of bound read/write in pad_buttons_pressed
+- player/screenshot: support %s date format on all platforms
+- input/ipc-unix: don't delete file for abstract sockets
+- osdep/io: make getenv case insensitive on windows
+- player: fix leak on client-message send failure
+- player/external_files: use natural sort for comparing filenames
+- player/external_files: fix --cover-art-whitelist priority
+- menu.conf: add OSC layout selection
+- vo_gpu_next: fix image subtitle hdr peak
+- ytdl_hook.lua: set the title in metadata
+- msg: sanitize term title and block C1 controls and DEL
+- w32_common: support initial --fs and --window-maximized
+- vf_vapoursynth: update for VapourSynth R74
+- wayland: parse toplevel states before geometry_configured check
+- sub/dec_sub: de-duplicate overlapping sub lines
+- select.lua: add select-secondary-subtitle-line
+- demux: enrich edition titles with codec/resolution/bitrate info
+- demux_{lavf,timeline}: consider audio only HLS when selecting edition
+- ao_wasapi: fix retry budget on DEVICE_INVALIDATED
+- demux_lavf: map `comment` to stream title
+- osdep/win32/smtc: fix client handle leak
+- ao_pulse: fix subscribe_cb using wrong bitmask for event type
+- vo_gpu_next: fix upload synchronization
+- player/lua: fix autofree ctx leak on exit() call
+- ra_gl: fix memory leak
+- demux/packet_pool: incrementally free old packets on pop
+- wayland: force redraw on every configure when in toplevel resize state
+- player/loadfile: fix stack-overflow on EDL metadata track
+- f_decoder_wrapper: output EOF when decoder is unavailable
+- vo_gpu_next: always cache frames in paused state and never interpolate
+- wayland: fix mapping for PAL/NTSC primaries
+- stream/cookies: allow reading cookies not only from a local file
+- msg: don't allow any escapes in --term-title
+- demux_libarchive: apply --directory-filter-types to files in archives
+- demux_cue: fix audio file lookup inside subdirectory
+- ytdl_hook.lua: map ass/srt subtitles
+- ao_pipewire: avoid deadlock when starting thread loop
+- wayland: map ICtCp coefficients to BT.2100 HLG as well
+- stream_curl: tell libcurl to use the native CA store
+- sub/sd_ass: subtitle timing rounding errors
+- vf_vapoursynth: improve backward compatibility
+- player/misc: rate limit taskbar progress update rate
+- demux_lavf: select non-empty edition by default
+- meson: consider only 'v0.*' tags when computing the version
+- demux/packet: fix OOB read in ITU-T T.35 UK parsing
+- input/ipc-win: fix uninitialized handle and missing client NULL check
+- video/vf_amf: fix use-after-free on AMF_INPUT_FULL
+- demux_timeline: fix Twitch VOD timestamps being offset by ~60 seconds
+- player: fix cover-art-files overriding embedded video tracks
+- subprocess-posix: use clone when available
+- osc.lua: don't reinit on duration changes
+- demux_mkv: don't apply AVI b-frame delay compensation to VfW tracks
+- ytdl_hook: use native http-proxy option instead of lavf option
+- ytdl_hook: defer loading until the formats become available
+- video/d3d: exclude HEVC on known crashing Intel drivers
+- video/d3d: exclude VP9 on known broken Intel drivers
+- demux_edl: fix signed integer overflow in HLS bitrate
+- msg: strip raw C1 controls and skip valid UTF-8 in sanitize
+- demux/avio_crypto: add AES decryption
+- ao_pipewire: convert pw_time.queued from bytes to frames
+- {select,console}.lua: release memory of menu items after menu closing
+- vf_d3d11vpp: enable NVIDIA RTX Video only for SDR input
+- options: store audio/sub delay in doubles instead of floats
+- osxbundle: fix a wrong vulkan search path
+- vo_gpu_next: ignore reference white for screenshots
+- video/vdpau: throttle reinit in all cases
+- ao_pipewire: treat init timeout as failure instead of success
+- vo/opengl/context: fix memory leaks on failed init
+- vo/context_wayland: fix memory leaks on failed init
+- vo_wlshm: fix leak on in flight buffer on unint
+- console.lua: speed up filtering of selectable items
+- demux: fail probing when the stream cannot be rewound to the start
+- demux: interrupt blocking reads whose result would be discarded
+- ad_spdif: recreate spdif muxer on reset
+- wayland: wait for initial surface configure before attaching buffer
+- demux/ebml: interpret zero-length elements as their default value
+- osdep/w32_register: add a DVD-Audio AutoPlay handler
+- player: fix timing of sparse still-image video streams
+- mp_image: keep all peak-detected HDR metadata across frame updates
+- ao_coreaudio: cleanup ao on init failure
+- vo_gpu_next: keep hwdec frames mapped while the queue holds them
+- stream_file: don't report a size for pipes and sockets
+- osdep/path-win: expand `~~exe_dir/` on portable mode
+- demux_lavf: read HLS and DASH manifests through the stream
+- autodeint: handle detection without video
+- chmap_avchannel: emit native layouts for maps in native order
+- f_swresample: describe channel layouts exactly to libswresample
+- stream_slice: don't read past the end of the slice
+- vo_gpu: fill the padding of the scaler LUT
+- vo_gpu_next: defer the queue reset until a new frame arrives
+- meson: respect -Dvapoursynth=disabled for vapoursynth-script
+- f_lavfi: recreate the graph when the negotiated params change
+- osdep/win32/smtc: fix hang on exit before the window is created
+- demux_mkv: fall back to the first cluster for seeks before the index
+- hwdec_drmprime_overlay: make the framebuffer the whole frame
+- stream/network: accept ICY headers without a space after the colon
+- context_drm_egl: handle set_color() with a NULL hint
+- context_drm_egl: keep allow_modeset until the color commit is submitted
+- osdep/io: restore umask-based file creation permissions
+- wayland: use configure bounds in window geometry
+- osxbundle: don't exclude libs that have the object file filename in path
+- vulkan/context: synchronize with lavu
+- vo_drm: fix hang when routine wakeups fill VT pipe
+- terminal: serialize terminal output between the status line and the VOs
+- vo_{sixel,kitty}: draw the video into a frame the size of the canvas
+- terminal: redraw the terminal VOs when the terminal is resized
+- terminal-win: ask the terminal for its cell size under ConPTY
+- sws_utils,zimg: keep the scalers across frames with dynamic HDR metadata
+- bash-completion: complete aliases and list actions like their target
+- osdep/language-win: advance through preferred UI languages
+- filter_sdh: fix heap over-read on events with a null byte
+- hwdec_d3d11egl: release the FFmpeg hardware device reference
+- context_angle: fix D3D11 device leak
+- demux_playlist: resolve relative entries against the url after redirects
+- vo_gpu: opengl: support GL_EXT_framebuffer_object
+- vo_gpu: opengl: use R8/RG8 formats on GLES 2.0 and GL 2.1
+- vo_gpu: fix dither quantization for > 31 bit depths
+- autoload.lua: exit early when path is a directory
+- d3d11/context: resize buffers when DXGI leaves exclusive fullscreen
+- vo_gpu_next: only re-upload OSD textures when they change
+- vo_gpu: decode XYZ into the tagged primaries
+- ytdl_hook: default cookies without a Domain to the host of origin
+- osdep/win32/smtc: fix crash at exit when another thread owned the MTA
+- win32/smtc: allow toggling at runtime
+- ao_wasapi: hold an MTA reference for the hotplug instance
 
 
 This listing is not complete. Check DOCS/client-api-changes.rst for a history
 of changes to the client API, and DOCS/interface-changes.rst for a history
 of changes to other user-visible interfaces.
 
-A complete changelog can be seen by running `git log v0.40.0..v0.41.0`
+A complete changelog can be seen by running `git log v0.41.0..v0.42.0`
 in the git repository or by visiting
-<https://github.com/mpv-player/mpv/compare/v0.40.0...v0.41.0>.
+<https://github.com/mpv-player/mpv/compare/v0.41.0...v0.42.0>.

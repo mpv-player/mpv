@@ -1,1 +1,0 @@
-make `mpv_command_node` accept `_name` for command name
