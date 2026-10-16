@@ -633,11 +633,7 @@ static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params)
 
     // Vulkan Wayland needs special handling to avoid duplicated color surface.
     bool waylandvk = strcmp(sw->ctx->fns->name, "waylandvk") == 0;
-    // Assume anything else is supported when set_color is defined. However,
-    // everything else can use Vulkan API colorspace without issues, so unlikely
-    // that set_color is used outside of Wayland.
-    bool supported = PL_API_VER >= 361 || !waylandvk;
-    if (supported && p->params.set_color) {
+    if (p->params.set_color) {
         if (waylandvk && params) {
           // Request VK_COLOR_SPACE_PASS_THROUGH_EXT, and also force immediate
           // cleanup of swapchain retired by pl_swapchain_colorspace_hint,

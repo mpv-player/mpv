@@ -12,7 +12,7 @@ export LDFLAGS="$LDFLAGS -L/usr/local/lib"
 mkdir -p subprojects
 git clone https://code.videolan.org/videolan/libplacebo.git \
     --recurse-submodules --shallow-submodules \
-    --depth=1 --branch v7.360.1 subprojects/libplacebo
+    --depth=1 --branch v7.387.0 subprojects/libplacebo
 
 meson setup build $common_args \
   -Db_sanitize=address,undefined \
