@@ -1,0 +1,1 @@
+`.iso` images of DVD-Video, DVD-Audio and Blu-ray discs are now opened with the matching disc backend instead of falling back to FFmpeg

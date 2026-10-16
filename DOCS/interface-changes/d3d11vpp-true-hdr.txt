@@ -1,0 +1,1 @@
+`d3d11vpp=nvidia-true-hdr` is now ignored for HDR sources, as it only converts SDR to HDR
