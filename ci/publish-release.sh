@@ -37,7 +37,9 @@ if [[ $tag != git-release ]]; then
     if gh release view "$tag" >/dev/null 2>&1; then
         gh release upload "$tag" --clobber release/*
     else
-        gh release create "$tag" --draft --title "$tag" --notes-file RELEASE_NOTES release/*
+        # Drop the "Release 0.X.Y" heading of the file.
+        notes=$(sed '1,/^$/d' RELEASE_NOTES)
+        gh release create "$tag" --draft --title "$tag" --notes "$notes" release/*
     fi
     exit 0
 fi
