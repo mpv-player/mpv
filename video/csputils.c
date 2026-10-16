@@ -389,12 +389,16 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct pl_transform3x3 *m)
         break;
     }
     case PL_COLOR_SYSTEM_XYZ: {
-        // For lack of anything saner to do, just assume the caller wants
-        // DCI-P3 primaries, which is a reasonable assumption.
-        const struct pl_raw_primaries *dst = pl_raw_primaries_get(PL_COLOR_PRIM_DCI_P3);
+        // XYZ is decoded into the tagged RGB primaries, DCI-P3 for DCDM X'Y'Z'
+        enum pl_color_primaries prim = params->color.primaries;
+        if (!prim)
+            prim = PL_COLOR_PRIM_DCI_P3;
+        const struct pl_raw_primaries *dst = pl_raw_primaries_get(prim);
         pl_matrix3x3 mat = pl_get_xyz2rgb_matrix(dst);
-        // DCDM X'Y'Z' is expected to have equal energy white point (EG 432-1 Annex H)
-        apply_chromatic_adaptation((struct pl_cie_xy){1.0/3.0, 1.0/3.0}, dst->white, &mat);
+        if (params->color.transfer != PL_COLOR_TRC_LINEAR) {
+            // DCDM X'Y'Z' is expected to have equal energy white point (EG 432-1 Annex H)
+            apply_chromatic_adaptation((struct pl_cie_xy){1.0/3.0, 1.0/3.0}, dst->white, &mat);
+        }
         *m = (struct pl_transform3x3) { .mat = mat };
         levels_in = -1;
         break;

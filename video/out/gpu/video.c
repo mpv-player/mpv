@@ -2576,12 +2576,8 @@ static void pass_convert_yuv(struct gl_video *p)
 
     GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
 
-    if (cparams.repr.sys == PL_COLOR_SYSTEM_XYZ) {
+    if (cparams.repr.sys == PL_COLOR_SYSTEM_XYZ)
         pass_delinearize(p->sc, p->image_params.color.transfer);
-        // mp_get_csp_matrix implicitly converts XYZ to DCI-P3
-        p->image_params.repr.sys = PL_COLOR_SYSTEM_RGB;
-        p->image_params.color.primaries = PL_COLOR_PRIM_DCI_P3;
-    }
 
     if (p->image_params.repr.sys == PL_COLOR_SYSTEM_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
