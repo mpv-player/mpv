@@ -213,54 +213,6 @@ enum pl_color_primaries mp_csp_guess_primaries(int width, int height)
     }
 }
 
-// LMS<-XYZ revised matrix from CIECAM97, based on a linear transform and
-// normalized for equal energy on monochrome inputs
-static const pl_matrix3x3 m_cat97 = {{
-    {  0.8562,  0.3372, -0.1934 },
-    { -0.8360,  1.8327,  0.0033 },
-    {  0.0357, -0.0469,  1.0112 },
-}};
-
-// M := M * XYZd<-XYZs
-static void apply_chromatic_adaptation(struct pl_cie_xy src,
-                                       struct pl_cie_xy dest, pl_matrix3x3 *mat)
-{
-    // If the white points are nearly identical, this is a wasteful identity
-    // operation.
-    if (fabs(src.x - dest.x) < 1e-6 && fabs(src.y - dest.y) < 1e-6)
-        return;
-
-    // XYZd<-XYZs = Ma^-1 * (I*[Cd/Cs]) * Ma
-    // http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
-    // For Ma, we use the CIECAM97 revised (linear) matrix
-    float C[3][2];
-
-    for (int i = 0; i < 3; i++) {
-        // source cone
-        C[i][0] = m_cat97.m[i][0] * pl_cie_X(src)
-                + m_cat97.m[i][1] * 1
-                + m_cat97.m[i][2] * pl_cie_Z(src);
-
-        // dest cone
-        C[i][1] = m_cat97.m[i][0] * pl_cie_X(dest)
-                + m_cat97.m[i][1] * 1
-                + m_cat97.m[i][2] * pl_cie_Z(dest);
-    }
-
-    // tmp := I * [Cd/Cs] * Ma
-    pl_matrix3x3 tmp = {0};
-    for (int i = 0; i < 3; i++)
-        tmp.m[i][i] = C[i][1] / C[i][0];
-
-    pl_matrix3x3_mul(&tmp, &m_cat97);
-
-    // M := M * Ma^-1 * tmp
-    pl_matrix3x3 ma_inv = m_cat97;
-    pl_matrix3x3_invert(&ma_inv);
-    pl_matrix3x3_mul(mat, &ma_inv);
-    pl_matrix3x3_mul(mat, &tmp);
-}
-
 // Get multiplication factor required if image data is fit within the LSBs of a
 // higher smaller bit depth fixed-point texture data.
 // This is broken. Use mp_get_csp_uint_mul().
@@ -393,12 +345,7 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct pl_transform3x3 *m)
         enum pl_color_primaries prim = params->color.primaries;
         if (!prim)
             prim = PL_COLOR_PRIM_DCI_P3;
-        const struct pl_raw_primaries *dst = pl_raw_primaries_get(prim);
-        pl_matrix3x3 mat = pl_get_xyz2rgb_matrix(dst);
-        if (params->color.transfer != PL_COLOR_TRC_LINEAR) {
-            // DCDM X'Y'Z' is expected to have equal energy white point (EG 432-1 Annex H)
-            apply_chromatic_adaptation((struct pl_cie_xy){1.0/3.0, 1.0/3.0}, dst->white, &mat);
-        }
+        pl_matrix3x3 mat = pl_get_xyz2rgb_matrix(pl_raw_primaries_get(prim));
         *m = (struct pl_transform3x3) { .mat = mat };
         levels_in = -1;
         break;
