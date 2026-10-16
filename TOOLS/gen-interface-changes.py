@@ -30,7 +30,7 @@ from subprocess import check_output
 def add_new_entries(docs_dir, out, git):
     changes_dir = pathlib.Path(docs_dir) / "interface-changes"
     files = []
-    for f in pathlib.Path(changes_dir).glob("*.txt"):
+    for f in changes_dir.iterdir():
         if f.is_file() and f.name != "example.txt":
             timestamp = check_output([git, "log", "--format=%ct", "-n", "1", "--",
                                       f], encoding="UTF-8")

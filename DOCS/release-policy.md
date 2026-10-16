@@ -32,7 +32,7 @@ While on master:
 - Run `TOOLS/gen-interface-changes.py` to refresh `DOCS/interface-changes.rst`,
   and edit manually as necessary.
 
-- Delete all `.txt` files in `DOCS/interface-changes/` except for `example.txt`.
+- Delete all files in `DOCS/interface-changes/` except for `example.txt`.
 
 - Create signed commit with changes.
 
