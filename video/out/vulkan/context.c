@@ -240,6 +240,10 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
 #ifdef VK_KHR_maintenance11
         VK_KHR_MAINTENANCE_11_EXTENSION_NAME, /* 1.4.350 */
 #endif
+#if defined(VK_KHR_internally_synchronized_queues) && PL_API_VER >= 365 && \
+    LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(60, 32, 100)
+        VK_KHR_INTERNALLY_SYNCHRONIZED_QUEUES_EXTENSION_NAME,
+#endif
     };
 
     /*
@@ -443,6 +447,24 @@ pl_vulkan mppl_create_vulkan(struct vulkan_opts *opts,
     };
 
     features.pNext = &recommended_features;
+
+#if defined(VK_KHR_internally_synchronized_queues) && PL_API_VER >= 365 && \
+    LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(60, 32, 100)
+    /*
+     * libplacebo creates every queue with
+     * VK_DEVICE_QUEUE_CREATE_INTERNALLY_SYNCHRONIZED_BIT_KHR when this is
+     * requested, and hwdec_vulkan passes the flag on through
+     * AVVulkanDeviceContext.queue_flags. Older lavu retrieves queues with
+     * flags 0 and gets VK_NULL_HANDLE, so only request it from lavu that
+     * knows the flags, and from libplacebo that will use it too.
+     */
+    VkPhysicalDeviceInternallySynchronizedQueuesFeaturesKHR synchronized_queues_feature = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INTERNALLY_SYNCHRONIZED_QUEUES_FEATURES_KHR,
+        .pNext = features.pNext,
+        .internallySynchronizedQueues = true,
+    };
+    features.pNext = &synchronized_queues_feature;
+#endif
 
     AVUUID param_uuid = { 0 };
     bool is_uuid = opts->device &&
