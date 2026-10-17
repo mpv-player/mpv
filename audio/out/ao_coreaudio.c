@@ -136,7 +136,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
-static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd, AudioChannelLayout *layout, size_t layout_size);
+static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd);
 static void init_physical_format(struct ao *ao);
 static void reinit_latency(struct ao *ao);
 static bool register_hotplug_cb(struct ao *ao);
@@ -176,13 +176,8 @@ static int init(struct ao *ao)
 
     AudioStreamBasicDescription asbd;
     ca_fill_asbd(ao, &asbd);
-    size_t layout_size;
-    AudioChannelLayout *layout = ca_get_acl(ao, &layout_size);
 
-    bool r = init_audiounit(ao, asbd, layout, layout_size);
-    talloc_free(layout);
-
-    if (!r)
+    if (!init_audiounit(ao, asbd))
         goto coreaudio_error;
 
     if (!register_hotplug_cb(ao))
@@ -279,7 +274,54 @@ coreaudio_error:
     talloc_free(tmp);
 }
 
-static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd, AudioChannelLayout *layout, size_t layout_size)
+static void init_channel_map(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    OSStatus err;
+
+    AudioStreamBasicDescription asbd;
+    uint32_t size = sizeof(asbd);
+    err = AudioUnitGetProperty(p->audio_unit, kAudioUnitProperty_StreamFormat,
+                               kAudioUnitScope_Output, 0, &asbd, &size);
+    if (!CHECK_CA_WARN("unable to retrieve device output format"))
+        return;
+
+    uint32_t device_channels = asbd.mChannelsPerFrame;
+    if (!device_channels) {
+        MP_WARN(ao, "unable to retrieve device channel count\n");
+        return;
+    }
+
+    if (ao->channels.num > device_channels) {
+        MP_WARN(ao, "more channels (%d) than the device has (%u), dropping the extra channels\n",
+                ao->channels.num, device_channels);
+    }
+
+    // ca_init_chmap() already configures the ao channels to match the output
+    // order of the device. without setting an explicit channel map audio unit
+    // will remap the channels again, possibly leading to a wrong mapping.
+    // prevent this double mapping by explicitly mapping our order 1:1 to the
+    // output and silencing remaining channels
+    SInt32 *channel_map = talloc_array(NULL, SInt32, device_channels);
+    char *channel_map_str = talloc_strdup(NULL, "");
+    for (uint32_t i = 0; i < device_channels; i++) {
+        channel_map[i] = i < ao->channels.num ? i : -1;
+        channel_map_str = talloc_asprintf_append(channel_map_str, "%s%d", i ? "," : "", channel_map[i]);
+    }
+    err = AudioUnitSetProperty(p->audio_unit,
+                               kAudioOutputUnitProperty_ChannelMap,
+                               kAudioUnitScope_Output, 0, channel_map,
+                               device_channels * sizeof(SInt32));
+
+    if (!CHECK_CA_WARN("unable to set the channel map on the audio unit")) {
+        MP_VERBOSE(ao, "rejected channel map: [%s]\n", channel_map_str);
+    }
+
+    talloc_free(channel_map);
+    talloc_free(channel_map_str);
+}
+
+static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
 {
     OSStatus err;
     uint32_t size;
@@ -318,17 +360,12 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd, Audi
 
     err = AudioUnitSetProperty(p->audio_unit,
                                kAudioOutputUnitProperty_CurrentDevice,
-                               kAudioUnitScope_Global, 0, &p->device,
+                               kAudioUnitScope_Output, 0, &p->device,
                                sizeof(p->device));
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "can't link audio unit to selected device");
 
-    err = AudioUnitSetProperty(p->audio_unit,
-                               kAudioOutputUnitProperty_ChannelMap,
-                               kAudioUnitScope_Global, 0, layout, layout_size);
-
-    CHECK_CA_ERROR_L(coreaudio_error_audiounit,
-                     "unable to set the input channel layout on the audio unit");
+    init_channel_map(ao);
 
     AURenderCallbackStruct render_cb = (AURenderCallbackStruct) {
         .inputProc       = render_cb_lpcm,
