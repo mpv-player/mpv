@@ -91,8 +91,8 @@
 #endif
 
 struct command_ctx {
-    // All properties, terminated with a {0} item.
-    struct m_property *properties;
+    // All properties, sorted by name.
+    struct m_property_list properties;
 
     double last_seek_time;
     double last_seek_pts;
@@ -428,9 +428,8 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct m_config_option *opt =
-        m_config_get_co(mpctx->mconfig, bstr0(prop->name));
-
+    struct m_config_option *opt = prop->is_option ? prop->priv :
+                        m_config_get_co(mpctx->mconfig, bstr0(prop->name));
     if (!opt)
         return M_PROPERTY_UNKNOWN;
 
@@ -4204,9 +4203,9 @@ static int mp_property_list(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET: {
         char **list = NULL;
         int num = 0;
-        for (int n = 0; cmd->properties[n].name; n++) {
+        for (int n = 0; n < cmd->properties.num; n++) {
             MP_TARRAY_APPEND(NULL, list, num,
-                                talloc_strdup(NULL, cmd->properties[n].name));
+                             talloc_strdup(NULL, cmd->properties.props[n].name));
         }
         MP_TARRAY_APPEND(NULL, list, num, NULL);
         *(char ***)arg = list;
@@ -4981,8 +4980,8 @@ uint64_t mp_get_property_event_mask(const char *name)
 int mp_get_property_id(struct MPContext *mpctx, const char *name)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
-    for (int n = 0; ctx->properties[n].name; n++) {
-        if (match_property(ctx->properties[n].name, name))
+    for (int n = 0; n < ctx->properties.num; n++) {
+        if (match_property(ctx->properties.props[n].name, name))
             return n;
     }
     return -1;
@@ -5010,10 +5009,10 @@ int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
     struct command_ctx *cmd = ctx->command_ctx;
-    int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
+    int r = m_property_do(ctx->log, &cmd->properties, name, action, val, ctx);
 
     if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
-        struct m_property *property = m_property_list_find(cmd->properties, name);
+        struct m_property *property = m_property_list_find(&cmd->properties, name);
         if (property && property->is_noisy && !mp_msg_test(ctx->log, MSGL_TRACE))
             return r;
 
@@ -5039,7 +5038,7 @@ int mp_property_do(const char *name, int action, void *val,
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
-    return m_properties_expand_string(ctx->properties, str, mpctx);
+    return m_properties_expand_string(&ctx->properties, str, mpctx);
 }
 
 // Before expanding properties, parse C-style escapes like "\n"
@@ -5066,7 +5065,7 @@ char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str
 void property_print_help(struct MPContext *mpctx)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
-    m_properties_print_help_list(mpctx->log, ctx->properties);
+    m_properties_print_help_list(mpctx->log, &ctx->properties);
 }
 
 /* List of default ways to show a property on OSD.
@@ -5679,7 +5678,7 @@ static void change_property_cmd(struct mp_cmd_ctx *cmd,
     struct m_property *prop = NULL;
     if (cmd->cmd->coalesce) {
         struct command_ctx *ctx = cmd->mpctx->command_ctx;
-        prop = m_property_list_find(ctx->properties, name);
+        prop = m_property_list_find(&ctx->properties, name);
         if (prop)
             prop->coalesce = true;
     }
@@ -8144,9 +8143,9 @@ void command_init(struct MPContext *mpctx)
 
     int num_base = MP_ARRAY_SIZE(mp_properties_base);
     int num_opts = m_config_get_co_count(mpctx->mconfig);
-    ctx->properties =
-        talloc_zero_array(ctx, struct m_property, num_base + num_opts + 1);
-    memcpy(ctx->properties, mp_properties_base, sizeof(mp_properties_base));
+    struct m_property *props =
+        talloc_zero_array(ctx, struct m_property, num_base + num_opts);
+    memcpy(props, mp_properties_base, sizeof(mp_properties_base));
 
     const char **prop_names = talloc_array(NULL, const char *, num_base);
     for (int i = 0; i < num_base; ++i)
@@ -8163,6 +8162,7 @@ void command_init(struct MPContext *mpctx)
         struct m_property prop = {
             .name = co->name,
             .call = mp_property_generic_option,
+            .priv = co,
             .is_option = true,
         };
 
@@ -8193,8 +8193,11 @@ void command_init(struct MPContext *mpctx)
         if (bsearch(&prop.name, prop_names, num_base, sizeof(const char *), str_compare))
             continue;
 
-        ctx->properties[count++] = prop;
+        props[count++] = prop;
     }
+
+    ctx->properties = (struct m_property_list){props, count};
+    m_property_list_sort(&ctx->properties);
 
     node_init(&ctx->mdata, MPV_FORMAT_NODE_ARRAY, NULL);
     talloc_steal(ctx, ctx->mdata.u.list);

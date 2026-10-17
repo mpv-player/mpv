@@ -706,7 +706,7 @@ static void script_get_property_bool(js_State *J)
 static bool same_as_int64(double d)
 {
     // The range checks also validly filter inf and nan, so behavior is defined
-    return d >= INT64_MIN && d <= (double) INT64_MAX && d == (int64_t)d;
+    return d >= -0x1p63 && d < 0x1p63 && d == (int64_t)d;
 }
 
 // args: name, number
@@ -1089,7 +1089,7 @@ static int jsL_checkint(js_State *J, int idx)
 static uint64_t jsL_checkuint64(js_State *J, int idx)
 {
     double d = js_tonumber(J, idx);
-    if (!(d >= 0 && d <= (double) UINT64_MAX))
+    if (!(d >= 0 && d < 0x1p64))
         js_error(J, "uint64 out of range at index %d", idx);
     return d;
 }
