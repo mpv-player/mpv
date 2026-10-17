@@ -104,10 +104,11 @@ static int vulkan_init(struct ra_hwdec *hw)
     AVVulkanDeviceContext *device_hwctx = device_ctx->hwctx;
 
     device_ctx->user_opaque = (void *)vk->vulkan;
-    // libavutil deprecated AVVulkanDeviceContext.lock/unlock_queue without
-    // replacement. This prevents us from using queue locking, as those callback
-    // will be removed in lavu. Set those callbacks as long as they are still
-    // present, they will be noop in libplacebo with `VK_KHR_internally_synchronized_queues`.
+    // libavutil deprecated AVVulkanDeviceContext.lock/unlock_queue in favour
+    // of `VK_KHR_internally_synchronized_queues`. Set the callbacks as long as
+    // they exist. They are no-ops in libplacebo when mppl_create_vulkan
+    // requested internally synchronized queues, and take libplacebo's queue
+    // locks otherwise.
     //
     // It's unclear what will happen to devices that do not support
     // `VK_KHR_internally_synchronized_queues` when the lock/unlock_queue
