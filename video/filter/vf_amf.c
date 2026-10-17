@@ -18,15 +18,24 @@
 #include <stdatomic.h>
 
 #include <windows.h>
-#include <d3d11.h>
+#include <d3d11_1.h>
 
 #include <AMF/components/FRC.h>
+#include <AMF/components/VQEnhancer.h>
 #include <AMF/core/Context.h>
 #include <AMF/core/Factory.h>
 #include <AMF/core/Surface.h>
 
 #include <libavutil/hwcontext_d3d11va.h>
 #include <libavutil/hwcontext.h>
+
+#include "config.h"
+
+#if HAVE_VULKAN
+#include <AMF/core/VulkanAMF.h>
+#include <libavutil/hwcontext_vulkan.h>
+#include <libplacebo/vulkan.h>
+#endif
 
 #include "filters/filter_internal.h"
 #include "filters/filter.h"
@@ -44,37 +53,63 @@ typedef atomic_uint_fast32_t mp_rc_t;
 #define mp_rc_deref(rc) (atomic_fetch_sub_explicit(rc, 1, memory_order_release) == 1)
 #define mp_rc_count(rc)  atomic_load(rc)
 
-struct opts {
-    int profile;
-    int mv_search_mode;
-    bool fallback_blend;
-    bool indicator;
-    bool use_future_frame;
-};
-
 struct amf_priv {
     mp_rc_t ref_count;
     HMODULE dll;
     AMFFactory *factory;
     AMFContext *ctx;
-    AMFComponent *frc;
+    AMFComponent *comp;
+#if HAVE_VULKAN
+    AMFVulkanDevice vk_dev;
+#endif
+};
+
+struct priv;
+
+struct amf_backend {
+    int imgfmt;
+    enum AVHWDeviceType device_type;
+    amf_int64 vqe_engine;
+    amf_int64 frc_engine;
+    int (*init)(struct mp_filter *f);
+    void (*uninit)(struct priv *p);
+    void (*lock)(struct priv *p);
+    void (*unlock)(struct priv *p);
+    void (*get_size)(struct mp_image *src, int *w, int *h);
+    AMFSurface *(*to_amf)(struct mp_filter *f, struct mp_image *src);
+    struct mp_image *(*from_amf)(struct mp_filter *f, AMFSurface *src);
 };
 
 struct priv {
-    struct opts *opts;
+    void *opts;
 
     struct mp_image_params params;
     struct mp_image *ref_image;
 
     ID3D11Device *d3d_dev;
+    ID3D11DeviceContext1 *d3d_ctx;
+    ID3D10Multithread *d3d_mt;
+    ID3DDeviceContextState *amf_state;
+    ID3DDeviceContextState *prev_state;
     ID3D11Texture2D *input_tex;
 
     bool has_frame;
 
     AVBufferRef *av_device_ref;
+    const struct amf_backend *be;
+    const wchar_t *component_name;
+
+#if HAVE_VULKAN
+    AMFContext1 *ctx1;
+    pl_vulkan vulkan;
+    uint32_t vk_qf;
+    AVBufferRef *vk_out_frames;
+#endif
 
     struct amf_priv *amf;
 };
+
+typedef int (*amf_init_fn)(struct mp_filter *f, struct mp_image *src, bool reinit);
 
 static inline AMF_SURFACE_FORMAT imgfmt2amf(int fmt)
 {
@@ -92,9 +127,33 @@ static inline AMF_SURFACE_FORMAT imgfmt2amf(int fmt)
     }
 }
 
+static void d3d11_lock(struct priv *p)
+{
+    ID3D10Multithread_Enter(p->d3d_mt);
+    ID3D11DeviceContext1_SwapDeviceContextState(p->d3d_ctx, p->amf_state,
+                                                &p->prev_state);
+}
+
+static void d3d11_unlock(struct priv *p)
+{
+    ID3D11DeviceContext1_SwapDeviceContextState(p->d3d_ctx, p->prev_state, NULL);
+    SAFE_RELEASE(p->prev_state);
+    ID3D10Multithread_Leave(p->d3d_mt);
+}
+
+static void amf_lock(struct priv *p)
+{
+    p->be->lock(p);
+}
+
+static void amf_unlock(struct priv *p)
+{
+    p->be->unlock(p);
+}
+
 static void unload_amf_library(struct amf_priv *a)
 {
-    mp_assert(!a->frc && !a->ctx);
+    mp_assert(!a->comp && !a->ctx);
     if (a->dll) {
         FreeLibrary(a->dll);
         a->dll = NULL;
@@ -127,8 +186,11 @@ static void flush(struct mp_filter *f)
 {
     struct priv *p = f->priv;
 
-    if (p->amf->frc)
-        ICALL(Flush, p->amf->frc);
+    if (p->amf->comp) {
+        amf_lock(p);
+        ICALL(Flush, p->amf->comp);
+        amf_unlock(p);
+    }
     p->has_frame = false;
     mp_image_unrefp(&p->ref_image);
 }
@@ -138,9 +200,9 @@ static void destroy_amf(struct amf_priv *a)
     if (!mp_rc_deref(&a->ref_count))
         return;
 
-    if (a->frc) {
-        ICALL(Release, a->frc);
-        a->frc = NULL;
+    if (a->comp) {
+        ICALL(Release, a->comp);
+        a->comp = NULL;
     }
 
     if (a->ctx) {
@@ -159,186 +221,142 @@ static void destroy(struct mp_filter *f)
 
     flush(f);
 
-    if (a->frc)
-        ICALL(Terminate, a->frc);
+    if (p->be) {
+        amf_lock(p);
+        if (a->comp)
+            ICALL(Terminate, a->comp);
+        if (a->ctx)
+            ICALL(Terminate, a->ctx);
+        amf_unlock(p);
+        p->be->uninit(p);
+    }
 
-    if (a->ctx)
-        ICALL(Terminate, a->ctx);
-
-    SAFE_RELEASE(p->input_tex);
-    SAFE_RELEASE(p->d3d_dev);
     av_buffer_unref(&p->av_device_ref);
 
     destroy_amf(a);
 }
 
-static int create_amf_context(struct mp_filter *f)
+static void d3d11_uninit(struct priv *p)
+{
+    SAFE_RELEASE(p->input_tex);
+    SAFE_RELEASE(p->amf_state);
+    SAFE_RELEASE(p->d3d_ctx);
+    SAFE_RELEASE(p->d3d_mt);
+    SAFE_RELEASE(p->d3d_dev);
+}
+
+static int d3d11_init(struct mp_filter *f)
 {
     struct priv *p = f->priv;
     struct amf_priv *a = p->amf;
 
-    AMF_RESULT res = ICALL(CreateContext, a->factory, &a->ctx);
-    if (res != AMF_OK) {
-        MP_ERR(f, "Failed to create AMF context: %d\n", res);
-        goto err;
-    }
-
-    struct mp_stream_info *info = mp_filter_find_stream_info(f);
-    if (!info || !info->hwdec_devs) {
-        MP_ERR(f, "No hwdec devices available for AMF initialization.\n");
-        goto err;
-    }
-
-    struct hwdec_imgfmt_request params = {
-        .imgfmt = IMGFMT_D3D11,
-        .probing = false,
-    };
-    hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
-    struct mp_hwdec_ctx *hwctx =
-        hwdec_devices_get_by_imgfmt_and_type(info->hwdec_devs, IMGFMT_D3D11,
-                                             AV_HWDEVICE_TYPE_D3D11VA);
-    if (!hwctx || !hwctx->av_device_ref) {
-        MP_ERR(f, "No suitable D3D11 hwdec device found for AMF initialization.\n");
-        goto err;
-    }
-
-    p->av_device_ref = av_buffer_ref(hwctx->av_device_ref);
-    MP_HANDLE_OOM(p->av_device_ref);
     AVHWDeviceContext *avhwctx = (void *)p->av_device_ref->data;
     AVD3D11VADeviceContext *d3dctx = avhwctx->hwctx;
     ID3D11Device_QueryInterface(d3dctx->device, &IID_ID3D11Device, (void **)&p->d3d_dev);
 
-    // AMF uses its own separate D3D11 device. This avoids any conflicts with
-    // with our presentation device, as we run it on different thread. Things
-    // work well, until there is compute shader processing done on the same device.
-    res = ICALL(InitDX11, a->ctx, NULL, AMF_DX11_1);
-    if (res != AMF_OK) {
-        MP_ERR(f, "Failed to initialize AMF context with D3D11: %d\n", res);
-        goto err;
+    ID3D11Device1 *dev1 = NULL;
+    HRESULT hr = ID3D11Device_QueryInterface(p->d3d_dev, &IID_ID3D11Device1,
+                                             (void **)&dev1);
+    if (SUCCEEDED(hr))
+        hr = ID3D11Device_QueryInterface(p->d3d_dev, &IID_ID3D10Multithread,
+                                         (void **)&p->d3d_mt);
+    if (SUCCEEDED(hr)) {
+        D3D_FEATURE_LEVEL level = ID3D11Device_GetFeatureLevel(p->d3d_dev);
+        hr = ID3D11Device1_CreateDeviceContextState(dev1, 0, &level, 1,
+                                                    D3D11_SDK_VERSION,
+                                                    &IID_ID3D11Device, NULL,
+                                                    &p->amf_state);
+    }
+    if (SUCCEEDED(hr))
+        ID3D11Device1_GetImmediateContext1(dev1, &p->d3d_ctx);
+    SAFE_RELEASE(dev1);
+    if (FAILED(hr)) {
+        MP_ERR(f, "Failed to set up the D3D11 device for AMF: %s\n",
+               mp_HRESULT_to_str(hr));
+        return -1;
     }
 
-    return 0;
-
-err:
-    destroy(f);
-
-    return -1;
-}
-
-static int create_amf_frc(struct mp_filter *f)
-{
-    struct priv *p = f->priv;
-    struct amf_priv *a = p->amf;
-
-    mp_assert(!a->frc);
-    AMF_RESULT res = ICALL(CreateComponent, a->factory, a->ctx, AMFFRC, &a->frc);
+    d3d11_lock(p);
+    AMF_RESULT res = ICALL(InitDX11, a->ctx, p->d3d_dev, AMF_DX11_1);
+    d3d11_unlock(p);
     if (res != AMF_OK) {
-        MP_ERR(f, "Failed to create AMF FRC component: %d\n", res);
+        MP_ERR(f, "Failed to initialize AMF context with D3D11: %d\n", res);
         return -1;
     }
 
     return 0;
 }
 
-static int init_frc(struct mp_filter *f, struct mp_image *src, bool reinit)
+static void d3d11_get_size(struct mp_image *src, int *w, int *h)
 {
-    AMF_RESULT res;
+    D3D11_TEXTURE2D_DESC desc = {0};
+    ID3D11Texture2D_GetDesc((ID3D11Texture2D *)src->planes[0], &desc);
+    *w = desc.Width;
+    *h = desc.Height;
+}
+
+static int create_amf_component(struct mp_filter *f, const wchar_t *name)
+{
     struct priv *p = f->priv;
     struct amf_priv *a = p->amf;
 
-    mp_assert(a->frc);
+    mp_assert(!a->comp);
+    AMF_RESULT res = ICALL(CreateComponent, a->factory, a->ctx, name, &a->comp);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to create AMF component: %d\n", res);
+        return -1;
+    }
 
-    // Support only D3D11 input, while it's possible to input host memory, this
-    // adds unnecessary complexity. We already have host memory upload filters,
+    return 0;
+}
+
+static int amf_get_init_params(struct mp_filter *f, struct mp_image *src,
+                               AMF_SURFACE_FORMAT *out_fmt, int *out_w, int *out_h)
+{
+    struct priv *p = f->priv;
+
+    // Support only D3D11 or Vulkan input, while it's possible to input host
+    // memory, this adds unnecessary complexity. We already have host memory
+    // upload filters,
     // that can be used, before calling this filter. Also using host memory here,
-    // would return source (non-interpolated) frames also in host memory, which
-    // again forces us to upload them back to GPU for presentation, duplicating work.
-    if (p->params.imgfmt != IMGFMT_D3D11) {
-        MP_ERR(f, "AMF FRC only supports D3D11 input. "
-                  "Use `--hwdec=d3d11va` or `--vf-pre=format=d3d11` to upload the data.\n");
-        goto err;
+    // would return the processed frames also in host memory, which again forces
+    // us to upload them back to GPU for presentation, duplicating work.
+    if (p->params.imgfmt != p->be->imgfmt) {
+        MP_ERR(f, "Input format changed from %s to %s.\n",
+               mp_imgfmt_to_name(p->be->imgfmt),
+               mp_imgfmt_to_name(p->params.imgfmt));
+        return -1;
     }
 
-    if (reinit)
-        goto init;
-
-    AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_ENGINE_TYPE, AMF_MEMORY_DX11);
-    if (res != AMF_OK) {
-        MP_WARN(f, "Failed to set FRC engine type to DX11: %d\n", res);
-        goto err;
-    }
-
-    AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_MODE, FRC_x2_PRESENT);
-    if (res != AMF_OK) {
-        MP_ERR(f, "Failed to set FRC mode to x2_PRESENT: %d\n", res);
-        goto err;
-    }
-
-    int profile = p->opts->profile;
-    if (profile == -1) {
-        if (p->params.h >= 1440)
-            profile = FRC_PROFILE_SUPER;
-        else
-            profile = FRC_PROFILE_HIGH;
-    }
-    AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_PROFILE, profile);
-    if (res != AMF_OK) {
-        MP_WARN(f, "Failed to set FRC profile: %d\n", res);
-        goto err;
-    }
-
-    AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_MV_SEARCH_MODE,
-                              p->opts->mv_search_mode);
-    if (res != AMF_OK) {
-        MP_WARN(f, "Failed to set FRC motion vector search mode: %d\n", res);
-        goto err;
-    }
-
-    AMF_ASSIGN_PROPERTY_BOOL(res, a->frc, AMF_FRC_ENABLE_FALLBACK,
-                             p->opts->fallback_blend);
-    if (res != AMF_OK) {
-        MP_WARN(f, "Failed to set FRC fallback mode: %d\n", res);
-        goto err;
-    }
-
-    AMF_ASSIGN_PROPERTY_BOOL(res, a->frc, AMF_FRC_INDICATOR,
-                             p->opts->indicator);
-    if (res != AMF_OK) {
-        MP_WARN(f, "Failed to set FRC indicator: %d\n", res);
-        goto err;
-    }
-
-    AMF_ASSIGN_PROPERTY_BOOL(res, a->frc, AMF_FRC_USE_FUTURE_FRAME,
-                             p->opts->use_future_frame);
-    if (res != AMF_OK) {
-        MP_WARN(f, "Failed to set FRC use_future_frame: %d\n", res);
-        goto err;
-    }
-
-init:;
     AMF_SURFACE_FORMAT amf_fmt = imgfmt2amf(p->params.hw_subfmt);
     if (amf_fmt == AMF_SURFACE_UNKNOWN) {
-        MP_ERR(f, "AMF FRC does not support input format: %s\n",
+        MP_ERR(f, "Unsupported input format: %s\n",
                    mp_imgfmt_to_name(p->params.hw_subfmt));
-        goto err;
+        return -1;
     }
 
-    // FRC expects texture size here, not the coded image size
-    D3D11_TEXTURE2D_DESC desc = {0};
-    ID3D11Texture2D_GetDesc((ID3D11Texture2D *)src->planes[0], &desc);
-    res = ICALL(Init, a->frc, amf_fmt, desc.Width, desc.Height);
+    // AMF components expect the texture size here, not the coded image size.
+    p->be->get_size(src, out_w, out_h);
+    *out_fmt = amf_fmt;
+    return 0;
+}
+
+static int amf_component_init(struct mp_filter *f, AMF_SURFACE_FORMAT fmt,
+                              int width, int height)
+{
+    struct priv *p = f->priv;
+
+    AMF_RESULT res = ICALL(Init, p->amf->comp, fmt, width, height);
     if (res != AMF_OK) {
-        MP_ERR(f, "Failed to initialize FRC component: %d\n", res);
-        goto err;
+        MP_ERR(f, "Failed to initialize AMF component: %d\n", res);
+        return -1;
     }
 
     SAFE_RELEASE(p->input_tex);
-
+#if HAVE_VULKAN
+    av_buffer_unref(&p->vk_out_frames);
+#endif
     return 0;
-
-err:
-    ICALL(Terminate, a->frc);
-    return -1;
 }
 
 struct amf_surface_free_ctx {
@@ -351,12 +369,12 @@ static void free_amf_surface(void *arg)
 {
     struct amf_surface_free_ctx *ctx = arg;
     ICALL(Release, ctx->surface);
-    ID3D11Texture2D_Release(ctx->tex); // shared texture
+    ID3D11Texture2D_Release(ctx->tex);
     destroy_amf(ctx->a);
     talloc_free(ctx);
 }
 
-static struct mp_image *mp_image_from_amf_surface(struct mp_filter *f, AMFSurface *src)
+static struct mp_image *d3d11_from_amf(struct mp_filter *f, AMFSurface *src)
 {
     struct priv *p = f->priv;
     struct amf_priv *a = p->amf;
@@ -369,47 +387,12 @@ static struct mp_image *mp_image_from_amf_surface(struct mp_filter *f, AMFSurfac
         return NULL;
     }
 
-    ID3D11Texture2D *amf_tex = ICALL(GetNative, plane);
-    if (!amf_tex) {
+    ID3D11Texture2D *tex = ICALL(GetNative, plane);
+    if (!tex) {
         MP_ERR(f, "Failed to get D3D11 texture from AMF plane.\n");
         return NULL;
     }
 
-    ID3D11Device *amf_dev = ICALL(GetDX11Device, a->ctx, AMF_DX11_1);
-    mp_require(amf_dev);
-
-    ID3D11DeviceContext *ctx = NULL;
-    ID3D11Device_GetImmediateContext(amf_dev, &ctx);
-    mp_require(ctx);
-    ID3D11DeviceContext_Flush(ctx);
-    SAFE_RELEASE(ctx);
-
-    IDXGIResource* amf_res;
-    HRESULT hr = ID3D11Texture2D_QueryInterface(amf_tex, &IID_IDXGIResource, (void **)&amf_res);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to query IDXGIResource from AMF texture: %#lx\n", hr);
-        return NULL;
-    }
-
-    HANDLE amf_shared;
-    hr = IDXGIResource_GetSharedHandle(amf_res, &amf_shared);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to get shared handle from IDXGIResource: %#lx\n", hr);
-        SAFE_RELEASE(amf_res);
-        return NULL;
-    }
-
-    ID3D11Texture2D *tex;
-    hr = ID3D11Device_OpenSharedResource(p->d3d_dev, amf_shared, &IID_ID3D11Texture2D, (void **)&tex);
-    SAFE_RELEASE(amf_res);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to open shared resource: %#lx\n", hr);
-        return NULL;
-    }
-
-    // At this point, we technically own a reference to a texture, but we have to
-    // keep also AMFSurface alive, as the implementation seems to reuse the same
-    // underlying texture for future frames.
     struct amf_surface_free_ctx *free_ctx = talloc(NULL, struct amf_surface_free_ctx);
     free_ctx->a = a;
     free_ctx->surface = src;
@@ -417,9 +400,10 @@ static struct mp_image *mp_image_from_amf_surface(struct mp_filter *f, AMFSurfac
     struct mp_image *out = mp_image_new_custom_ref(p->ref_image, (void *)free_ctx, free_amf_surface);
     if (!out) {
         MP_ERR(f, "Unexpected error when creating mp_image.\n");
-        free_amf_surface(free_ctx);
+        talloc_free(free_ctx);
         return NULL;
     }
+    ID3D11Texture2D_AddRef(tex);
     mp_image_copy_attributes(out, p->ref_image);
     // hwctx is not copied by mp_image_copy_attributes
     out->hwctx = av_buffer_ref(p->ref_image->hwctx);
@@ -444,7 +428,7 @@ static int copy_tex(ID3D11DeviceContext *ctx, ID3D11Device *dev,
         desc.ArraySize = 1;
         desc.Usage = D3D11_USAGE_DEFAULT;
         desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-        desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
+        desc.MiscFlags = 0;
 
         HRESULT hr = ID3D11Device_CreateTexture2D(dev, &desc, NULL, dst);
         if (FAILED(hr))
@@ -469,79 +453,43 @@ static const AMFSurfaceObserver amf_dtor = {
     }
 };
 
-static AMFSurface *mp_image_to_amf_surface(struct mp_filter *f, struct mp_image *src)
+static AMFSurface *d3d11_to_amf(struct mp_filter *f, struct mp_image *src)
 {
     struct priv *p = f->priv;
     struct amf_priv *a = p->amf;
-    IDXGIResource* resource = NULL;
-    ID3D11Texture2D *amf_tex = NULL;
-    AMFSurfaceObserver *dtor = talloc_dup(NULL, (AMFSurfaceObserver *)&amf_dtor);
-    talloc_steal(dtor, src); // release mp_image when no longer needed
 
-    if (src->imgfmt != IMGFMT_D3D11) {
-        MP_ERR(f, "AMF FRC only supports D3D11 input. "
-                  "Use `--hwdec=d3d11va` or `--vf-pre=format=d3d11` to upload the data.\n");
-        goto err;
-    }
+    mp_require(src->imgfmt == IMGFMT_D3D11);
 
     ID3D11Texture2D *tex = (void *)src->planes[0];
     amf_int index = (intptr_t)src->planes[1];
 
-    ID3D11DeviceContext *ctx = NULL;
-    ID3D11Device_GetImmediateContext(p->d3d_dev, &ctx);
-    mp_require(ctx);
-    // Textures between AMF and our D3D11 device are shared using shared handles
-    // `D3D11_RESOURCE_MISC_SHARED`, which is also set on textures returned
-    // from AMF. These textures are implicitly synchronized, documentation states
-    // that after a shared texture is updated, `ID3D11DeviceContext::Flush()`
-    // must be called on the updating device. Flushing the command queue is
-    // sufficient for the driver to synchronize access to the shared resource.
-    // We intentionally do not use more explicit synchronization mechanisms such
-    // as `IDXGIKeyedMutex` or `D3D11_RESOURCE_MISC_SHARED_NTHANDLE`, as they
-    // are not supported by AMF, nor D3D11VA decoder and would require additional
-    // intermediate copies.
-    // However, resources created by a D3D11VA device are not implicitly
-    // synchronized, so we perform a GPU-GPU copy before sharing the texture
-    // with AMF. This ensures the video decoder has finished writing to the
-    // texture. A copy is faster than synchronizing through the CPU, without copies.
-    copy_tex(ctx, p->d3d_dev, &p->input_tex, tex, index);
-    tex = p->input_tex;
-    index = 0;
-    ID3D11DeviceContext_Flush(ctx);
-    SAFE_RELEASE(ctx);
-
-    HRESULT hr = ID3D11Texture2D_QueryInterface(tex, &IID_IDXGIResource, (void **)&resource);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to query IDXGIResource from texture: %#lx\n", hr);
-        goto err;
+    D3D11_TEXTURE2D_DESC desc;
+    ID3D11Texture2D_GetDesc(tex, &desc);
+    if (!(desc.BindFlags & D3D11_BIND_SHADER_RESOURCE)) {
+        if (copy_tex((ID3D11DeviceContext *)p->d3d_ctx, p->d3d_dev,
+                     &p->input_tex, tex, index) < 0) {
+            MP_ERR(f, "Failed to copy the input texture.\n");
+            talloc_free(src);
+            return NULL;
+        }
+        tex = p->input_tex;
+        index = 0;
     }
 
-    HANDLE shared;
-    hr = IDXGIResource_GetSharedHandle(resource, &shared);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to get shared handle from IDXGIResource: %#lx\n", hr);
-        goto err;
-    }
-
-    ID3D11Device *amf_dev = ICALL(GetDX11Device, a->ctx, AMF_DX11_1); // not refcounted
-    hr = ID3D11Device_OpenSharedResource(amf_dev, shared, &IID_ID3D11Texture2D, (void **)&amf_tex);
-    SAFE_RELEASE(resource);
-    if (FAILED(hr)) {
-        MP_ERR(f, "Failed to open shared resource: %#lx\n", hr);
-        goto err;
-    }
-
-    AMFSurface *out;
-    AMF_RESULT res = ICALL(CreateSurfaceFromDX11Native, a->ctx, amf_tex, &out, dtor);
-    if (res != AMF_OK) {
-        MP_ERR(f, "Failed to create AMF surface from D3D11: %d\n", res);
-        goto err;
-    }
+    AMFSurfaceObserver *dtor = talloc_dup(NULL, (AMFSurfaceObserver *)&amf_dtor);
+    talloc_steal(dtor, src); // release mp_image when no longer needed
 
     // Copied from <https://github.com/GPUOpen-LibrariesAndSDKs/AMF/blob/afed28d37aca1938da2eedc50599bb3535a987ec/amf/public/src/components/Capture/MediaFoundation/MFCaptureImpl.cpp#L64>
     static const GUID AMFTextureArrayIndexGUID = {0x28115527, 0xe7c3, 0x4b66, {0x99, 0xd3, 0x4f, 0x2a, 0xe6, 0xb4, 0x7f, 0xaf}};
-    ID3D11Resource_SetPrivateData(amf_tex, &AMFTextureArrayIndexGUID, sizeof(index), &index);
-    SAFE_RELEASE(amf_tex);
+    ID3D11Texture2D_SetPrivateData(tex, &AMFTextureArrayIndexGUID, sizeof(index), &index);
+
+    AMFSurface *out;
+    AMF_RESULT res = ICALL(CreateSurfaceFromDX11Native, a->ctx, tex, &out, dtor);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to create AMF surface from D3D11: %d\n", res);
+        talloc_free(dtor);
+        return NULL;
+    }
 
     if (src->pts != MP_NOPTS_VALUE)
         ICALL(SetPts, out, (amf_pts)(src->pts * AMF_SECOND));
@@ -549,18 +497,573 @@ static AMFSurface *mp_image_to_amf_surface(struct mp_filter *f, struct mp_image 
         MP_WARN(f, "Warning: source image has no PTS.\n");
 
     return out;
-
-err:
-    SAFE_RELEASE(resource);
-    SAFE_RELEASE(amf_tex);
-    talloc_free(dtor);
-    return NULL;
 }
 
-static void process(struct mp_filter *f)
+static const struct amf_backend d3d11_backend = {
+    .imgfmt = IMGFMT_D3D11,
+    .device_type = AV_HWDEVICE_TYPE_D3D11VA,
+    .vqe_engine = AMF_MEMORY_DX11,
+    .frc_engine = FRC_ENGINE_DX11,
+    .init = d3d11_init,
+    .uninit = d3d11_uninit,
+    .lock = d3d11_lock,
+    .unlock = d3d11_unlock,
+    .get_size = d3d11_get_size,
+    .to_amf = d3d11_to_amf,
+    .from_amf = d3d11_from_amf,
+};
+
+#if HAVE_VULKAN
+struct vk_frame_hold {
+    AMFSurfaceObserver observer;
+    struct mp_image *img;
+    AMFVulkanSurface surface;
+    AMFVulkanTimeline timeline;
+    uint64_t claimed;
+};
+
+static AMF_STD_CALL void vk_frame_release(AMFSurfaceObserver *observer,
+                                          AMFSurface *surface)
+{
+    struct vk_frame_hold *h = (struct vk_frame_hold *)observer;
+
+    if (h->timeline.uiCount < h->claimed) {
+        AVHWFramesContext *hwfc = (void *)h->img->hwctx->data;
+        AVVulkanDeviceContext *vk = hwfc->device_ctx->hwctx;
+        AVVkFrame *vkf = (void *)h->img->planes[0];
+        VkSemaphoreSignalInfo info = {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO,
+            .semaphore = vkf->sem[0],
+            .value = h->claimed,
+        };
+        vkSignalSemaphore(vk->act_dev, &info);
+    }
+    talloc_free(h);
+}
+
+static const AMFSurfaceObserverVtbl vk_frame_hold_vtbl = {
+    .OnSurfaceDataRelease = vk_frame_release,
+};
+
+static AMFSurface *vk_wrap(struct mp_filter *f, struct mp_image *img,
+                           VkImageLayout layout)
+{
+    struct priv *p = f->priv;
+    AVHWFramesContext *hwfc = (void *)img->hwctx->data;
+    AVVulkanFramesContext *vkfc = hwfc->hwctx;
+    AVVkFrame *vkf = (void *)img->planes[0];
+
+    if (vkf->img[1]) {
+        MP_ERR(f, "AMF needs single-image multiplane Vulkan frames.\n");
+        talloc_free(img);
+        return NULL;
+    }
+
+    struct vk_frame_hold *h = talloc_zero(NULL, struct vk_frame_hold);
+    h->observer.pVtbl = &vk_frame_hold_vtbl;
+    h->img = talloc_steal(h, img);
+
+    vkfc->lock_frame(hwfc, vkf);
+    h->timeline = (AMFVulkanTimeline) {
+        .cbSizeof = sizeof(h->timeline),
+        .eExtensionType = AMF_VARIANT_TIMELINE_SEMAPHORE,
+        .uiCount = vkf->sem_value[0],
+    };
+    h->surface = (AMFVulkanSurface) {
+        .cbSizeof = sizeof(h->surface),
+        .hImage = vkf->img[0],
+        .hMemory = vkf->mem[0],
+        .iSize = vkf->size[0],
+        .eFormat = vkfc->format[0],
+        .iWidth = hwfc->width,
+        .iHeight = hwfc->height,
+        .eCurrentLayout = vkf->layout[0],
+        .Sync = {
+            .cbSizeof = sizeof(h->surface.Sync),
+            .pNext = &h->timeline,
+            .hSemaphore = vkf->sem[0],
+            .bSubmitted = true,
+        },
+    };
+    AMFSurface *out = NULL;
+    AMF_RESULT res = ICALL(CreateSurfaceFromVulkanNative, p->ctx1, &h->surface,
+                           &out, &h->observer);
+    if (res == AMF_OK) {
+        h->claimed = ++vkf->sem_value[0];
+        vkf->layout[0] = layout;
+        vkf->access[0] = VK_ACCESS_2_NONE;
+    }
+    vkfc->unlock_frame(hwfc, vkf);
+
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to create AMF surface from Vulkan: %d\n", res);
+        talloc_free(h);
+        return NULL;
+    }
+    return out;
+}
+
+static void vk_lock(struct priv *p)
+{
+    p->vulkan->lock_queue(p->vulkan, p->vk_qf, 0);
+}
+
+static void vk_unlock(struct priv *p)
+{
+    p->vulkan->unlock_queue(p->vulkan, p->vk_qf, 0);
+}
+
+static void vk_uninit(struct priv *p)
+{
+    av_buffer_unref(&p->vk_out_frames);
+    if (p->ctx1)
+        ICALL(Release, p->ctx1);
+    p->ctx1 = NULL;
+}
+
+static int vk_init(struct mp_filter *f)
 {
     struct priv *p = f->priv;
     struct amf_priv *a = p->amf;
+    AVHWDeviceContext *avhwctx = (void *)p->av_device_ref->data;
+    AVVulkanDeviceContext *vk = avhwctx->hwctx;
+    AMF_RESULT res;
+
+    p->vulkan = avhwctx->user_opaque;
+    p->vk_qf = p->vulkan->queue_compute.index;
+
+    HMODULE loader = GetModuleHandleW(L"vulkan-1.dll");
+    void *gipa = (void *)vk->get_proc_addr(NULL, "vkGetInstanceProcAddr");
+    if (!loader || !gipa ||
+        gipa != (void *)GetProcAddress(loader, "vkGetInstanceProcAddr"))
+    {
+        MP_ERR(f, "AMF requires mpv to use the system Vulkan loader.\n");
+        return -1;
+    }
+
+    AMF_ASSIGN_PROPERTY_BOOL(res, a->ctx,
+                             AMF_CONTEXT_VULKAN_USE_TIMELINE_SEMAPHORES, true);
+    if (res != AMF_OK) {
+        MP_ERR(f, "AMF does not support Vulkan timeline semaphores: %d\n", res);
+        return -1;
+    }
+
+    AMFGuid guid = IID_AMFContext1();
+    res = ICALL(QueryInterface, a->ctx, &guid, (void **)&p->ctx1);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to query AMFContext1: %d\n", res);
+        return -1;
+    }
+
+    a->vk_dev = (AMFVulkanDevice) {
+        .cbSizeof = sizeof(a->vk_dev),
+        .hInstance = vk->inst,
+        .hPhysicalDevice = vk->phys_dev,
+        .hDevice = vk->act_dev,
+    };
+    vk_lock(p);
+    res = ICALL(InitVulkan, p->ctx1, &a->vk_dev);
+    vk_unlock(p);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to initialize AMF context with Vulkan: %d\n", res);
+        return -1;
+    }
+
+    return 0;
+}
+
+static void vk_get_size(struct mp_image *src, int *w, int *h)
+{
+    AVHWFramesContext *hwfc = (void *)src->hwctx->data;
+    *w = hwfc->width;
+    *h = hwfc->height;
+}
+
+static AMFSurface *vk_to_amf(struct mp_filter *f, struct mp_image *src)
+{
+    struct priv *p = f->priv;
+    AVHWFramesContext *hwfc = (void *)src->hwctx->data;
+    double pts = src->pts;
+
+    AMFSurface *out = NULL;
+    AMF_RESULT res = ICALL(AllocSurface, p->amf->ctx, AMF_MEMORY_VULKAN,
+                           imgfmt2amf(src->params.hw_subfmt),
+                           hwfc->width, hwfc->height, &out);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to allocate AMF surface: %d\n", res);
+        talloc_free(src);
+        return NULL;
+    }
+
+    AMFSurface *in = vk_wrap(f, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+    if (!in) {
+        ICALL(Release, out);
+        return NULL;
+    }
+
+    res = ICALL(CopySurfaceRegion, in, out, 0, 0, 0, 0, hwfc->width,
+                hwfc->height);
+    ICALL(Release, in);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to copy the input image: %d\n", res);
+        ICALL(Release, out);
+        return NULL;
+    }
+
+    if (pts != MP_NOPTS_VALUE)
+        ICALL(SetPts, out, (amf_pts)(pts * AMF_SECOND));
+    else
+        MP_WARN(f, "Warning: source image has no PTS.\n");
+
+    return out;
+}
+
+static struct mp_image *vk_from_amf(struct mp_filter *f, AMFSurface *src)
+{
+    struct priv *p = f->priv;
+    AVHWFramesContext *in_fc = (void *)p->ref_image->hwctx->data;
+
+    if (!p->vk_out_frames) {
+        p->vk_out_frames = av_hwframe_ctx_alloc(p->av_device_ref);
+        MP_HANDLE_OOM(p->vk_out_frames);
+        AVHWFramesContext *fc = (void *)p->vk_out_frames->data;
+        fc->format = AV_PIX_FMT_VULKAN;
+        fc->sw_format = in_fc->sw_format;
+        fc->width = in_fc->width;
+        fc->height = in_fc->height;
+        if (av_hwframe_ctx_init(p->vk_out_frames) < 0) {
+            MP_ERR(f, "Failed to create the Vulkan output frame pool.\n");
+            av_buffer_unref(&p->vk_out_frames);
+            return NULL;
+        }
+    }
+
+    AVFrame *av_frame = av_frame_alloc();
+    MP_HANDLE_OOM(av_frame);
+    if (av_hwframe_get_buffer(p->vk_out_frames, av_frame, 0) < 0) {
+        MP_ERR(f, "Failed to allocate a Vulkan output frame.\n");
+        av_frame_free(&av_frame);
+        return NULL;
+    }
+    struct mp_image *out = mp_image_from_av_frame(av_frame);
+    av_frame_free(&av_frame);
+    if (!out)
+        return NULL;
+    mp_image_copy_attributes(out, p->ref_image);
+    mp_image_set_size(out, p->ref_image->w, p->ref_image->h);
+    out->pts = ICALL(GetPts, src) / (double)AMF_SECOND;
+
+    struct mp_image *ref = mp_image_new_ref(out);
+    MP_HANDLE_OOM(ref);
+    AMFSurface *dst = vk_wrap(f, ref, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    AMF_RESULT res = AMF_FAIL;
+    if (dst) {
+        vk_lock(p);
+        res = ICALL(Convert, src, AMF_MEMORY_VULKAN);
+        if (res == AMF_OK && ICALL(GetMemoryType, src) != AMF_MEMORY_VULKAN)
+            res = AMF_NOT_SUPPORTED;
+        if (res == AMF_OK)
+            res = ICALL(CopySurfaceRegion, src, dst, 0, 0, 0, 0, in_fc->width,
+                        in_fc->height);
+        vk_unlock(p);
+        ICALL(Release, dst);
+    }
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to copy the output image: %d\n", res);
+        talloc_free(out);
+        return NULL;
+    }
+
+    ICALL(Release, src);
+    return out;
+}
+
+static const struct amf_backend vulkan_backend = {
+    .imgfmt = IMGFMT_VULKAN,
+    .device_type = AV_HWDEVICE_TYPE_VULKAN,
+    .vqe_engine = AMF_MEMORY_VULKAN,
+    .frc_engine = FRC_ENGINE_VULKAN,
+    .init = vk_init,
+    .uninit = vk_uninit,
+    .lock = vk_lock,
+    .unlock = vk_unlock,
+    .get_size = vk_get_size,
+    .to_amf = vk_to_amf,
+    .from_amf = vk_from_amf,
+};
+#endif
+
+static const struct amf_backend *const amf_backends[] = {
+    &d3d11_backend,
+#if HAVE_VULKAN
+    &vulkan_backend,
+#endif
+};
+
+static int create_amf_context(struct mp_filter *f, struct mp_image *src)
+{
+    struct priv *p = f->priv;
+    struct amf_priv *a = p->amf;
+
+    for (int i = 0; i < MP_ARRAY_SIZE(amf_backends); i++) {
+        if (amf_backends[i]->imgfmt == src->imgfmt)
+            p->be = amf_backends[i];
+    }
+    if (!p->be) {
+        MP_ERR(f, "Unsupported input format %s. Use `--hwdec=d3d11va`, "
+                  "`--hwdec=vulkan` or `--vf-pre=format=d3d11`.\n",
+               mp_imgfmt_to_name(src->imgfmt));
+        return -1;
+    }
+
+    struct mp_stream_info *info = mp_filter_find_stream_info(f);
+    if (!info || !info->hwdec_devs) {
+        MP_ERR(f, "No hwdec devices available for AMF initialization.\n");
+        goto err;
+    }
+
+    struct hwdec_imgfmt_request params = {
+        .imgfmt = p->be->imgfmt,
+        .probing = false,
+    };
+    hwdec_devices_request_for_img_fmt(info->hwdec_devs, &params);
+    struct mp_hwdec_ctx *hwctx =
+        hwdec_devices_get_by_imgfmt_and_type(info->hwdec_devs, p->be->imgfmt,
+                                             p->be->device_type);
+    if (!hwctx || !hwctx->av_device_ref) {
+        MP_ERR(f, "No suitable %s hwdec device found for AMF initialization.\n",
+               mp_imgfmt_to_name(p->be->imgfmt));
+        goto err;
+    }
+
+    p->av_device_ref = av_buffer_ref(hwctx->av_device_ref);
+    MP_HANDLE_OOM(p->av_device_ref);
+
+    AMF_RESULT res = ICALL(CreateContext, a->factory, &a->ctx);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to create AMF context: %d\n", res);
+        goto err;
+    }
+
+    if (p->be->init(f) < 0)
+        goto err;
+
+    return 0;
+
+err:
+    if (p->be)
+        p->be->uninit(p);
+    p->be = NULL;
+    return -1;
+}
+
+static AMF_RESULT amf_submit_image(struct mp_filter *f, struct mp_image *in,
+                                   amf_init_fn init)
+{
+    struct priv *p = f->priv;
+    struct amf_priv *a = p->amf;
+    AMF_RESULT res = AMF_FAIL;
+
+    if (!a->ctx) {
+        if (create_amf_context(f, in) < 0 ||
+            create_amf_component(f, p->component_name) < 0)
+        {
+            talloc_free(in);
+            return AMF_FAIL;
+        }
+    }
+
+    amf_lock(p);
+
+    if (!mp_image_params_static_equal(&in->params, &p->params)) {
+        MP_VERBOSE(f, "Input image parameters changed, reinitializing...\n");
+        ICALL(Terminate, a->comp);
+        p->params = in->params;
+        if (init(f, in, false) < 0) {
+            MP_ERR(f, "AMF component init failed\n");
+            talloc_free(in);
+            goto done;
+        }
+    }
+
+    AMFSurface *surface = p->be->to_amf(f, in);
+    if (!surface) {
+        MP_WARN(f, "Failed to create AMF surface\n");
+        goto done;
+    }
+
+    res = ICALL(SubmitInput, a->comp, (AMFData *)surface);
+    // This shouldn't happen according to docs, but it does...
+    if (res == AMF_EOF) {
+        MP_ERR(f, "SubmitInput returned AMF_EOF, reinitializing...\n");
+        if (init(f, p->ref_image, true) < 0) {
+            MP_ERR(f, "AMF component reinit failed\n");
+            ICALL(Release, surface);
+            res = AMF_FAIL;
+            goto done;
+        }
+        res = ICALL(SubmitInput, a->comp, (AMFData *)surface);
+    }
+
+    ICALL(Release, surface);
+
+    if (res != AMF_OK && res != AMF_EOF && res != AMF_INPUT_FULL) {
+        MP_WARN(f, "SubmitInput failed: %d\n", res);
+        res = AMF_FAIL;
+    }
+
+done:
+    amf_unlock(p);
+    return res;
+}
+
+static AMF_RESULT amf_query_output(struct mp_filter *f, AMFSurface **out)
+{
+    struct priv *p = f->priv;
+
+    *out = NULL;
+    if (!p->amf->comp)
+        return AMF_EOF;
+    amf_lock(p);
+    AMF_RESULT res = ICALL(QueryOutput, p->amf->comp, (AMFData **)out);
+    amf_unlock(p);
+    return res;
+}
+
+static void amf_drain(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
+
+    if (!p->amf->comp)
+        return;
+    amf_lock(p);
+    ICALL(Drain, p->amf->comp);
+    amf_unlock(p);
+}
+
+static struct mp_filter *amf_create(struct mp_filter *parent, void *options,
+                                    const struct mp_filter_info *info,
+                                    const wchar_t *component_name)
+{
+    struct mp_filter *f = mp_filter_create(parent, info);
+    if (!f) {
+        talloc_free(options);
+        return NULL;
+    }
+
+    mp_filter_add_pin(f, MP_PIN_IN, "in");
+    mp_filter_add_pin(f, MP_PIN_OUT, "out");
+
+    struct priv *p = f->priv;
+    p->opts = talloc_steal(p, options);
+    p->amf = talloc_zero(NULL, struct amf_priv);
+    mp_rc_init(&p->amf->ref_count);
+
+    if (load_amf_library(p->amf) < 0) {
+        MP_ERR(f, "Failed to load AMF library\n");
+        goto fail;
+    }
+
+    p->component_name = component_name;
+    return f;
+
+fail:
+    talloc_free(f);
+    return NULL;
+}
+
+struct frc_opts {
+    int profile;
+    int mv_search_mode;
+    bool fallback_blend;
+    bool indicator;
+    bool use_future_frame;
+};
+
+static int frc_init(struct mp_filter *f, struct mp_image *src, bool reinit)
+{
+    AMF_RESULT res;
+    struct priv *p = f->priv;
+    struct amf_priv *a = p->amf;
+    struct frc_opts *opts = p->opts;
+
+    mp_assert(a->comp);
+
+    AMF_SURFACE_FORMAT amf_fmt;
+    int width, height;
+    if (amf_get_init_params(f, src, &amf_fmt, &width, &height) < 0)
+        goto err;
+
+    if (reinit)
+        goto init;
+
+    AMF_ASSIGN_PROPERTY_INT64(res, a->comp, AMF_FRC_ENGINE_TYPE,
+                              p->be->frc_engine);
+    if (res != AMF_OK) {
+        MP_WARN(f, "Failed to set FRC engine type: %d\n", res);
+        goto err;
+    }
+
+    AMF_ASSIGN_PROPERTY_INT64(res, a->comp, AMF_FRC_MODE, FRC_x2_PRESENT);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to set FRC mode to x2_PRESENT: %d\n", res);
+        goto err;
+    }
+
+    int profile = opts->profile;
+    if (profile == -1) {
+        if (p->params.h >= 1440)
+            profile = FRC_PROFILE_SUPER;
+        else
+            profile = FRC_PROFILE_HIGH;
+    }
+    AMF_ASSIGN_PROPERTY_INT64(res, a->comp, AMF_FRC_PROFILE, profile);
+    if (res != AMF_OK) {
+        MP_WARN(f, "Failed to set FRC profile: %d\n", res);
+        goto err;
+    }
+
+    AMF_ASSIGN_PROPERTY_INT64(res, a->comp, AMF_FRC_MV_SEARCH_MODE,
+                              opts->mv_search_mode);
+    if (res != AMF_OK) {
+        MP_WARN(f, "Failed to set FRC motion vector search mode: %d\n", res);
+        goto err;
+    }
+
+    AMF_ASSIGN_PROPERTY_BOOL(res, a->comp, AMF_FRC_ENABLE_FALLBACK,
+                             opts->fallback_blend);
+    if (res != AMF_OK) {
+        MP_WARN(f, "Failed to set FRC fallback mode: %d\n", res);
+        goto err;
+    }
+
+    AMF_ASSIGN_PROPERTY_BOOL(res, a->comp, AMF_FRC_INDICATOR, opts->indicator);
+    if (res != AMF_OK) {
+        MP_WARN(f, "Failed to set FRC indicator: %d\n", res);
+        goto err;
+    }
+
+    AMF_ASSIGN_PROPERTY_BOOL(res, a->comp, AMF_FRC_USE_FUTURE_FRAME,
+                             opts->use_future_frame);
+    if (res != AMF_OK) {
+        MP_WARN(f, "Failed to set FRC use_future_frame: %d\n", res);
+        goto err;
+    }
+
+init:
+    if (amf_component_init(f, amf_fmt, width, height) < 0)
+        goto err;
+
+    return 0;
+
+err:
+    ICALL(Terminate, a->comp);
+    return -1;
+}
+
+static void frc_process(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
 
     if (!mp_pin_in_needs_data(f->ppins[1]))
         return;
@@ -580,7 +1083,7 @@ static void process(struct mp_filter *f)
     }
 
     if (frame.type == MP_FRAME_EOF) {
-        ICALL(Drain, a->frc);
+        amf_drain(f);
         goto read_out;
     }
 
@@ -595,54 +1098,19 @@ static void process(struct mp_filter *f)
     mp_image_unrefp(&p->ref_image);
     p->ref_image = mp_image_new_ref(in);
 
-    if (!mp_image_params_static_equal(&in->params, &p->params)) {
-        MP_VERBOSE(f, "Input image parameters changed, reinitializing...\n");
-        ICALL(Terminate, a->frc);
-        p->params = in->params;
-        if (init_frc(f, in, false) < 0) {
-            MP_ERR(f, "FRC init failed\n");
-            mp_filter_internal_mark_failed(f);
-            return;
-        }
-    }
-
-    AMFSurface *surface = mp_image_to_amf_surface(f, in);
-    if (!surface) {
-        MP_WARN(f, "Failed to create AMF surface\n");
-        mp_filter_internal_mark_failed(f);
-        return;
-    }
-
-    AMF_RESULT res = ICALL(SubmitInput, a->frc, (AMFData *)surface);
-    // This shouldn't happen according to docs, but it does...
-    if (res == AMF_EOF) {
-        MP_ERR(f, "FRC SubmitInput returned AMF_EOF, reinitializing...\n");
-        if (init_frc(f, p->ref_image, true) < 0) {
-            MP_ERR(f, "FRC reinit failed\n");
-            mp_filter_internal_mark_failed(f);
-            return;
-        }
-        res = ICALL(SubmitInput, a->frc, (AMFData *)surface);
-    }
-
-    ICALL(Release, surface);
+    AMF_RESULT res = amf_submit_image(f, in, frc_init);
 
     if (res == AMF_INPUT_FULL) {
-        MP_WARN(f, "FRC input queue full...\n");
         frame = (struct mp_frame){MP_FRAME_VIDEO, mp_image_new_ref(p->ref_image)};
         mp_pin_out_unread(f->ppins[0], frame);
-        return;
-    }
-
-    if (res != AMF_OK && res != AMF_EOF) {
-        MP_WARN(f, "FRC SubmitInput failed: %d\n", res);
+    } else if (res == AMF_FAIL) {
         mp_filter_internal_mark_failed(f);
         return;
     }
 
 read_out:;
-    AMFSurface *amf_out = NULL;
-    res = ICALL(QueryOutput, a->frc, (AMFData **)&amf_out);
+    AMFSurface *amf_out;
+    res = amf_query_output(f, &amf_out);
 
     if (res == AMF_EOF) {
         p->has_frame = false;
@@ -651,18 +1119,23 @@ read_out:;
     }
 
     if (res != AMF_OK && res != AMF_REPEAT) {
-        MP_WARN(f, "FRC QueryOutput returned: %d\n", res);
+        MP_WARN(f, "QueryOutput returned: %d\n", res);
         mp_filter_internal_mark_failed(f);
         return;
     }
 
     if (!amf_out && res == AMF_REPEAT) {
-        MP_WARN(f, "FRC QueryOutput returned NULL surface with AMF_REPEAT\n");
+        MP_WARN(f, "QueryOutput returned NULL surface with AMF_REPEAT\n");
         mp_filter_internal_mark_failed(f);
         return;
     }
 
-    struct mp_image *out = mp_image_from_amf_surface(f, amf_out);
+    if (!amf_out) {
+        mp_filter_internal_mark_progress(f);
+        return;
+    }
+
+    struct mp_image *out = p->be->from_amf(f, amf_out);
     if (!out) {
         MP_WARN(f, "Failed to create mp_image from AMF surface\n");
         ICALL(Release, amf_out);
@@ -684,7 +1157,7 @@ read_out:;
 
 static const struct mp_filter_info vf_amf_frc_filter = {
     .name = "amf_frc",
-    .process = process,
+    .process = frc_process,
     .reset = flush,
     .destroy = destroy,
     .priv_size = sizeof(struct priv),
@@ -693,40 +1166,11 @@ static const struct mp_filter_info vf_amf_frc_filter = {
 static struct mp_filter *vf_amf_frc_create(struct mp_filter *parent,
                                            void *options)
 {
-    struct mp_filter *f = mp_filter_create(parent, &vf_amf_frc_filter);
-    if (!f) {
-        talloc_free(options);
-        return NULL;
-    }
-
-    mp_filter_add_pin(f, MP_PIN_IN, "in");
-    mp_filter_add_pin(f, MP_PIN_OUT, "out");
-
-    struct priv *p = f->priv;
-    p->opts = talloc_steal(p, options);
-    p->amf = talloc_zero(NULL, struct amf_priv);
-    mp_rc_init(&p->amf->ref_count);
-
-    if (load_amf_library(p->amf) < 0) {
-        MP_ERR(f, "Failed to load AMF library\n");
-        goto fail;
-    }
-
-    if (create_amf_context(f) < 0)
-        goto fail;
-
-    if (create_amf_frc(f) < 0)
-        goto fail;
-
-    return f;
-
-fail:
-    talloc_free(f);
-    return NULL;
+    return amf_create(parent, options, &vf_amf_frc_filter, AMFFRC);
 }
 
-#define OPT_BASE_STRUCT struct opts
-static const m_option_t vf_opts_fields[] = {
+#define OPT_BASE_STRUCT struct frc_opts
+static const m_option_t vf_frc_opts_fields[] = {
     {"profile", OPT_CHOICE(profile,
         {"auto", -1},
         {"low", FRC_PROFILE_LOW},
@@ -751,7 +1195,163 @@ const struct mp_user_filter_entry vf_amf_frc = {
             .mv_search_mode = FRC_MV_SEARCH_NATIVE,
             .use_future_frame = true,
         },
-        .options = vf_opts_fields,
+        .options = vf_frc_opts_fields,
     },
     .create = vf_amf_frc_create,
 };
+#undef OPT_BASE_STRUCT
+
+struct vqe_opts {
+    double attenuation;
+};
+
+static int vqe_init(struct mp_filter *f, struct mp_image *src, bool reinit)
+{
+    AMF_RESULT res;
+    struct priv *p = f->priv;
+    struct amf_priv *a = p->amf;
+    struct vqe_opts *opts = p->opts;
+
+    mp_assert(a->comp);
+
+    AMF_SURFACE_FORMAT amf_fmt;
+    int width, height;
+    if (amf_get_init_params(f, src, &amf_fmt, &width, &height) < 0)
+        goto err;
+
+    if (reinit)
+        goto init;
+
+    AMF_ASSIGN_PROPERTY_INT64(res, a->comp, AMF_VIDEO_ENHANCER_ENGINE_TYPE,
+                              p->be->vqe_engine);
+    if (res != AMF_OK) {
+        MP_WARN(f, "Failed to set VQE engine type: %d\n", res);
+        goto err;
+    }
+
+    AMF_ASSIGN_PROPERTY_DOUBLE(res, a->comp, AMF_VE_FCR_ATTENUATION,
+                               opts->attenuation);
+    if (res != AMF_OK) {
+        MP_ERR(f, "Failed to set VQE attenuation: %d\n", res);
+        goto err;
+    }
+
+init:
+    if (amf_component_init(f, amf_fmt, width, height) < 0)
+        goto err;
+
+    return 0;
+
+err:
+    ICALL(Terminate, a->comp);
+    return -1;
+}
+
+static void vqe_process(struct mp_filter *f)
+{
+    struct priv *p = f->priv;
+
+    if (!mp_pin_in_needs_data(f->ppins[1]))
+        return;
+
+    if (!mp_pin_out_request_data(f->ppins[0]))
+        return;
+
+    struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
+
+    if (frame.type == MP_FRAME_NONE) {
+        MP_WARN(f, "Needs a frame, but got MP_FRAME_NONE...\n");
+        return;
+    }
+
+    if (frame.type == MP_FRAME_EOF) {
+        amf_drain(f);
+        goto read_out;
+    }
+
+    if (frame.type != MP_FRAME_VIDEO) {
+        MP_ERR(f, "Unexpected frame type: %d\n", frame.type);
+        mp_frame_unref(&frame);
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    struct mp_image *in = frame.data;
+    mp_image_unrefp(&p->ref_image);
+    p->ref_image = mp_image_new_ref(in);
+
+    AMF_RESULT res = amf_submit_image(f, in, vqe_init);
+
+    if (res == AMF_INPUT_FULL) {
+        frame = (struct mp_frame){MP_FRAME_VIDEO, mp_image_new_ref(p->ref_image)};
+        mp_pin_out_unread(f->ppins[0], frame);
+    } else if (res == AMF_FAIL) {
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+read_out:;
+    AMFSurface *amf_out;
+    res = amf_query_output(f, &amf_out);
+
+    if (res == AMF_EOF) {
+        mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_EOF, NULL));
+        return;
+    }
+
+    if (res != AMF_OK && res != AMF_REPEAT) {
+        MP_WARN(f, "QueryOutput returned: %d\n", res);
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    if (!amf_out) {
+        mp_filter_internal_mark_progress(f);
+        return;
+    }
+
+    struct mp_image *out = p->be->from_amf(f, amf_out);
+    if (!out) {
+        MP_WARN(f, "Failed to create mp_image from AMF surface\n");
+        ICALL(Release, amf_out);
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    mp_image_unrefp(&p->ref_image);
+    mp_pin_in_write(f->ppins[1], MAKE_FRAME(MP_FRAME_VIDEO, out));
+}
+
+static const struct mp_filter_info vf_amf_vqe_filter = {
+    .name = "amf_vqe",
+    .process = vqe_process,
+    .reset = flush,
+    .destroy = destroy,
+    .priv_size = sizeof(struct priv),
+};
+
+static struct mp_filter *vf_amf_vqe_create(struct mp_filter *parent,
+                                           void *options)
+{
+    return amf_create(parent, options, &vf_amf_vqe_filter, AMFVQEnhancer);
+}
+
+#define OPT_BASE_STRUCT struct vqe_opts
+static const m_option_t vf_vqe_opts_fields[] = {
+    {"attenuation", OPT_DOUBLE(attenuation), M_RANGE(0.02, 0.4)},
+    {0}
+};
+
+const struct mp_user_filter_entry vf_amf_vqe = {
+    .desc = {
+        .description = "AMD Video Quality Enhancer filter",
+        .name = "amf_vqe",
+        .priv_size = sizeof(OPT_BASE_STRUCT),
+        .priv_defaults = &(const OPT_BASE_STRUCT) {
+            .attenuation = VE_FCR_DEFAULT_ATTENUATION,
+        },
+        .options = vf_vqe_opts_fields,
+    },
+    .create = vf_amf_vqe_create,
+};
+#undef OPT_BASE_STRUCT
