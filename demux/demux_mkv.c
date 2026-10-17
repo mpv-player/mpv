@@ -31,6 +31,7 @@
 #include <libavutil/common.h>
 #include <libavutil/dovi_meta.h>
 #include <libavutil/lzo.h>
+#include <libavutil/mathematics.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/avstring.h>
 
@@ -178,9 +179,9 @@ typedef struct mkv_index {
 } mkv_index_t;
 
 struct block_info {
-    uint64_t duration, discardpadding;
+    uint64_t duration;
     bool simple, keyframe, duration_known;
-    int64_t timecode;
+    int64_t timecode, discardpadding;
     mkv_track_t *track;
     // Actual packet data.
     AVBufferRef *laces[MAX_NUM_LACES];
@@ -3203,9 +3204,15 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             if (i == 0 && block_info->duration_known)
                 dp->duration = block_duration / 1e9;
             if (stream->type == STREAM_AUDIO) {
-                unsigned int srate = stream->codec->samplerate;
-                demux_packet_set_padding(dp, 0,
-                    block_info->discardpadding / 1e9 * srate);
+                int64_t padding = av_rescale(block_info->discardpadding,
+                                             stream->codec->samplerate,
+                                             1000000000);
+                int start = 0, end = 0;
+                if (padding < 0 && i == 0)
+                    start = -padding;
+                if (padding > 0 && i == block_info->num_laces - 1)
+                    end = padding;
+                demux_packet_set_padding(dp, start, end);
                 mkv_d->a_skip_preroll = 0;
             }
             if (block_info->additions) {
@@ -3255,8 +3262,8 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             break;
 
         case MATROSKA_ID_DISCARDPADDING:
-            block->discardpadding = ebml_read_uint(s);
-            if (block->discardpadding == EBML_UINT_INVALID)
+            block->discardpadding = ebml_read_int(s);
+            if (block->discardpadding == EBML_INT_INVALID)
                 goto error;
             break;
 
