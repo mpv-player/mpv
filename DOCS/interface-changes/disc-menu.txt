@@ -1,3 +1,6 @@
 add `--disc-menu` option
 add `disc-menu-active` property
-add `discnav` command
+add `discnav` command with the `up`, `down`, `left`, `right`, `select`,
+`menu`, `title-menu`, `popup`, `audio-menu`, `sub-menu`, `angle-menu`,
+`up-menu`, `prev`, `red`, `green`, `yellow`, `blue`, `mouse-move` and
+`mouse-click` actions

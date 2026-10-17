@@ -192,14 +192,18 @@ static void d_nav_refresh(demuxer_t *demuxer)
     arm_dvd_sub_holds(p);
 }
 
-static void get_disc_lang(struct stream *stream, struct sh_stream *sh, bool dvd)
+static void get_disc_track_info(struct stream *stream, struct sh_stream *sh, bool dvd)
 {
-    struct stream_lang_req req = {.type = sh->type, .id = sh->demuxer_id};
+    struct stream_track_req req = {.type = sh->type, .id = sh->demuxer_id};
     if (dvd && sh->type == STREAM_SUB)
         req.id = req.id & 0x1F; // mpeg ID to index
-    stream_control(stream, STREAM_CTRL_GET_LANG, &req);
+    stream_control(stream, STREAM_CTRL_GET_TRACK_INFO, &req);
     if (req.name[0])
         sh->lang = talloc_strdup(sh, req.name);
+    sh->forced_track |= !!(req.flags & TRACK_FORCED);
+    sh->visual_impaired_track |= !!(req.flags & TRACK_VISUAL_IMPAIRED);
+    sh->hearing_impaired_track |= !!(req.flags & TRACK_HEARING_IMPAIRED);
+    sh->commentary_track |= !!(req.flags & TRACK_COMMENTARY);
 }
 
 static void add_dvd_streams(demuxer_t *demuxer)
@@ -214,7 +218,7 @@ static void add_dvd_streams(demuxer_t *demuxer)
             struct sh_stream *sh = demux_alloc_sh_stream(STREAM_SUB);
             sh->demuxer_id = n + 0x20;
             sh->codec->codec = "dvd_subtitle";
-            get_disc_lang(stream, sh, true);
+            get_disc_track_info(stream, sh, true);
             p->dvd_subs[n] = sh;
             MP_TARRAY_APPEND(p, p->outer_streams, p->num_outer_streams, sh);
 
@@ -371,7 +375,7 @@ static void sync_streams(struct demuxer *demuxer)
                     outer->codec->par_h = f.p_h;
                 }
             }
-            get_disc_lang(demuxer->stream, outer, p->is_dvd);
+            get_disc_track_info(demuxer->stream, outer, p->is_dvd);
             MP_TARRAY_APPEND(p, p->outer_streams, p->num_outer_streams, outer);
             demux_add_sh_stream(demuxer, outer);
         } else if (outer->type != STREAM_SUB && outer->codec && src->codec) {
