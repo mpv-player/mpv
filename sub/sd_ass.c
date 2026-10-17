@@ -422,23 +422,35 @@ static void filter_and_add(struct sd *sd, struct demux_packet *pkt)
     }
 }
 
+// 64-bit FNV-1a
+static inline uint64_t hash_data(const unsigned char *data, size_t len)
+{
+    uint64_t hash = 0xcbf29ce484222325; // offset basis
+    for (size_t n = 0; n < len; n++)
+        hash = (hash ^ data[n]) * 0x100000001b3; // FNV prime
+    return hash;
+}
+
 // Test if the packet with the given file position and pts was already consumed.
 // Return false if the packet is new (and add it to the internal list), and
-// return true if it was already seen.
+// return true if it was already seen. Packets without a file position are
+// identified by a hash of their contents instead.
 static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *priv = sd->priv;
+    int64_t pos = packet->pos >= 0 ? packet->pos
+                                   : hash_data(packet->buffer, packet->len);
     int a = 0;
     int b = priv->num_seen_packets;
     while (a < b) {
         int mid = a + (b - a) / 2;
         struct seen_packet *seen_packet = &priv->seen_packets[mid];
-        if (packet->pos == seen_packet->pos && packet->pts == seen_packet->pts) {
+        if (pos == seen_packet->pos && packet->pts == seen_packet->pts) {
             packet->seen_pos = mid;
             return true;
         }
-        if (packet->pos > seen_packet->pos ||
-            (packet->pos == seen_packet->pos && packet->pts > seen_packet->pts)) {
+        if (pos > seen_packet->pos ||
+            (pos == seen_packet->pos && packet->pts > seen_packet->pts)) {
             a = mid + 1;
         } else {
             b = mid;
@@ -446,7 +458,7 @@ static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
     }
     packet->seen_pos = a;
     MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a,
-                        (struct seen_packet){packet->pos, packet->pts, -1});
+                        (struct seen_packet){pos, packet->pts, -1});
     return false;
 }
 
@@ -460,8 +472,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     packet->sub_duration = packet->duration;
 
     if (ctx->converter) {
-        if (!sd->opts->sub_clear_on_seek && packet->pos >= 0 &&
-            check_packet_seen(sd, packet))
+        if (!sd->opts->sub_clear_on_seek && check_packet_seen(sd, packet))
             return;
 
         double sub_pts = 0;
