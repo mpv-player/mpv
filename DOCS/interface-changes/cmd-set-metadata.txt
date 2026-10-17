@@ -1,1 +1,0 @@
-make the `metadata/by-key` property writable
