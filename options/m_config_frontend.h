@@ -65,6 +65,7 @@ typedef struct m_config {
     // Registered options.
     struct m_config_option *opts; // all options, even suboptions
     int num_opts;
+    struct m_config_option **sorted_opts; // opts sorted by name, for lookup
 
     // List of defined profiles.
     struct m_profile *profiles;

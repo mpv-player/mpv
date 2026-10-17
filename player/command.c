@@ -91,8 +91,8 @@
 #endif
 
 struct command_ctx {
-    // All properties, terminated with a {0} item.
-    struct m_property *properties;
+    // All properties, sorted by name.
+    struct m_property_list properties;
 
     double last_seek_time;
     double last_seek_pts;
@@ -377,34 +377,18 @@ static int count_lines(char *text)
     return count;
 }
 
-// Given a huge string separated by new lines, attempts to cut off text above
-// the current line to keep the line visible, and below to keep rendering
-// performance up. pos gives the current line (0 for the first line).
+// Given a huge string separated by new lines, cuts off text above the current
+// line to keep the line visible, and below to keep at most max_lines lines, and
+// prepends a header line. pos gives the current line (0 for the first line).
 // "text" might be returned as is, or it can be freed and a new allocation is
 // returned.
-// This is only a heuristic - we can't deal with line breaking.
-static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int pos)
+static char *cut_osd_lines(const char *header, char *text, int pos, int max_lines)
 {
     int count = count_lines(text);
     if (!count)
         return text;
 
-    int max_lines;
-    if (mpctx->video_out && mpctx->opts->video_osd) {
-        int screen_h, font_h;
-        osd_get_text_size(mpctx->osd, &screen_h, &font_h);
-        max_lines = screen_h / MPMAX(font_h, 1);
-    } else {
-        int w = -1;
-        max_lines = 24;
-        terminal_get_size(&w, &max_lines);
-        char *msg = mp_property_expand_escaped_string(mpctx, mpctx->opts->status_msg);
-        max_lines -= msg[0] ? count_lines(msg) : 1;
-        talloc_free(msg);
-    }
-    // Subtract 1 for the header.
-    max_lines--;
-
+    max_lines = MPMAX(max_lines, 0);
     char *new = talloc_asprintf(NULL, "%s [%d/%d]:\n", header, pos + 1, count);
     int start = MPMIN(MPMAX(pos - max_lines / 2, 0), count - max_lines);
     char *head = skip_n_lines(text, start);
@@ -418,6 +402,41 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
     return new;
 }
 
+// Like cut_osd_lines(), but guess max_lines from the OSD or terminal size.
+// This is only a heuristic - we can't deal with line breaking.
+static char *cut_osd_list(struct MPContext *mpctx, const char *header,
+                          char *text, int pos)
+{
+    int max_lines;
+    if (mpctx->video_out && mpctx->opts->video_osd) {
+        int screen_h, font_h;
+        osd_get_text_size(mpctx->osd, &screen_h, &font_h);
+        max_lines = screen_h / MPMAX(font_h, 1);
+    } else {
+        int w = -1;
+        max_lines = 24;
+        terminal_get_size(&w, &max_lines);
+        // Leave room for the last printed terminal status message.
+        char *status = mpctx->term_osd_status;
+        max_lines -= status && status[0] ? count_lines(status) : 1;
+    }
+    // Subtract 1 for the header.
+    return cut_osd_lines(header, text, pos, max_lines - 1);
+}
+
+// Finish M_PROPERTY_PRINT or M_PROPERTY_PRINT_LIMITED of a list property.
+static void print_osd_list(struct MPContext *mpctx, int action, void *arg,
+                           const char *header, char *text, int pos)
+{
+    if (action == M_PROPERTY_PRINT_LIMITED) {
+        struct m_property_print_limited *p = arg;
+        p->num_lines = count_lines(text);
+        p->out = cut_osd_lines(header, text, pos, p->max_lines);
+    } else {
+        *(char **)arg = cut_osd_list(mpctx, header, text, pos);
+    }
+}
+
 static char *format_delay(double time)
 {
     return talloc_asprintf(NULL, "%.f ms", time * 1000);
@@ -428,9 +447,8 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct m_config_option *opt =
-        m_config_get_co(mpctx->mconfig, bstr0(prop->name));
-
+    struct m_config_option *opt = prop->is_option ? prop->priv :
+                        m_config_get_co(mpctx->mconfig, bstr0(prop->name));
     if (!opt)
         return M_PROPERTY_UNKNOWN;
 
@@ -1097,7 +1115,8 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     int count = get_chapter_count(mpctx);
     switch (action) {
-    case M_PROPERTY_PRINT: {
+    case M_PROPERTY_PRINT:
+    case M_PROPERTY_PRINT_LIMITED: {
         int cur = mpctx->playback_initialized ? get_current_chapter(mpctx) : -1;
         char *res = NULL;
         int n;
@@ -1117,7 +1136,14 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
             talloc_free(time);
         }
 
-        *(char **)arg = count ? cut_osd_list(mpctx, "Chapters", res, cur) : res;
+        if (count) {
+            print_osd_list(mpctx, action, arg, "Chapters", res, cur);
+        } else if (action == M_PROPERTY_PRINT_LIMITED) {
+            *(struct m_property_print_limited *)arg =
+                (struct m_property_print_limited){ .out = res };
+        } else {
+            *(char **)arg = res;
+        }
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET: {
@@ -3587,7 +3613,8 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
         talloc_free(lines);
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_PRINT: {
+    case M_PROPERTY_PRINT:
+    case M_PROPERTY_PRINT_LIMITED: {
         struct sub_lines *lines = sub_get_lines(sub);
         if (!lines)
             return M_PROPERTY_UNAVAILABLE;
@@ -3611,7 +3638,7 @@ static int mp_property_sub_lines(void *ctx, struct m_property *prop,
                 pos += count_lines(lines->entries[i - 1].text);
         }
 
-        *(char **)arg = cut_osd_list(mpctx, "Subtitle lines", res, pos);
+        print_osd_list(mpctx, action, arg, "Subtitle lines", res, pos);
         talloc_free(lines);
         return M_PROPERTY_OK;
     }
@@ -3737,7 +3764,7 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (action == M_PROPERTY_PRINT) {
+    if (action == M_PROPERTY_PRINT || action == M_PROPERTY_PRINT_LIMITED) {
         struct playlist *pl = mpctx->playlist;
         char *res = talloc_strdup(NULL, "");
 
@@ -3762,8 +3789,8 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
             }
         }
 
-        *(char **)arg = cut_osd_list(mpctx, "Playlist", res,
-                                     playlist_entry_to_index(pl, pl->current));
+        print_osd_list(mpctx, action, arg, "Playlist", res,
+                       playlist_entry_to_index(pl, pl->current));
         return M_PROPERTY_OK;
     }
 
@@ -4204,9 +4231,9 @@ static int mp_property_list(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET: {
         char **list = NULL;
         int num = 0;
-        for (int n = 0; cmd->properties[n].name; n++) {
+        for (int n = 0; n < cmd->properties.num; n++) {
             MP_TARRAY_APPEND(NULL, list, num,
-                                talloc_strdup(NULL, cmd->properties[n].name));
+                             talloc_strdup(NULL, cmd->properties.props[n].name));
         }
         MP_TARRAY_APPEND(NULL, list, num, NULL);
         *(char ***)arg = list;
@@ -4981,8 +5008,8 @@ uint64_t mp_get_property_event_mask(const char *name)
 int mp_get_property_id(struct MPContext *mpctx, const char *name)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
-    for (int n = 0; ctx->properties[n].name; n++) {
-        if (match_property(ctx->properties[n].name, name))
+    for (int n = 0; n < ctx->properties.num; n++) {
+        if (match_property(ctx->properties.props[n].name, name))
             return n;
     }
     return -1;
@@ -5010,10 +5037,10 @@ int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
     struct command_ctx *cmd = ctx->command_ctx;
-    int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
+    int r = m_property_do(ctx->log, &cmd->properties, name, action, val, ctx);
 
     if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
-        struct m_property *property = m_property_list_find(cmd->properties, name);
+        struct m_property *property = m_property_list_find(&cmd->properties, name);
         if (property && property->is_noisy && !mp_msg_test(ctx->log, MSGL_TRACE))
             return r;
 
@@ -5039,11 +5066,18 @@ int mp_property_do(const char *name, int action, void *val,
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
-    return m_properties_expand_string(ctx->properties, str, mpctx);
+    return m_properties_expand_string(&ctx->properties, str, mpctx);
 }
 
 // Before expanding properties, parse C-style escapes like "\n"
 char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str)
+{
+    return mp_property_expand_escaped_string_limited(mpctx, str, NULL);
+}
+
+char *mp_property_expand_escaped_string_limited(struct MPContext *mpctx,
+                                                const char *str,
+                                                struct m_property_line_budget *budget)
 {
     void *tmp = talloc_new(NULL);
     bstr strb = bstr0(str);
@@ -5058,7 +5092,9 @@ char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str
             break;
         bstr_xappend(tmp, &dst, bstr0("\""));
     }
-    char *r = mp_property_expand_string(mpctx, dst.start);
+    struct command_ctx *ctx = mpctx->command_ctx;
+    char *r = m_properties_expand_string_limited(&ctx->properties, dst.start,
+                                                 mpctx, budget);
     talloc_free(tmp);
     return r;
 }
@@ -5066,7 +5102,7 @@ char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str
 void property_print_help(struct MPContext *mpctx)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
-    m_properties_print_help_list(mpctx->log, ctx->properties);
+    m_properties_print_help_list(mpctx->log, &ctx->properties);
 }
 
 /* List of default ways to show a property on OSD.
@@ -5679,7 +5715,7 @@ static void change_property_cmd(struct mp_cmd_ctx *cmd,
     struct m_property *prop = NULL;
     if (cmd->cmd->coalesce) {
         struct command_ctx *ctx = cmd->mpctx->command_ctx;
-        prop = m_property_list_find(ctx->properties, name);
+        prop = m_property_list_find(&ctx->properties, name);
         if (prop)
             prop->coalesce = true;
     }
@@ -8144,9 +8180,9 @@ void command_init(struct MPContext *mpctx)
 
     int num_base = MP_ARRAY_SIZE(mp_properties_base);
     int num_opts = m_config_get_co_count(mpctx->mconfig);
-    ctx->properties =
-        talloc_zero_array(ctx, struct m_property, num_base + num_opts + 1);
-    memcpy(ctx->properties, mp_properties_base, sizeof(mp_properties_base));
+    struct m_property *props =
+        talloc_zero_array(ctx, struct m_property, num_base + num_opts);
+    memcpy(props, mp_properties_base, sizeof(mp_properties_base));
 
     const char **prop_names = talloc_array(NULL, const char *, num_base);
     for (int i = 0; i < num_base; ++i)
@@ -8163,6 +8199,7 @@ void command_init(struct MPContext *mpctx)
         struct m_property prop = {
             .name = co->name,
             .call = mp_property_generic_option,
+            .priv = co,
             .is_option = true,
         };
 
@@ -8193,8 +8230,11 @@ void command_init(struct MPContext *mpctx)
         if (bsearch(&prop.name, prop_names, num_base, sizeof(const char *), str_compare))
             continue;
 
-        ctx->properties[count++] = prop;
+        props[count++] = prop;
     }
+
+    ctx->properties = (struct m_property_list){props, count};
+    m_property_list_sort(&ctx->properties);
 
     node_init(&ctx->mdata, MPV_FORMAT_NODE_ARRAY, NULL);
     talloc_steal(ctx, ctx->mdata.u.list);

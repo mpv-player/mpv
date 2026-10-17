@@ -48,6 +48,11 @@ enum mp_property_action {
     //  arg: char**
     M_PROPERTY_PRINT,
 
+    // Like M_PROPERTY_PRINT, but print at most max_lines lines after the
+    // header line. Only implemented by properties that print a list.
+    //  arg: struct m_property_print_limited*
+    M_PROPERTY_PRINT_LIMITED,
+
     // Get human readable fixed length string representing the current value.
     // If unimplemented, the property wrapper uses the property type as
     // fallback.
@@ -100,6 +105,13 @@ enum mp_property_action {
 
     // Total number of actions.
     M_PROPERTY_MAX_ACTION,
+};
+
+// Argument for M_PROPERTY_PRINT_LIMITED
+struct m_property_print_limited {
+    int max_lines;      // IN number of list lines to print (0: header only)
+    int num_lines;      // OUT number of lines of the whole list
+    char *out;          // OUT talloc-allocated result
 };
 
 // Argument for M_PROPERTY_SWITCH
@@ -156,14 +168,22 @@ struct m_property {
     bool is_noisy;
 };
 
-struct m_property *m_property_list_find(const struct m_property *list,
+// A set of properties, sorted by name with m_property_list_sort().
+struct m_property_list {
+    struct m_property *props;
+    int num;
+};
+
+void m_property_list_sort(struct m_property_list *list);
+
+struct m_property *m_property_list_find(const struct m_property_list *list,
                                         const char *name);
 
 // Access a property.
 // action: one of m_property_action
 // ctx: opaque value passed through to property implementation
 // returns: one of mp_property_return
-int m_property_do(struct mp_log *log, const struct m_property* prop_list,
+int m_property_do(struct mp_log *log, const struct m_property_list *prop_list,
                   const char* property_name, int action, void* arg, void *ctx);
 
 // Given a path of the form "a/b/c", this function will set *prefix to "a",
@@ -174,7 +194,7 @@ bool m_property_split_path(const char *path, bstr *prefix, const char **rem);
 
 // Print a list of properties.
 void m_properties_print_help_list(struct mp_log *log,
-                                  const struct m_property *list);
+                                  const struct m_property_list *list);
 
 // Expand a property string.
 // This function allows to print strings containing property values.
@@ -188,8 +208,26 @@ void m_properties_print_help_list(struct mp_log *log,
 // STR is recursively expanded using the same rules.
 // "$$" can be used to escape "$", and "$}" to escape "}".
 // "$>" disables parsing of "$" for the rest of the string.
-char* m_properties_expand_string(const struct m_property *prop_list,
+char* m_properties_expand_string(const struct m_property_list *prop_list,
                                  const char *str, void *ctx);
+
+// Line limits for the list properties of an expanded string, in the order
+// they are expanded.
+struct m_property_line_budget {
+    // Limit for each list. If NULL, lists print only their header line, and
+    // num_lines/num are filled with the number of lines of each list.
+    int *max_lines;
+    int *num_lines;
+    int num;
+    // Index of the next list. Reset to 0 before each expansion.
+    int idx;
+};
+
+// Like m_properties_expand_string(), but print the properties implementing
+// M_PROPERTY_PRINT_LIMITED within the limits from budget.
+char *m_properties_expand_string_limited(const struct m_property_list *prop_list,
+                                         const char *str, void *ctx,
+                                         struct m_property_line_budget *budget);
 
 // Trivial helpers for implementing properties.
 int m_property_bool_ro(int action, void* arg, bool var);
