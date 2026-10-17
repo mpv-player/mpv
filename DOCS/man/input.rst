@@ -513,7 +513,7 @@ Playlist Manipulation
     Go to the first of the previous entries on the playlist with a different
     ``playlist-path``.
 
-``playlist-play-index <integer|current|none> [preserve-options]``]
+``playlist-play-index <index> [<preserve-options> [<id>]]``]
     Start (or restart) playback of the given playlist index. In addition to the
     0-based playlist entry index, it supports the following values:
 
@@ -522,10 +522,12 @@ Playlist Manipulation
         played again (unload and reload). If none is set, playback is stopped.
         (In corner cases, ``playlist-current-pos`` can point to a playlist entry
         even if playback is currently inactive,
-
     <none>
         Playback is stopped. If idle mode (``--idle``) is enabled, the player
         will enter idle mode, otherwise it will exit.
+    <id>
+        The position is determined by the item with the playlist entry ID
+        specified by the ``id`` argument.
 
     Setting ``preserve-options`` (``MPV_FORMAT_FLAG``) will not reset file-local
     options when the playback of the current playlist index is restarted.
@@ -561,6 +563,8 @@ Playlist Manipulation
         If nothing is currently playing, start playback. (Always starts with the
         added file, even if the playlist was not empty before running this
         command).
+    <id>
+        The ``index`` argument is interpreted as a playlist entry ID.
 
     Multiple flags can be combined, e.g.: ``append+play``.
 
@@ -588,8 +592,10 @@ Playlist Manipulation
     The third argument is an insertion index, used only by the ``insert-at``
     action. When used with those actions, the new item will be inserted at the
     index position in the playlist, or appended to the end if index is less than
-    0 or greater than the size of the playlist. This argument will be ignored for
-    all other actions. This argument was added in mpv 0.38.0.
+    0 or greater than the size of the playlist. If the second argument contains
+    the ``id`` flag, then the position is determined by the playlist item with
+    the specified ID. This argument will be ignored for all other actions.
+    This argument was added in mpv 0.38.0.
 
     The fourth argument is a list of options and values which should be set
     while the file is playing. It is of the form ``opt1=value1,opt2=value2,..``.
@@ -624,6 +630,8 @@ Playlist Manipulation
         If nothing is currently playing, start playback. (Always starts with the
         added playlist, even if the internal playlist was not empty before running
         this command).
+    <id>
+        The ``index`` argument is interpreted as a playlist entry ID.
 
     Multiple flags can be combined, e.g.: ``append+play``.
 
@@ -652,24 +660,29 @@ Playlist Manipulation
     The third argument is an insertion index, used only by the ``insert-at`` action.
     When used with those actions, the new playlist will be inserted at the index
     position in the internal playlist, or appended to the end if index is less
-    than 0 or greater than the size of the internal playlist. This argument will be
-    ignored for all other actions. This argument was added in mpv 0.38.0.
+    than 0 or greater than the size of the internal playlist. If the second argument
+    contains the ``id`` flag, then the position is determined by the playlist item
+    with the specified ID. This argument will be ignored for all other actions.
+    This argument was added in mpv 0.38.0.
 
 ``playlist-clear``
     Clear the playlist, except the currently played file.
 
-``playlist-remove <index>``
+``playlist-remove <index> [<id>]``
     Remove the playlist entry at the given index. Index values start counting
     with 0. The special value ``current`` removes the current entry. Note that
     removing the current entry also stops playback and starts playing the next
-    entry.
+    entry. The special value ``id`` means the position is determined by the
+    item with the playlist entry ID specified by the ``id`` argument.
 
-``playlist-move <index1> <index2>``
+``playlist-move <index1> <index2> [<flags>]``
     Move the playlist entry at index1, so that it takes the place of the
     entry index2. (Paradoxically, the moved playlist entry will not have
     the index value index2 after moving if index1 was lower than index2,
     because index2 refers to the target entry, not the index the entry
-    will have after moving.)
+    will have after moving.) If the ``flags`` argument has the special value
+    ``id``, then the positions are determined as the items with the playlist
+    entry ID specified by the first two arguments.
 
 ``playlist-shuffle``
     Shuffle the playlist. This is similar to what is done on start if the
