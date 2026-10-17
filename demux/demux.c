@@ -4249,6 +4249,11 @@ static void refresh_track(struct demux_internal *in, struct sh_stream *stream,
 
     if (in->back_demuxing)
         ds->back_seek_pos = ref_pts;
+    // A demuxer that has read nothing since a seek to the start (such as an
+    // external file with no stream selected so far) is still at the start, so
+    // it is only in position for a stream enabled there.
+    bool in_position = in->after_seek &&
+        !(in->after_seek_to_start && ref_pts > in->d_thread->start_time);
     // Avoid refresh seek for video streams except when immediately after a seek
     // to ensure a correct seek position.
     bool avoid_refresh = false;
@@ -4267,7 +4272,7 @@ static void refresh_track(struct demux_internal *in, struct sh_stream *stream,
     // - If cache is enabled and a seek causes some new data to be cached, the demuxer
     //   is sought to the end of cache after cache joining. Switching track immediately
     //   after this also causes the same problem.
-    if (!in->after_seek || (ds->type != STREAM_VIDEO && !avoid_refresh)) {
+    if (!in_position || (ds->type != STREAM_VIDEO && !avoid_refresh)) {
         MP_VERBOSE(in, "refresh track %d (%s)\n", stream->index,
                    stream_type_name(ds->type));
         initiate_refresh_seek(in, ds, ref_pts);
