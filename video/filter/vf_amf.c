@@ -262,7 +262,7 @@ static int init_frc(struct mp_filter *f, struct mp_image *src, bool reinit)
     if (reinit)
         goto init;
 
-    AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_ENGINE_TYPE, AMF_MEMORY_DX11);
+    AMF_ASSIGN_PROPERTY_INT64(res, a->frc, AMF_FRC_ENGINE_TYPE, FRC_ENGINE_DX11);
     if (res != AMF_OK) {
         MP_WARN(f, "Failed to set FRC engine type to DX11: %d\n", res);
         goto err;
@@ -417,7 +417,8 @@ static struct mp_image *mp_image_from_amf_surface(struct mp_filter *f, AMFSurfac
     struct mp_image *out = mp_image_new_custom_ref(p->ref_image, (void *)free_ctx, free_amf_surface);
     if (!out) {
         MP_ERR(f, "Unexpected error when creating mp_image.\n");
-        free_amf_surface(free_ctx);
+        ID3D11Texture2D_Release(tex);
+        talloc_free(free_ctx);
         return NULL;
     }
     mp_image_copy_attributes(out, p->ref_image);
@@ -601,6 +602,7 @@ static void process(struct mp_filter *f)
         p->params = in->params;
         if (init_frc(f, in, false) < 0) {
             MP_ERR(f, "FRC init failed\n");
+            talloc_free(in);
             mp_filter_internal_mark_failed(f);
             return;
         }
@@ -619,6 +621,7 @@ static void process(struct mp_filter *f)
         MP_ERR(f, "FRC SubmitInput returned AMF_EOF, reinitializing...\n");
         if (init_frc(f, p->ref_image, true) < 0) {
             MP_ERR(f, "FRC reinit failed\n");
+            ICALL(Release, surface);
             mp_filter_internal_mark_failed(f);
             return;
         }
@@ -628,13 +631,9 @@ static void process(struct mp_filter *f)
     ICALL(Release, surface);
 
     if (res == AMF_INPUT_FULL) {
-        MP_WARN(f, "FRC input queue full...\n");
         frame = (struct mp_frame){MP_FRAME_VIDEO, mp_image_new_ref(p->ref_image)};
         mp_pin_out_unread(f->ppins[0], frame);
-        return;
-    }
-
-    if (res != AMF_OK && res != AMF_EOF) {
+    } else if (res != AMF_OK && res != AMF_EOF) {
         MP_WARN(f, "FRC SubmitInput failed: %d\n", res);
         mp_filter_internal_mark_failed(f);
         return;
@@ -659,6 +658,11 @@ read_out:;
     if (!amf_out && res == AMF_REPEAT) {
         MP_WARN(f, "FRC QueryOutput returned NULL surface with AMF_REPEAT\n");
         mp_filter_internal_mark_failed(f);
+        return;
+    }
+
+    if (!amf_out) {
+        mp_filter_internal_mark_progress(f);
         return;
     }
 
