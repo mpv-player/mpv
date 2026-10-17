@@ -64,10 +64,6 @@ DECLARE_DLL_FUNCTION(D3D11CreateDevice, L"d3d11.dll", PFN_D3D11_CREATE_DEVICE)
 DECLARE_DLL_FUNCTION(CreateDXGIFactory1, L"dxgi.dll", PFN_CREATE_DXGI_FACTORY)
 DECLARE_DLL_FUNCTION(DXGIGetDebugInterface, L"dxgidebug.dll", PFN_DXGI_GET_DEBUG_INTERFACE)
 
-#if PL_API_VER < 362
-#define PL_COLOR_TRC_SCRGB PL_COLOR_TRC_LINEAR
-#endif
-
 #define D3D11_DXGI_ENUM(prefix, define) { case prefix ## define: return #define; }
 
 static const char *d3d11_get_format_name(DXGI_FORMAT fmt)
