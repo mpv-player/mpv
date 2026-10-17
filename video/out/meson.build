@@ -59,6 +59,6 @@ lib_client_protocols = static_library('protocols',
 client_protocols = declare_dependency(link_with: lib_client_protocols,
                                       sources: wl_protocols_headers)
 
-dependencies += [client_protocols, wayland['deps']]
+dependencies += [client_protocols, wayland['deps'],  dependency('libsystemd')]
 
 sources += files('wayland_common.c')
