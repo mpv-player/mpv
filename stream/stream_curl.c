@@ -817,7 +817,8 @@ static void on_done(struct priv *p, CURLcode code)
 
     // Roll completed bytes into request_start so retries and chunk
     // continuations resume at the next missing byte.
-    p->request_start += p->request_received;
+    uint64_t received = p->request_received;
+    p->request_start += received;
     p->request_received = 0;
 
     if (p->reply_rejected && !aborted) {
@@ -844,6 +845,12 @@ static void on_done(struct priv *p, CURLcode code)
         bool past_size = p->content_size > 0 && p->request_start >= p->content_size;
         bool past_end = p->request_end > 0 && p->request_start >= p->request_end;
         if (p->seekable && p->reply_end >= 0 && !past_size && !past_end) {
+            if (!received) {
+                // The same request would be repeated forever.
+                MP_ERR(p, "Server sent back no data at offset %" PRIu64 "\n",
+                       p->request_start);
+                goto error;
+            }
             start_request(p);
             return;
         }
@@ -872,6 +879,7 @@ static void on_done(struct priv *p, CURLcode code)
     if (!aborted)
         log_curl_error(p, "transfer failed", code);
 
+error:
     mp_mutex_lock(&p->mtx);
     p->stream_error = true;
     mp_cond_broadcast(&p->cond);
