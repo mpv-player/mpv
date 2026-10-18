@@ -457,9 +457,14 @@ static OSStatus hotplug_cb(AudioObjectID id, UInt32 naddr,
     struct ao *ao = ctx;
     struct priv *p = ao->priv;
     MP_VERBOSE(ao, "Handling potential hotplug event...\n");
+    AudioDeviceID old_device = p->device;
     reinit_device(ao);
-    if (p->audio_unit)
-        reinit_latency(ao);
+    if (p->audio_unit) {
+        if (p->device != old_device)
+            ao_request_reload(ao);
+        else
+            reinit_latency(ao);
+    }
     ao_hotplug_event(ao);
     return noErr;
 }
