@@ -567,7 +567,11 @@ static int control(stream_t *stream, int cmd, void *arg)
             break;
         if (!volid[0])
             break;
-        *(char **)arg = talloc_strdup(NULL, volid);
+        bstr name = bstr_sanitize_utf8_latin1(NULL, bstr0(volid));
+        // Sanitize adds a terminating NUL, so we can use it directly, but
+        // only if conversion has happened.
+        *(char **)arg = name.start == (unsigned char *)volid
+                            ? talloc_strdup(NULL, volid) : (char *)name.start;
         return STREAM_OK;
     }
     }
