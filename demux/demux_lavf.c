@@ -180,6 +180,7 @@ static const struct format_hack format_hacks[] = {
     {"hls", .nested_network = true, .clear_filepos = true, .no_ext_picky = true},
     {"dash", .nested_network = true, .clear_filepos = true},
     {"sdp", .clear_filepos = true, .is_network = true, .no_seek = true},
+    {"rtp", .clear_filepos = true, .is_network = true, .no_seek = true},
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
     {"mxf", .use_stream_ids = true},

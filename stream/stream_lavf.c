@@ -348,15 +348,18 @@ static int open_f(stream_t *stream)
     for (int i = 0; i < MP_ARRAY_SIZE(prefix); i++)
         if (!strncmp(filename, prefix[i], strlen(prefix[i])))
             filename += strlen(prefix[i]);
+    // URLs that libavformat handles in a demuxer rather than in a protocol.
+    // The demuxer opens the URL itself, so there is no stream layer and
+    // demux_lavf does all the real work.
+    char *lavf_demuxer = NULL;
     if (!strncmp(filename, "rtsp:", 5) || !strncmp(filename, "rtsps:", 6)) {
-        /* This is handled as a special demuxer, without a separate
-         * stream layer. demux_lavf will do all the real work. Note
-         * that libavformat doesn't even provide a protocol entry for
-         * this (the rtsp demuxer's probe function checks for a "rtsp:"
-         * filename prefix), so it has to be handled specially here.
-         */
+        lavf_demuxer = "rtsp";
+    } else if (!strncmp(filename, "rtp:", 4)) {
+        lavf_demuxer = "rtp";
+    }
+    if (lavf_demuxer) {
         stream->demuxer = "lavf";
-        stream->lavf_type = "rtsp";
+        stream->lavf_type = lavf_demuxer;
         stream->streaming = true;
         if (stream->info->stream_origin == STREAM_ORIGIN_NET)
             stream->is_network = true;
