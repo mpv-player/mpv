@@ -28,6 +28,7 @@ static const int speaker_map[][2] = {
     { kAudioChannelLabel_Left,                 MP_SPEAKER_ID_FL   },
     { kAudioChannelLabel_Right,                MP_SPEAKER_ID_FR   },
     { kAudioChannelLabel_Center,               MP_SPEAKER_ID_FC   },
+    { kAudioChannelLabel_Mono,                 MP_SPEAKER_ID_FC   },
     { kAudioChannelLabel_LFEScreen,            MP_SPEAKER_ID_LFE  },
     { kAudioChannelLabel_LeftSurround,         MP_SPEAKER_ID_BL   },
     { kAudioChannelLabel_RightSurround,        MP_SPEAKER_ID_BR   },
