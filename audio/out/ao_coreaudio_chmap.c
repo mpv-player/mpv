@@ -492,8 +492,6 @@ bool ca_init_chmap(struct ao *ao, AudioDeviceID device)
     if (!chmap_sel.num_chmaps)
         mp_chmap_sel_add_map(&chmap_sel, &(struct mp_chmap)MP_CHMAP_INIT_STEREO);
 
-    mp_chmap_sel_add_map(&chmap_sel, &(struct mp_chmap)MP_CHMAP_INIT_MONO);
-
     if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels)) {
         MP_ERR(ao, "could not select a suitable channel map among the "
                    "hardware supported ones. Make sure to configure your "
