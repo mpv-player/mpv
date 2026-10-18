@@ -357,6 +357,9 @@ static int open_f(stream_t *stream)
          */
         stream->demuxer = "lavf";
         stream->lavf_type = "rtsp";
+        stream->streaming = true;
+        if (stream->info->stream_origin == STREAM_ORIGIN_NET)
+            stream->is_network = true;
         talloc_free(temp);
         return STREAM_OK;
     }
