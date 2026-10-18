@@ -515,10 +515,13 @@ static void finalize_probe(struct priv *p)
 static void check_http_reply(struct priv *p, long resp, int64_t range_start,
                              int64_t range_total)
 {
-    if (resp == 416 && p->content_size < 0) {
+    if (resp == 416 && p->content_size < 0 &&
+        (range_total < 0 || range_total <= p->request_start))
+    {
         // The request started past the end of a file of unknown size, so this
-        // is EOF. The reply tells the size if the server knows it by now.
-        if (range_total > 0 && range_total <= p->request_start) {
+        // is EOF. The reply tells the size if the server knows it by now. A
+        // 416 that states a size past the requested offset is an error.
+        if (range_total >= 0) {
             mp_mutex_lock(&p->mtx);
             p->content_size = range_total;
             mp_mutex_unlock(&p->mtx);
