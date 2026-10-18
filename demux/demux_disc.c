@@ -524,6 +524,10 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
     if (resync) {
         stream_control(demuxer->stream, STREAM_CTRL_NAV_DRAIN_ACK, NULL);
         refresh_disc_metadata(demuxer);
+        // Reset still_image flag since it's tied to the specific title,
+        // and the jump may have moved to a different one.
+        if (p->is_dvd && p->video_sh && p->video_sh->still_image)
+            demux_set_stream_still_image(demuxer, p->video_sh, false);
     }
 
     // A DVD jump is fully handled by this seek, adopt the current counter.
