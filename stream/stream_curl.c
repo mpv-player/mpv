@@ -480,7 +480,7 @@ static void parse_content_range(CURL *c, int64_t *out_start, int64_t *out_end,
         return;
     bstr rest;
     long long v = bstrtoll(total, &rest, 10);
-    if (rest.len == 0 && v > 0)
+    if (rest.len == 0 && v >= 0)
         *out_total = v;
     bstr_eatstart0(&range, "bytes");
     bstr start, end;
@@ -575,6 +575,16 @@ static void on_http_header(struct priv *p, struct bstr line)
     if (p->probed) {
         check_http_reply(p, resp, range_start, range_total);
         return;
+    }
+
+    // The first range of an empty file is not satisfiable.
+    if (resp == 416 && p->request_start == 0 && range_total <= 0) {
+        p->seekable = true;
+        p->content_size = 0;
+        p->finished = true;
+        p->reply_rejected = true;
+        p->stream_ok = true;
+        goto done;
     }
 
     if (!is_http_success(resp)) {
@@ -744,7 +754,7 @@ static void start_request(struct priv *p)
     bool chunked = ranged && p->opts->max_request_size > 0;
     bool capped = ranged && p->request_end > 0;
 
-    bool past_size = p->seekable && p->content_size > 0 && start >= p->content_size;
+    bool past_size = p->seekable && p->content_size >= 0 && start >= p->content_size;
     bool past_end = capped && start >= p->request_end;
     if (past_size || past_end) {
         p->finished = true;
@@ -845,7 +855,7 @@ static void on_done(struct priv *p, CURLcode code)
         // A reply may end before the requested range does: servers cap their
         // replies, and with an unknown file size only a 416 marks the end.
         // Keep requesting from where this reply stopped.
-        bool past_size = p->content_size > 0 && p->request_start >= p->content_size;
+        bool past_size = p->content_size >= 0 && p->request_start >= p->content_size;
         bool past_end = p->request_end > 0 && p->request_start >= p->request_end;
         if (p->seekable && p->reply_end >= 0 && !past_size && !past_end) {
             if (!received) {
