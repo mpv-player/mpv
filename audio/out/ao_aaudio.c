@@ -359,7 +359,7 @@ static int init(struct ao *ao)
             if (result != AAUDIO_ERROR_OUT_OF_RANGE) {
                 break;
             }
-        } while (i++ < MP_ARRAY_SIZE(aaudio_max_chnums));
+        } while (++i < MP_ARRAY_SIZE(aaudio_max_chnums));
 
         ao->channels = channels;
     } else {
