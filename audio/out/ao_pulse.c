@@ -53,6 +53,9 @@ struct priv {
     bool playing;
     bool underrun_signalled;
 
+    bool have_sink_map;
+    pa_channel_map sink_map;
+
     char *cfg_host;
     int cfg_buffer;
     bool cfg_latency_hacks;
@@ -255,8 +258,57 @@ static bool chmap_pa_from_mp(pa_channel_map *dst, struct mp_chmap *src)
     return true;
 }
 
+static void sink_map_cb(pa_context *c, const pa_sink_info *i, int eol, void *ud)
+{
+    struct ao *ao = ud;
+    struct priv *priv = ao->priv;
+
+    if (eol) {
+        pa_threaded_mainloop_signal(priv->mainloop, 0); // wakeup waitop()
+        return;
+    }
+
+    priv->sink_map = i->channel_map;
+    priv->have_sink_map = true;
+}
+
+// Must be called with the mainloop locked.
+static void query_sink_map(struct ao *ao, const char *sink)
+{
+    struct priv *priv = ao->priv;
+
+    priv->have_sink_map = false;
+    if (!waitop_no_unlock(priv, pa_context_get_sink_info_by_name(priv->context, sink,
+                                                                 sink_map_cb, ao)))
+    {
+        MP_VERBOSE(ao, "Could not get the sink's channel map.\n");
+    }
+}
+
 static bool select_chmap(struct ao *ao, pa_channel_map *dst)
 {
+    struct priv *priv = ao->priv;
+
+    if (mp_chmap_is_unknown(&ao->channels) && priv->have_sink_map &&
+        ao->channels.num <= PA_CHANNELS_MAX)
+    {
+        // Channels without positions take the sink's positions in order, so
+        // the server maps them by index. Extra channels get AUX positions the
+        // sink does not use.
+        int aux = 0;
+        dst->channels = ao->channels.num;
+        for (int n = 0; n < dst->channels; n++) {
+            if (n < priv->sink_map.channels) {
+                dst->map[n] = priv->sink_map.map[n];
+                continue;
+            }
+            while (pa_channel_map_has_position(&priv->sink_map, PA_CHANNEL_POSITION_AUX0 + aux))
+                aux++;
+            dst->map[n] = PA_CHANNEL_POSITION_AUX0 + aux++;
+        }
+        return true;
+    }
+
     struct mp_chmap_sel sel = {0};
     for (int n = 0; speaker_map[n][1] != -1; n++)
         mp_chmap_sel_add_speaker(&sel, speaker_map[n][1]);
@@ -412,6 +464,9 @@ static int init(struct ao *ao)
 
     if (!(format = pa_format_info_new()))
         goto unlock_and_fail;
+
+    if (mp_chmap_is_unknown(&ao->channels))
+        query_sink_map(ao, sink);
 
     if (!set_format(ao, format)) {
         ao->channels = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
