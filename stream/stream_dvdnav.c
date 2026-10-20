@@ -81,7 +81,7 @@ struct priv {
     mp_mutex lock;                      // guards the nav/menu state below
 
     bool still_active;                  // fill_buffer() is holding a still
-    uint32_t spu_clut[16];
+    uint32_t spu_clut[16];              // the PGC's CLUT, as 0xRRGGBB
     bool spu_clut_valid;
     bool in_menu;
     int current_button;                 // mirror of libdvdnav HL_BTNN_REG
@@ -286,21 +286,11 @@ static void compute_highlight_palette(struct priv *priv, pci_t *pci, int btn)
     uint32_t coli;
     memcpy(&coli, &pci->hli.btn_colit.btn_coli[coln][0], sizeof(coli)); // [0] = select state
 
-    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
-    struct pl_transform3x3 cmatrix;
-    mp_get_csp_matrix(&csp, &cmatrix);
-
     for (int i = 0; i < 4; i++) {
         uint8_t ci = (coli >> (16 + i * 4)) & 0xF;
         uint8_t a  = (coli >> (i * 4)) & 0xF;
-        uint32_t entry = priv->spu_clut[ci];
-        // CLUT entry is 0x00YYCrCb. mp_get_csp_matrix returns a YCbCr→RGB matrix
-        // expecting {Y, Cb, Cr}, reorder to match this.
-        int y[3] = {(entry >> 16) & 0xff, entry & 0xff, (entry >> 8) & 0xff};
-        int c[3];
-        mp_map_fixp_color(&cmatrix, 8, y, 8, c);
         uint32_t alpha = (a << 4) | a;
-        priv->hl.palette[i] = (alpha << 24) | (c[0] << 16) | (c[1] << 8) | c[2];
+        priv->hl.palette[i] = (alpha << 24) | priv->spu_clut[ci];
     }
 }
 
@@ -841,7 +831,19 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         break;
     }
     case DVDNAV_SPU_CLUT_CHANGE: {
-        memcpy(priv->spu_clut, buf, 16 * sizeof(uint32_t));
+        // A CLUT entry is 0x00YYCrCb, and the matrix takes its input as
+        // Y, Cb, Cr and answers as R, G, B.
+        struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+        struct pl_transform3x3 cmatrix;
+        mp_get_csp_matrix(&csp, &cmatrix);
+        const uint32_t *clut = buf;
+        for (int i = 0; i < 16; i++) {
+            uint32_t e = clut[i];
+            int y[3] = {(e >> 16) & 0xff, e & 0xff, (e >> 8) & 0xff};
+            int c[3];
+            mp_map_fixp_color(&cmatrix, 8, y, 8, c);
+            priv->spu_clut[i] = (c[0] << 16) | (c[1] << 8) | c[2];
+        }
         priv->spu_clut_valid = true;
         update_highlight(priv);
         break;

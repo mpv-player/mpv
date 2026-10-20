@@ -28,8 +28,6 @@
 #include "packet.h"
 #include "stheader.h"
 
-#include "video/csputils.h"
-
 // DVD-Video has 32 subpicture (SPU) streams, mapped to PES substream IDs 0x20..0x3F.
 #define MAX_DVD_SPU_STREAMS 32
 
@@ -242,21 +240,9 @@ static void set_dvd_sub_palette(struct demuxer *demuxer, struct sh_stream *sh)
     if (stream_control(demuxer->stream, STREAM_CTRL_GET_DVD_INFO, &info) <= 0)
         return;
 
-    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
-    struct pl_transform3x3 cmatrix;
-    mp_get_csp_matrix(&csp, &cmatrix);
-
     char *s = talloc_strdup(sh, "palette: ");
-    for (int i = 0; i < 16; i++) {
-        // A CLUT entry is 0x00YYCrCb, and the matrix takes its input as
-        // Y, Cb, Cr and answers as R, G, B.
-        int color = info.palette[i];
-        int y[3] = {(color >> 16) & 0xff, color & 0xff, (color >> 8) & 0xff};
-        int c[3];
-        mp_map_fixp_color(&cmatrix, 8, y, 8, c);
-        color = (c[0] << 16) | (c[1] << 8) | c[2];
-        s = talloc_asprintf_append(s, "%s%06x", i ? ", " : "", color);
-    }
+    for (int i = 0; i < 16; i++)
+        s = talloc_asprintf_append(s, "%s%06x", i ? ", " : "", info.palette[i]);
     s = talloc_asprintf_append(s, "\n");
 
     talloc_free(sh->codec->extradata);
