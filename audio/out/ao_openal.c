@@ -260,7 +260,7 @@ static int init(struct ao *ao)
         MP_CHMAP4(FL, FR, BL, BR),                  // 4.0
         {0},                                        // 5.0
         MP_CHMAP6(FL, FR, FC, LFE, BL, BR),         // 5.1
-        MP_CHMAP7(FL, FR, FC, LFE, SL, SR, BC),     // 6.1
+        MP_CHMAP7(FL, FR, FC, LFE, BC, SL, SR),     // 6.1
         MP_CHMAP8(FL, FR, FC, LFE, BL, BR, SL, SR), // 7.1
     };
     ao->channels = possible_layouts[num_channels];
