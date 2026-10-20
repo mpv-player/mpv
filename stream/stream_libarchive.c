@@ -516,7 +516,7 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
     struct priv *p = s->priv;
     if (p->mpa && !p->broken_seek) {
         locale_t oldlocale = uselocale(p->mpa->locale);
-        int r = archive_seek_data(p->mpa->arch, newpos, SEEK_SET);
+        int64_t r = archive_seek_data(p->mpa->arch, newpos, SEEK_SET);
         uselocale(oldlocale);
         if (r >= 0)
             return 1;
