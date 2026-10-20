@@ -163,14 +163,16 @@ static bool init_audiounit(struct ao *ao)
         MP_VERBOSE(ao, "channel map: %i: %u\n", i, layout->mChannelDescriptions[i].mChannelLabel);
     }
 
-    if (af_fmt_is_spdif(ao->format) || instance.outputNumberOfChannels <= 2) {
+    if (af_fmt_is_spdif(ao->format) || instance.outputNumberOfChannels <= 2 ||
+        layout->mNumberChannelDescriptions > MP_NUM_CHANNELS)
+    {
         ao->channels = (struct mp_chmap)MP_CHMAP_INIT_STEREO;
         MP_VERBOSE(ao, "using stereo output\n");
     } else {
         ao->channels.num = (uint8_t)layout->mNumberChannelDescriptions;
         for (UInt32 i = 0; i < layout->mNumberChannelDescriptions; i++) {
-          ao->channels.speaker[i] =
-              ca_label_to_mp_speaker_id(layout->mChannelDescriptions[i].mChannelLabel);
+            int speaker = ca_label_to_mp_speaker_id(layout->mChannelDescriptions[i].mChannelLabel);
+            ao->channels.speaker[i] = speaker < 0 ? MP_SPEAKER_ID_NA : speaker;
         }
         MP_VERBOSE(ao, "using standard channel mapping\n");
     }
