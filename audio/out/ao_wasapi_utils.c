@@ -202,10 +202,12 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
     wformat->SubFormat                   = *format_to_subtype(format->mp_format);
     wformat->Samples.wValidBitsPerSample = format->used_msb;
 
-    uint64_t chans = mp_chmap_to_waveext(channels);
+    bool unknown = mp_chmap_is_unknown(channels);
+    uint64_t chans = unknown ? KSAUDIO_SPEAKER_DIRECTOUT
+                             : mp_chmap_to_waveext(channels);
     wformat->dwChannelMask = chans;
 
-    if (wformat->Format.nChannels > 8 || wformat->dwChannelMask != chans) {
+    if (!unknown && (wformat->Format.nChannels > 8 || wformat->dwChannelMask != chans)) {
         // IAudioClient::IsFormatSupported tend to fallback to stereo for closest
         // format match when there are more channels. Remix to standard layout.
         // Also if input channel mask has channels outside 32-bits override it
@@ -230,7 +232,8 @@ static void change_waveformat_channels(WAVEFORMATEXTENSIBLE *wformat,
                                        struct mp_chmap *channels)
 {
     wformat->Format.nChannels = channels->num;
-    wformat->dwChannelMask    = mp_chmap_to_waveext(channels);
+    wformat->dwChannelMask    = mp_chmap_is_unknown(channels) ? KSAUDIO_SPEAKER_DIRECTOUT
+                                                              : mp_chmap_to_waveext(channels);
     update_waveformat_datarate(wformat);
 }
 
@@ -281,6 +284,9 @@ static bool chmap_from_waveformat(struct mp_chmap *channels,
     if (wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
         mp_chmap_from_waveext(channels, wformat->dwChannelMask);
+        // Channels without a bit in the mask have no speaker position.
+        if (channels->num < wf->nChannels && wf->nChannels <= MP_NUM_CHANNELS)
+            mp_chmap_fill_na(channels, wf->nChannels);
     } else {
         mp_chmap_from_channels(channels, wf->nChannels);
     }
@@ -566,9 +572,8 @@ static bool find_formats(struct ao *ao)
     struct wasapi_state *state = ao->priv;
     struct mp_chmap channels = ao->channels;
 
-    if (mp_chmap_is_unknown(&channels))
-        mp_chmap_from_channels(&channels, channels.num);
-    mp_chmap_reorder_to_waveext(&channels);
+    if (!mp_chmap_is_unknown(&channels))
+        mp_chmap_reorder_to_waveext(&channels);
     if (!mp_chmap_is_valid(&channels))
         mp_chmap_from_channels(&channels, 2);
 
