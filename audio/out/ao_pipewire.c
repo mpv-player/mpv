@@ -624,8 +624,11 @@ static int init(struct ao *ao)
             .channels = ao->channels.num,
         };
 
-        for (int i = 0; i < ao->channels.num; i++)
-            audio_info.position[i] = mp_speaker_id_to_spa(ao, ao->channels.speaker[i]);
+        bool unknown = mp_chmap_is_unknown(&ao->channels);
+        for (int i = 0; i < ao->channels.num; i++) {
+            audio_info.position[i] = unknown ? SPA_AUDIO_CHANNEL_AUX0 + i
+                                             : mp_speaker_id_to_spa(ao, ao->channels.speaker[i]);
+        }
 
         params[0] = spa_format_audio_raw_build(&b, SPA_PARAM_EnumFormat, &audio_info);
         if (!params[0])
