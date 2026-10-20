@@ -30,7 +30,129 @@ Interface changes
 
 ::
 
+ --- mpv 0.43.0 ---
  --- mpv 0.42.0 ---
+    - the `loadfile` and `loadlist` commands can now take multiple flags (i.e.
+      `append+play`)
+    - the `expand-properties` command modifier also applies to string lists now
+    - stop searching the deprecated `lua-settings` directory for script config
+      files
+    - rename `d3d11vpp=mode=ivctc` to `d3d11vpp=mode=ivtc`
+    - remove the deprecated `time-start` property
+    - remove the deprecated `error` field from `end-file`
+    - remove `windowcontrols_title` script-opt from osc, use `title` mpv option
+      instead
+    - remove `osc-livemarkers` script-opt because chapter markers are now
+      updated without reiniting the OSC
+    - remove `--angle-renderer=d3d9`, ANGLE dropped the D3D9 backend
+    - make the `metadata/by-key` property writable
+    - make `player-operation-mode` readable as a property
+    - make `mpv_command_node` accept `_name` for command name
+    - make `--autocreate-playlist` only activate for regular files
+    - implement `lavfi-tempo` an alternative speed changing audio filter
+    - effective `--image-display-duration` takes `--speed` into consideration
+      now
+    - deprecate `mp.input.log_error()`
+    - deprecate `--vo=vaapi`
+    - deprecate `--vo-tct-buffering`, each frame is written to the terminal in
+      one piece
+    - deprecate `--vo-sixel-buffered`, each frame is written to the terminal in
+      one piece
+    - deprecate `--vf=format=sig-peak`
+    - change `ytdl_hook-all_formats` default to `yes`
+    - change `--ytdl-format` default to
+      `bestvideo*+bestaudio/bestvideo+bestaudio/best`
+    - change `--vf=format:stereo-in=no` to keep the source stereo 3D mode,
+      `--vf=format:stereo-in=mono` now overrides it with 2D
+    - change `--tls-verify` default to `yes`
+    - change `--hwdec-extra-frames` default to `auto`, sized from VO frame
+      retention
+    - change `--hdr-reference-white=auto` to follow the system SDR white level
+      (Windows only)
+    - change `%tX` format specifier of `--screenshot-template` option to only
+      accept C11 strftime specifiers or `%s` specifier
+    - bind right click to context menu
+    - add support for (a subset of) tunable parameter for `vo=gpu`
+    - add libcurl-based stream backend (http, https, ftp, ftps), with new
+      options `--curl-enabled`, `--curl-http-version`, `--curl-max-redirects`,
+      `--curl-max-retries`, `--curl-connect-timeout`, `--curl-buffer-size` and
+      `--curl-max-request-size`
+    - add `video_colorspace`, `max_luma`, `primaries` and `transfer` arguments
+      to the `overlay-add` command
+    - add `vf=format=enhancement-layer` option
+    - add `user-data/mpv/context-menu/open` sub-property
+    - add `update-clipboard` command
+    - change `clipboard` property to require `update-clipboard` command when
+      clipboard monitoring is disabled
+    - add `track_info_selected_only` script option for stats
+    - add `track-list/N/demux-duration` property
+    - add `sub-lines` and `secondary-sub-lines` properties
+    - add `skip_{backward,forward}_mbtn_*_down_command` script-opt for osc
+    - add `{close,minimize,maximize}_mbtn_*_command` script-opt for osc
+    - add `preserve-options` flag to `playlist-play-index`
+    - add `osc-windowcontrols_independent` script-opt
+    - add `osc-seekbar_wheel_down_command` and `osc-seekbar_wheel_up_command`
+      script-opts
+    - add `osc-icon_style` option
+    - add `osc-dynamic_margins` option
+    - add `osc-sub-margin` option
+    - add `osc-osd-margin` option
+    - add `on_loaded` hook
+    - add `mp.utils.terminal_display_width()` function that measures the width
+      of a string in terminal cells
+    - add `libplacebo-version` property
+    - add `keep-open` argument support to select.lua script bindings
+    - add `env` property that can be used to retrieve environment variables
+    - add `dvda://` protocol for DVD-Audio playback
+    - add `--dvda-device` and `--dvda-page` options
+    - add `dsd` choice to `--audio-spdif` for DSD-over-PCM (DoP) passthrough
+    - add `console_opt_overrides` argument to `mp.input.get()` and
+      `mp.input.select()`
+    - add `boxwidth` script option to osc
+    - add `slimboxwidth` script option to osc
+    - add `audioonlyscreen` script option to osc
+    - add `aes-ctr://` protocol
+    - add `--wayland-session=<string>`
+    - restore the mpv window on wayland using xdg-session-management-v1
+    - add `--vf=amf_frc`
+    - add `--target-trc=scrgb`
+    - add `--sub-hdr-peak=auto` to follow the reference white and make it the
+      default
+    - add `--secondary-sub-scale` option
+    - `--sub-scale` now only affects primary subtitles
+    - add `--playlist-inherit-options` option
+    - add `--input-builtin-drag-and-drop` option
+    - add `dropped-file` property
+    - add `--disc-menu` option
+    - add `disc-menu-active` property
+    - add `discnav` command
+    - add `--demuxer-hysteresis-bytes`
+    - `track-list` now hides dependent tracks (e.g. tile sub-streams, IAMF audio
+      element layers, LCEVC enhancement streams) by default
+    - add `--show-dependent-tracks` option to expose them
+    - `track-list` is now filtered by the currently selected edition
+    - add `edition-list/N/metadata` sub-property
+    - add `program_id` support to EDL `!track_meta` header
+    - add `--flatten-editions` option to disable program-based edition grouping
+    - add `track-list/N/program-ids` sub-property
+    - deprecate `track-list/N/program-id` in favor of `track-list/N/program-ids`
+    - `track-list/N/ff-index` may be unavailable if no known mapping exists
+    - `mp.input.get()` `complete` callbacks are now passed a second argument, a
+      function which can be passed the completion values, which allows
+      generating completions asynchronously. The old method of returning
+      completions from the callback is now deprecated.
+    - `filename` and the `%f` screenshot template use the file name from the
+      HTTP `Content-Disposition` header when the server sends one
+    - `d3d11vpp=nvidia-true-hdr` is now ignored for HDR sources, as it only
+      converts SDR to HDR
+    - `.iso` images of DVD-Video, DVD-Audio and Blu-ray discs are now opened
+      with the matching disc backend instead of falling back to FFmpeg
+    - `--target-gamut` now accepts custom CIE xy primaries as comma-separated
+      values (Rx,Ry,Gx,Gy,Bx,By,Wx,Wy) in addition to named primary sets
+    - `--geometry` x/y position is now applied only on initial window creation,
+      unless `--force-window-position=yes` is set.
+    - 'command-list' now also returns a default value and available choices
+      where applicable for each command argument.
  --- mpv 0.41.0 ---
     - the value of `--tls-ca-file` is now expanded as a path
     - the value of `--tls-cert-file` is now expanded as a path

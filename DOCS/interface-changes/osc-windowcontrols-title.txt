@@ -1,1 +1,0 @@
-remove `windowcontrols_title` script-opt from osc, use `title` mpv option instead

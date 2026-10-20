@@ -1,1 +1,0 @@
-change `--ytdl-format` default to `bestvideo*+bestaudio/bestvideo+bestaudio/best`

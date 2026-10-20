@@ -1,1 +1,0 @@
-deprecate `--vo-tct-buffering`, each frame is written to the terminal in one piece
