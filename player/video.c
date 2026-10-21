@@ -607,14 +607,25 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct vo *vo = mpctx->video_out;
 
-    if (mpctx->video_status < STATUS_READY) {
+    // First frame after a reset while audio is already playing: the chain was
+    // started mid-playback (track switch, disc stream delivering again), or a
+    // sparse stream's frame was held through the restart. delay is zero from
+    // the reset and the frame would be shown right away. Set it to the audio
+    // written past the frame's pts, so the audio sync below shows the frame
+    // at its time like any later one.
+    bool first_frame = mpctx->video_pts == MP_NOPTS_VALUE;
+    if (first_frame && mpctx->audio_status == STATUS_PLAYING) {
+        double apts = written_audio_pts(mpctx);
+        double pts = mpctx->next_frames[0]->pts;
+        if (apts != MP_NOPTS_VALUE && pts != MP_NOPTS_VALUE)
+            mpctx->delay = apts + opts->audio_delay - pts;
+    }
+
+    if (mpctx->video_status < STATUS_READY && mpctx->audio_status != STATUS_PLAYING) {
         mpctx->time_frame = 0;
     } else if (mpctx->display_sync_active || vo->opts->video_sync == VS_NONE) {
         // don't touch the timing
-    } else if (mpctx->audio_status == STATUS_PLAYING &&
-               mpctx->video_status == STATUS_PLAYING &&
-               !ao_untimed(mpctx->ao))
-    {
+    } else if (mpctx->audio_status == STATUS_PLAYING && !ao_untimed(mpctx->ao)) {
         double buffered_audio = ao_get_delay(mpctx->ao);
 
         double predicted = mpctx->delay / mpctx->video_speed +
@@ -622,7 +633,7 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
         double difference = buffered_audio - predicted;
         MP_STATS(mpctx, "value %f audio-diff", difference);
 
-        if (opts->autosync) {
+        if (opts->autosync && !first_frame) {
             /* Smooth reported playback position from AO by averaging
              * it with the value expected based on previous value and
              * time elapsed since then. May help smooth video timing
@@ -1219,17 +1230,6 @@ void write_video(struct MPContext *mpctx)
 
     mpctx->time_frame -= get_relative_time(mpctx);
     update_avsync_before_frame(mpctx);
-
-    // Schedule frames directly against the audio clock for sparse video.
-    if (vo_c->is_sparse && !mpctx->display_sync_active &&
-        mpctx->audio_status == STATUS_PLAYING &&
-        mpctx->video_status == STATUS_PLAYING)
-    {
-        double apts = playing_audio_pts(mpctx);
-        double fpts = mpctx->next_frames[0]->pts;
-        if (apts != MP_NOPTS_VALUE && fpts != MP_NOPTS_VALUE)
-            mpctx->time_frame = MPMAX(fpts - apts, 0) / mpctx->video_speed;
-    }
 
     // Enforce timing subtitles to video frames.
     osd_set_force_video_pts(mpctx->osd, MP_NOPTS_VALUE);
