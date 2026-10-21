@@ -60,6 +60,7 @@ struct dvda_still {
 struct dvda_track {
     int64_t time;               // start time relative to title start (ticks)
     int64_t duration;           // 90 kHz PTS ticks
+    int64_t first_pts;          // PTS of the track's first packet (ticks)
     uint32_t start_sector;      // within the ATS AOB space
     uint32_t end_sector;        // inclusive
     struct dvda_still *stills;  // still pictures shown during this track
@@ -164,6 +165,11 @@ struct priv {
     struct mp_log *lib_log;     // used by libdvdread's log callback
     bool probing;               // open is an .iso auto-detection probe
     struct dvda_opts *opts;
+
+    // What demux_disc maps the data by, see STREAM_CTRL_GET_SEGMENTS.
+    struct stream_segment *segs;     // runs started, not collected yet
+    int num_segs;
+    bool seg_pending;                // the next read starts a run
 };
 
 #define OPT_BASE_STRUCT struct dvda_opts
@@ -357,6 +363,7 @@ static bool read_disc_structure(stream_t *stream)
                 t.tracks[i] = (struct dvda_track){
                     .time = time,
                     .duration = ts->length_pts_of_track,
+                    .first_pts = ts->first_pts_of_track,
                     .start_sector = rec->atsi_track_pointer_rows[first - 1].start_sector,
                     .end_sector = rec->atsi_track_pointer_rows[last - 1].end_sector,
                 };
@@ -374,9 +381,10 @@ static bool read_disc_structure(stream_t *stream)
                        t.audio_desc ? t.audio_desc : "?");
             for (int i = 0; i < num_tracks; i++) {
                 struct dvda_track *tr = &t.tracks[i];
-                MP_DBG(stream, "  track %d: t=%.2f dur=%.2f sectors=%"PRIu32
-                       "..%"PRIu32" stills=%d\n", i, DVDA_TIME_TO_S(tr->time),
-                       DVDA_TIME_TO_S(tr->duration), tr->start_sector,
+                MP_DBG(stream, "  track %d: t=%.2f dur=%.2f pts=%.2f sectors="
+                       "%"PRIu32"..%"PRIu32" stills=%d\n", i,
+                       DVDA_TIME_TO_S(tr->time), DVDA_TIME_TO_S(tr->duration),
+                       DVDA_TIME_TO_S(tr->first_pts), tr->start_sector,
                        tr->end_sector, tr->num_stills);
             }
             MP_TARRAY_APPEND(priv, priv->titles, priv->num_titles, t);
@@ -407,8 +415,34 @@ static bool play_title(stream_t *stream, int title)
     }
     priv->title = title;
     priv->cur_sector = t->start_sector;
+    TA_FREEP(&priv->segs);
+    priv->num_segs = 0;
+    priv->seg_pending = true;
     return true;
 }
+
+// A track whose sectors fall outside the title's contiguous AOB range is a
+// trailing marker.
+static bool track_sectors_ok(struct dvda_title *t, struct dvda_track *tr)
+{
+    return tr->start_sector >= t->start_sector &&
+           tr->end_sector <= t->end_sector &&
+           tr->end_sector >= tr->start_sector;
+}
+
+// The track holding the sector, NULL between tracks.
+static struct dvda_track *track_at_sector(struct dvda_title *t, uint32_t sector)
+{
+    for (int i = 0; i < t->num_tracks; i++) {
+        struct dvda_track *tr = &t->tracks[i];
+        if (track_sectors_ok(t, tr) && sector >= tr->start_sector &&
+            sector <= tr->end_sector)
+            return tr;
+    }
+    return NULL;
+}
+
+static double sector_to_time(struct dvda_title *t, uint32_t sector);
 
 static int fill_buffer(stream_t *stream, void *buf, int max_len)
 {
@@ -424,8 +458,18 @@ static int fill_buffer(stream_t *stream, void *buf, int max_len)
     if (priv->cur_sector > t->end_sector)
         return 0; // title end
 
-    size_t blocks = MPMIN(max_len / DVD_BLOCK_SIZE,
-                          t->end_sector - priv->cur_sector + 1);
+    struct dvda_track *tr = track_at_sector(t, priv->cur_sector);
+    if (priv->seg_pending || (tr && priv->cur_sector == tr->start_sector)) {
+        MP_TARRAY_APPEND(priv, priv->segs, priv->num_segs, (struct stream_segment){
+            .pos = stream->pos,
+            .raw_base = tr ? DVDA_TIME_TO_S(tr->first_pts) : MP_NOPTS_VALUE,
+            .time = DVDA_TIME_TO_S(tr ? tr->time : sector_to_time(t, priv->cur_sector)),
+        });
+        priv->seg_pending = false;
+    }
+
+    uint32_t end_sector = tr ? tr->end_sector : t->end_sector;
+    size_t blocks = MPMIN(max_len / DVD_BLOCK_SIZE, end_sector - priv->cur_sector + 1);
     ssize_t r = DVDReadBlocks(priv->file, priv->cur_sector, blocks, buf);
     if (r <= 0) {
         MP_ERR(stream, "Error reading sector %"PRIu32".\n", priv->cur_sector);
@@ -433,15 +477,6 @@ static int fill_buffer(stream_t *stream, void *buf, int max_len)
     }
     priv->cur_sector += r;
     return r * DVD_BLOCK_SIZE;
-}
-
-// A track whose sectors fall outside the title's contiguous AOB range is a
-// trailing marker.
-static bool track_sectors_ok(struct dvda_title *t, struct dvda_track *tr)
-{
-    return tr->start_sector >= t->start_sector &&
-           tr->end_sector <= t->end_sector &&
-           tr->end_sector >= tr->start_sector;
 }
 
 // Map a sector position to title-relative playback time via the track it falls
@@ -638,9 +673,20 @@ static int control(stream_t *stream, int cmd, void *arg)
         *(double *)arg = DVDA_TIME_TO_S(sector_to_time(t, priv->cur_sector));
         return STREAM_OK;
     case STREAM_CTRL_SEEK_TO_TIME: {
-        double *args = arg;
-        priv->cur_sector = time_to_sector(t, DVDA_TIME_FROM_S(args[0]));
+        struct stream_seek_req *req = arg;
+        priv->cur_sector = time_to_sector(t, DVDA_TIME_FROM_S(req->target));
         stream_drop_buffers(stream);
+        TA_FREEP(&priv->segs);
+        priv->num_segs = 0;
+        priv->seg_pending = true;
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_SEGMENTS: {
+        struct stream_segments_req *req = arg;
+        req->segs = talloc_steal(NULL, priv->segs);
+        req->num = priv->num_segs;
+        priv->segs = NULL;
+        priv->num_segs = 0;
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_NUM_TITLES:

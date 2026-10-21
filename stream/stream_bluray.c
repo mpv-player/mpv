@@ -149,8 +149,10 @@ struct bluray_priv_s {
     bool hdmv_mode;
     struct bd_overlay_plane ig;
     struct bd_overlay_plane pg;
-    double tl_offset;
-    bool tl_offset_valid;
+    // What demux_disc maps the data by, see STREAM_CTRL_GET_SEGMENTS.
+    struct stream_segment *segs;     // runs started, not collected yet
+    int num_segs;
+    bool seg_pending;                // the next data read starts a run
 
     mp_mutex overlay_lock;
 
@@ -274,6 +276,74 @@ static bool bd_clip_lang(const BLURAY_CLIP_INFO *ci, struct stream_track_req *re
         }
     }
     return false;
+}
+
+static const char *bd_codec_name(uint8_t coding_type)
+{
+    switch (coding_type) {
+    case BLURAY_STREAM_TYPE_VIDEO_MPEG1:    return "mpeg1video";
+    case BLURAY_STREAM_TYPE_VIDEO_MPEG2:    return "mpeg2video";
+    case BLURAY_STREAM_TYPE_VIDEO_VC1:      return "vc1";
+    case BLURAY_STREAM_TYPE_VIDEO_H264:     return "h264";
+    case BLURAY_STREAM_TYPE_VIDEO_HEVC:     return "hevc";
+    case BLURAY_STREAM_TYPE_AUDIO_MPEG1:
+    case BLURAY_STREAM_TYPE_AUDIO_MPEG2:    return "mp3";
+    case BLURAY_STREAM_TYPE_AUDIO_LPCM:     return "pcm_bluray";
+    case BLURAY_STREAM_TYPE_AUDIO_AC3:      return "ac3";
+    case BLURAY_STREAM_TYPE_AUDIO_DTS:
+    case BLURAY_STREAM_TYPE_AUDIO_DTSHD:
+    case BLURAY_STREAM_TYPE_AUDIO_DTSHD_MASTER:
+    case BLURAY_STREAM_TYPE_AUDIO_DTSHD_SECONDARY: return "dts";
+    case BLURAY_STREAM_TYPE_AUDIO_TRUHD:    return "truehd";
+    case BLURAY_STREAM_TYPE_AUDIO_AC3PLUS:
+    case BLURAY_STREAM_TYPE_AUDIO_AC3PLUS_SECONDARY: return "eac3";
+    case BLURAY_STREAM_TYPE_SUB_PG:         return "hdmv_pgs_subtitle";
+    case BLURAY_STREAM_TYPE_SUB_TEXT:       return "hdmv_text_subtitle";
+    }
+    return NULL;
+}
+
+// Appends the presentation streams of the clip being played to the list.
+// Runs with overlay_lock held.
+static void bd_list_streams(const struct bluray_priv_s *priv, void *ta,
+                            struct stream_decl_stream **list, int *num)
+{
+    const BLURAY_CLIP_INFO *ci = bd_current_clip(priv);
+    if (!ci)
+        return;
+    const struct {
+        int type;
+        const BLURAY_STREAM_INFO *si;
+        int count;
+    } lists[] = {
+        {STREAM_VIDEO, ci->video_streams,     ci->video_stream_count},
+        {STREAM_AUDIO, ci->audio_streams,     ci->audio_stream_count},
+        {STREAM_SUB,   ci->pg_streams,        ci->pg_stream_count},
+        {STREAM_VIDEO, ci->sec_video_streams, ci->sec_video_stream_count},
+        {STREAM_AUDIO, ci->sec_audio_streams, ci->sec_audio_stream_count},
+    };
+    for (int l = 0; l < MP_ARRAY_SIZE(lists); l++) {
+        for (int i = 0; i < lists[l].count; i++) {
+            const BLURAY_STREAM_INFO *si = &lists[l].si[i];
+            MP_TARRAY_APPEND(ta, *list, *num, ((struct stream_decl_stream){
+                lists[l].type, si->pid, bd_codec_name(si->coding_type)}));
+        }
+    }
+}
+
+// Note a run of data starting at stream position `pos` (a clip change, a
+// seek, a jump) for demux_disc. Every stream of the clip has data in it.
+// Runs with overlay_lock held.
+static void bd_record_segment(struct bluray_priv_s *b, int64_t pos)
+{
+    const BLURAY_CLIP_INFO *ci = bd_current_clip(b);
+    struct stream_segment seg = {
+        .pos = pos,
+        .raw_base = ci ? BD_TIME_TO_S(ci->in_time) : MP_NOPTS_VALUE,
+        .time = ci ? BD_TIME_TO_S(ci->start_time)
+                   : BD_TIME_TO_S(bd_tell_time(b->bd)),
+    };
+    MP_TARRAY_APPEND(b, b->segs, b->num_segs, seg);
 }
 
 static enum pl_color_system bd_overlay_csp(struct bluray_priv_s *priv)
@@ -676,6 +746,7 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             b->current_playlist = playlist;
             b->current_title = title;
             b->current_playitem = 0;
+            b->seg_pending = true;
             b->clip_open = true;
             if (b->hdmv_mode)
                 b->discontinuity_id++;
@@ -686,6 +757,7 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             mp_mutex_lock(&b->overlay_lock);
             if (b->current_playitem != ev.param) {
                 b->current_playitem = ev.param;
+                b->seg_pending = true;
                 b->nav_change_id++;
             }
             mp_mutex_unlock(&b->overlay_lock);
@@ -781,6 +853,12 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             }
             if (!b->read_pos_known)
                 MP_DBG(s, "reads resume at %"PRIu64"\n", pos - n);
+            if (!b->read_pos_known || b->seg_pending) {
+                mp_mutex_lock(&b->overlay_lock);
+                bd_record_segment(b, s->pos);
+                b->seg_pending = false;
+                mp_mutex_unlock(&b->overlay_lock);
+            }
             b->next_read_pos = pos;
             b->read_pos_known = true;
             if (b->still_active) {
@@ -815,6 +893,8 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             b->read_pos_known = false;
             mp_mutex_lock(&b->overlay_lock);
             b->resync_owed = true;
+            TA_FREEP(&b->segs);
+            b->num_segs = 0;
             mp_mutex_unlock(&b->overlay_lock);
             MP_VERBOSE(s, "jump settled (id %u), EOF for demuxer resync\n",
                        b->discontinuity_id);
@@ -923,24 +1003,26 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         mp_mutex_unlock(&b->overlay_lock);
         return STREAM_OK;
     }
-    case STREAM_CTRL_SET_TIMELINE_OFFSET:
-        mp_mutex_lock(&b->overlay_lock);
-        b->tl_offset = *(double *)arg;
-        b->tl_offset_valid = true;
-        mp_mutex_unlock(&b->overlay_lock);
-        return STREAM_OK;
     case STREAM_CTRL_SET_PLAYBACK_TIME: {
         if (!b->hdmv_mode)
             break;
-        // libbluray wants the clip's own presentation timestamp, so undo the
-        // demuxer's rebase.
+        // libbluray wants the clip's own presentation timestamp. Playback
+        // time is playlist time, the clip table maps it back.
+        int64_t pl = BD_TIME_FROM_S(*(double *)arg);
+        int64_t raw = -1;
         mp_mutex_lock(&b->overlay_lock);
-        int64_t raw = BD_TIME_FROM_S(*(double *)arg - b->tl_offset);
-        const BLURAY_CLIP_INFO *ci = bd_current_clip(b);
-        bool ok = b->tl_offset_valid && ci &&
-                  raw >= (int64_t)ci->in_time && raw <= (int64_t)ci->out_time;
+        const BLURAY_TITLE_INFO *ti = b->title_info;
+        for (unsigned n = 0; ti && n < ti->clip_count; n++) {
+            const BLURAY_CLIP_INFO *ci = &ti->clips[n];
+            int64_t start = ci->start_time;
+            int64_t end = start + (ci->out_time - ci->in_time);
+            if (pl >= start && pl <= end) {
+                raw = ci->in_time + (pl - start);
+                break;
+            }
+        }
         mp_mutex_unlock(&b->overlay_lock);
-        if (!ok)
+        if (raw < 0)
             break;
         bd_set_scr(b->bd, raw);
         return STREAM_OK;
@@ -987,10 +1069,14 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         return STREAM_OK;
     }
     case STREAM_CTRL_SEEK_TO_TIME: {
-        double pts = *((double *) arg);
-        bd_seek_time(b->bd, BD_TIME_FROM_S(pts));
+        struct stream_seek_req *req = arg;
+        bd_seek_time(b->bd, BD_TIME_FROM_S(req->target));
         stream_drop_buffers(s);
         b->read_pos_known = false;
+        mp_mutex_lock(&b->overlay_lock);
+        TA_FREEP(&b->segs);
+        b->num_segs = 0;
+        mp_mutex_unlock(&b->overlay_lock);
         // API makes it hard to determine seeking success
         return STREAM_OK;
     }
@@ -1048,6 +1134,25 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             return STREAM_UNSUPPORTED;
         *(double *)arg = ti->playlist;
         bd_free_title_info(ti);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_STREAMS: {
+        struct stream_streams_req *req = arg;
+        req->streams = NULL;
+        req->num = 0;
+        mp_mutex_lock(&b->overlay_lock);
+        bd_list_streams(b, NULL, &req->streams, &req->num);
+        mp_mutex_unlock(&b->overlay_lock);
+        return req->num ? STREAM_OK : STREAM_UNSUPPORTED;
+    }
+    case STREAM_CTRL_GET_SEGMENTS: {
+        struct stream_segments_req *req = arg;
+        mp_mutex_lock(&b->overlay_lock);
+        req->segs = talloc_steal(NULL, b->segs);
+        req->num = b->num_segs;
+        b->segs = NULL;
+        b->num_segs = 0;
+        mp_mutex_unlock(&b->overlay_lock);
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_TRACK_INFO: {
