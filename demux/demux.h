@@ -331,8 +331,6 @@ void demux_set_wakeup_cb(struct demuxer *demuxer, void (*cb)(void *ctx), void *c
 void demux_start_prefetch(struct demuxer *demuxer);
 void demux_drive_nav(struct demuxer *demuxer);
 void demux_nav_refresh(struct demuxer *demuxer);
-void demux_set_stream_still_image(struct demuxer *demuxer,
-                                  struct sh_stream *sh, bool still_image);
 void demux_set_stream_absent(struct demuxer *demuxer, struct sh_stream *sh,
                              bool absent);
 void demux_set_stream_group(struct demuxer *demuxer,
