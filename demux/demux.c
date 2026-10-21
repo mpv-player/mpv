@@ -921,18 +921,6 @@ static void update_stream_eager_state(struct demux_internal *in)
         in->blocked = false;
 }
 
-void demux_set_stream_still_image(demuxer_t *demuxer, struct sh_stream *sh,
-                                  bool still_image)
-{
-    struct demux_internal *in = demuxer->in;
-    mp_assert(demuxer == in->d_thread);
-
-    mp_mutex_lock(&in->lock);
-    sh->still_image = still_image;
-    update_stream_eager_state(in);
-    mp_mutex_unlock(&in->lock);
-}
-
 // Set whether the media provides data for this stream at all.
 void demux_set_stream_absent(demuxer_t *demuxer, struct sh_stream *sh,
                              bool absent)
