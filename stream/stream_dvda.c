@@ -674,6 +674,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         return STREAM_OK;
     case STREAM_CTRL_SEEK_TO_TIME: {
         struct stream_seek_req *req = arg;
+        req->skip_until = MP_NOPTS_VALUE;
         priv->cur_sector = time_to_sector(t, DVDA_TIME_FROM_S(req->target));
         stream_drop_buffers(stream);
         TA_FREEP(&priv->segs);

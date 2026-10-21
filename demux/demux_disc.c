@@ -68,6 +68,9 @@ struct priv {
     int64_t first_seg_id;
     int64_t applied_seg;    // id of the segment whose presence was applied
 
+    // Drop audio before this playback time, see d_seek().
+    double skip_until;
+
     // DVD-only: retain the last SPU packet per substream. The menu subpicture
     // is one-shot on an unseekable stream; re-deliver it on (re)selection and
     // demux_nav_refresh(), like a refresh seek for ordinary streams.
@@ -645,6 +648,8 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
     // pending on the packet-read path.
     bool bd_jump = have_nav && !p->is_dvd && nav.discontinuity_id != p->last_discontinuity_id;
 
+    p->skip_until = MP_NOPTS_VALUE;
+
     if (resync) {
         MP_VERBOSE(demuxer, "resync seek at jump boundary (disc id %u)\n",
                    nav.discontinuity_id);
@@ -656,8 +661,17 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
                    "slave reopen pending\n", nav.discontinuity_id);
     } else {
         MP_VERBOSE(demuxer, "seek to: %f\n", seek_pts);
-        struct stream_seek_req req = {.target = seek_pts, .flags = flags};
+        struct stream_seek_req req = {
+            .target = seek_pts,
+            .flags = flags,
+            .skip_until = MP_NOPTS_VALUE,
+        };
         stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, &req);
+        if (req.skip_until != MP_NOPTS_VALUE) {
+            // The stream stopped at the picture shown at the target.
+            MP_VERBOSE(demuxer, "dropping audio before %f\n", req.skip_until);
+            p->skip_until = req.skip_until;
+        }
         if (p->is_bd) {
             // The reposition starts a new byte-stream run. Restart the byte
             // position counters, the slave's drop_buffers below resyncs the
@@ -995,6 +1009,18 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
         pkt->codec = sh->codec;
     }
 
+    // Drop the audio between the landing and the seek target (see d_seek).
+    if (p->skip_until != MP_NOPTS_VALUE && sh->type == STREAM_AUDIO &&
+        pkt->pts != MP_NOPTS_VALUE)
+    {
+        if (pkt->pts < p->skip_until) {
+            talloc_free(pkt);
+            return true;
+        }
+        MP_VERBOSE(demuxer, "audio reached seek target %f\n", p->skip_until);
+        p->skip_until = MP_NOPTS_VALUE;
+    }
+
     if (sh->type == STREAM_AUDIO && pkt->pts != MP_NOPTS_VALUE) {
         inject_still(demuxer, pkt->pts);
         // Deliver the still before the audio it belongs to, so the frame is
@@ -1081,6 +1107,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     struct priv *p = demuxer->priv = talloc_zero(demuxer, struct priv);
     p->disc_audio_id = -1;
     p->applied_seg = -1;
+    p->skip_until = MP_NOPTS_VALUE;
 
     if (check != DEMUX_CHECK_FORCE)
         return -1;

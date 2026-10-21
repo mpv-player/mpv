@@ -263,6 +263,7 @@ struct stream_segments_req {
 struct stream_seek_req {
     double target;      // in: absolute playback time
     int flags;          // in: SEEK_* flags (demux.h)
+    double skip_until;  // out: drop audio until this time (MP_NOPTS_VALUE otherwise)
 };
 
 // for STREAM_CTRL_AVSEEK

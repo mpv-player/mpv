@@ -1030,6 +1030,53 @@ static int fill_buffer(stream_t *s, void *buf, int max_len)
     return 0;
 }
 
+// A seek into a slideshow title lands in a VOBU without video, and nothing
+// would show until the next picture, minutes later. Move back to the VOBU
+// holding the picture valid at the landing. The demuxer drops the audio in
+// between.
+static bool land_on_picture(stream_t *stream)
+{
+    struct priv *priv = stream->priv;
+    dvdnav_t *dvdnav = priv->dvdnav;
+    uint8_t buf[2048];
+
+    // Read up to the landing VOBU's NAV packet, handling the events libdvdnav
+    // queues for the seek on the way, as fill_buffer() does.
+    for (int i = 0; i < 32; i++) {
+        int event = DVDNAV_NOP, len = 0;
+        if (dvdnav_get_next_block(dvdnav, buf, &event, &len) != DVDNAV_STATUS_OK)
+            return false;
+        mp_mutex_lock(&priv->lock);
+        int r = process_event(stream, event, buf, len);
+        mp_mutex_unlock(&priv->lock);
+        if (event == DVDNAV_NAV_PACKET)
+            break;
+        if (r >= 0)
+            return false;
+    }
+
+    const dsi_t *dsi = dvdnav_get_current_nav_dsi(dvdnav);
+    if (!dsi || dsi->dsi_gi.vobu_1stref_ea)
+        return false;
+    uint32_t back = dsi->vobu_sri.prev_video & SRI_END_OF_CELL;
+    if (back == SRI_END_OF_CELL || back == 0)
+        return false;
+    if (dvdnav_sector_search(dvdnav, -(int64_t)back, SEEK_CUR) != DVDNAV_STATUS_OK) {
+        MP_VERBOSE(stream, "landed in a VOBU without video, cannot move %"PRIu32
+                   " blocks back to its picture: %s\n",
+                   back, dvdnav_err_to_string(dvdnav));
+        return false;
+    }
+    MP_VERBOSE(stream, "landed in a VOBU without video, moved %"PRIu32
+               " blocks back to its picture\n", back);
+    mp_mutex_lock(&priv->lock);
+    drop_segments(priv);
+    priv->tl_anchor = true;
+    priv->pci_valid = false;
+    mp_mutex_unlock(&priv->lock);
+    return true;
+}
+
 static int64_t seek_landing_ticks(struct priv *priv, double d, double margin)
 {
     int64_t tm = DVD_TIME_FROM_S(d - margin);
@@ -1150,6 +1197,7 @@ static int control(stream_t *stream, int cmd, void *arg)
         struct stream_seek_req *req = arg;
         double d = req->target;
         int flags = req->flags;
+        req->skip_until = MP_NOPTS_VALUE;
         if (in_menu_domain(dvdnav)) {
             // The menu subpicture (buttons, highlight) is a one-shot packet
             // at its cell start, and dvdnav's time search lands mid-cell,
@@ -1198,6 +1246,10 @@ static int control(stream_t *stream, int cmd, void *arg)
         priv->tl_anchor = true;
         mp_mutex_unlock(&priv->lock);
         stream_drop_buffers(stream);
+        if (!in_menu_domain(dvdnav) && land_on_picture(stream)) {
+            req->skip_until = d;
+            return STREAM_OK;
+        }
         d = DVD_TIME_TO_S(dvdnav_get_current_time(dvdnav));
         MP_VERBOSE(stream, "landed at: %f\n", d);
         uint32_t pos, len;
