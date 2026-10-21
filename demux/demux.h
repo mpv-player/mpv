@@ -310,7 +310,8 @@ int demux_read_packet_async_until(struct sh_stream *sh, double min_pts,
 bool demux_stream_is_selected(struct sh_stream *stream);
 void demux_set_stream_wakeup_cb(struct sh_stream *sh,
                                 void (*cb)(void *ctx), void *ctx);
-struct demux_packet *demux_read_any_packet(struct demuxer *demuxer);
+struct demux_packet *demux_read_any_packet(struct demuxer *demuxer,
+                                           bool *new_streams);
 
 struct sh_stream *demux_get_stream(struct demuxer *demuxer, int index);
 int demux_get_num_stream(struct demuxer *demuxer);

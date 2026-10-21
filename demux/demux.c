@@ -3002,14 +3002,17 @@ int demux_read_packet_async_until(struct sh_stream *sh, double min_pts,
     return r;
 }
 
-// Read and return any packet we find. NULL means EOF.
-// Does not work with threading (don't call demux_start_thread()).
-struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
+// Read and return any packet we find. NULL means EOF. With new_streams set,
+// return without a packet once the demuxer added streams, and set
+// *new_streams. Does not work with threading (don't call demux_start_thread()).
+struct demux_packet *demux_read_any_packet(struct demuxer *demuxer,
+                                           bool *new_streams)
 {
     struct demux_internal *in = demuxer->in;
     mp_mutex_lock(&in->lock);
     mp_assert(!in->threading); // doesn't work with threading
     struct demux_packet *out_pkt = NULL;
+    int num_streams = in->num_streams;
     bool read_more = true;
     while (read_more && !in->blocked) {
         bool all_eof = true;
@@ -3023,6 +3026,10 @@ struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
         // retry after calling this
         read_more = thread_work(in);
         read_more &= !all_eof;
+        if (new_streams && in->num_streams > num_streams) {
+            *new_streams = true;
+            break;
+        }
     }
 done:
     mp_mutex_unlock(&in->lock);

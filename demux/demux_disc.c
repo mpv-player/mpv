@@ -983,7 +983,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     if (!p->slave)
         return false;
 
-    struct demux_packet *pkt = demux_read_any_packet(p->slave);
+    struct demux_packet *pkt = demux_read_any_packet(p->slave, NULL);
     if (!pkt) {
         // EOF is a real still (hold the frame), a held jump boundary (the
         // player resyncs it via the seek path), or (BD) an out-of-band jump.
@@ -996,7 +996,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
                        p->last_discontinuity_id, nav2.discontinuity_id);
             if (!process_discontinuity(demuxer, nav2.discontinuity_id))
                 return false;
-            pkt = demux_read_any_packet(p->slave);
+            pkt = demux_read_any_packet(p->slave, NULL);
         } else if (p->is_bd && p->nav_active) {
             // The slave latches the EOF and stops touching the stream.
             // Peek to run the event loop, the VM progresses only on reads.
