@@ -1070,6 +1070,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
     case STREAM_CTRL_SEEK_TO_TIME: {
         struct stream_seek_req *req = arg;
+        req->skip_until = MP_NOPTS_VALUE;
         bd_seek_time(b->bd, BD_TIME_FROM_S(req->target));
         stream_drop_buffers(s);
         b->read_pos_known = false;
