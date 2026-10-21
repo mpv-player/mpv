@@ -509,6 +509,8 @@ struct mp_abort_entry {
 void reset_audio_state(struct MPContext *mpctx);
 void reinit_audio_chain(struct MPContext *mpctx);
 int init_audio_decoder(struct MPContext *mpctx, struct track *track);
+void uninit_audio_decoder(struct MPContext *mpctx);
+void reinit_audio_decoder(struct MPContext *mpctx);
 int reinit_audio_filters(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
 void fill_audio_out_buffers(struct MPContext *mpctx);
@@ -687,6 +689,8 @@ bool disc_nav_mouse_pos_to_src(struct MPContext *mpctx, int src_w, int src_h,
 // video.c
 void reset_video_state(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
+void uninit_video_decoder(struct MPContext *mpctx);
+void reinit_video_decoder(struct MPContext *mpctx);
 void reinit_video_chain(struct MPContext *mpctx);
 void reinit_video_chain_src(struct MPContext *mpctx, struct track *track);
 int reinit_video_filters(struct MPContext *mpctx);

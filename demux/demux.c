@@ -423,6 +423,9 @@ struct demux_stream {
     struct demux_packet *reader_head;   // points at current decoder position
     bool skip_to_keyframe;
     bool attached_picture_added;
+    bool lazy_eof;          // last EOF returned to the reader was not the
+                            // demuxer's EOF (non-eager stream or queue
+                            // overflow), more packets may follow
     bool need_wakeup;       // call wakeup_cb on next reader_head state change
     double force_read_until;// eager=false streams (subs): force read-ahead
 
@@ -843,6 +846,7 @@ static void ds_clear_reader_state(struct demux_stream *ds,
     ds->bitrate = -1;
     ds->skip_to_keyframe = false;
     ds->attached_picture_added = false;
+    ds->lazy_eof = false;
     ds->last_ret_pos = -1;
     ds->last_ret_dts = MP_NOPTS_VALUE;
     ds->force_read_until = MP_NOPTS_VALUE;
@@ -2884,6 +2888,11 @@ static int dequeue_packet(struct demux_stream *ds, double min_pts,
             if (!lazy_stream_needs_wait(ds))
                 ds->eof = eof = true;
         }
+        // Non-eager streams and streams starved by a queue overflow get EOF
+        // while the demuxer can still read. Backward demuxing signals BOF
+        // this way, which is final.
+        if (eof)
+            ds->lazy_eof = !in->eof && !in->back_demuxing;
         return eof ? -1 : 0;
     }
 
@@ -2892,6 +2901,7 @@ static int dequeue_packet(struct demux_stream *ds, double min_pts,
     pkt = read_packet_from_cache(in, pkt);
     if (!pkt)
         return 0;
+    ds->lazy_eof = false;
 
     if (in->back_demuxing) {
         if (pkt->keyframe) {
@@ -4364,6 +4374,31 @@ bool demux_stream_is_selected(struct sh_stream *stream)
     bool r = false;
     mp_mutex_lock(&stream->ds->in->lock);
     r = stream->ds->selected;
+    mp_mutex_unlock(&stream->ds->in->lock);
+    return r;
+}
+
+// Return true if the last EOF returned for the stream was a lazy one, i.e. the
+// demuxer could still read: the stream is not eager (sparse video, subtitles,
+// a stream absent from the current data), or it was starved by a queue
+// overflow. More packets may follow.
+bool demux_stream_eof_is_lazy(struct sh_stream *stream)
+{
+    if (!stream)
+        return false;
+    mp_mutex_lock(&stream->ds->in->lock);
+    bool r = stream->ds->lazy_eof;
+    mp_mutex_unlock(&stream->ds->in->lock);
+    return r;
+}
+
+// Return true if packets are queued for the reader.
+bool demux_stream_has_packets(struct sh_stream *stream)
+{
+    if (!stream)
+        return false;
+    mp_mutex_lock(&stream->ds->in->lock);
+    bool r = !!stream->ds->reader_head;
     mp_mutex_unlock(&stream->ds->in->lock);
     return r;
 }
