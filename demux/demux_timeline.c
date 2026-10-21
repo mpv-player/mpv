@@ -280,7 +280,7 @@ static void do_read_next_packet(struct demuxer *demuxer,
         return;
     }
 
-    struct demux_packet *pkt = demux_read_any_packet(seg->d);
+    struct demux_packet *pkt = demux_read_any_packet(seg->d, NULL);
     if (!pkt || (!src->no_clip && pkt->pts >= seg->end))
         src->eos_packets += 1;
 
