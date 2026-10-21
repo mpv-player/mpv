@@ -38,6 +38,7 @@
 #include "fmt-conversion.h"
 #include "hwdec.h"
 #include "mp_image.h"
+#include "csputils.h"
 #include "osdep/threads.h"
 #include "sws_utils.h"
 #include "out/placebo/utils.h"
@@ -1050,6 +1051,12 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     // If the signal peak is unknown, we're forced to pick the TRC's
     // nominal range as the signal peak to prevent clipping
     pl_color_space_infer(&params->color);
+
+    // libplacebo's pl_primaries_valid() accepts gamuts where the white point
+    // coincides with a primary; zero such hdr.prim so downstream color-matrix
+    // code treats it as unknown. See mpv-player/mpv#18417.
+    if (!mp_raw_primaries_valid(&params->color.hdr.prim))
+        params->color.hdr.prim = (struct pl_raw_primaries){0};
 
     if (!pl_color_space_is_hdr(&params->color)) {
         // Some clips have leftover HDR metadata after conversion to SDR, so to

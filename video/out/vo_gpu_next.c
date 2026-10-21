@@ -1439,6 +1439,11 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // TODO: Implement this for all backends
     if (sw->fns->target_csp)
         target_csp = sw->fns->target_csp(sw);
+    // Swapchain-reported mastering primaries can be degenerate (see
+    // mpv-player/mpv#18417). Zero them before any further use so downstream
+    // pl_primaries_valid() calls treat them as unknown.
+    if (!mp_raw_primaries_valid(&target_csp.hdr.prim))
+        target_csp.hdr.prim = (struct pl_raw_primaries){0};
     if (target_csp.primaries == PL_COLOR_PRIM_UNKNOWN)
         target_csp.primaries = mp_get_best_prim_container(&target_csp.hdr.prim);
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {

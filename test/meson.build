@@ -118,6 +118,10 @@ test('timer', timer)
 format = executable('format', files('format.c'), include_directories: incdir, link_with: test_utils)
 test('format', format)
 
+csputils = executable('csputils', files('csputils.c'), include_directories: incdir,
+                      dependencies: [libavutil, libplacebo], link_with: [img_utils, test_utils])
+test('csputils', csputils)
+
 language = executable('language', files('language.c'), include_directories: incdir, link_with: test_utils)
 test('language', language)
 

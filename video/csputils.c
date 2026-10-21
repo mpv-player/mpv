@@ -627,7 +627,7 @@ int mp_parse_raw_primaries(struct mp_log *log, const char *str,
             &prim.red.x, &prim.red.y, &prim.green.x, &prim.green.y,
             &prim.blue.x, &prim.blue.y, &prim.white.x, &prim.white.y) == 8)
     {
-        if (!pl_primaries_valid(&prim))
+        if (!mp_raw_primaries_valid(&prim))
             return M_OPT_OUT_OF_RANGE;
         *out = prim;
         return 1;
@@ -647,4 +647,24 @@ int mp_parse_raw_primaries(struct mp_log *log, const char *str,
     }
 
     return ret;
+}
+
+// libplacebo's pl_primaries_valid() misses degenerate gamuts where the white
+// point coincides with (or is collinear with two of) the RGB vertices, because
+// its triangle-interior test treats near-zero signed distances as "inside".
+// This stricter check rejects those cases. Fixes mpv-player/mpv#18417.
+bool mp_raw_primaries_valid(const struct pl_raw_primaries *prim)
+{
+    if (!pl_primaries_valid(prim))
+        return false;
+
+    float d1 = (prim->white.x - prim->green.x) * (prim->red.y - prim->green.y) -
+               (prim->red.x - prim->green.x) * (prim->white.y - prim->green.y);
+    float d2 = (prim->white.x - prim->blue.x) * (prim->green.y - prim->blue.y) -
+               (prim->green.x - prim->blue.x) * (prim->white.y - prim->blue.y);
+    float d3 = (prim->white.x - prim->red.x) * (prim->blue.y - prim->red.y) -
+               (prim->blue.x - prim->red.x) * (prim->white.y - prim->red.y);
+
+    return (d1 >  1e-5f && d2 >  1e-5f && d3 >  1e-5f) ||
+           (d1 < -1e-5f && d2 < -1e-5f && d3 < -1e-5f);
 }

@@ -141,4 +141,6 @@ enum pl_color_primaries mp_get_best_prim_container(const struct pl_raw_primaries
 int mp_parse_raw_primaries(struct mp_log *log, const char *str,
                            struct pl_raw_primaries *out);
 
+bool mp_raw_primaries_valid(const struct pl_raw_primaries *prim);
+
 #endif /* MPLAYER_CSPUTILS_H */
