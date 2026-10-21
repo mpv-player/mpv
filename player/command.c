@@ -420,7 +420,9 @@ static char *cut_osd_list(struct MPContext *mpctx, char *header, char *text, int
 
 static char *format_delay(double time)
 {
-    return talloc_asprintf(NULL, "%.f ms", time * 1000);
+    // Round to an integer first. Printing with "%.f" would keep the sign of
+    // small negative values and produce "-0 ms".
+    return talloc_asprintf(NULL, "%ld ms", lrint(time * 1000));
 }
 
 // Property-option bridge. (Maps the property to the option with the same name.)
