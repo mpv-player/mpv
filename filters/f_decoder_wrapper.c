@@ -221,6 +221,7 @@ struct priv {
     // --- Specific access depending on threading stuff.
     struct mp_async_queue *queue; // decoded frame output queue
     struct mp_dispatch_queue *dec_dispatch; // non-NULL if decoding thread used
+    bool eof_output;    // an EOF went out: the stream is done for this decoder
     bool dec_thread_lock; // debugging (esp. for no-thread case)
     mp_thread dec_thread;
     bool dec_thread_valid;
@@ -346,6 +347,7 @@ static void decf_reset(struct mp_filter *f)
     mp_mutex_unlock(&p->cache_lock);
 
     p->coverart_returned = 0;
+    p->eof_output = false;
 
     for (int n = 0; n < p->num_reverse_queue; n++)
         mp_frame_unref(&p->reverse_queue[n]);
@@ -960,6 +962,11 @@ static void feed_packet(struct priv *p)
     if (p->decoded_coverart.type)
         return;
 
+    // Don't read after EOF was output. If the stream continues, the player
+    // creates a new decoder.
+    if (p->eof_output)
+        return;
+
     if (!p->packet.type && !p->new_segment) {
         p->packet = mp_pin_out_read(p->demux);
         if (!p->packet.type)
@@ -1167,6 +1174,7 @@ static void read_frame(struct priv *p)
 
 output_frame:
     process_output_frame(p, frame);
+    p->eof_output = frame.type == MP_FRAME_EOF;
     mp_pin_in_write(pin, frame);
 }
 

@@ -272,8 +272,10 @@ static void ao_chain_uninit(struct ao_chain *ao_c)
         track->ao_c = NULL;
         if (ao_c->dec_src)
             mp_assert(track->dec->f->pins[0] == ao_c->dec_src);
-        talloc_free(track->dec->f);
-        track->dec = NULL;
+        if (track->dec) {
+            talloc_free(track->dec->f);
+            track->dec = NULL;
+        }
     }
 
     if (ao_c->filter_src)
@@ -561,6 +563,42 @@ static const struct mp_filter_info ao_filter = {
     .process = ao_process,
 };
 
+// Create the track's decoder and connect it to the filter chain.
+static bool ao_chain_init_decoder(struct MPContext *mpctx, struct ao_chain *ao_c)
+{
+    struct track *track = ao_c->track;
+    if (!init_audio_decoder(mpctx, track))
+        return false;
+    ao_c->dec_src = track->dec->f->pins[0];
+    mp_pin_connect(ao_c->filter->f->pins[0], ao_c->dec_src);
+    return true;
+}
+
+// Destroy the track's decoder, keeping the filter chain and the AO. The chain
+// stays at EOF until reinit_audio_decoder().
+void uninit_audio_decoder(struct MPContext *mpctx)
+{
+    struct ao_chain *ao_c = mpctx->ao_chain;
+    struct track *track = ao_c->track;
+    mp_assert(track && track->dec);
+    talloc_free(track->dec->f);
+    track->dec = NULL;
+    ao_c->dec_src = NULL;
+}
+
+// Create a new decoder for the track and restart the chain with it.
+void reinit_audio_decoder(struct MPContext *mpctx)
+{
+    struct ao_chain *ao_c = mpctx->ao_chain;
+    mp_assert(ao_c->track && !ao_c->track->dec);
+    // init_audio_decoder() deselects the track and destroys the chain on failure.
+    if (!ao_chain_init_decoder(mpctx, ao_c))
+        return;
+    // The filter chain still holds the old decoder's EOF.
+    mp_filter_reset(ao_c->filter->f);
+    reset_audio_state(mpctx);
+}
+
 // (track=NULL creates a blank chain, used for lavfi-complex)
 void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
 {
@@ -589,10 +627,8 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct track *track)
     if (track) {
         ao_c->track = track;
         track->ao_c = ao_c;
-        if (!init_audio_decoder(mpctx, track))
+        if (!ao_chain_init_decoder(mpctx, ao_c))
             goto init_error;
-        ao_c->dec_src = track->dec->f->pins[0];
-        mp_pin_connect(ao_c->filter->f->pins[0], ao_c->dec_src);
     }
 
     reset_audio_state(mpctx);
@@ -649,6 +685,10 @@ static void ao_process(struct mp_filter *f)
 {
     struct ao_chain *ao_c = f->priv;
     struct MPContext *mpctx = ao_c->mpctx;
+
+    // Once the chain reached EOF nothing is read from it again.
+    if (ao_c->out_eof)
+        return;
 
     if (!ao_c->queue_filter) {
         // This will eventually lead to the creation of the AO + queue, due
@@ -709,24 +749,6 @@ static void ao_process(struct mp_filter *f)
         if (!samples) {
             mp_filter_internal_mark_progress(f);
             mp_frame_unref(&frame);
-            return;
-        }
-
-        ao_c->out_eof = false;
-
-        if (mpctx->audio_status == STATUS_DRAINING ||
-            mpctx->audio_status == STATUS_EOF)
-        {
-            // If a new frame comes decoder/filter EOF, we should preferably
-            // call get_sync_pts() again, which (at least in obscure situations)
-            // may require us to wait a while until the sync PTS is known. Our
-            // code sucks and can't deal with that, so jump through a hoop to
-            // get things done in the correct order.
-            mp_pin_out_unread(f->ppins[0], frame);
-            ao_c->start_pts_known = false;
-            mpctx->audio_status = STATUS_SYNCING;
-            mp_wakeup_core(mpctx);
-            MP_VERBOSE(mpctx, "new audio frame after EOF\n");
             return;
         }
 

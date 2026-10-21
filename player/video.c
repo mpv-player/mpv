@@ -227,6 +227,46 @@ static void filter_update_subtitles(void *ctx, double pts)
         update_subtitles(mpctx, pts);
 }
 
+// Create the track's decoder and connect it to the filter chain.
+static bool vo_chain_init_decoder(struct MPContext *mpctx, struct vo_chain *vo_c)
+{
+    struct track *track = vo_c->track;
+    if (!init_video_decoder(mpctx, track))
+        return false;
+    vo_c->dec_src = track->dec->f->pins[0];
+    vo_c->filter->container_fps =
+        mp_decoder_wrapper_get_container_fps(track->dec);
+    if (vo_c->is_coverart)
+        mp_decoder_wrapper_set_coverart_flag(track->dec, true);
+    mp_pin_connect(vo_c->filter->f->pins[0], vo_c->dec_src);
+    return true;
+}
+
+// Destroy the track's decoder, keeping the filter chain, the VO and the
+// displayed frame. The chain stays at EOF until reinit_video_decoder().
+void uninit_video_decoder(struct MPContext *mpctx)
+{
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    struct track *track = vo_c->track;
+    mp_assert(track && track->dec);
+    talloc_free(track->dec->f);
+    track->dec = NULL;
+    vo_c->dec_src = NULL;
+}
+
+// Create a new decoder for the track and restart the chain with it.
+void reinit_video_decoder(struct MPContext *mpctx)
+{
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    mp_assert(vo_c->track && !vo_c->track->dec);
+    // init_video_decoder() deselects the track and destroys the chain on failure.
+    if (!vo_chain_init_decoder(mpctx, vo_c))
+        return;
+    // The filter chain still holds the old decoder's EOF.
+    mp_filter_reset(vo_c->filter->f);
+    reset_video_state(mpctx);
+}
+
 // (track=NULL creates a blank chain, used for lavfi-complex)
 void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
 {
@@ -265,22 +305,10 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     if (track) {
         vo_c->track = track;
         track->vo_c = vo_c;
-        if (!init_video_decoder(mpctx, track))
-            goto err_out;
-
-        vo_c->dec_src = track->dec->f->pins[0];
-        vo_c->filter->container_fps =
-            mp_decoder_wrapper_get_container_fps(track->dec);
         vo_c->is_coverart = !!track->attached_picture;
         vo_c->is_sparse = track->stream->still_image || vo_c->is_coverart;
-
-        if (vo_c->is_coverart)
-            mp_decoder_wrapper_set_coverart_flag(track->dec, true);
-
-        track->vo_c = vo_c;
-        vo_c->track = track;
-
-        mp_pin_connect(vo_c->filter->f->pins[0], vo_c->dec_src);
+        if (!vo_chain_init_decoder(mpctx, vo_c))
+            goto err_out;
     }
 
     update_vo_chain_el_pair(mpctx);
@@ -1075,18 +1103,16 @@ void write_video(struct MPContext *mpctx)
     if (mpctx->paused && mpctx->video_status >= STATUS_READY)
         return;
 
+    // Once the chain reached EOF nothing is read from it again.
     bool logical_eof = false;
-    int r = video_output_image(mpctx, &logical_eof);
+    int r = VD_EOF;
+    if (mpctx->video_status < STATUS_DRAINING)
+        r = video_output_image(mpctx, &logical_eof);
     MP_TRACE(mpctx, "video_output_image: r=%d/eof=%d/st=%s\n", r, logical_eof,
              mp_status_str(mpctx->video_status));
 
     if (r < 0)
         goto error;
-
-    // A frame arriving while the restart is still in progress is the
-    // restart's first frame, even if the (sparse) stream was at EOF.
-    if (r == VD_NEW_FRAME && mpctx->video_status == STATUS_EOF && !mpctx->restart_complete)
-        mpctx->video_status = STATUS_SYNCING;
 
     if (r == VD_WAIT) {
         // Heuristic to detect underruns.
@@ -1152,9 +1178,6 @@ void write_video(struct MPContext *mpctx)
         }
         return;
     }
-
-    if (mpctx->video_status > STATUS_PLAYING)
-        mpctx->video_status = STATUS_PLAYING;
 
     if (r != VD_NEW_FRAME) {
         mp_wakeup_core(mpctx); // Decode more in next iteration.

@@ -2702,7 +2702,7 @@ static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct mp_image_params p = {0};
     struct vo_chain *vo_c = mpctx->vo_chain;
-    if (!vo_c || !vo_c->track)
+    if (!vo_c || !vo_c->track || !vo_c->track->dec)
         return M_PROPERTY_UNAVAILABLE;
 
     int valid = m_property_read_sub_validate(ctx, prop, action, arg);
