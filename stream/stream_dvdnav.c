@@ -102,6 +102,16 @@ struct priv {
     bool sub_visible;                   // SPU "on" flag from same event
 
     struct dvd_opts *opts;
+
+    // What demux_disc maps the data by, see STREAM_CTRL_GET_SEGMENTS.
+    struct stream_segment *segs;        // VOBUs read, not collected yet
+    int num_segs;
+    bool tl_anchor;                     // the next VOBU takes its playback
+                                        // time from the VM (after a jump)
+    bool cell_start;                    // the next VOBU opens a cell
+    double cell_raw_base;               // start PTM of the cell's first VOBU
+    double cell_time;                   // playback time of cell_raw_base
+    double cell_raw_end;                // end PTM of its last VOBU read
 };
 
 struct dvd_opts {
@@ -567,8 +577,13 @@ static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 
 // Mark a source-position jump. Runs with priv->lock held. Set requested for a
 // move mpv asked the disc to make, as opposed to one the disc reported.
+static void drop_segments(struct priv *priv);
+
 static void bump_discontinuity(struct priv *priv, bool requested)
 {
+    // The VOBUs read since the last payload are not played.
+    drop_segments(priv);
+    priv->tl_anchor = true;
     // Back-to-back disc events with no payload between them are one jump. A
     // held still never delivers payload, so a requested move must not wait.
     if (priv->at_boundary && !requested)
@@ -713,6 +728,99 @@ static int mp_dvdnav_number_of_subs(stream_t *stream)
     return n;
 }
 
+static const char *dvd_audio_codec(uint16_t fmt)
+{
+    switch (fmt) {
+    case DVD_AUDIO_FORMAT_AC3:       return "ac3";
+    case DVD_AUDIO_FORMAT_DTS:       return "dts";
+    case DVD_AUDIO_FORMAT_LPCM:      return "pcm_dvd";
+    case DVD_AUDIO_FORMAT_MPEG:
+    case DVD_AUDIO_FORMAT_MPEG2_EXT: return "mp2";
+    }
+    return NULL;
+}
+
+// Appends the streams the current program chain declares to the list: its
+// video, the audio streams it makes available, its subpictures. With a
+// VOBU's dsi, only the video and audio with packs in that VOBU (a
+// subpicture stays declared, it shows on past the VOBU holding its packs).
+static void dvd_list_streams(stream_t *stream, const dsi_t *dsi, void *ta,
+                             struct stream_decl_stream **list, int *num)
+{
+    struct priv *priv = stream->priv;
+    dvdnav_t *dvdnav = priv->dvdnav;
+    if (!dsi || dsi->dsi_gi.vobu_1stref_ea) {
+        MP_TARRAY_APPEND(ta, *list, *num, ((struct stream_decl_stream){
+            STREAM_VIDEO, 0x1e0, "mpeg2video"}));
+    }
+    for (int l = 0; l < 8; l++) {
+        int physical = dvdnav_get_audio_logical_stream(dvdnav, l);
+        int id = dvd_audio_substream_id(priv, l, physical);
+        if (id < 0 || (dsi && !dsi->synci.a_synca[physical]))
+            continue;
+        MP_TARRAY_APPEND(ta, *list, *num, ((struct stream_decl_stream){
+            STREAM_AUDIO, id,
+            dvd_audio_codec(dvdnav_audio_stream_format(dvdnav, l))}));
+    }
+    int subs = mp_dvdnav_number_of_subs(stream);
+    for (int i = 0; i < MPMIN(subs, 32); i++) {
+        MP_TARRAY_APPEND(ta, *list, *num, ((struct stream_decl_stream){
+            STREAM_SUB, 0x20 + i, "dvd_subtitle"}));
+    }
+}
+
+// Forget the VOBUs read but not collected. Runs with priv->lock held.
+static void drop_segments(struct priv *priv)
+{
+    TA_FREEP(&priv->segs);
+    priv->num_segs = 0;
+}
+
+// Note the VOBU this NAV packet opens: where its data lands in the stream,
+// the cell's timestamp base, which declared streams have packs in it. A
+// VOBU without payload (the hold of a still, which is skipped) delivers
+// nothing and takes no playback time. Runs with priv->lock held.
+static void record_vobu(stream_t *s, const pci_t *pci)
+{
+    struct priv *priv = s->priv;
+    dvdnav_t *dvdnav = priv->dvdnav;
+    const dsi_t *dsi = dvdnav_get_current_nav_dsi(dvdnav);
+    double s_ptm = DVD_TIME_TO_S(pci->pci_gi.vobu_s_ptm);
+    double e_ptm = DVD_TIME_TO_S(pci->pci_gi.vobu_e_ptm);
+
+    if (!dsi || !dsi->dsi_gi.vobu_ea)
+        return;
+
+    if (priv->tl_anchor) {
+        // The VM moved, its clock says where playback continues.
+        priv->cell_raw_base = s_ptm;
+        priv->cell_time = DVD_TIME_TO_S(dvdnav_get_current_time(dvdnav));
+        priv->tl_anchor = false;
+        priv->cell_start = false;
+    } else if (priv->cell_start) {
+        // A cell's timestamps continue where the previous cell's ended.
+        priv->cell_time += priv->cell_raw_end - priv->cell_raw_base;
+        priv->cell_raw_base = s_ptm;
+        priv->cell_start = false;
+    }
+    priv->cell_raw_end = e_ptm;
+
+    MP_TARRAY_APPEND(priv, priv->segs, priv->num_segs, ((struct stream_segment){
+        .pos = s->pos,
+        .raw_base = priv->cell_raw_base,
+        .time = priv->cell_time,
+    }));
+    struct stream_segment *seg = &priv->segs[priv->num_segs - 1];
+    struct stream_decl_stream *has = NULL;
+    int num_has = 0;
+    dvd_list_streams(s, dsi, NULL, &has, &num_has);
+    for (int n = 0; n < num_has; n++) {
+        MP_TARRAY_APPEND(priv->segs, seg->present, seg->num_present,
+                         ((struct stream_stream_id){has[n].type, has[n].id}));
+    }
+    talloc_free(has);
+}
+
 // Handle one event from dvdnav_get_next_block(). Returns the value that
 // fill_buffer() should return, or -1 to continue reading..
 static int process_event(stream_t *s, int event, void *buf, int len)
@@ -740,6 +848,7 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         pci->hli.hl_gi.btn_ns = MPMIN(pci->hli.hl_gi.btn_ns, MP_ARRAY_SIZE(pci->hli.btnit));
         priv->pci_valid = true;
         MP_TRACE(s, "start pts = %"PRIu32"\n", pci->pci_gi.vobu_s_ptm);
+        record_vobu(s, pci);
         // Reset selection to first button if the current selection is out of
         // range. libdvdnav holds stale button selections when the menu changes,
         // which makes the new page unusable.
@@ -822,6 +931,7 @@ static int process_event(stream_t *s, int event, void *buf, int len)
 
         if (ev->pgc_length)
             priv->duration = ev->pgc_length;
+        priv->cell_start = true;
 
         MP_VERBOSE(s, "cell change: cell=%d pg=%d pgc_len=%.3f "
                    "cur_time=%.3f domain=%s\n",
@@ -1037,9 +1147,9 @@ static int control(stream_t *stream, int cmd, void *arg)
         return STREAM_OK;
     }
     case STREAM_CTRL_SEEK_TO_TIME: {
-        double *args = arg;
-        double d = args[0]; // absolute target timestamp
-        int flags = args[1]; // from SEEK_* flags (demux.h)
+        struct stream_seek_req *req = arg;
+        double d = req->target;
+        int flags = req->flags;
         if (in_menu_domain(dvdnav)) {
             // The menu subpicture (buttons, highlight) is a one-shot packet
             // at its cell start, and dvdnav's time search lands mid-cell,
@@ -1084,6 +1194,8 @@ static int control(stream_t *stream, int cmd, void *arg)
         priv->pci_valid = false;
         priv->pending_drain = false;
         priv->at_boundary = true;
+        drop_segments(priv);
+        priv->tl_anchor = true;
         mp_mutex_unlock(&priv->lock);
         stream_drop_buffers(stream);
         d = DVD_TIME_TO_S(dvdnav_get_current_time(dvdnav));
@@ -1126,10 +1238,26 @@ static int control(stream_t *stream, int cmd, void *arg)
     case STREAM_CTRL_GET_DVD_INFO: {
         struct stream_dvd_info_req *req = arg;
         memset(req, 0, sizeof(*req));
-        req->num_subs = mp_dvdnav_number_of_subs(stream);
         static_assert(sizeof(uint32_t) == sizeof(unsigned int), "");
         mp_mutex_lock(&priv->lock);
         memcpy(req->palette, priv->spu_clut, sizeof(req->palette));
+        mp_mutex_unlock(&priv->lock);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_STREAMS: {
+        struct stream_streams_req *req = arg;
+        req->streams = NULL;
+        req->num = 0;
+        dvd_list_streams(stream, NULL, NULL, &req->streams, &req->num);
+        return STREAM_OK;
+    }
+    case STREAM_CTRL_GET_SEGMENTS: {
+        struct stream_segments_req *req = arg;
+        mp_mutex_lock(&priv->lock);
+        req->segs = talloc_steal(NULL, priv->segs);
+        req->num = priv->num_segs;
+        priv->segs = NULL;
+        priv->num_segs = 0;
         mp_mutex_unlock(&priv->lock);
         return STREAM_OK;
     }
@@ -1350,6 +1478,7 @@ static int open_s_internal(stream_t *stream)
     priv->audio_physical = -1;
     priv->sub_physical = -1;
     priv->sub_visible = false;
+    priv->tl_anchor = true;
 
     p->opts = mp_get_config_group(stream, stream->global, &dvd_conf);
 

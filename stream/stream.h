@@ -83,7 +83,7 @@ enum stream_ctrl {
     STREAM_CTRL_GET_NUM_CHAPTERS,
     STREAM_CTRL_GET_CURRENT_TIME,
     STREAM_CTRL_GET_CHAPTER_TIME,
-    STREAM_CTRL_SEEK_TO_TIME,
+    STREAM_CTRL_SEEK_TO_TIME,        // struct stream_seek_req*
     STREAM_CTRL_GET_ASPECT_RATIO,
     STREAM_CTRL_GET_NUM_ANGLES,
     STREAM_CTRL_GET_ANGLE,
@@ -95,7 +95,6 @@ enum stream_ctrl {
     STREAM_CTRL_GET_CHAPTER_NAME,    // struct stream_name_req*
     STREAM_CTRL_GET_TITLE_NAME,      // struct stream_name_req*
     STREAM_CTRL_SET_ACTIVE_TRACK,    // struct stream_track_req* (audio, id in)
-    STREAM_CTRL_SET_TIMELINE_OFFSET, // double*, playback = raw + offset
     STREAM_CTRL_SET_PLAYBACK_TIME,   // double*, current presentation time
     STREAM_CTRL_SET_PLAYBACK_RATE,   // double*, 0 = paused, 1 = normal
     STREAM_CTRL_GET_CURRENT_TITLE,
@@ -107,6 +106,8 @@ enum stream_ctrl {
     STREAM_CTRL_SET_STILL_PAGE,      // int*, force the shown still page
     STREAM_CTRL_NAV_DRAIN_ENABLE,    // start holding EOF at jump boundaries
     STREAM_CTRL_NAV_DRAIN_ACK,       // flush done, release the held EOF
+    STREAM_CTRL_GET_STREAMS,         // struct stream_streams_req*
+    STREAM_CTRL_GET_SEGMENTS,        // struct stream_segments_req*
 };
 
 // Fetch the still image that a disc (DVD-Audio ASVS) associates with the given
@@ -221,7 +222,47 @@ struct stream_track_req {
 
 struct stream_dvd_info_req {
     unsigned int palette[16];
-    int num_subs;
+};
+
+// The presentation streams the disc declares for what it is playing (a DVD
+// program chain, a Blu-ray clip). The ids are the demuxer's (demuxer_id).
+struct stream_decl_stream {
+    int type;           // STREAM_VIDEO, STREAM_AUDIO, STREAM_SUB
+    int id;
+    const char *codec;  // static string, NULL when the disc does not say
+};
+struct stream_streams_req {
+    struct stream_decl_stream *streams; // out: talloc'd, the caller frees
+    int num;
+};
+
+struct stream_stream_id {
+    int type;
+    int id;
+};
+
+// One run of source data as the disc describes it (a DVD VOBU, a Blu-ray
+// clip): where it starts, how its in-stream timestamps map to playback time,
+// and which declared streams have data in it.
+struct stream_segment {
+    int64_t pos;        // stream position of its first byte
+    double raw_base;    // in-stream timestamp that plays at `time`, or
+                        // MP_NOPTS_VALUE: the first packet mapped into it
+    double time;        // playback time of raw_base
+    struct stream_stream_id *present;   // the declared streams with data in
+                                        // it, NULL when all of them have
+    int num_present;
+};
+struct stream_segments_req {
+    struct stream_segment *segs;    // out: the stream's talloc'd array, oldest
+                                    //      first, the present lists are its
+                                    //      children, the caller owns it
+    int num;
+};
+
+struct stream_seek_req {
+    double target;      // in: absolute playback time
+    int flags;          // in: SEEK_* flags (demux.h)
 };
 
 // for STREAM_CTRL_AVSEEK
