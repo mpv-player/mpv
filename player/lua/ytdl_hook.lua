@@ -255,6 +255,13 @@ local function url_is_safe(url)
     return safe
 end
 
+-- yt-dlp marks subtitles that need one of its own downloaders with a protocol.
+local function sub_protocol_is_supported(sub_info)
+    local proto = sub_info.protocol
+    return proto == nil or proto == "http" or proto == "https" or
+           proto:find("^m3u8") ~= nil
+end
+
 local function is_whitelisted(url)
     url = url:match("https?://(.+)")
 
@@ -751,18 +758,23 @@ local function add_single_video(json)
         table.sort(subs, function(a, b) return a.lang < b.lang end)
         for _, e in ipairs(subs) do
             local lang, sub_info = e.lang, e.info
-            msg.verbose("adding subtitle ["..lang.."]")
 
             local sub = nil
 
-            if sub_info.data ~= nil then
+            if not sub_protocol_is_supported(sub_info) then
+                msg.verbose("Skipping subtitle ["..lang.."] with protocol "..
+                            sub_info.protocol)
+            elseif sub_info.data ~= nil then
                 sub = "memory://"..sub_info.data
             elseif sub_info.url ~= nil and
                 url_is_safe(sub_info.url) then
                 sub = sub_info.url
+            else
+                msg.verbose("No subtitle data/url for ["..lang.."]")
             end
 
             if sub ~= nil then
+                msg.verbose("adding subtitle ["..lang.."]")
                 local edl = "edl://!no_clip;!delay_open,media_type=sub"
                 local codec = map_codec_to_mpv(sub_info.ext)
                 if codec then
@@ -771,8 +783,6 @@ local function add_single_video(json)
                 edl = edl .. ";" .. edl_escape(sub)
                 local title = sub_info.name or sub_info.ext
                 mp.commandv("sub-add", edl, "auto", title, lang)
-            else
-                msg.verbose("No subtitle data/url for ["..lang.."]")
             end
         end
     end
@@ -1100,19 +1110,26 @@ local function run_ytdl_hook(url)
             if entry_wsubs ~= nil and
                 json.entries[entry_wsubs].duration ~= nil then
                 for j, req in pairs(json.entries[entry_wsubs].requested_subtitles) do
-                    local subfile = "edl://"
-                    for _, entry in pairs(json.entries) do
-                        if entry.requested_subtitles ~= nil and
-                            entry.requested_subtitles[j] ~= nil and
-                            url_is_safe(entry.requested_subtitles[j].url) then
-                            subfile = subfile..edl_escape(entry.requested_subtitles[j].url)
-                        else
-                            subfile = subfile..edl_escape("memory://WEBVTT")
+                    if not sub_protocol_is_supported(req) then
+                        msg.verbose("Skipping subtitle ["..j.."] with protocol "..
+                                    req.protocol)
+                    else
+                        local subfile = "edl://"
+                        for _, entry in pairs(json.entries) do
+                            local sub_info = entry.requested_subtitles and
+                                             entry.requested_subtitles[j]
+                            if sub_info ~= nil and
+                                sub_protocol_is_supported(sub_info) and
+                                url_is_safe(sub_info.url) then
+                                subfile = subfile..edl_escape(sub_info.url)
+                            else
+                                subfile = subfile..edl_escape("memory://WEBVTT")
+                            end
+                            subfile = subfile..",length="..entry.duration..";"
                         end
-                        subfile = subfile..",length="..entry.duration..";"
+                        msg.debug(j.." sub EDL: "..subfile)
+                        mp.commandv("sub-add", subfile, "auto", req.ext, j)
                     end
-                    msg.debug(j.." sub EDL: "..subfile)
-                    mp.commandv("sub-add", subfile, "auto", req.ext, j)
                 end
             end
 
