@@ -48,6 +48,12 @@ enum mp_property_action {
     //  arg: char**
     M_PROPERTY_PRINT,
 
+    // Like M_PROPERTY_PRINT, but a list is printed whole instead of being cut
+    // to the OSD or terminal size. If unimplemented, the property wrapper
+    // falls back to M_PROPERTY_PRINT.
+    //  arg: char**
+    M_PROPERTY_PRINT_UNCUT,
+
     // Get human readable fixed length string representing the current value.
     // If unimplemented, the property wrapper uses the property type as
     // fallback.
@@ -196,8 +202,10 @@ void m_properties_print_help_list(struct mp_log *log,
 // STR is recursively expanded using the same rules.
 // "$$" can be used to escape "$", and "$}" to escape "}".
 // "$>" disables parsing of "$" for the rest of the string.
+// print_action is the action used for ${NAME}, M_PROPERTY_PRINT or
+// M_PROPERTY_PRINT_UNCUT.
 char* m_properties_expand_string(const struct m_property_list *prop_list,
-                                 const char *str, void *ctx);
+                                 const char *str, void *ctx, int print_action);
 
 // Trivial helpers for implementing properties.
 int m_property_bool_ro(int action, void* arg, bool var);

@@ -150,7 +150,8 @@ int m_property_do(struct mp_log *log, const struct m_property_list *prop_list,
 
     struct m_option opt = {0};
     bool get_opt_required[M_PROPERTY_MAX_ACTION] = {
-        [M_PROPERTY_FIXED_LEN_PRINT] = true, [M_PROPERTY_PRINT] = true, [M_PROPERTY_GET_STRING] = true,
+        [M_PROPERTY_FIXED_LEN_PRINT] = true, [M_PROPERTY_PRINT] = true,
+        [M_PROPERTY_PRINT_UNCUT] = true, [M_PROPERTY_GET_STRING] = true,
         [M_PROPERTY_MULTIPLY] = true, [M_PROPERTY_SWITCH] = true,
         [M_PROPERTY_GET_NODE] = true, [M_PROPERTY_SET_NODE] = true,
     };
@@ -169,9 +170,13 @@ int m_property_do(struct mp_log *log, const struct m_property_list *prop_list,
     }
 
     switch (action) {
+    case M_PROPERTY_PRINT_UNCUT:
     case M_PROPERTY_FIXED_LEN_PRINT:
     case M_PROPERTY_PRINT: {
         if ((r = do_action(prop, key, action, arg, ctx)) >= 0)
+            return r;
+        if (action == M_PROPERTY_PRINT_UNCUT &&
+            (r = do_action(prop, key, M_PROPERTY_PRINT, arg, ctx)) >= 0)
             return r;
         // Fallback to m_option
         if ((r = do_action(prop, key, M_PROPERTY_GET, &val, ctx)) <= 0)
@@ -295,7 +300,8 @@ static void append_str(char **s, int *len, bstr append)
 }
 
 static int expand_property(const struct m_property_list *prop_list, char **ret,
-                           int *ret_len, bstr prop, bool silent_error, void *ctx)
+                           int *ret_len, bstr prop, bool silent_error, void *ctx,
+                           int print_action)
 {
     bool cond_yes = bstr_eatstart0(&prop, "?");
     bool cond_no = !cond_yes && bstr_eatstart0(&prop, "!");
@@ -306,7 +312,7 @@ static int expand_property(const struct m_property_list *prop_list, char **ret,
     bool comp = test && bstr_split_tok(prop, "==", &prop, &comp_with);
     if (test && !comp)
         raw = true;
-    int method = raw ? M_PROPERTY_GET_STRING : M_PROPERTY_PRINT;
+    int method = raw ? M_PROPERTY_GET_STRING : print_action;
     method = fixed_len ? M_PROPERTY_FIXED_LEN_PRINT : method;
 
     char *s = NULL;
@@ -328,7 +334,7 @@ static int expand_property(const struct m_property_list *prop_list, char **ret,
 }
 
 char *m_properties_expand_string(const struct m_property_list *prop_list,
-                                 const char *str0, void *ctx)
+                                 const char *str0, void *ctx, int print_action)
 {
     char *ret = NULL;
     int ret_len = 0;
@@ -362,7 +368,7 @@ char *m_properties_expand_string(const struct m_property_list *prop_list,
 
             if (!skip) {
                 skip = expand_property(prop_list, &ret, &ret_len, name,
-                                       have_fallback, ctx);
+                                       have_fallback, ctx, print_action);
                 if (skip)
                     skip_level = level;
             }
