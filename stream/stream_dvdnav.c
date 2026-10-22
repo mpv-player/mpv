@@ -579,8 +579,37 @@ static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
 // move mpv asked the disc to make, as opposed to one the disc reported.
 static void drop_segments(struct priv *priv);
 
+// Record the active audio stream: physical stream number, -1 for none.
+static void set_active_audio(struct priv *priv, int physical)
+{
+    if (priv->audio_physical != physical) {
+        priv->audio_physical = physical;
+        priv->nav_change_id++;
+    }
+}
+
+// Record the active subpicture stream. raw is libdvdnav's encoding: physical
+// stream number in the low 5 bits, 0x80 set when it's hidden, -1 for none.
+static void set_active_sub(struct priv *priv, int raw)
+{
+    bool visible = raw >= 0 && !(raw & 0x80);
+    int phys = raw >= 0 ? (raw & 0x1F) : -1;
+    if (priv->sub_physical != phys || priv->sub_visible != visible) {
+        priv->sub_physical = phys;
+        priv->sub_visible = visible;
+        priv->nav_change_id++;
+    }
+}
+
 static void bump_discontinuity(struct priv *priv, bool requested)
 {
+    // DVDNAV_AUDIO_STREAM_CHANGE and DVDNAV_SPU_STREAM_CHANGE only come with
+    // the next block. With the EOF held at the boundary that is after the
+    // player resynced and the demuxer reads again, so the player would switch
+    // tracks only after packets of the new domain were read with the old
+    // selection. The VM state already describes the destination, use it.
+    set_active_audio(priv, dvdnav_get_active_audio_stream(priv->dvdnav));
+    set_active_sub(priv, dvdnav_get_active_spu_stream(priv->dvdnav));
     // The VOBUs read since the last payload are not played.
     drop_segments(priv);
     priv->tl_anchor = true;
@@ -963,25 +992,15 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         // physical: 0..7 = active audio stream, -1 = SPU/audio off.
         MP_VERBOSE(s, "audio change phys=%d log=%d domain=%s\n",
                    ev->physical, ev->logical, dvd_domain_name(dvdnav));
-        if (priv->audio_physical != ev->physical) {
-            priv->audio_physical = ev->physical;
-            priv->nav_change_id++;
-        }
+        set_active_audio(priv, ev->physical);
         break;
     }
     case DVDNAV_SPU_STREAM_CHANGE: {
         dvdnav_spu_stream_change_event_t *ev = buf;
-        int raw = ev->physical_wide;
-        bool visible = raw >= 0 && !(raw & 0x80);
-        int phys = raw >= 0 ? (raw & 0x1F) : -1;
         MP_VERBOSE(s, "sub change phys_wide=0x%x lb=0x%x ps=0x%x log=%d domain=%s\n",
                    ev->physical_wide, ev->physical_letterbox,
                    ev->physical_pan_scan, ev->logical, dvd_domain_name(dvdnav));
-        if (priv->sub_physical != phys || priv->sub_visible != visible) {
-            priv->sub_physical = phys;
-            priv->sub_visible = visible;
-            priv->nav_change_id++;
-        }
+        set_active_sub(priv, ev->physical_wide);
         break;
     }
     }
