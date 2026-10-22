@@ -182,7 +182,7 @@ static char *get_term_status_msg(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
 
     if (opts->status_msg)
-        return mp_property_expand_escaped_string(mpctx, opts->status_msg);
+        return mp_expand_term_status_msg(mpctx);
 
     char *line = NULL;
 
