@@ -34,6 +34,7 @@ struct segment {
     double d_start;
     char *url;
     bool lazy;
+    bool load_failed;
     struct demuxer *d;
     // stream_map[sh_stream.index] = virtual_stream, where sh_stream is a stream
     // from the source d, and virtual_stream is a streamexported by the
@@ -210,7 +211,7 @@ static void close_lazy_segments(struct demuxer *demuxer,
 static void reopen_lazy_segments(struct demuxer *demuxer,
                                  struct virtual_source *src)
 {
-    if (src->current->d)
+    if (src->current->d || src->current->load_failed)
         return;
 
     // Note: we must _not_ close segments during demuxing,
@@ -225,8 +226,10 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
     };
     src->current->d = demux_open_url(src->current->url, &params,
                                      demuxer->cancel, demuxer->global);
-    if (!src->current->d && !demux_cancel_test(demuxer))
+    if (!src->current->d && !demux_cancel_test(demuxer)) {
         MP_ERR(demuxer, "failed to load segment\n");
+        src->current->load_failed = true;
+    }
     if (src->current->d)
         update_slave_stats(demuxer, src->current->d);
     associate_streams(demuxer, src, src->current);
