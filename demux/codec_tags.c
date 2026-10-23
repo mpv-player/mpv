@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
+
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/common.h>
@@ -23,6 +25,7 @@
 #include "codec_tags.h"
 #include "stheader.h"
 #include "common/av_common.h"
+#include "misc/bstr.h"
 
 static const char *lookup_tag(int type, uint32_t tag)
 {
@@ -202,4 +205,83 @@ const char *mp_map_mimetype_to_video_codec(const char *mimetype)
         }
     }
     return NULL;
+}
+
+// MPEG-4 ObjectTypeIndication (ISO/IEC 14496-1), second field of mp4a and mp4v
+// codec strings. Keep in sync with ff_mp4_obj_type in libavformat/isom.c.
+static const enum AVCodecID mp4_object_types[] = {
+    [0x20] = AV_CODEC_ID_MPEG4,
+    [0x21] = AV_CODEC_ID_H264,
+    [0x23] = AV_CODEC_ID_HEVC,
+    [0x33] = AV_CODEC_ID_VVC,
+    [0x40] = AV_CODEC_ID_AAC,
+    [0x60] = AV_CODEC_ID_MPEG2VIDEO,
+    [0x61] = AV_CODEC_ID_MPEG2VIDEO,
+    [0x62] = AV_CODEC_ID_MPEG2VIDEO,
+    [0x63] = AV_CODEC_ID_MPEG2VIDEO,
+    [0x64] = AV_CODEC_ID_MPEG2VIDEO,
+    [0x65] = AV_CODEC_ID_MPEG2VIDEO,
+    [0x66] = AV_CODEC_ID_AAC,
+    [0x67] = AV_CODEC_ID_AAC,
+    [0x68] = AV_CODEC_ID_AAC,
+    [0x69] = AV_CODEC_ID_MP3,
+    [0x6A] = AV_CODEC_ID_MPEG1VIDEO,
+    [0x6B] = AV_CODEC_ID_MP3,
+    [0x6C] = AV_CODEC_ID_MJPEG,
+    [0x6D] = AV_CODEC_ID_PNG,
+    [0x6E] = AV_CODEC_ID_JPEG2000,
+    [0xA3] = AV_CODEC_ID_VC1,
+    [0xA4] = AV_CODEC_ID_DIRAC,
+    [0xA5] = AV_CODEC_ID_AC3,
+    [0xA6] = AV_CODEC_ID_EAC3,
+    [0xA9] = AV_CODEC_ID_DTS,
+    [0xAD] = AV_CODEC_ID_OPUS,
+    [0xB1] = AV_CODEC_ID_VP9,
+    [0xDD] = AV_CODEC_ID_VORBIS,
+};
+
+// MPEG-4 AudioObjectType (ISO/IEC 14496-3), third field of mp4a.40 codec
+// strings. Keep in sync with mp4_audio_types in libavformat/isom.c.
+static const enum AVCodecID mp4_audio_object_types[] = {
+    [32] = AV_CODEC_ID_MP1,
+    [33] = AV_CODEC_ID_MP2,
+    [34] = AV_CODEC_ID_MP3,
+    [36] = AV_CODEC_ID_MP4ALS,
+};
+
+const char *mp_map_rfc6381_to_codec(int type, const char *str)
+{
+    bstr name, fields;
+    bstr_split_tok(bstr0(str), ".", &name, &fields);
+    char *lower = bstrdup0(NULL, name);
+    bstr_lower(bstr0(lower));
+
+    // mpv codec name, "vp9.2" style suffixes are ignored
+    int id = mp_codec_to_av_codec_id(lower);
+
+    // ISOBMFF sample entry, matched against the lowercase entries only
+    if (id == AV_CODEC_ID_NONE && name.len == 4) {
+        const struct AVCodecTag *tags[] = {
+            type == STREAM_VIDEO ? avformat_get_mov_video_tags()
+                                 : avformat_get_mov_audio_tags(),
+            NULL,
+        };
+        id = av_codec_get_id(tags, AV_RL32(lower));
+        if (!strcmp(lower, "dvh1")) {
+            // HEVC-based Dolby Vision derived from hvc1, see mov.c.
+            id = AV_CODEC_ID_HEVC;
+        } else if (!strcmp(lower, "mp4a") || !strcmp(lower, "mp4v")) {
+            unsigned oti, aot;
+            int num = bstr_sscanf(fields, "%x.%u", &oti, &aot);
+            if (num >= 1 && oti < MP_ARRAY_SIZE(mp4_object_types))
+                id = mp4_object_types[oti] ? mp4_object_types[oti] : id;
+            if (num >= 2 && oti == 0x40 && aot < MP_ARRAY_SIZE(mp4_audio_object_types))
+                id = mp4_audio_object_types[aot] ? mp4_audio_object_types[aot] : id;
+        }
+    }
+    talloc_free(lower);
+
+    if (id == AV_CODEC_ID_NONE || avcodec_get_type(id) != mp_to_av_stream_type(type))
+        return NULL;
+    return mp_codec_from_av_codec_id(id);
 }

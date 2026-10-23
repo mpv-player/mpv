@@ -30,4 +30,8 @@ void mp_set_pcm_codec(struct mp_codec_params *c, bool sign, bool is_float,
 
 const char *mp_map_mimetype_to_video_codec(const char *mimetype);
 
+// Map an RFC 6381 codec string (e.g. "avc1.64001F") or mpv codec name to the
+// mpv codec name of the given STREAM_* type. Returns NULL if unknown.
+const char *mp_map_rfc6381_to_codec(int type, const char *str);
+
 #endif
