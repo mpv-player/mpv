@@ -1,0 +1,6 @@
+[wrap-file]
+directory = siphasher-1.0.1
+source_url =  https://crates.io/api/v1/crates/siphasher/1.0.1/download
+source_filename = siphasher-1.0.1.tar.gz
+source_hash = 56199f7ddabf13fe5074ce809e7d3f42b42ae711800501b5b16ea82ad029c39d
+patch_directory = siphasher
