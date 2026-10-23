@@ -195,6 +195,23 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
     void *tmp = talloc_new(NULL);
     char *result;
 
+#if HAVE_DOS_PATHS
+    wchar_t *pathw = mp_from_utf8(tmp, path);
+    DWORD len = GetFullPathNameW(pathw, 0, NULL, NULL);
+    wchar_t *pathc = talloc_array(tmp, wchar_t, len);
+    if (!len || !GetFullPathNameW(pathw, len, pathc, NULL)) {
+        result = talloc_strdup(talloc_ctx, path);
+        goto exit;
+    }
+    // PathAllocCanonicalize() treats the "." of a \\.\ path as a directory and
+    // removes it, so skip it for device paths.
+    wchar_t *pathx = NULL;
+    if (wcsncmp(pathc, L"\\\\.\\", 4) &&
+        SUCCEEDED(PathAllocCanonicalize(pathc, PATHCCH_ALLOW_LONG_PATHS, &pathx)))
+        pathc = pathx;
+    result = mp_to_utf8(talloc_ctx, pathc);
+    LocalFree(pathx);
+#else
     if (!mp_path_is_absolute(bstr0(path))) {
         char *cwd = mp_getcwd(tmp);
         if (!cwd) {
@@ -204,31 +221,6 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
         path = mp_path_join(tmp, cwd, path);
     }
 
-#if HAVE_DOS_PATHS
-    wchar_t *pathw = mp_from_utf8(tmp, path);
-    wchar_t *read = pathw, *write = pathw;
-    wchar_t prev = '\0';
-    // preserve leading double backslashes
-    if (read[0] == '\\' && read[1] == '\\') {
-        prev = '\\';
-        write += 2;
-        read += 2;
-    }
-    wchar_t curr;
-    while ((curr = *read)) {
-        if (curr == '/')
-            curr = '\\';
-        if (curr != '\\' || prev != '\\')
-            *write++ = curr;
-        prev = curr;
-        read++;
-    }
-    *write = '\0';
-    size_t max_size = wcslen(pathw) + 1;
-    wchar_t *pathc = talloc_array(tmp, wchar_t, max_size);
-    HRESULT hr = PathCchCanonicalizeEx(pathc, max_size, pathw, PATHCCH_ALLOW_LONG_PATHS);
-    result = SUCCEEDED(hr) ? mp_to_utf8(talloc_ctx, pathc) : talloc_strdup(talloc_ctx, path);
-#else
     result = talloc_strdup(tmp, "");
     const char *next;
     const char *end = path + strlen(path);

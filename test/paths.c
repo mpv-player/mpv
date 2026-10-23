@@ -103,6 +103,16 @@ int main(void)
     TEST_NORMALIZE("\\\\server\\share\\path", "\\\\?\\UNC/server/share/path/.");
     TEST_NORMALIZE("C:\\", "C:/.");
     TEST_NORMALIZE("C:\\", "C:/../");
+    TEST_NORMALIZE("\\\\server\\share\\path", "//server/share/path");
+    TEST_NORMALIZE("\\\\server\\share\\path", "//server\\share/path");
+    TEST_NORMALIZE("\\\\server\\share\\path", "\\\\server/share/path");
+    TEST_NORMALIZE("\\\\server\\share\\path", "//server/share/sub/../path");
+    TEST_NORMALIZE("\\\\server\\share\\path", "//server/share/../../path");
+    TEST_NORMALIZE("\\\\server\\share\\path", "//?/UNC/server/share/path");
+    TEST_NORMALIZE("C:\\file.mkv", "//?/C:/folder/../file.mkv");
+    TEST_NORMALIZE("\\\\.\\pipe\\mpv", "\\\\.\\pipe\\mpv");
+    TEST_NORMALIZE("\\\\.\\pipe\\mpv", "//./pipe/mpv");
+    TEST_NORMALIZE("\\\\.\\C:\\file.mkv", "//./C:/folder/../file.mkv");
 #else
     TEST_NORMALIZE("/foo/bar", "/foo//bar");
     TEST_NORMALIZE("/foo/bar", "/foo///bar");
