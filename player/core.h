@@ -107,6 +107,9 @@ struct track {
     // Currently used for decoding.
     bool selected;
 
+    // Decoder initialization failed.
+    bool dec_failed;
+
     // The type specific ID, also called aid (audio), sid (subs), vid (video).
     // For UI purposes only; this ID doesn't have anything to do with any
     // IDs coming from demuxers or container files.
