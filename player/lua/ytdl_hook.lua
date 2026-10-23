@@ -74,45 +74,44 @@ local safe_protos = Set {
 
 -- For some sites, youtube-dl returns the audio codec (?) only in the "ext" field.
 local ext_map = {
+    ["aac"]         = "aac",
+    ["alac"]        = "alac",
+    ["ape"]         = "ape",
+    ["flac"]        = "flac",
+    ["m4a"]         = "aac",
     ["mp3"]         = "mp3",
     ["opus"]        = "opus",
+    ["spx"]         = "speex",
+    ["vorbis"]      = "vorbis",
 }
 
-local codec_map = {
-    -- src pattern  = mpv codec
+-- Codec names reported by yt-dlp that mpv does not know. Everything else is
+-- passed through, mpv resolves RFC 6381 codec strings itself.
+local codec_aliases = {
+    ["h265"]        = "hevc",
+    ["m4a"]         = "aac",
+}
+
+-- Subtitle formats by yt-dlp "ext".
+local sub_codec_map = {
     ["ass"]         = "ass",
+    ["lrc"]         = "text",
+    ["scc"]         = "eia_608",
     ["srt"]         = "subrip",
+    ["ssa"]         = "ass",
     ["vtt"]         = "webvtt",
-    ["opus"]        = "opus",
-    ["vp9"]         = "vp9",
-    ["vp9%..*"]     = "vp9",
-    ["vp09%..*"]    = "vp9",
-    ["avc1%..*"]    = "h264",
-    ["av01%..*"]    = "av1",
-    ["mp4a%..*"]    = "aac",
-    ["hev1%..*"]    = "hevc",
 }
 
 if mp.get_property_native("subrandr-version") ~= nil then
-    codec_map["srv3"] = "subrandr/srv3"
+    sub_codec_map["srv3"] = "subrandr/srv3"
 end
 
--- Codec name as reported by youtube-dl mapped to mpv internal codec names.
--- Fun fact: mpv will not really use the codec, but will still try to initialize
--- the codec on track selection (just to scrap it), meaning it's only a hint,
--- but one that may make initialization fail. On the other hand, if the codec
--- is valid but completely different from the actual media, nothing bad happens.
+-- The codec is only a hint, decoding uses the codec of the opened stream.
 local function map_codec_to_mpv(codec)
     if codec == nil then
         return nil
     end
-    for k, v in pairs(codec_map) do
-        local s, e = codec:find(k)
-        if s == 1 and e == #codec then
-            return v
-        end
-    end
-    return nil
+    return codec_aliases[codec:lower()] or codec
 end
 
 local function platform_is_windows()
@@ -568,8 +567,9 @@ local function formats_to_edl(json, formats, use_all_formats)
                 elseif sub.media_type == "audio" then
                     props = props .. ",samplerate=" .. as_integer(track.asr)
                 end
+                local codec = sub.codec and ",codec=" .. edl_escape(sub.codec) or ""
                 hdr[#hdr + 1] = "!delay_open,media_type=" .. sub.media_type ..
-                    ",codec=" .. (sub.codec or "null") .. props
+                    codec .. props
 
                 -- Add bitrate information etc. for better user selection.
                 local byterate = 0
@@ -776,7 +776,7 @@ local function add_single_video(json)
             if sub ~= nil then
                 msg.verbose("adding subtitle ["..lang.."]")
                 local edl = "edl://!no_clip;!delay_open,media_type=sub"
-                local codec = map_codec_to_mpv(sub_info.ext)
+                local codec = sub_codec_map[sub_info.ext]
                 if codec then
                     edl = edl .. ",codec=" .. codec
                 end
