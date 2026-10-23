@@ -44,7 +44,7 @@ struct osd_style_opts;
 struct mp_log;
 
 void mp_ass_flush_old_events(ASS_Track *track, long long ts);
-void mp_ass_set_style(ASS_Style *style, double res_y,
+void mp_ass_set_style(ASS_Style *style, double res_x, double res_y,
                       const struct osd_style_opts *opts);
 
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
