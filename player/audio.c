@@ -541,7 +541,6 @@ init_error:
     if (track->sink)
         mp_pin_disconnect(track->sink);
     track->sink = NULL;
-    error_on_track(mpctx, track);
     return 0;
 }
 
