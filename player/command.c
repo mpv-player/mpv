@@ -426,7 +426,8 @@ static char *cut_osd_list(struct MPContext *mpctx, int action, char *header,
 
 static char *format_delay(double time)
 {
-    return talloc_asprintf(NULL, "%.f ms", time * 1000);
+    char *str = mp_format_double(NULL, time * 1000, 6, false, false, true);
+    return talloc_strdup_append(str, " ms");
 }
 
 // Property-option bridge. (Maps the property to the option with the same name.)
