@@ -22,10 +22,6 @@
 #include "video_shaders.h"
 #include "video.h"
 
-#if PL_API_VER < 362
-#define PL_COLOR_TRC_SCRGB PL_COLOR_TRC_LINEAR
-#endif
-
 #define GLSL(x) gl_sc_add(sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(sc, __VA_ARGS__)
 #define GLSLH(x) gl_sc_hadd(sc, #x "\n");
