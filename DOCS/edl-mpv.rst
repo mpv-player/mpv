@@ -290,12 +290,13 @@ This has the following parameters:
     the opened URL are ignored.)
 
 ``codec``
-    The mpv codec name that is expected. Although mpv tries to initialize a
-    decoder with it currently (and will fail track selection if it does not
-    initialize successfully), it is not used for decoding - decoding still uses
-    the information retrieved from opening the actual media information, and may
-    be a different codec (you should try to avoid this, of course). Defaults to
-    ``null``.
+    The mpv codec name or RFC 6381 codec string (e.g. ``avc1.64001F``) that is
+    expected. Although mpv tries to initialize a decoder with it currently (and
+    will fail track selection if it does not initialize successfully), it is
+    not used for decoding - decoding still uses the information retrieved from
+    opening the actual media information, and may be a different codec (you
+    should try to avoid this, of course). Unknown audio and video codecs are
+    ignored. Defaults to ``null``.
 
     Above also applies for similar fields such as ``w``.  These fields are
     mostly to help with user track pre-selection.
