@@ -703,7 +703,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             pick = track;
             goto cleanup;
         }
-        if (track->no_auto_select)
+        if (track->no_auto_select || track->dec_failed)
             continue;
         if (!opts->autoload_files && track->is_external)
             continue;

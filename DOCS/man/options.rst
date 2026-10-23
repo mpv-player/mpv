@@ -50,9 +50,10 @@ Track Selection
     This is a string list option. See `List Options`_ for details.
 
 ``--aid=<ID|auto|no>``
-    Select audio track. ``auto`` selects the default, ``no`` disables audio.
-    See also ``--alang``. mpv normally prints available audio tracks on the
-    terminal when starting playback of a file.
+    Select audio track. ``auto`` selects the default, or the next best track
+    if the default fails to initialize. ``no`` disables audio. See also
+    ``--alang``. mpv normally prints available audio tracks on the terminal
+    when starting playback of a file.
 
     ``--audio`` is an alias for ``--aid``.
 
@@ -107,14 +108,16 @@ Track Selection
 
 ``--sid=<ID|auto|no>``
     Display the subtitle stream specified by ``<ID>``. ``auto`` selects
-    the default, ``no`` disables subtitles.
+    the default, or the next best stream if the default fails to initialize.
+    ``no`` disables subtitles.
 
     ``--sub`` is an alias for ``--sid``.
 
     ``--sid=no`` or ``--sub=no`` disables subtitle decoding.
 
 ``--vid=<ID|auto|no>``
-    Select video channel. ``auto`` selects the default, ``no`` disables video.
+    Select video channel. ``auto`` selects the default, or the next best track
+    if the default fails to initialize. ``no`` disables video.
 
     ``--video`` is an alias for ``--vid``.
 
@@ -563,7 +566,8 @@ Playback Control
     Stop playback if either audio or video fails to initialize (default: no).
     With ``no``, playback will continue in video-only or audio-only mode if one
     of them fails. This doesn't affect playback of audio-only or video-only
-    files.
+    files. If the automatically selected track fails to initialize, the next
+    best track is tried before this option takes effect.
 
 ``--play-direction=<forward|+|backward|->``
     Control the playback direction (default: forward). Setting ``backward``

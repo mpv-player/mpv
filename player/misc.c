@@ -258,6 +258,26 @@ void error_on_track(struct MPContext *mpctx, struct track *track)
 {
     if (!track || !track->selected)
         return;
+    int order = -1;
+    for (int t = 0; t < num_ptracks[track->type]; t++) {
+        if (mpctx->current_track[t][track->type] == track) {
+            order = t;
+            break;
+        }
+    }
+    // Select the next best track, if the current one failed to initialize.
+    if (order >= 0 && track->dec_failed && mpctx->opts->stream_auto_sel &&
+        mpctx->opts->stream_id[order][track->type] == -1)
+    {
+        struct track *next = select_default_track(mpctx, order, track->type);
+        if (next) {
+            MP_WARN(mpctx, "Falling back to %s track %d.\n",
+                    stream_type_name(track->type), next->user_tid);
+            mp_switch_track_n(mpctx, order, track->type, next, 0);
+            if (mpctx->current_track[order][track->type] != track)
+                return;
+        }
+    }
     mp_deselect_track(mpctx, track);
     if (track->type == STREAM_AUDIO)
         MP_INFO(mpctx, "Audio: no audio\n");

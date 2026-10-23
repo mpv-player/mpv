@@ -223,6 +223,7 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
     mp_assert(!track->d_sub);
 
     if (!init_subdec(mpctx, track)) {
+        track->dec_failed = true;
         error_on_track(mpctx, track);
         return;
     }
