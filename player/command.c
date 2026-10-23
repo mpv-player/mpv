@@ -426,6 +426,9 @@ static char *cut_osd_list(struct MPContext *mpctx, int action, char *header,
 
 static char *format_delay(double time)
 {
+    // Tentative: round sub-millisecond values to zero so we don't print "-0 ms"
+    if (fabs(time) <= 0.0005)
+        time = 0;
     return talloc_asprintf(NULL, "%.f ms", time * 1000);
 }
 
