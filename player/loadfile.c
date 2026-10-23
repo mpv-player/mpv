@@ -1606,10 +1606,12 @@ static int reinit_complex_filters(struct MPContext *mpctx, bool force_uninit)
         track->selected = true;
 
         if (!track->dec) {
-            if (track->type == STREAM_VIDEO && !init_video_decoder(mpctx, track))
+            bool ok = track->type == STREAM_VIDEO ? init_video_decoder(mpctx, track)
+                                                  : init_audio_decoder(mpctx, track);
+            if (!ok) {
+                error_on_track(mpctx, track);
                 goto done;
-            if (track->type == STREAM_AUDIO && !init_audio_decoder(mpctx, track))
-                goto done;
+            }
         }
 
         mp_pin_connect(track->sink, track->dec->f->pins[0]);
