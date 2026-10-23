@@ -64,7 +64,7 @@ struct sd_ass_priv {
 };
 
 struct seen_packet {
-    int64_t pos;
+    int64_t sig;
     double pts;
     int animated; // -1 is unknown
 };
@@ -438,19 +438,19 @@ static inline uint64_t hash_data(const unsigned char *data, size_t len)
 static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *priv = sd->priv;
-    int64_t pos = packet->pos >= 0 ? packet->pos
+    int64_t sig = packet->pos >= 0 ? packet->pos
                                    : hash_data(packet->buffer, packet->len);
     int a = 0;
     int b = priv->num_seen_packets;
     while (a < b) {
         int mid = a + (b - a) / 2;
         struct seen_packet *seen_packet = &priv->seen_packets[mid];
-        if (pos == seen_packet->pos && packet->pts == seen_packet->pts) {
+        if (sig == seen_packet->sig && packet->pts == seen_packet->pts) {
             packet->seen_pos = mid;
             return true;
         }
-        if (pos > seen_packet->pos ||
-            (pos == seen_packet->pos && packet->pts > seen_packet->pts)) {
+        if (sig > seen_packet->sig ||
+            (sig == seen_packet->sig && packet->pts > seen_packet->pts)) {
             a = mid + 1;
         } else {
             b = mid;
@@ -458,7 +458,7 @@ static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
     }
     packet->seen_pos = a;
     MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a,
-                        (struct seen_packet){pos, packet->pts, -1});
+                        (struct seen_packet){sig, packet->pts, -1});
     return false;
 }
 
