@@ -91,6 +91,7 @@ local codec_map = {
     ["av01%..*"]    = "av1",
     ["mp4a%..*"]    = "aac",
     ["hev1%..*"]    = "hevc",
+    ["hvc1%..*"]    = "hevc",
 }
 
 if mp.get_property_native("subrandr-version") ~= nil then
