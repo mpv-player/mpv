@@ -210,10 +210,17 @@ static void set_errno_from_lasterror(void)
     // This just handles the error codes expected from CreateFile at the moment
     switch (GetLastError()) {
     case ERROR_FILE_NOT_FOUND:
+    case ERROR_PATH_NOT_FOUND:
+    case ERROR_INVALID_DRIVE:
+    case ERROR_BAD_NETPATH:
+    case ERROR_BAD_NET_NAME:
+    case ERROR_BAD_PATHNAME:
+    case ERROR_FILENAME_EXCED_RANGE:
         errno = ENOENT;
         break;
     case ERROR_SHARING_VIOLATION:
     case ERROR_ACCESS_DENIED:
+    case ERROR_NETWORK_ACCESS_DENIED:
         errno = EACCES;
         break;
     case ERROR_FILE_EXISTS:
