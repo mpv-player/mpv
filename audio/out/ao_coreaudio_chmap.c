@@ -438,7 +438,6 @@ static AudioChannelLayout* ca_query_stereo_layout(struct ao *ao,
 {
     OSStatus err;
     uint32_t channels[2];
-    const int nch = MP_ARRAY_SIZE(channels);
     AudioChannelLayout *r = NULL;
 
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
@@ -451,18 +450,26 @@ static AudioChannelLayout* ca_query_stereo_layout(struct ao *ao,
     err = AudioObjectGetPropertyData(device, &p_addr, 0, NULL, &psize, channels);
     CHECK_CA_ERROR("could not get device preferred stereo layout");
 
+    uint32_t left = channels[0], right = channels[1];
+    if (!left || !right || left == right || left > MP_NUM_CHANNELS || right > MP_NUM_CHANNELS) {
+        MP_VERBOSE(ao, "ignoring invalid preferred stereo layout [%u,%u]\n", left, right);
+        goto coreaudio_error;
+    }
+
+    MP_VERBOSE(ao, "found valid preferred stereo layout [%u,%u]\n", left, right);
+
+    uint32_t nch = MPMAX(left, right);
     psize = sizeof(AudioChannelLayout) + nch * sizeof(AudioChannelDescription);
     r = talloc_zero_size(talloc_ctx, psize);
     r->mChannelLayoutTag = kAudioChannelLayoutTag_UseChannelDescriptions;
     r->mNumberChannelDescriptions = nch;
 
-    AudioChannelDescription desc = {0};
-    desc.mChannelFlags = kAudioChannelFlags_AllOff;
-
-    for(int i = 0; i < nch; i++) {
-        desc.mChannelLabel = channels[i];
-        r->mChannelDescriptions[i] = desc;
+    for (uint32_t i = 0; i < nch; i++) {
+        r->mChannelDescriptions[i].mChannelFlags = kAudioChannelFlags_AllOff;
+        r->mChannelDescriptions[i].mChannelLabel = kAudioChannelLabel_Unknown;
     }
+    r->mChannelDescriptions[left - 1].mChannelLabel = kAudioChannelLabel_Left;
+    r->mChannelDescriptions[right - 1].mChannelLabel = kAudioChannelLabel_Right;
 
 coreaudio_error:
     return r;
