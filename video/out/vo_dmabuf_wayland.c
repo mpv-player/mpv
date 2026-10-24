@@ -72,7 +72,6 @@ struct osd_buffer {
     struct wl_buffer *buffer;
     struct wl_list link;
     struct mp_image image;
-    size_t size;
     bool attached;
 };
 
@@ -91,6 +90,7 @@ struct priv {
 
     struct wl_shm_pool *osd_shm_pool;
     uint8_t *osd_shm_data;
+    size_t osd_shm_size;
     int osd_shm_width;
     int osd_shm_stride;
     int osd_shm_height;
@@ -399,12 +399,24 @@ static void destroy_osd_buffers(struct vo *vo)
     struct osd_buffer *osd_buf, *tmp;
     wl_list_for_each_safe(osd_buf, tmp, &p->osd_buffer_list, link) {
         wl_list_remove(&osd_buf->link);
-        munmap(osd_buf->image.planes[0], osd_buf->size);
-        if (osd_buf->buffer) {
+        if (osd_buf->buffer)
             wl_buffer_destroy(osd_buf->buffer);
-            osd_buf->buffer = NULL;
-        }
+        talloc_free(osd_buf);
     }
+}
+
+static void destroy_osd_shm_pool(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    destroy_osd_buffers(vo);
+    if (p->osd_shm_pool)
+        wl_shm_pool_destroy(p->osd_shm_pool);
+    if (p->osd_shm_data)
+        munmap(p->osd_shm_data, p->osd_shm_size);
+    p->osd_shm_pool = NULL;
+    p->osd_shm_data = NULL;
+    p->osd_shm_size = 0;
 }
 
 static struct osd_buffer *osd_buffer_check(struct vo *vo)
@@ -424,7 +436,6 @@ static struct osd_buffer *osd_buffer_create(struct vo *vo)
     struct osd_buffer *osd_buf = talloc_zero(vo, struct osd_buffer);
 
     osd_buf->vo = vo;
-    osd_buf->size = p->osd_shm_height * p->osd_shm_stride;
     mp_image_set_size(&osd_buf->image, p->osd_shm_width, p->osd_shm_height);
     osd_buf->image.planes[0] = p->osd_shm_data;
     osd_buf->image.stride[0] = p->osd_shm_stride;
@@ -470,15 +481,14 @@ static void create_shm_pool(struct vo *vo)
         goto error2;
     close(fd);
 
-    destroy_osd_buffers(vo);
+    destroy_osd_shm_pool(vo);
 
-    if (p->osd_shm_pool)
-        wl_shm_pool_destroy(p->osd_shm_pool);
     p->osd_shm_pool = pool;
     p->osd_shm_width = vo->dwidth;
     p->osd_shm_height = vo->dheight;
     p->osd_shm_stride = stride;
     p->osd_shm_data = data;
+    p->osd_shm_size = size;
     return;
 
 error2:
@@ -780,9 +790,7 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
 
     destroy_buffers(vo);
-    destroy_osd_buffers(vo);
-    if (p->osd_shm_pool)
-        wl_shm_pool_destroy(p->osd_shm_pool);
+    destroy_osd_shm_pool(vo);
     if (p->solid_buffer_pool)
         wl_shm_pool_destroy(p->solid_buffer_pool);
     if (p->solid_buffer)
