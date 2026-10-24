@@ -274,6 +274,34 @@ coreaudio_error:
     talloc_free(tmp);
 }
 
+static void log_default_channel_map(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    UInt32 size = 0;
+    Boolean writable = false;
+    OSStatus err = AudioUnitGetPropertyInfo(p->audio_unit,
+                                            kAudioOutputUnitProperty_ChannelMap,
+                                            kAudioUnitScope_Output, 0, &size,
+                                            &writable);
+
+    if (!CHECK_CA_WARN("unable to query the default channel map")) {
+        return;
+    }
+
+    SInt32 *map = talloc_size(NULL, size);
+    err = AudioUnitGetProperty(p->audio_unit, kAudioOutputUnitProperty_ChannelMap,
+                               kAudioUnitScope_Output, 0, map, &size);
+
+    if (CHECK_CA_WARN("unable to read the default channel map")) {
+        char *str = talloc_strdup(map, "");
+        for (size_t i = 0; i < size / sizeof(SInt32); i++)
+            str = talloc_asprintf_append(str, "%s%d", i ? "," : "", map[i]);
+        MP_VERBOSE(ao, "default channel map of the audio unit: [%s]\n", str);
+    }
+    talloc_free(map);
+}
+
 static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
 {
     OSStatus err;
@@ -318,6 +346,7 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_ERROR_L(coreaudio_error_audiounit,
                      "can't link audio unit to selected device");
 
+    log_default_channel_map(ao);
 
     AURenderCallbackStruct render_cb = (AURenderCallbackStruct) {
         .inputProc       = render_cb_lpcm,
