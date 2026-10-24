@@ -974,6 +974,10 @@ static bool setup_curl(struct priv *p)
         SETOPT(CURLOPT_HSTS_CTRL, (long)CURLHSTS_ENABLE);
     SETOPT(CURLOPT_TCP_KEEPALIVE, 1L);
     SETOPT(CURLOPT_CONNECTTIMEOUT_MS, (long)(p->opts->connect_timeout * 1000));
+    if (p->net_opts->timeout > 0) {
+        SETOPT(CURLOPT_LOW_SPEED_LIMIT, 1L);
+        SETOPT(CURLOPT_LOW_SPEED_TIME, (long)ceil(p->net_opts->timeout));
+    }
 
     if (p->net_opts->useragent && p->net_opts->useragent[0])
         SETOPT(CURLOPT_USERAGENT, p->net_opts->useragent);
