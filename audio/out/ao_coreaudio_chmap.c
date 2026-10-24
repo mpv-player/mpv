@@ -28,6 +28,7 @@ static const int speaker_map[][2] = {
     { kAudioChannelLabel_Left,                 MP_SPEAKER_ID_FL   },
     { kAudioChannelLabel_Right,                MP_SPEAKER_ID_FR   },
     { kAudioChannelLabel_Center,               MP_SPEAKER_ID_FC   },
+    { kAudioChannelLabel_Mono,                 MP_SPEAKER_ID_FC   },
     { kAudioChannelLabel_LFEScreen,            MP_SPEAKER_ID_LFE  },
     { kAudioChannelLabel_LeftSurround,         MP_SPEAKER_ID_BL   },
     { kAudioChannelLabel_RightSurround,        MP_SPEAKER_ID_BR   },
@@ -491,8 +492,6 @@ bool ca_init_chmap(struct ao *ao, AudioDeviceID device)
 
     if (!chmap_sel.num_chmaps)
         mp_chmap_sel_add_map(&chmap_sel, &(struct mp_chmap)MP_CHMAP_INIT_STEREO);
-
-    mp_chmap_sel_add_map(&chmap_sel, &(struct mp_chmap)MP_CHMAP_INIT_MONO);
 
     if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels)) {
         MP_ERR(ao, "could not select a suitable channel map among the "
