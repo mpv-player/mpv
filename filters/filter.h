@@ -408,6 +408,7 @@ struct mp_stream_info {
     bool vflip;
     bool rotate90;
     bool force_swdec;
+    bool deinterlace;
     struct vo *dr_vo; // for calling vo_get_image()
 };
 
