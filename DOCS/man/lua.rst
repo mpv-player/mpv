@@ -897,13 +897,16 @@ strictly part of the guaranteed API.
     trailing text is returned as 3rd return value. (The 3rd return value is
     always there, but with ``trail`` set, no error is raised.)
 
-``utils.format_json(v)``
+``utils.format_json(v [, pretty])``
     Format the given Lua table (or value) as a JSON string and return it. On
     error, returns ``nil, error``. (Errors usually only happen on value types
     incompatible with JSON.)
 
     The argument value uses similar conventions as ``mp.set_property_native()``
     to distinguish empty objects and arrays.
+
+    If the ``pretty`` parameter is ``true`` (or any value equal to ``true``),
+    then the output string is formatted and indented for human consumption.
 
 ``utils.to_string(v)``
     Turn the given value into a string. Formats tables and their contents. This
