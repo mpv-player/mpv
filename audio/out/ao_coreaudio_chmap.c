@@ -473,12 +473,12 @@ static void ca_retrieve_layouts(struct ao *ao, struct mp_chmap_sel *s,
     void *ta_ctx = talloc_new(NULL);
     struct mp_chmap chmap;
 
-    AudioChannelLayout *ml = ca_query_layout(ao, device, ta_ctx);
-    if (ml && ca_layout_to_mp_chmap(ao, ml, &chmap))
-        mp_chmap_sel_add_map(s, &chmap);
-
     AudioChannelLayout *sl = ca_query_stereo_layout(ao, device, ta_ctx);
     if (sl && ca_layout_to_mp_chmap(ao, sl, &chmap))
+        mp_chmap_sel_add_map(s, &chmap);
+
+    AudioChannelLayout *ml = ca_query_layout(ao, device, ta_ctx);
+    if (ml && ca_layout_to_mp_chmap(ao, ml, &chmap))
         mp_chmap_sel_add_map(s, &chmap);
 
     talloc_free(ta_ctx);
