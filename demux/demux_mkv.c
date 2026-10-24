@@ -1647,7 +1647,9 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track, int idx)
         extradata = track->private_data + 40;
         extradata_size = track->private_size - 40;
         mp_set_codec_from_tag(sh_v);
-        track->block_dts = true;
+        // The DTS are the PTS if the codec does not reorder frames.
+        const AVCodecDescriptor *desc = avcodec_descriptor_get(mp_codec_to_av_codec_id(sh_v->codec));
+        track->block_dts = !desc || (desc->props & AV_CODEC_PROP_REORDER);
     } else if (track->private_size >= RVPROPERTIES_SIZE
                && (!strcmp(track->codec_id, "V_REAL/RV10")
                 || !strcmp(track->codec_id, "V_REAL/RV20")
