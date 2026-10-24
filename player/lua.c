@@ -1201,12 +1201,14 @@ static int script_parse_json(lua_State *L)
 
 static int script_format_json(lua_State *L)
 {
+    mp_lua_optarg(L, 2);
+    bool pretty = lua_toboolean(L, 2);
     void *tmp = talloc_new(get_ctx(L));
     struct mpv_node node;
     if (!makenode(tmp, &node, L, 1))
         return node_error(L, tmp);
     char *dst = talloc_strdup(tmp, "");
-    int r = json_write(&dst, &node);
+    int r = pretty ? json_write_pretty(&dst, &node) : json_write(&dst, &node);
     if (r >= 0) {
         lua_pushstring(L, dst);
     } else {
