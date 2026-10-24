@@ -1037,17 +1037,16 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     } else if (forced_csp == PL_COLOR_SYSTEM_XYZ) {
         params->repr.sys = PL_COLOR_SYSTEM_XYZ;
         params->repr.levels = PL_COLOR_LEVELS_FULL;
-        // ST 428-1 primaries tag the XYZ data itself, not an RGB space
-        if (params->color.primaries == PL_COLOR_PRIM_CIE_1931)
-            params->color.primaries = PL_COLOR_PRIM_UNKNOWN;
         if (params->color.transfer == PL_COLOR_TRC_LINEAR) {
             // Linear light XYZ is decoded into the tagged primaries
             if (params->color.primaries == PL_COLOR_PRIM_UNKNOWN)
                 params->color.primaries = PL_COLOR_PRIM_BT_2020;
         } else {
-            // Anything else is DCDM X'Y'Z' (ST 428-1), decoded into DCI-P3
-            params->color.transfer = PL_COLOR_TRC_ST428;
-            params->color.primaries = PL_COLOR_PRIM_DCI_P3;
+            // Anything else is DCDM X'Y'Z' (ST 428-1) by default.
+            if (params->color.transfer == PL_COLOR_TRC_UNKNOWN)
+                params->color.transfer = PL_COLOR_TRC_ST428;
+            if (params->color.primaries == PL_COLOR_PRIM_UNKNOWN)
+                params->color.primaries = PL_COLOR_PRIM_DCI_P3;
         }
     } else {
         // We have no clue.
