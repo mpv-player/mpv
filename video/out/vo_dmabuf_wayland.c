@@ -570,7 +570,7 @@ static void resize(struct vo *vo)
     mp_mutex_lock(&vo->params_mutex);
     vo->target_params->w = mp_rect_w(dst);
     vo->target_params->h = mp_rect_h(dst);
-    vo->target_params->rotate = (vo->params->rotate % 90) * 90;
+    vo->target_params->rotate = vo->params->rotate % 90 ? 0 : vo->params->rotate;
     vo->target_params->vflip = vo->params->vflip;
     mp_mutex_unlock(&vo->params_mutex);
 
@@ -763,8 +763,10 @@ done:
     vo->target_params = &p->target_params;
     mp_mutex_unlock(&vo->params_mutex);
 
+    mp_require(img->params.rotate >= 0 && img->params.rotate < 360);
+    int rotate = img->params.rotate % 90 ? 0 : img->params.rotate;
     wl_surface_set_buffer_transform(vo->wl->video_surface,
-        transform_enum_lut[img->params.rotate / 90][!!img->params.vflip]);
+        transform_enum_lut[rotate / 90][!!img->params.vflip]);
 
     // Immediately destroy all buffers if params change.
     destroy_buffers(vo);
