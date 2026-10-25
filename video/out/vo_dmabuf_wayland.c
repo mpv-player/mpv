@@ -332,6 +332,8 @@ static struct buffer *buffer_create(struct vo *vo, struct vo_frame *frame)
 
     struct mp_image *image = buf->frame->current;
     struct zwp_linux_buffer_params_v1 *params = zwp_linux_dmabuf_v1_create_params(wl->dmabuf);
+    if (!params)
+        goto err;
 
     switch(p->hwdec_type) {
     case HWDEC_VAAPI:
@@ -342,19 +344,23 @@ static struct buffer *buffer_create(struct vo *vo, struct vo_frame *frame)
         break;
     }
 
-    if (!buf->drm_format) {
-        talloc_free(buf->frame);
-        talloc_free(buf);
-        zwp_linux_buffer_params_v1_destroy(params);
-        return NULL;
-    }
+    if (!buf->drm_format)
+        goto err;
 
     buf->buffer = zwp_linux_buffer_params_v1_create_immed(params, image->params.w, image->params.h,
                                                           buf->drm_format, 0);
+    if (!buf->buffer)
+        goto err;
     zwp_linux_buffer_params_v1_destroy(params);
     wl_buffer_add_listener(buf->buffer, &buffer_listener, buf);
     wl_list_insert(&p->buffer_list, &buf->link);
     return buf;
+err:
+    if (params)
+        zwp_linux_buffer_params_v1_destroy(params);
+    talloc_free(buf->frame);
+    talloc_free(buf);
+    return NULL;
 }
 
 static struct buffer *buffer_get(struct vo *vo, struct vo_frame *frame)
