@@ -155,6 +155,23 @@ static void d3d11_refine_hwframes(AVBufferRef *hw_frames_ctx)
     }
 }
 
+static void d3d11_device_lock(void *lock_ctx)
+{
+    ID3D10Multithread_Enter((ID3D10Multithread *)lock_ctx);
+}
+
+static void d3d11_device_unlock(void *lock_ctx)
+{
+    ID3D10Multithread_Leave((ID3D10Multithread *)lock_ctx);
+}
+
+static void d3d11_free_device_ref(AVHWDeviceContext *ctx)
+{
+    AVD3D11VADeviceContext *hwctx = ctx->hwctx;
+    if (hwctx->lock == d3d11_device_lock)
+        ID3D10Multithread_Release((ID3D10Multithread *)hwctx->lock_ctx);
+}
+
 AVBufferRef *d3d11_wrap_device_ref(ID3D11Device *device)
 {
     AVBufferRef *device_ref = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_D3D11VA);
@@ -166,6 +183,16 @@ AVBufferRef *d3d11_wrap_device_ref(ID3D11Device *device)
 
     ID3D11Device_AddRef(device);
     hwctx->device = device;
+
+    ID3D10Multithread *multithread;
+    if (SUCCEEDED(ID3D11Device_QueryInterface(device, &IID_ID3D10Multithread,
+                                              (void **)&multithread))) {
+        ID3D10Multithread_SetMultithreadProtected(multithread, TRUE);
+        hwctx->lock = d3d11_device_lock;
+        hwctx->unlock = d3d11_device_unlock;
+        hwctx->lock_ctx = multithread;
+        ctx->free = d3d11_free_device_ref;
+    }
 
     if (av_hwdevice_ctx_init(device_ref) < 0)
         av_buffer_unref(&device_ref);
