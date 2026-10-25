@@ -543,7 +543,8 @@ static void resize(struct vo *vo)
     vo->dwidth = width;
     vo->dheight = height;
 
-    create_osd_shm_pool(vo);
+    if (!p->osd_shm_pool || p->osd_shm_width != width || p->osd_shm_height != height)
+        create_osd_shm_pool(vo);
 
     // top level viewport is calculated with pan set to zero
     vo->opts->pan_x = 0;
