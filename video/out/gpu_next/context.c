@@ -50,6 +50,18 @@
 #include "video/out/vulkan/context.h"
 #endif
 
+#if HAVE_D3D11 && defined(PL_HAVE_D3D11)
+static void d3d11_lock(void *lock_ctx)
+{
+    ID3D10Multithread_Enter((ID3D10Multithread *)lock_ctx);
+}
+
+static void d3d11_unlock(void *lock_ctx)
+{
+    ID3D10Multithread_Leave((ID3D10Multithread *)lock_ctx);
+}
+#endif
+
 #if HAVE_D3D11
 static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
                           struct ra_ctx_opts *ctx_opts)
@@ -82,6 +94,15 @@ static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
         goto err_out;
     }
     ctx->gpu = d3d11->gpu;
+
+    ID3D10Multithread *multithread;
+    if (SUCCEEDED(ID3D11Device_QueryInterface(device, &IID_ID3D10Multithread,
+                                              (void **)&multithread))) {
+        ID3D10Multithread_SetMultithreadProtected(multithread, TRUE);
+        ctx->lock = d3d11_lock;
+        ctx->unlock = d3d11_unlock;
+        ctx->lock_ctx = multithread;
+    }
 
     mppl_log_set_probing(ctx->pllog, false);
 
@@ -221,6 +242,8 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
         if (ra_is_d3d11(ctx->ra_ctx->ra)) {
             pl_d3d11 d3d11 = pl_d3d11_get(ctx->gpu);
             pl_d3d11_destroy(&d3d11);
+            if (ctx->lock_ctx)
+                ID3D10Multithread_Release((ID3D10Multithread *)ctx->lock_ctx);
         }
 #endif
     }

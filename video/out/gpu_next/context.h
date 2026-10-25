@@ -32,8 +32,24 @@ struct gpu_ctx {
     pl_gpu gpu;
     pl_swapchain swapchain;
 
+    void (*lock)(void *lock_ctx);
+    void (*unlock)(void *lock_ctx);
+    void *lock_ctx;
+
     void *priv;
 };
+
+static inline void gpu_ctx_lock(struct gpu_ctx *ctx)
+{
+    if (ctx->lock)
+        ctx->lock(ctx->lock_ctx);
+}
+
+static inline void gpu_ctx_unlock(struct gpu_ctx *ctx)
+{
+    if (ctx->unlock)
+        ctx->unlock(ctx->lock_ctx);
+}
 
 struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts);
 bool gpu_ctx_resize(struct gpu_ctx *ctx, int w, int h);

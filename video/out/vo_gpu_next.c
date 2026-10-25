@@ -1356,7 +1356,7 @@ static void update_tm_viz(struct pl_color_map_params *params,
 static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
                                      const struct mp_image *mpi);
 
-static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+static bool draw_frame_unlocked(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     pl_options pars = p->pars;
@@ -1583,16 +1583,23 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         // Update again after possible max_luma change
         if (p->icc_profile)
             hint = p->icc_profile->csp;
+        gpu_ctx_unlock(p->context);
         external_params = set_colorspace_hint(p, &hint);
+        gpu_ctx_lock(p->context);
     } else if (!target_hint) {
         if (!hint.hdr.min_luma)
             hint.hdr.min_luma = target_csp.hdr.min_luma;
+        gpu_ctx_unlock(p->context);
         external_params = set_colorspace_hint(p, NULL);
+        gpu_ctx_lock(p->context);
     }
 
     struct pl_swapchain_frame swframe;
+    gpu_ctx_unlock(p->context);
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
-    if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
+    bool started = should_draw && pl_swapchain_start_frame(p->sw, &swframe);
+    gpu_ctx_lock(p->context);
+    if (!started) {
         if (frame->current) {
             // Advance the queue state to the current PTS to discard unused frames
             struct pl_queue_params qparams = *pl_queue_params(
@@ -1855,7 +1862,9 @@ static void resize(struct vo *vo)
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &src, &dst, &osd);
     if (vo->dwidth && vo->dheight) {
+        gpu_ctx_unlock(p->context);
         gpu_ctx_resize(p->context, vo->dwidth, vo->dheight);
+        gpu_ctx_lock(p->context);
         vo->want_redraw = true;
     }
 
@@ -1870,7 +1879,7 @@ static void resize(struct vo *vo)
     p->dst = dst;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params)
+static int reconfig_unlocked(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
     if (!p->ra_ctx->fns->reconfig(p->ra_ctx))
@@ -2191,7 +2200,7 @@ static void update_ra_ctx_options(struct vo *vo, struct ra_ctx_opts *ctx_opts)
                             border_alpha;
 }
 
-static int control(struct vo *vo, uint32_t request, void *data)
+static int control_unlocked(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
 
@@ -2248,7 +2257,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
 
     case VOCTRL_EXTERNAL_RESIZE:
-        reconfig(vo, NULL);
+        reconfig_unlocked(vo, NULL);
         return true;
 
     case VOCTRL_LOAD_HWDEC_API:
@@ -2478,9 +2487,40 @@ done:
     pl_cache_destroy(&cache->cache);
 }
 
+static int reconfig(struct vo *vo, struct mp_image_params *params)
+{
+    struct priv *p = vo->priv;
+    gpu_ctx_lock(p->context);
+    int ret = reconfig_unlocked(vo, params);
+    gpu_ctx_unlock(p->context);
+    return ret;
+}
+
+static int control(struct vo *vo, uint32_t request, void *data)
+{
+    struct priv *p = vo->priv;
+    gpu_ctx_lock(p->context);
+    int ret = control_unlocked(vo, request, data);
+    gpu_ctx_unlock(p->context);
+    return ret;
+}
+
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+{
+    struct priv *p = vo->priv;
+    gpu_ctx_lock(p->context);
+    bool ret = draw_frame_unlocked(vo, frame);
+    gpu_ctx_unlock(p->context);
+    return ret;
+}
+
+
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
+
+    if (p->context)
+        gpu_ctx_lock(p->context);
 
     // Drain any in-flight uploads.
     if (p->gpu)
@@ -2523,6 +2563,9 @@ static void uninit(struct vo *vo)
     }
 
     pl_options_free(&p->pars);
+
+    if (p->context)
+        gpu_ctx_unlock(p->context);
 
     p->ra_ctx = NULL;
     p->pllog = NULL;
