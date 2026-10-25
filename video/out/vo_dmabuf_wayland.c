@@ -97,7 +97,6 @@ struct priv {
     bool osd_surface_is_mapped;
     bool osd_surface_has_contents;
 
-    struct osd_buffer *osd_buffer;
     struct mp_draw_sub_cache *osd_cache;
     struct mp_osd_res screen_osd_res;
 
@@ -252,7 +251,6 @@ static void drmprime_dmabuf_importer(struct buffer *buf, struct mp_image *src,
 {
 #if HAVE_DRM
     int layer_no, plane_no;
-    int max_planes = 0;
     const AVDRMFrameDescriptor *desc = (AVDRMFrameDescriptor *)src->planes[0];
     if (!desc)
         return;
@@ -262,7 +260,6 @@ static void drmprime_dmabuf_importer(struct buffer *buf, struct mp_image *src,
         AVDRMLayerDescriptor layer = desc->layers[layer_no];
 
         buf->drm_format = layer.format;
-        max_planes = MPMAX(max_planes, layer.nb_planes);
         for (plane_no = 0; plane_no < layer.nb_planes; ++plane_no) {
             AVDRMPlaneDescriptor plane = layer.planes[plane_no];
             int object_index = plane.object_index;
