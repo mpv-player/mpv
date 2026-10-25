@@ -433,6 +433,10 @@ static struct osd_buffer *osd_buffer_check(struct vo *vo)
 static struct osd_buffer *osd_buffer_create(struct vo *vo)
 {
     struct priv *p = vo->priv;
+
+    if (!p->osd_shm_pool)
+        return NULL;
+
     struct osd_buffer *osd_buf = talloc_zero(vo, struct osd_buffer);
 
     osd_buf->vo = vo;
