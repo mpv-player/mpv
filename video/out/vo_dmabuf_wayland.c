@@ -463,7 +463,7 @@ static struct osd_buffer *osd_buffer_get(struct vo *vo)
     }
 }
 
-static void create_shm_pool(struct vo *vo)
+static void create_osd_shm_pool(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wl;
     struct priv *p = vo->priv;
@@ -533,7 +533,7 @@ static void resize(struct vo *vo)
     vo->dwidth = width;
     vo->dheight = height;
 
-    create_shm_pool(vo);
+    create_osd_shm_pool(vo);
 
     // top level viewport is calculated with pan set to zero
     vo->opts->pan_x = 0;
