@@ -1,0 +1,12 @@
+--tone-mapping-param now only affects vo_gpu
+add --tone-mapping-knee-adaption
+add --tone-mapping-knee-minimum
+add --tone-mapping-knee-maximum
+add --tone-mapping-knee-default
+add --tone-mapping-knee-offset
+add --tone-mapping-slope-tuning
+add --tone-mapping-slope-offset
+add --tone-mapping-spline-contrast
+add --tone-mapping-reinhard-contrast
+add --tone-mapping-linear-knee
+add --tone-mapping-exposure

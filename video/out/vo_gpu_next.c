@@ -187,6 +187,7 @@ static void update_render_options(struct vo *vo);
 static void update_lut(struct priv *p, struct user_lut *lut);
 
 struct gl_next_opts {
+    struct pl_tone_map_constants tone_constants;
     bool delayed_peak;
     int sub_hdr_peak;
     int image_subs_hdr_peak;
@@ -214,6 +215,17 @@ const struct m_opt_choice_alternatives lut_types[] = {
 #define OPT_BASE_STRUCT struct gl_next_opts
 const struct m_sub_options gl_next_conf = {
     .opts = (const struct m_option[]) {
+        {"tone-mapping-knee-adaptation", OPT_FLOAT(tone_constants.knee_adaptation), M_RANGE(0, 1)},
+        {"tone-mapping-knee-minimum", OPT_FLOAT(tone_constants.knee_minimum), M_RANGE(0, 0.5)},
+        {"tone-mapping-knee-maximum", OPT_FLOAT(tone_constants.knee_maximum), M_RANGE(0.5, 1)},
+        {"tone-mapping-knee-default", OPT_FLOAT(tone_constants.knee_default), M_RANGE(0, 1)},
+        {"tone-mapping-knee-offset", OPT_FLOAT(tone_constants.knee_offset), M_RANGE(0.5, 2)},
+        {"tone-mapping-slope-tuning", OPT_FLOAT(tone_constants.slope_tuning), M_RANGE(0, 10)},
+        {"tone-mapping-slope-offset", OPT_FLOAT(tone_constants.slope_offset), M_RANGE(0, 1)},
+        {"tone-mapping-spline-contrast", OPT_FLOAT(tone_constants.spline_contrast), M_RANGE(0, 1.5)},
+        {"tone-mapping-reinhard-contrast", OPT_FLOAT(tone_constants.reinhard_contrast), M_RANGE(0, 1)},
+        {"tone-mapping-linear-knee", OPT_FLOAT(tone_constants.linear_knee), M_RANGE(0, 1)},
+        {"tone-mapping-exposure", OPT_FLOAT(tone_constants.exposure), M_RANGE(0, 10)},
         {"sub-hdr-peak", OPT_CHOICE(sub_hdr_peak, {"auto", 0}, {"sdr", PL_COLOR_SDR_WHITE}),
             M_RANGE(10, 10000)},
         {"image-subs-hdr-peak", OPT_CHOICE(image_subs_hdr_peak, {"sdr", PL_COLOR_SDR_WHITE},
@@ -240,6 +252,7 @@ const struct m_sub_options gl_next_conf = {
         {0},
     },
     .defaults = &(struct gl_next_opts) {
+        .tone_constants = { PL_TONE_MAP_CONSTANTS },
         .border_background = BACKGROUND_COLOR,
         .background_blur_radius = 16.0f,
         .inter_preserve = true,
@@ -2943,11 +2956,8 @@ static void update_render_options(struct vo *vo)
     };
 
     pars->color_map_params.tone_mapping_function = tone_map_funs[opts->tone_map.curve];
-AV_NOWARN_DEPRECATED(
-    pars->color_map_params.tone_mapping_param = opts->tone_map.curve_param;
-    if (isnan(pars->color_map_params.tone_mapping_param)) // vo_gpu compatibility
-        pars->color_map_params.tone_mapping_param = 0.0;
-)
+    pars->color_map_params.tone_constants = p->next_opts->tone_constants;
+
     pars->color_map_params.inverse_tone_mapping = opts->tone_map.inverse;
     pars->color_map_params.contrast_recovery = opts->tone_map.contrast_recovery;
     pars->color_map_params.visualize_lut = opts->tone_map.visualize;
