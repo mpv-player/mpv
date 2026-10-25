@@ -433,6 +433,9 @@ static struct osd_buffer *osd_buffer_check(struct vo *vo)
 static struct osd_buffer *osd_buffer_create(struct vo *vo)
 {
     struct priv *p = vo->priv;
+    if (!p->osd_shm_pool)
+        return NULL;
+
     struct osd_buffer *osd_buf = talloc_zero(vo, struct osd_buffer);
 
     osd_buf->vo = vo;
@@ -468,6 +471,8 @@ static void create_shm_pool(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     struct priv *p = vo->priv;
 
+    destroy_osd_shm_pool(vo);
+
     int stride = MP_ALIGN_UP(vo->dwidth * 4, MP_IMAGE_BYTE_ALIGN);
     size_t size = vo->dheight * stride;
     int fd = vo_wayland_allocate_memfd(vo, size);
@@ -480,8 +485,6 @@ static void create_shm_pool(struct vo *vo)
     if (!pool)
         goto error2;
     close(fd);
-
-    destroy_osd_shm_pool(vo);
 
     p->osd_shm_pool = pool;
     p->osd_shm_width = vo->dwidth;
