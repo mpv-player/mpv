@@ -7786,6 +7786,73 @@ them.
         Conceptually simpler than ST2094-40, and generally produces worse
         results.
 
+``--tone-mapping-knee-adaptation=<0.0..1.0>``
+    Controls how strongly the knee point adapts to the source scene average
+    brightness, relative to the target average in PQ space. A value of 1.0
+    fully adapts the source average to the target average, while 0.0 disables
+    adaptation. Defaults to 0.4.
+
+    Affects ``st2094-40``, ``st2094-10`` and ``spline``.
+    (``--vo=gpu-next`` only)
+
+``--tone-mapping-knee-minimum=<0.0..0.5>``
+    Sets the minimum knee point as a fraction of the PQ luminance range.
+    Limits how low the automatically determined knee point can be.
+    Defaults to 0.1. (``--vo=gpu-next`` only)
+
+``--tone-mapping-knee-maximum=<0.5..1.0>``
+    Sets the maximum knee point as a fraction of the PQ luminance range.
+    Limits how high the automatically determined knee point can be.
+    Defaults to 0.8. (``--vo=gpu-next`` only)
+
+``--tone-mapping-knee-default=<0.0..1.0>``
+    Sets the fallback knee point used when source scene average brightness
+    metadata is unavailable. Normally, the knee point is determined from
+    the source scene average instead. The value should be between
+    ``--tone-mapping-knee-minimum`` and ``--tone-mapping-knee-maximum``.
+    Defaults to 0.4. (``--vo=gpu-next`` only)
+
+``--tone-mapping-knee-offset=<0.5..2.0>``
+    Sets the knee point offset for ``bt.2390``. The ITU-R specification
+    defines 0.5 as the default, but libplacebo uses 1.0.
+    Defaults to 1.0. (``--vo=gpu-next`` only)
+
+``--tone-mapping-slope-tuning=<0.0..10.0>``
+    Controls how the slope of the ``spline`` curve is adjusted based on
+    the difference between source and target peaks. The tuning aims to
+    preserve a slope closer to 1.0 for small differences and approach
+    linear mapping for larger differences. Defaults to 1.5.
+    (``--vo=gpu-next`` only)
+
+``--tone-mapping-slope-offset=<0.0..1.0>``
+    Controls the slope adjustment of the ``spline`` curve, together with
+    ``--tone-mapping-slope-tuning``. Defaults to 0.2.
+    (``--vo=gpu-next`` only)
+
+``--tone-mapping-spline-contrast=<0.0..1.5>``
+    Controls the contrast of the ``spline`` curve. Higher values produce
+    a steeper curve, preserving midtone contrast at the cost of shadow
+    and highlight detail. Lower values produce a shallower curve,
+    preserving highlights at the cost of midtone contrast. Values above
+    1.0 can increase contrast beyond that of the source.
+    Defaults to 0.5. (``--vo=gpu-next`` only)
+
+``--tone-mapping-reinhard-contrast=<0.0..1.0>``
+    Sets the local contrast coefficient at the display peak for
+    ``reinhard``. A value of 0.5 makes reference white approximately
+    half as bright as when clipping. Defaults to 0.5.
+    (``--vo=gpu-next`` only)
+
+``--tone-mapping-linear-knee=<0.0..1.0>``
+    Sets the knee point for the legacy ``mobius`` and ``gamma`` curves,
+    which operate on linear light. Defaults to 0.3.
+    (``--vo=gpu-next`` only)
+
+``--tone-mapping-exposure=<0.0..10.0>``
+    Sets the linear exposure or gain applied by the ``linear`` curve.
+    Defaults to 1.0.
+    (``--vo=gpu-next`` only)
+
 ``--tone-mapping-param=<value>``
     Set tone mapping parameters. By default, this is set to the special string
     ``default``, which maps to an algorithm-specific default value. Ignored if
@@ -7817,6 +7884,9 @@ them.
         Specifies the knee point (in PQ space). Defaults to 0.30.
     st2094-10
         Specifies the contrast (slope) at the knee point. Defaults to 1.0.
+
+    This option only affects ``--vo=gpu``. For ``--vo=gpu-next``, use
+    ``--tone-mapping-*`` options instead.
 
 ``--inverse-tone-mapping``
     If set, allows inverse tone mapping (expanding dynamic range). Can be used
