@@ -413,6 +413,9 @@ static void destroy_osd_shm_pool(struct vo *vo)
         munmap(p->osd_shm_data, p->osd_shm_size);
     p->osd_shm_pool = NULL;
     p->osd_shm_data = NULL;
+    p->osd_shm_height = 0;
+    p->osd_shm_width = 0;
+    p->osd_shm_stride = 0;
     p->osd_shm_size = 0;
 }
 
