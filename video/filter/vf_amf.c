@@ -35,6 +35,7 @@
 #include "osdep/windows_utils.h"
 #include "video/hwdec.h"
 #include "video/mp_image.h"
+#include "video/mp_image_pool.h"
 
 #define ICALL(func, that, ...) (that)->pVtbl->func((that), ##__VA_ARGS__)
 
@@ -69,6 +70,7 @@ struct priv {
     bool has_frame;
 
     AVBufferRef *av_device_ref;
+    AVBufferRef *hw_frames_ref;
 
     struct amf_priv *amf;
 };
@@ -189,6 +191,7 @@ static void destroy(struct mp_filter *f)
     SAFE_RELEASE(p->d3d_ctx);
     SAFE_RELEASE(p->d3d_mt);
     SAFE_RELEASE(p->d3d_dev);
+    av_buffer_unref(&p->hw_frames_ref);
     av_buffer_unref(&p->av_device_ref);
 
     destroy_amf(a);
@@ -292,7 +295,7 @@ static int amf_get_init_params(struct mp_filter *f, struct mp_image *src,
     // would return the processed frames also in host memory, which again forces
     // us to upload them back to GPU for presentation, duplicating work.
     if (p->params.imgfmt != IMGFMT_D3D11) {
-        MP_ERR(f, "Input must be a D3D11 texture. "
+        MP_ERR(f, "Input must be a D3D11 texture or an AMF surface. "
                   "Use `--hwdec=d3d11va` or `--vf-pre=format=d3d11` to upload the data.\n");
         return -1;
     }
@@ -467,6 +470,88 @@ static AMFSurface *mp_image_to_amf_surface(struct mp_filter *f, struct mp_image 
         MP_WARN(f, "Warning: source image has no PTS.\n");
 
     return out;
+}
+
+static bool same_d3d11_device(ID3D11Device *a, ID3D11Device *b)
+{
+    if (a == b)
+        return true;
+
+    IUnknown *unk_a = NULL, *unk_b = NULL;
+    ID3D11Device_QueryInterface(a, &IID_IUnknown, (void **)&unk_a);
+    ID3D11Device_QueryInterface(b, &IID_IUnknown, (void **)&unk_b);
+    bool same = unk_a && unk_a == unk_b;
+    SAFE_RELEASE(unk_a);
+    SAFE_RELEASE(unk_b);
+    return same;
+}
+
+static struct mp_image *amf_surface_to_d3d11_image(struct mp_filter *f,
+                                                   struct mp_image *in)
+{
+    struct priv *p = f->priv;
+
+    if (in->imgfmt != IMGFMT_AMF)
+        return in;
+
+    AMFSurface *surface = (AMFSurface *)in->planes[0];
+    if (ICALL(GetMemoryType, surface) != AMF_MEMORY_DX11) {
+        MP_ERR(f, "AMF surface input must be in D3D11 memory.\n");
+        goto fail;
+    }
+
+    AMFPlane *plane = ICALL(GetPlaneAt, surface, 0);
+    ID3D11Texture2D *tex = plane ? ICALL(GetNative, plane) : NULL;
+    if (!tex) {
+        MP_ERR(f, "Failed to get D3D11 texture from AMF surface.\n");
+        goto fail;
+    }
+    for (int i = 1; i < ICALL(GetPlanesCount, surface); i++) {
+        plane = ICALL(GetPlaneAt, surface, i);
+        if (!plane || ICALL(GetNative, plane) != tex) {
+            MP_ERR(f, "AMF surface planes must share one D3D11 texture.\n");
+            goto fail;
+        }
+    }
+
+    D3D11_TEXTURE2D_DESC desc;
+    ID3D11Texture2D_GetDesc(tex, &desc);
+    if (desc.ArraySize > 1) {
+        MP_ERR(f, "AMF surface input must not be a texture array.\n");
+        goto fail;
+    }
+
+    ID3D11Device *dev = NULL;
+    ID3D11Texture2D_GetDevice(tex, &dev);
+    bool same_dev = same_d3d11_device(dev, p->d3d_dev);
+    SAFE_RELEASE(dev);
+    if (!same_dev) {
+        MP_ERR(f, "AMF surface input must be on the hwdec D3D11 device.\n");
+        goto fail;
+    }
+
+    if (!mp_update_av_hw_frames_pool(&p->hw_frames_ref, p->av_device_ref,
+                                     IMGFMT_D3D11, in->params.hw_subfmt,
+                                     desc.Width, desc.Height, false))
+    {
+        MP_ERR(f, "Failed to create D3D11 frames context.\n");
+        goto fail;
+    }
+
+    struct mp_image *out = mp_image_new_ref(in);
+    MP_HANDLE_OOM(out);
+    mp_image_sethwfmt(out, IMGFMT_D3D11, in->params.hw_subfmt);
+    av_buffer_unref(&out->hwctx);
+    out->hwctx = av_buffer_ref(p->hw_frames_ref);
+    MP_HANDLE_OOM(out->hwctx);
+    out->planes[0] = (uint8_t *)tex;
+    out->planes[1] = 0;
+    talloc_free(in);
+    return out;
+
+fail:
+    talloc_free(in);
+    return NULL;
 }
 
 static AMF_RESULT amf_submit_image(struct mp_filter *f, struct mp_image *in,
@@ -696,7 +781,11 @@ static void frc_process(struct mp_filter *f)
         return;
     }
 
-    struct mp_image *in = frame.data;
+    struct mp_image *in = amf_surface_to_d3d11_image(f, frame.data);
+    if (!in) {
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
     mp_image_unrefp(&p->ref_image);
     p->ref_image = mp_image_new_ref(in);
 
@@ -877,7 +966,11 @@ static void vqe_process(struct mp_filter *f)
         return;
     }
 
-    struct mp_image *in = frame.data;
+    struct mp_image *in = amf_surface_to_d3d11_image(f, frame.data);
+    if (!in) {
+        mp_filter_internal_mark_failed(f);
+        return;
+    }
     mp_image_unrefp(&p->ref_image);
     p->ref_image = mp_image_new_ref(in);
 

@@ -778,9 +778,10 @@ Available mpv-only filters are:
     results from lower frame rate video inputs. The filter doubles the input
     frame rate by generating intermediate frames.
 
-    AMF FRC only supports D3D11 input currently. Use `--hwdec=d3d11va` or
-    `--vf-pre=format=d3d11` to upload the data. `--d3d11va-zero-copy` is also
-    recommended for better performance.
+    AMF FRC supports D3D11 input, and AMF surfaces on the hwdec D3D11 device,
+    such as the output of the FFmpeg AMF filters used through ``lavfi``. Use
+    `--hwdec=d3d11va` or `--vf-pre=format=d3d11` to upload other data.
+    `--d3d11va-zero-copy` is also recommended for better performance.
 
     ``profile=<auto|low|high|super>``
         Selects the quality profile for frame rate conversion.
@@ -828,9 +829,11 @@ Available mpv-only filters are:
     AMF VQ Enhancer reduces the blocking artifacts introduced by AVC/HEVC
     compression at low bit rates, while preserving details.
 
-    AMF VQ Enhancer only supports D3D11 input currently. Use ``--hwdec=d3d11va``
-    or ``--vf-pre=format=d3d11`` to upload the data. ``--d3d11va-zero-copy`` is
-    also recommended for better performance.
+    AMF VQ Enhancer supports D3D11 input, and AMF surfaces on the hwdec D3D11
+    device, such as the output of the FFmpeg AMF filters used through
+    ``lavfi``. Use ``--hwdec=d3d11va`` or ``--vf-pre=format=d3d11`` to upload
+    other data. ``--d3d11va-zero-copy`` is also recommended for better
+    performance.
 
     ``attenuation=<0.02-0.4>``
         Controls the strength of the enhancement. Higher values result in
