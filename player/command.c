@@ -8487,27 +8487,8 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
         mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
     }
 
-    if (flags & UPDATE_VO && mpctx->video_out) {
-        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-        struct mp_pin *filter_src = mpctx->vo_chain ? mpctx->vo_chain->filter_src : NULL;
-        uninit_video_out(mpctx);
-        handle_force_window(mpctx, true);
-
-        if (filter_src) {
-            reinit_video_chain_src(mpctx, NULL);
-            if (mpctx->vo_chain) {
-                mpctx->vo_chain->filter_src = filter_src;
-                mp_pin_connect(mpctx->vo_chain->filter->f->pins[0], filter_src);
-            }
-        } else {
-            reinit_video_chain(mpctx);
-        }
-
-        if (track || filter_src)
-            queue_seek(mpctx, MPSEEK_RELATIVE, 0.0, MPSEEK_EXACT, 0);
-
-        mp_wakeup_core(mpctx);
-    }
+    if (flags & UPDATE_VO && mpctx->video_out)
+        mp_force_video_reinit(mpctx);
 
     if (flags & UPDATE_AUDIO)
         reload_audio_output(mpctx);
