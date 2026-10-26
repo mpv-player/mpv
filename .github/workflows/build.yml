@@ -40,6 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ubuntu:26.10
+      # https://github.com/actions/runner-images/issues/14790
+      options: --security-opt seccomp=unconfined
       env:
         WINEPREFIX: /tmp/wine
     env:
