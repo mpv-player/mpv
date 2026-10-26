@@ -492,10 +492,6 @@ local function get_kbinfo_lines()
                 bind.priority > active[bind.key].priority)
            ) and not bind.cmd:find("script-binding stats/__forced_", 1, true)
            and bind.section ~= "input_forced_console"
-           and (
-               searched_text == nil or
-               (bind.key .. bind.cmd .. (bind.comment or "")):lower():find(searched_text, 1, true)
-           )
         then
             active[bind.key] = bind
         end
@@ -506,7 +502,11 @@ local function get_kbinfo_lines()
     local kspaces = ""  -- as many spaces as the longest key name
     for _, bind in pairs(active) do
         bind.subject = cmd_subject(bind.cmd)
-        if bind.subject ~= "ignore" then
+        if bind.subject ~= "ignore" and (
+                searched_text == nil or
+                (bind.key .. bind.cmd .. (bind.comment or "")):lower():find(searched_text, 1, true)
+            )
+        then
             ordered[#ordered+1] = bind
             _,_, bind.mods = bind.key:find("(.*)%+.")
             _, bind.mods_count = bind.key:gsub("%+.", "")
