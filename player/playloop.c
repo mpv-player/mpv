@@ -887,6 +887,27 @@ static void handle_vo_events(struct MPContext *mpctx)
 {
     struct vo *vo = mpctx->video_out;
     int events = vo ? vo_query_and_reset_events(vo, VO_EVENTS_USER) : 0;
+    if (events & VO_EVENT_GPU_CONTEXT_LOST) {
+        int limit = mpctx->opts->gpu_loss_recovery_attempts;
+        if (limit < 0) {
+            MP_ERR(mpctx, "GPU context lost, recovery disabled\n");
+            mpctx->stop_play = PT_QUIT;
+        } else if (limit > 0 && mpctx->gpu_loss_recovery_count >= limit) {
+            MP_ERR(mpctx, "GPU context lost, recovery attempt limit reached\n");
+            mpctx->stop_play = PT_QUIT;
+        } else {
+            if (limit > 0)
+                mpctx->gpu_loss_recovery_count++;
+            bool had_chain = mpctx->vo_chain;
+            MP_WARN(mpctx, "GPU context lost, recreating video output\n");
+            mp_force_video_reinit(mpctx);
+            if (!mpctx->video_out || (had_chain && !mpctx->vo_chain)) {
+                MP_ERR(mpctx, "Failed to recreate video output\n");
+                mpctx->stop_play = PT_QUIT;
+            }
+        }
+    }
+
     if (events & VO_EVENT_RESIZE)
         mp_notify(mpctx, MP_EVENT_WIN_RESIZE, NULL);
     if (events & VO_EVENT_WIN_STATE)

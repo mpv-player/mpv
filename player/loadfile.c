@@ -1842,6 +1842,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->speed_factor_a = mpctx->speed_factor_v = 1.0;
     mpctx->display_sync_error = 0.0;
     mpctx->display_sync_active = false;
+    mpctx->gpu_loss_recovery_count = 0;
     // let get_current_time() show 0 as start time (before playback_pts is set)
     mpctx->last_seek_pts = 0.0;
     mpctx->seek = (struct seek_params){ 0 };
