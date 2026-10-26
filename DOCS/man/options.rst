@@ -5905,11 +5905,12 @@ TLS/connection diagnostics), set ``--msg-level=curl=trace``.
     (default: 16).
 
 ``--curl-max-retries=<0-100>``
-    Number of times a single transfer may be transparently re-attempted
-    after a recoverable error (timeout, connection drop, HTTP/2 stream
-    reset, ...) before the stream gives up (default: 5). A request that
-    fails before any response headers arrive can always be retried; after
-    that, only seekable transfers can.
+    Number of times a single seekable transfer may be transparently
+    re-attempted after a recoverable error (timeout, connection drop,
+    HTTP/2 stream reset, ...) before the stream gives up (default: 5).
+    Non-seekable transfers cannot be retried and ignore this option.
+    A request that fails before any response headers arrive is retried
+    too, seekable or not.
 
 ``--curl-connect-timeout=<seconds>``
     TCP/TLS connect timeout in seconds (default: 30, range 0-600). 0 lets
