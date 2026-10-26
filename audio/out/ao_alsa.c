@@ -946,7 +946,11 @@ static bool recover_and_get_state(struct ao *ao, struct mp_pcm_state *state)
             // Otherwise do error checking and query the PCM state properly.
             CHECK_ALSA_ERROR("snd_pcm_status");
 
+            // ALSA can compute xrun status *after* computing this return value,
+            // so ask again to make sure.
             pcmst = snd_pcm_status_get_state(st);
+            if (pcmst == SND_PCM_STATE_RUNNING)
+                pcmst = snd_pcm_state(p->alsa);
         }
 
         if (n == 10)
