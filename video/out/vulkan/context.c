@@ -148,6 +148,7 @@ struct priv {
     struct vulkan_opts *opts;
     struct ra_ctx_params params;
     struct ra_tex proxy_tex;
+    bool device_lost;
 };
 
 static const struct ra_swapchain_fns vulkan_swapchain;
@@ -579,10 +580,24 @@ static int color_depth(struct ra_swapchain *sw)
     return -1;
 }
 
+static bool check_device_lost(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    if (!p->device_lost && p->vk->gpu && pl_gpu_is_failed(p->vk->gpu)) {
+        p->device_lost = true;
+        MP_ERR(sw->ctx, "Vulkan device lost\n");
+        vo_event(sw->ctx->vo, VO_EVENT_GPU_CONTEXT_LOST);
+    }
+    return p->device_lost;
+}
+
 static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
     struct pl_swapchain_frame frame;
+
+    if (check_device_lost(sw))
+        return false;
 
     bool visible = true;
     if (p->params.check_visible)
@@ -608,12 +623,20 @@ static bool start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 static bool submit_frame(struct ra_swapchain *sw, const struct vo_frame *frame)
 {
     struct priv *p = sw->priv;
+
+    if (check_device_lost(sw))
+        return false;
+
     return pl_swapchain_submit_frame(p->vk->swapchain);
 }
 
 static void swap_buffers(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
+
+    if (check_device_lost(sw))
+        return;
+
     pl_swapchain_swap_buffers(p->vk->swapchain);
     if (p->params.swap_buffers)
         p->params.swap_buffers(sw->ctx);
