@@ -715,6 +715,21 @@ static bool is_recoverable_error(CURLcode code)
     }
 }
 
+// The server was reached, so the same request may get through.
+static bool is_dropped_connection(CURLcode code)
+{
+    switch (code) {
+    case CURLE_RECV_ERROR:
+    case CURLE_SEND_ERROR:
+    case CURLE_GOT_NOTHING:
+    case CURLE_HTTP2:
+    case CURLE_HTTP2_STREAM:
+        return true;
+    default:
+        return false;
+    }
+}
+
 static bool check_setopt(struct priv *p, const char *name, CURLcode res)
 {
     if (res == CURLE_OK)
@@ -820,7 +835,7 @@ static void on_done(struct priv *p, CURLcode code)
     if (!p->probed) {
         // Connection died before any headers arrived. Nothing was read yet,
         // so the same request can be sent again.
-        if (!aborted && is_recoverable_error(code) &&
+        if (!aborted && is_dropped_connection(code) &&
             p->retry_count < p->opts->max_retries)
         {
             p->retry_count++;
