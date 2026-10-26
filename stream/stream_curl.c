@@ -818,7 +818,17 @@ static void on_done(struct priv *p, CURLcode code)
     bool aborted = atomic_load_explicit(&p->aborted, memory_order_relaxed);
 
     if (!p->probed) {
-        // Connection died before any headers arrived.
+        // Connection died before any headers arrived. Nothing was read yet,
+        // so the same request can be sent again.
+        if (!aborted && is_recoverable_error(code) &&
+            p->retry_count < p->opts->max_retries)
+        {
+            p->retry_count++;
+            MP_WARN(p, "%s, retrying (#%d)\n", curl_easy_strerror(code),
+                    p->retry_count);
+            start_request(p);
+            return;
+        }
         if (code != CURLE_OK && !aborted)
             log_curl_error(p, "error", code);
         mp_mutex_lock(&p->mtx);
