@@ -2963,6 +2963,8 @@ static void update_render_options(struct vo *vo)
     pars->color_map_params.visualize_lut = opts->tone_map.visualize;
     pars->color_map_params.contrast_smoothness = opts->tone_map.contrast_smoothness;
     pars->color_map_params.gamut_mapping = gamut_modes[opts->tone_map.gamut_mode];
+    pars->color_map_params.mastering_clip = opts->tone_map.mastering_clip;
+    pars->color_map_params.film_strength = opts->tone_map.film_strength;
 
     pars->params.dither_params = NULL;
     pars->params.error_diffusion = NULL;

@@ -126,6 +126,8 @@ struct gl_tone_map_opts {
     float peak_percentile;
     float contrast_recovery;
     float contrast_smoothness;
+    float mastering_clip;
+    float film_strength;
     int gamut_mode;
     bool visualize;
 };
