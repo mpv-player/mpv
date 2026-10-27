@@ -300,7 +300,7 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
     gl_sc_uniform_vec2(sc, "output_size", (float[2]){w, h});
     GLSL(vec2 coeff = fcoord * output_size/size;)
     float threshold = scaler->conf.kernel.params[0];
-    threshold = isnan(threshold) ? 0.0 : threshold;
+    threshold = mp_isnan(threshold) ? 0.0 : threshold;
     GLSLF("coeff = (coeff - %f) * 1.0/%f;\n", threshold, 1.0 - 2 * threshold);
     GLSL(coeff = clamp(coeff, 0.0, 1.0);)
     // Compute the right blend of colors
@@ -723,12 +723,12 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     float param = opts->curve_param;
     switch (curve) {
     case TONE_MAPPING_CLIP:
-        GLSLF("sig = min(%f * sig, 1.0);\n", isnan(param) ? 1.0 : param);
+        GLSLF("sig = min(%f * sig, 1.0);\n", mp_isnan(param) ? 1.0 : param);
         break;
 
     case TONE_MAPPING_MOBIUS:
         GLSLF("if (sig_peak > (1.0 + 1e-6)) {\n");
-        GLSLF("const float j = %f;\n", isnan(param) ? 0.3 : param);
+        GLSLF("const float j = %f;\n", mp_isnan(param) ? 0.3 : param);
         // solve for M(j) = j; M(sig_peak) = 1.0; M'(j) = 1.0
         // where M(x) = scale * (x+a)/(x+b)
         GLSLF("float a = -j*j * (sig_peak - 1.0) / (j*j - 2.0*j + sig_peak);\n");
@@ -742,7 +742,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
         break;
 
     case TONE_MAPPING_REINHARD: {
-        float contrast = isnan(param) ? 0.5 : param,
+        float contrast = mp_isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
         GLSLF("sig = sig / (sig + vec3(%f));\n", offset);
         GLSLF("float scale = (sig_peak + %f) / sig_peak;\n", offset);
@@ -765,7 +765,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     }
 
     case TONE_MAPPING_GAMMA: {
-        float gamma = isnan(param) ? 1.8 : param;
+        float gamma = mp_isnan(param) ? 1.8 : param;
         GLSLF("const float cutoff = 0.05, gamma = 1.0/%f;\n", gamma);
         GLSL(float scale = pow(cutoff / sig_peak, gamma.x) / cutoff;)
         GLSLF("sig = mix(scale * sig,"
@@ -776,7 +776,7 @@ static void pass_tone_map(struct gl_shader_cache *sc,
     }
 
     case TONE_MAPPING_LINEAR: {
-        float coeff = isnan(param) ? 1.0 : param;
+        float coeff = mp_isnan(param) ? 1.0 : param;
         GLSLF("sig = min(%f / sig_peak, 1.0) * sig;\n", coeff);
         break;
     }
