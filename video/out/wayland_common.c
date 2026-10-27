@@ -1906,7 +1906,9 @@ static void apply_toplevel_config(struct vo_wayland_state *wl)
                                    opts->autofit_larger.wh_valid || opts->autofit_smaller.wh_valid;
         if (width && height && !autofit_or_geometry) {
             wl->initial_size_hint = true;
-            wl->window_size = (struct mp_rect){0, 0, width, height};
+            wl->window_size = (struct mp_rect){0, 0,
+                handle_round(wl->scaling, width), handle_round(wl->scaling, height)
+            };
             wl->geometry = wl->window_size;
         } else {
             wl->override_surface_local = true;
