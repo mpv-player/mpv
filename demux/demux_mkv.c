@@ -3207,6 +3207,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 int64_t padding = av_rescale(block_info->discardpadding,
                                              stream->codec->samplerate,
                                              1000000000);
+                if (padding < -INT_MAX || padding > INT_MAX)
+                    padding = 0;
                 int start = 0, end = 0;
                 if (padding < 0 && i == 0)
                     start = -padding;
