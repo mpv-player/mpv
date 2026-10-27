@@ -3325,7 +3325,8 @@ static int read_next_block_into_queue(demuxer_t *demuxer)
             switch (ebml_read_id(s)) {
             case MATROSKA_ID_TIMECODE: {
                 uint64_t num = ebml_read_uint(s);
-                if (num == EBML_UINT_INVALID)
+                // Block timestamps add up to INT16_MAX ticks to this.
+                if (num == EBML_UINT_INVALID || num > INT64_MAX / mkv_d->tc_scale - INT16_MAX)
                     goto find_next_cluster;
                 mkv_d->cluster_tc = num * mkv_d->tc_scale;
                 break;
