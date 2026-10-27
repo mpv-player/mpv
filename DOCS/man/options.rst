@@ -8014,6 +8014,19 @@ them.
     users on very high DPI displays ("retina") may want to increase it. (Only
     for ``vo=gpu-next``)
 
+``--hdr-mastering-clip=<0.0..1.0>``
+    Controls soft clipping of source values above the mastering display's peak
+    luminance when the mastering metadata is considered reliable. The effect
+    fades out as the measured scene luminance exceeds the mastering peak.
+    Defaults to 1.0. (``--vo=gpu-next`` only)
+
+``--hdr-film-strength=<0.0..2.0>``
+    Controls the strength of the film-like response during tone mapping. Higher
+    values whiten compressed highlights at the cost of saturation, while lower
+    values preserve their original chromaticity. Values above 1.0 increase the
+    effect further at the risk of clipping highlights. Defaults to 0.3.
+    (``--vo=gpu-next`` only)
+
 ``--use-embedded-icc-profile``
     Load the embedded ICC profile contained in media files such as PNG images.
     (Default: yes). Note that this option only works when also using a display

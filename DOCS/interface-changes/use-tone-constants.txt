@@ -10,3 +10,5 @@ add --tone-mapping-spline-contrast
 add --tone-mapping-reinhard-contrast
 add --tone-mapping-linear-knee
 add --tone-mapping-exposure
+add --hdr-mastering-clip
+add --hdr-film-strength
