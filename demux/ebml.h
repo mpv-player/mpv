@@ -92,8 +92,8 @@ bool ebml_is_mkv_level1_id(uint32_t id);
 uint32_t ebml_read_id (stream_t *s);
 uint64_t ebml_read_length (stream_t *s);
 int64_t ebml_read_signed_length(stream_t *s);
-uint64_t ebml_read_uint (stream_t *s);
-int64_t ebml_read_int (stream_t *s);
+bool ebml_read_uint (stream_t *s, uint64_t *out);
+bool ebml_read_int (stream_t *s, int64_t *out);
 int ebml_read_skip(struct mp_log *log, int64_t end, stream_t *s);
 int ebml_resync_cluster(struct mp_log *log, stream_t *s);
 
