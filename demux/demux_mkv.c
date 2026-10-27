@@ -3253,12 +3253,14 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
 
     while (stream_tell(s) < end) {
         switch (ebml_read_id(s)) {
-        case MATROSKA_ID_BLOCKDURATION:
-            block->duration = ebml_read_uint(s);
-            if (block->duration == EBML_UINT_INVALID)
+        case MATROSKA_ID_BLOCKDURATION:;
+            uint64_t duration = ebml_read_uint(s);
+            if (duration == EBML_UINT_INVALID)
                 goto error;
-            block->duration *= mkv_d->tc_scale;
-            block->duration_known = true;
+            if (duration <= INT64_MAX / mkv_d->tc_scale) {
+                block->duration = duration * mkv_d->tc_scale;
+                block->duration_known = true;
+            }
             break;
 
         case MATROSKA_ID_DISCARDPADDING:
