@@ -121,6 +121,7 @@ struct priv {
     IDXGISwapChain *swapchain;
     struct pl_color_space swapchain_csp;
     BOOL fullscreen_state;
+    bool device_lost;
 
     int64_t perf_freq;
     unsigned last_sync_refresh_count;
@@ -232,9 +233,28 @@ static float d3d11_target_ref_luma(struct ra_swapchain *sw)
     return mp_dxgi_sdr_white_level_from_hwnd(&p->dxgi_ctx, vo_w32_hwnd(sw->ctx->vo));
 }
 
+static bool check_device_lost(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    if (p->device_lost)
+        return true;
+
+    HRESULT hr = ID3D11Device_GetDeviceRemovedReason(p->device);
+    if (SUCCEEDED(hr))
+        return false;
+
+    MP_ERR(sw->ctx, "Direct3D 11 device lost: %s\n", mp_HRESULT_to_str(hr));
+    p->device_lost = true;
+    vo_event(sw->ctx->vo, VO_EVENT_GPU_CONTEXT_LOST);
+    return true;
+}
+
 static bool d3d11_start_frame(struct ra_swapchain *sw, struct ra_fbo *out_fbo)
 {
     struct priv *p = sw->priv;
+
+    if (check_device_lost(sw))
+        return false;
 
     if (!out_fbo)
         return true;
@@ -293,6 +313,9 @@ static void d3d11_swap_buffers(struct ra_swapchain *sw)
 
     HRESULT hr = IDXGISwapChain_Present(p->swapchain, p->opts->sync_interval, 0);
     if (hr == S_OK)
+        return;
+
+    if (check_device_lost(sw))
         return;
 
     // DXGI leaves exclusive fullscreen by itself during Present(), e.g. when the
