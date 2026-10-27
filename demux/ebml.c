@@ -114,24 +114,25 @@ int64_t ebml_read_signed_length(stream_t *s)
 /*
  * Read the next element as an unsigned int.
  */
-uint64_t ebml_read_uint(stream_t *s)
+bool ebml_read_uint(stream_t *s, uint64_t *out)
 {
     uint64_t len, value = 0;
 
     len = ebml_read_length(s);
     if (len == EBML_UINT_INVALID || len > 8)
-        return EBML_UINT_INVALID;
+        return false;
 
     while (len--)
         value = (value << 8) | stream_read_char(s);
 
-    return value;
+    *out = value;
+    return true;
 }
 
 /*
  * Read the next element as a signed int.
  */
-int64_t ebml_read_int(stream_t *s)
+bool ebml_read_int(stream_t *s, int64_t *out)
 {
     uint64_t value = 0;
     uint64_t len;
@@ -139,9 +140,11 @@ int64_t ebml_read_int(stream_t *s)
 
     len = ebml_read_length(s);
     if (len == EBML_UINT_INVALID || len > 8)
-        return EBML_INT_INVALID;
-    if (!len)
-        return 0;
+        return false;
+    if (!len) {
+        *out = 0;
+        return true;
+    }
 
     len--;
     l = stream_read_char(s);
@@ -151,7 +154,8 @@ int64_t ebml_read_int(stream_t *s)
     while (len--)
         value = (value << 8) | stream_read_char(s);
 
-    return (int64_t)value; // assume complement of 2
+    *out = (int64_t)value; // assume complement of 2
+    return true;
 }
 
 /*
