@@ -259,6 +259,9 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
         result = talloc_strndup_append_buffer(result, ptr, next - ptr);
     }
 
+    if (!result[0])
+        result = talloc_strdup_append_buffer(result, "/");
+
     result = talloc_steal(talloc_ctx, result);
 #endif
 

@@ -120,6 +120,9 @@ int main(void)
     TEST_NORMALIZE("/foo/bar", "/foo/bar/");
     TEST_NORMALIZE("/foo/bar", "/foo/./bar");
     TEST_NORMALIZE("/usr", "/usr/bin/..");
+    TEST_NORMALIZE("/", "/");
+    TEST_NORMALIZE("/", "//");
+    TEST_NORMALIZE("/", "/.");
 #endif
 
     TEST_BASENAME("/usr/local/bin", "bin");
