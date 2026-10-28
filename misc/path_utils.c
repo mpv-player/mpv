@@ -189,7 +189,7 @@ char *mp_normalize_path(void *talloc_ctx, const char *path)
     if (!path)
         return NULL;
 
-    if (mp_is_url(bstr0(path)) || !strcmp(path, "-"))
+    if (!path[0] || mp_is_url(bstr0(path)) || !strcmp(path, "-"))
         return talloc_strdup(talloc_ctx, path);
 
     void *tmp = talloc_new(NULL);
