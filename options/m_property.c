@@ -341,6 +341,7 @@ char *m_properties_expand_string(const struct m_property_list *prop_list,
     bool skip = false;
     int level = 0, skip_level = 0;
     bstr str = bstr0(str0);
+    int last_brace = bstrrchr(str, '}');
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     int n = 0;
 #endif
@@ -350,7 +351,7 @@ char *m_properties_expand_string(const struct m_property_list *prop_list,
             if (skip && level <= skip_level)
                 skip = false;
             level--;
-        } else if (bstr_startswith0(str, "${") && bstr_find0(str, "}") >= 0) {
+        } else if (bstr_startswith0(str, "${") && str.start - (unsigned char *)str0 < last_brace) {
             str = bstr_cut(str, 2);
             level++;
 
