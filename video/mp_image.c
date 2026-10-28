@@ -71,13 +71,19 @@ static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
         int line_bytes = (alloc_w * desc.bpp[n] + 7) / 8;
         int align = mp_lcm(stride_align, (desc.bpp[n] && desc.bpp[n] % 8 == 0) ? desc.bpp[n] / 8 : 1);
         out_stride[n] = MP_ALIGN_NPOT(line_bytes, align);
-        out_plane_size[n] = out_stride[n] * alloc_h;
+        int64_t plane_size = (int64_t)out_stride[n] * alloc_h;
+        if (plane_size < 0 || plane_size > INT_MAX)
+            return -1;
+        out_plane_size[n] = plane_size;
     }
     if (desc.flags & MP_IMGFLAG_PAL)
         out_plane_size[1] = AVPALETTE_SIZE;
 
+    // Leave room for the stride_align bytes the callers add to the size.
     int sum = 0;
     for (int n = 0; n < MP_MAX_PLANES; n++) {
+        if (out_plane_size[n] > INT_MAX - stride_align - sum)
+            return -1;
         out_plane_offset[n] = out_plane_size[n] ? sum : -1;
         sum += out_plane_size[n];
     }
