@@ -593,7 +593,8 @@ static void fix_filenames(struct tl_parts *parts, char *source_path)
     bstr proto = mp_split_proto(bstr0(source_path), NULL);
     // Don't adjust self-expanding protocols
     if (!bstrcasecmp0(proto, "memory") || !bstrcasecmp0(proto, "lavf") ||
-        !bstrcasecmp0(proto, "hex") || !bstrcasecmp0(proto, "edl"))
+        !bstrcasecmp0(proto, "hex") || !bstrcasecmp0(proto, "edl") ||
+        !bstrcasecmp0(proto, "ffmpeg") || !bstrcasecmp0(proto, "data"))
     {
         return;
     }
