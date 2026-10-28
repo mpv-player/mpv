@@ -1635,6 +1635,10 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                 av_dict_set(&opts[i], "request_sample_fmt", "dsd", 0);
         }
 #endif
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+        for (int i = 0; i < nb_streams; i++)
+            av_dict_set_int(&opts[i], "max_pixels", 4096 * 4096, 0);
+#endif
         int r = avformat_find_stream_info(avfc, opts);
         for (int i = 0; i < nb_streams; i++)
             av_dict_free(&opts[i]);
