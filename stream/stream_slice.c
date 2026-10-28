@@ -50,6 +50,8 @@ static int fill_buffer(struct stream *s, void *buffer, int len)
 static int seek(struct stream *s, int64_t newpos)
 {
     struct priv *p = s->priv;
+    if (newpos > INT64_MAX - p->slice_start)
+        return 0;
     return stream_seek(p->inner, newpos + p->slice_start);
 }
 
@@ -121,8 +123,13 @@ static int parse_slice_range(stream_t *stream)
             return STREAM_ERROR;
     }
 
-    if (max_end_is_offset)
+    if (max_end_is_offset) {
+        if (p->slice_max_end > INT64_MAX - p->slice_start) {
+            MP_ERR(stream, "The byte range end overflows: '%s'\n", stream->url);
+            return STREAM_ERROR;
+        }
         p->slice_max_end += p->slice_start;
+    }
 
     if (p->slice_max_end && p->slice_max_end < p->slice_start) {
         MP_ERR(stream, "The byte range end (%"PRId64") can't be smaller than the start (%"PRId64"): '%s'\n",
