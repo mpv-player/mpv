@@ -344,6 +344,7 @@ void mp_force_video_refresh(struct MPContext *mpctx)
 
     // If not paused, the next frame should come soon enough.
     if (opts->pause || mpctx->time_frame >= 0.5 ||
+        (vo_c->track && vo_c->track->image) ||
         mpctx->video_status == STATUS_EOF)
     {
         issue_refresh_seek(mpctx, MPSEEK_VERY_EXACT);
