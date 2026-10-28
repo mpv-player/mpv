@@ -3539,6 +3539,14 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         return NULL;
     }
 
+    mp_dbg(log, "Trying demuxer: %s (force-level: %s)\n",
+           desc->name, d_level(check));
+
+    if (stream && !stream_seek(stream, 0)) {
+        mp_err(log, "Failed to rewind stream to the start.\n");
+        return NULL;
+    }
+
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
     struct m_config_cache *opts_cache =
         m_config_cache_alloc(demuxer, global, &demux_conf);
@@ -3589,16 +3597,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     *in->d_thread = *demuxer;
 
     in->d_thread->metadata = talloc_zero(in->d_thread, struct mp_tags);
-
-    mp_dbg(log, "Trying demuxer: %s (force-level: %s)\n",
-           desc->name, d_level(check));
-
-    if (stream && !stream_seek(stream, 0)) {
-        mp_err(log, "Failed to rewind stream to the start.\n");
-        demuxer->stream = NULL;
-        demux_free(demuxer);
-        return NULL;
-    }
 
     in->d_thread->params = params; // temporary during open()
     int ret = demuxer->desc->open(in->d_thread, check);
