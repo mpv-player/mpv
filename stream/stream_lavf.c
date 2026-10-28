@@ -387,6 +387,10 @@ static int open_f(stream_t *stream)
 
     mp_setup_av_network_options(&dict, NULL, stream->global, stream->log);
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    av_dict_set(&dict, "protocol_blacklist", "fd,pipe", 0);
+#endif
+
     AVIOInterruptCB cb = {
         .callback = interrupt_cb,
         .opaque = stream,
