@@ -633,6 +633,17 @@ void mp_msg_sanitize(bstr *text, bool allow_sgr)
     }
 }
 
+// Start of a UTF-8 sequence at the end of str that more text may complete.
+static size_t utf8_tail_start(bstr str)
+{
+    for (size_t n = 1; n <= 4 && n <= str.len; n++) {
+        unsigned char ch = str.start[str.len - n];
+        if ((ch & 0xC0) != 0x80)
+            return ch >= 0xC0 ? str.len - n : str.len;
+    }
+    return str.len;
+}
+
 void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 {
     if (!mp_msg_test(log, lev))
@@ -644,6 +655,9 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     root->buffer.len = 0;
 
+    // The partial line is sanitized already, except for a UTF-8 sequence at
+    // its end that the new text may complete.
+    size_t sanitized = utf8_tail_start(log->partial[lev]);
     if (log->partial[lev].len)
         bstr_xappend(root, &root->buffer, log->partial[lev]);
     log->partial[lev].len = 0;
@@ -653,7 +667,8 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         bstr_xappend(root, &root->buffer, bstr0(format));
     }
 
-    mp_msg_sanitize(&root->buffer, true);
+    bstr text = {root->buffer.start + sanitized, root->buffer.len - sanitized};
+    mp_msg_sanitize(&text, true);
 
     // Remember last status message and restore it to ensure that it is
     // always displayed
