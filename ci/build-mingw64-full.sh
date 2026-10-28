@@ -116,15 +116,19 @@ mpv_args=(
     --buildtype=release
     --prefer-static
     --default-library=shared
-    -Dc_link_args="$FF_LIBS"
-    -Dcpp_link_args="$FF_LIBS"
+    # With --prefer-static meson searches for libiconv only in the compiler's
+    # own directories, so pass it in the link args.
+    # https://github.com/mesonbuild/meson/issues/10172
+    -Dc_link_args="$FF_LIBS -L$FFBUILD_PREFIX/lib -liconv"
+    -Dcpp_link_args="$FF_LIBS -L$FFBUILD_PREFIX/lib -liconv"
     -Dgpl=$gpl
     --force-fallback-for=mujs
     -Dmujs:werror=false
     -Dmujs:default_library=static
     -Dlua=luajit
-    -D{amf,d3d11,javascript,lcms2,libarchive,libbluray,libcurl,shaderc}=enabled
-    -D{sixel,spirv-cross,subrandr,vapoursynth,vulkan,win32-smtc,zimg}=enabled
+    -D{amf,d3d11,iconv,javascript,lcms2,libarchive,libbluray,libcurl}=enabled
+    -D{shaderc,sixel,spirv-cross,subrandr,vapoursynth,vulkan}=enabled
+    -D{win32-smtc,zimg}=enabled
 )
 if $gpl; then
     # Only the GPL image carries the dependencies of the GPL features.
