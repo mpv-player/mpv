@@ -81,6 +81,18 @@ ninja install
 popd
 endgroup
 
+group "Building uchardet"
+$gitclone -b v0.0.8 https://gitlab.freedesktop.org/uchardet/uchardet.git
+mkdir -p uchardet/build
+pushd uchardet/build
+cmake -GNinja -DCMAKE_TOOLCHAIN_FILE="$FFBUILD_CMAKE_TOOLCHAIN" \
+      -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$FFBUILD_PREFIX" \
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+      -DBUILD_SHARED_LIBS=OFF -DBUILD_BINARY=OFF ..
+ninja install
+popd
+endgroup
+
 group "Building subrandr"
 build_subrandr "$FFBUILD_PREFIX" --target "$FFBUILD_RUST_TARGET" \
                --static-library true --shared-library false
@@ -127,7 +139,7 @@ mpv_args=(
     -Dmujs:default_library=static
     -Dlua=luajit
     -D{amf,d3d11,iconv,javascript,lcms2,libarchive,libbluray,libcurl}=enabled
-    -D{shaderc,sixel,spirv-cross,subrandr,vapoursynth,vulkan}=enabled
+    -D{shaderc,sixel,spirv-cross,subrandr,uchardet,vapoursynth,vulkan}=enabled
     -D{win32-smtc,zimg}=enabled
 )
 if $gpl; then
