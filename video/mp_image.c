@@ -53,13 +53,13 @@ static int mp_image_layout(int imgfmt, int w, int h, int stride_align,
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
 
-    w = MP_ALIGN_UP(w, desc.align_x);
-    h = MP_ALIGN_UP(h, desc.align_y);
-
     struct mp_image_params params = {.imgfmt = imgfmt, .w = w, .h = h};
 
     if (!mp_image_params_valid(&params) || desc.flags & MP_IMGFLAG_HWACCEL)
         return -1;
+
+    w = MP_ALIGN_UP(w, desc.align_x);
+    h = MP_ALIGN_UP(h, desc.align_y);
 
     // Note: for non-mod-2 4:2:0 YUV frames, we have to allocate an additional
     //       top/right border. This is needed for correct handling of such
