@@ -605,7 +605,7 @@ void mp_msg_sanitize(bstr *text, bool allow_sgr)
         }
 
         // Block UTF-8 C1 controls (C2 80..C2 9F), except PU1/PU2 used internally.
-        if (ch == 0xC2 && i + 1 < text->len) {
+        if (ch == 0xC2 && i + 1 < text->len && (text->start[i + 1] & 0xC0) == 0x80) {
             unsigned char c1 = text->start[i + 1];
             if (c1 >= 0x80 && c1 <= 0x9F && c1 != 0x91 && c1 != 0x92) {
                 text->start[i] = '?';
