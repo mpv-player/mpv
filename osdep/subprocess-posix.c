@@ -155,7 +155,7 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
         .path = path,
         .opts = opts,
         .src_fds = src_fds,
-        .child_stack = stacks[1],
+        .child_stack = detach ? stacks[1] : NULL,
         .pipe_end = -1,
         .failed = false,
         .detach = detach,
