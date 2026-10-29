@@ -42,12 +42,6 @@
 #define MP_NONSTRING
 #endif
 
-#if __has_attribute(no_sanitize)
-#define MP_NO_ASAN __attribute__((no_sanitize("address")))
-#else
-#define MP_NO_ASAN
-#endif
-
 #ifndef NDEBUG
 #define MP_ASSERT_UNREACHABLE() (assert(!"unreachable"), abort())
 #elif __has_builtin(__builtin_unreachable)
