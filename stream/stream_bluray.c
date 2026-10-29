@@ -164,6 +164,7 @@ struct bluray_priv_s {
     bool read_pos_known;             // next_read_pos is valid
     bool resync_owed;                // jump settled, resync seek not acked yet
     bool clip_open;                  // libbluray still has a clip to act on
+    int64_t pending_scr;             // clip time the player presents, -1 when none
     double pending_rate;             // rate the player asked for, not applied yet
     bool pending_rate_set;
     int pending_angle;               // 1-based, 0 when no angle change is owed
@@ -821,6 +822,8 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         }
 
         mp_mutex_lock(&b->overlay_lock);
+        int64_t scr = b->pending_scr;
+        b->pending_scr = -1;
         bool pending_rate = b->pending_rate_set && b->clip_open;
         double rate = b->pending_rate;
         if (pending_rate)
@@ -829,6 +832,8 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         if (pending_angle)
             b->pending_angle = 0;
         mp_mutex_unlock(&b->overlay_lock);
+        if (scr >= 0)
+            bd_set_scr(b->bd, scr);
         if (pending_rate)
             bd_set_rate(b->bd, BD_TIME_FROM_S(rate));
         if (pending_angle)
@@ -1021,10 +1026,11 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
                 break;
             }
         }
+        if (raw >= 0)
+            b->pending_scr = raw;
         mp_mutex_unlock(&b->overlay_lock);
         if (raw < 0)
             break;
-        bd_set_scr(b->bd, raw);
         return STREAM_OK;
     }
     case STREAM_CTRL_SET_PLAYBACK_RATE: {
@@ -1032,6 +1038,9 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             break;
         double rate = *(double *)arg;
         if (rate == 0) {
+            // This blocks until a disc read in progress finishes. Might cause
+            // buffering issues. Fix this, if real issue arises. The read()
+            // itself is not called after pause, so we cannot call it from there.
             bd_set_rate(b->bd, BD_TIME_FROM_S(rate));
         } else {
             mp_mutex_lock(&b->overlay_lock);
@@ -1077,6 +1086,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         mp_mutex_lock(&b->overlay_lock);
         TA_FREEP(&b->segs);
         b->num_segs = 0;
+        b->pending_scr = -1;
         mp_mutex_unlock(&b->overlay_lock);
         // API makes it hard to determine seeking success
         return STREAM_OK;
@@ -1588,6 +1598,7 @@ static int bluray_stream_open_internal(stream_t *s)
     // these should be set before any callback
     b->current_angle = -1;
     b->current_title = -1;
+    b->pending_scr = -1;
 
     // initialize libbluray event queue
     bd_get_event(bd, NULL);
