@@ -1949,7 +1949,8 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     } else {
         if (!(flags & SEEK_FORWARD))
             seek_pts -= priv->seek_delay;
-        seek_pts_av = seek_pts * AV_TIME_BASE;
+        seek_pts_av = MPCLAMP(seek_pts, INT64_MIN / AV_TIME_BASE,
+                              INT64_MAX / AV_TIME_BASE) * AV_TIME_BASE;
     }
 
     // Hack to make wav seeking "deterministic". Without this, features like
@@ -1971,8 +1972,8 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
                       priv->pcm_seek_hack->codecpar->block_align;
         if (samples > 0) {
             MP_VERBOSE(demuxer, "using bullshit libavformat PCM seek hack\n");
-            double pts = seek_pts_av / (double)AV_TIME_BASE;
-            seek_pts_av = pts / av_q2d(priv->pcm_seek_hack->time_base);
+            seek_pts_av = av_rescale_q(seek_pts_av, AV_TIME_BASE_Q,
+                                       priv->pcm_seek_hack->time_base);
             int64_t align = seek_pts_av % samples;
             seek_pts_av -= align;
             seek_stream = priv->pcm_seek_hack->index;
