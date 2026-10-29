@@ -1147,7 +1147,9 @@ void write_video(struct MPContext *mpctx)
             if (vo_c->is_sparse && !mpctx->ao_chain) {
                 MP_VERBOSE(mpctx, "assuming this is an image\n");
                 mpctx->time_frame += opts->image_display_duration / opts->playback_speed;
-            } else if (mpctx->last_frame_duration > 0) {
+            } else if (mpctx->last_frame_duration > 0 && !opts->untimed &&
+                       !(vo->driver->caps & VO_CAP_UNTIMED))
+            {
                 MP_VERBOSE(mpctx, "using demuxer frame duration for last frame\n");
                 mpctx->time_frame += mpctx->last_frame_duration;
             } else {
