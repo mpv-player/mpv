@@ -16,6 +16,23 @@ local function join(sep, arr, count)
     return r
 end
 
+local pending = {["wc -c"] = true, ["cat"] = true, ["detached subprocess"] = true}
+
+local function check(ok, what)
+    pending[what] = nil
+    if not ok then
+        mp.msg.error("check failed: " .. what)
+        mp.commandv("quit", "1")
+    end
+end
+
+mp.add_hook("on_after_end_file", 50, function()
+    for what in pairs(pending) do
+        mp.msg.error("check did not finish: " .. what)
+        mp.commandv("quit", "1")
+    end
+end)
+
 mp.observe_property("vo-configured", "bool", function(_, v)
     if v ~= true then
         return
@@ -84,12 +101,14 @@ mp.observe_property("vo-configured", "bool", function(_, v)
                              stdin_data = "hello", capture_stdout = true},
         function(_, val)
             print("Should be '5': " .. val.stdout)
+            check(tonumber(val.stdout) == 5, "wc -c")
         end)
     -- blocking stdin by default
     mp.command_native_async({_name = "subprocess", args = {"cat"},
                              capture_stdout = true},
         function(_, val)
             print("Should be 0: " .. #val.stdout)
+            check(#val.stdout == 0, "cat")
         end)
     -- stdin + detached
     mp.command_native_async({_name = "subprocess",
@@ -98,6 +117,7 @@ mp.observe_property("vo-configured", "bool", function(_, v)
                              detach = true},
         function(_, val)
             print("5s test: " .. val.status)
+            check(val.status == 0, "detached subprocess")
         end)
 
     -- This should get killed on script exit.
