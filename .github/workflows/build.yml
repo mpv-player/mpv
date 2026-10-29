@@ -637,11 +637,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Get CPU count
+        id: cpu_count
+        shell: bash
+        run: |
+          echo "count=$(nproc)" >> $GITHUB_OUTPUT
+
       - name: Start FreeBSD VM
         uses: cross-platform-actions/action@v1.6.0
         with:
           operating_system: freebsd
           version: '15.1'
+          cpu_count: ${{ steps.cpu_count.outputs.count }}
           sync_files: runner-to-vm
 
       - name: Install dependencies
