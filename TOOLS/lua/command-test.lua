@@ -93,7 +93,7 @@ mp.observe_property("vo-configured", "bool", function(_, v)
         end)
     -- stdin + detached
     mp.command_native_async({_name = "subprocess",
-                             args = {"bash", "-c", "(sleep 5s ; cat)"},
+                             args = {"sh", "-c", "(sleep 5s ; cat)"},
                              stdin_data = "this should appear after 5s.\n",
                              detach = true},
         function(_, val)
