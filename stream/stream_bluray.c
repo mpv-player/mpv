@@ -895,9 +895,9 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             b->resync_owed = true;
             TA_FREEP(&b->segs);
             b->num_segs = 0;
-            mp_mutex_unlock(&b->overlay_lock);
             MP_VERBOSE(s, "jump settled (id %u), EOF for demuxer resync\n",
                        b->discontinuity_id);
+            mp_mutex_unlock(&b->overlay_lock);
             return 0;
         }
 
