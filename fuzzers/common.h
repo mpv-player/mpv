@@ -56,7 +56,7 @@ static inline void set_fontconfig_sysroot(void)
 }
 
 #ifndef PLAYBACK_TIME_LIMIT
-#define PLAYBACK_TIME_LIMIT 5
+#define PLAYBACK_TIME_LIMIT 1
 #endif
 
 #ifndef EVENTS_LIMIT
