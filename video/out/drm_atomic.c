@@ -149,7 +149,7 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
     drmModePlaneRes *plane_res = NULL;
     drmModeRes *res = NULL;
     struct drm_object *plane = NULL;
-    struct drm_atomic_context *ctx;
+    struct drm_atomic_context *ctx = NULL;
     int crtc_index = -1;
     int layercount = -1;
     int primary_id = 0;
@@ -234,11 +234,13 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
 
                 if (layercount == draw_plane_idx) {
                     ctx->draw_plane = plane;
+                    plane = NULL;
                     continue;
                 }
 
                 if (layercount == drmprime_video_plane_idx) {
                     ctx->drmprime_video_plane = plane;
+                    plane = NULL;
                     continue;
                 }
             }
@@ -289,6 +291,8 @@ fail:
         drmModeFreePlaneResources(plane_res);
     if (plane)
         drm_object_free(plane);
+    if (ctx)
+        drm_atomic_destroy_context(ctx);
     return NULL;
 }
 
