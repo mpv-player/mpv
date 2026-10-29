@@ -32,7 +32,7 @@ void mp_client_property_change(struct MPContext *mpctx, const char *name);
 void mp_client_send_property_changes(struct MPContext *mpctx);
 
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name);
-void mp_client_set_weak(struct mpv_handle *ctx);
+struct mpv_handle *mp_new_weak_client(struct mp_client_api *clients, const char *name);
 struct mp_log *mp_client_get_log(struct mpv_handle *ctx);
 struct mpv_global *mp_client_get_global(struct mpv_handle *ctx);
 

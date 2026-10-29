@@ -167,7 +167,7 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
         // Create the client before creating the thread; otherwise a race
         // condition could happen, where MPContext is destroyed while the
         // thread tries to create the client.
-        .client = mp_new_client(mpctx->clients, script_name),
+        .client = mp_new_weak_client(mpctx->clients, script_name),
     };
 
     talloc_free(tmp);
@@ -179,7 +179,6 @@ static int64_t mp_load_script(struct MPContext *mpctx, const char *fname)
         return -1;
     }
 
-    mp_client_set_weak(arg->client);
     arg->log = mp_client_get_log(arg->client);
     int64_t id = mpv_client_id(arg->client);
 
