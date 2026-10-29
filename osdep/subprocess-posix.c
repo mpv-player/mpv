@@ -57,19 +57,19 @@ static int as_execvpe(const char *path, const char *file, char *const argv[],
         return execve(file, argv, envp);
 
     size_t flen = strlen(file);
-    while (path && path[0]) {
+    while (path) {
         size_t plen = strcspn(path, ":");
         // Ignore paths that are too long.
         char fn[PATH_MAX];
         if (plen + 1 + flen + 1 < sizeof(fn)) {
             memcpy(fn, path, plen);
             fn[plen] = '/';
-            memcpy(fn + plen + 1, file, flen + 1);
+            memcpy(fn + plen + (plen > 0), file, flen + 1);
             execve(fn, argv, envp);
             if (errno != EACCES && errno != ENOENT && errno != ENOTDIR)
                 break;
         }
-        path += plen + (path[plen] == ':' ? 1 : 0);
+        path = path[plen] ? path + plen + 1 : NULL;
     }
     return -1;
 }
@@ -273,8 +273,6 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     bool killed_by_us = false;
     int cancel_fd = -1;
     char *path = getenv("PATH");
-    if (!path)
-        path = ""; // failure, who cares
 
     *res = (struct mp_subprocess_result){0};
 
