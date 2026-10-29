@@ -298,6 +298,11 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
             if (mp_make_cloexec_pipe(comm_pipe[n]) < 0)
                 goto done;
             MPSWAP(int, comm_pipe[n][0], comm_pipe[n][1]);
+            int flags = fcntl(comm_pipe[n][0], F_GETFL);
+            if (flags == -1)
+                goto done;
+            if (fcntl(comm_pipe[n][0], F_SETFL, flags | O_NONBLOCK) == -1)
+                goto done;
 
             struct sigaction sa = {.sa_handler = SIG_IGN, .sa_flags = SA_RESTART};
             sigfillset(&sa.sa_mask);
@@ -383,7 +388,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
                     }
                     ssize_t r = write(comm_pipe[n][0], fd->write_buf->start,
                                       fd->write_buf->len);
-                    if (r < 0 && errno == EINTR)
+                    if (r < 0 && (errno == EINTR || errno == EAGAIN))
                         continue;
                     if (r < 0) {
                         // Let's not signal an error for now - caller can check
