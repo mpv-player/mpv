@@ -447,6 +447,14 @@ static struct mp_log_buffer_entry *log_buffer_read(struct mp_log_buffer *buffer)
     return res;
 }
 
+static bool log_buffer_full(struct mp_log_buffer *buffer)
+{
+    mp_mutex_lock(&buffer->lock);
+    bool full = buffer->num_entries == buffer->capacity;
+    mp_mutex_unlock(&buffer->lock);
+    return full;
+}
+
 static void write_msg_to_buffers(struct mp_log *log, int lev, bstr text)
 {
     struct mp_log_root *root = log->root;
@@ -463,17 +471,14 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, bstr text)
             if (buffer->level == MP_LOG_BUFFER_MSGL_LOGFILE) {
                 // If the buffer is full, block until we can write again,
                 // unless there's no write thread (died, or early filebuffer)
-                bool dead = false;
-                while (buffer->num_entries == buffer->capacity && !dead) {
+                if (buffer->num_entries == buffer->capacity) {
                     // Temporary unlock is OK; buffer->level is immutable, and
                     // buffer can't go away because the global log lock is held.
                     mp_mutex_unlock(&buffer->lock);
                     mp_mutex_lock(&root->log_file_lock);
-                    if (root->log_file_thread_active) {
+                    while (root->log_file_thread_active && log_buffer_full(buffer)) {
                         mp_cond_wait(&root->log_file_wakeup,
                                           &root->log_file_lock);
-                    } else {
-                        dead = true;
                     }
                     mp_mutex_unlock(&root->log_file_lock);
                     mp_mutex_lock(&buffer->lock);
