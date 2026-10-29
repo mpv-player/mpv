@@ -81,7 +81,7 @@ void demux_packet_unref(struct demux_packet *dp)
 {
     if (!dp)
         return;
-    struct AVPacket *avpkt = dp ? dp->avpacket : NULL;
+    struct AVPacket *avpkt = dp->avpacket;
     if (avpkt)
         av_packet_unref(avpkt);
     ta_free_children(dp);
