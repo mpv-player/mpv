@@ -123,8 +123,8 @@ typedef struct mkv_track {
     float v_projection_pose_roll;
 
     uint32_t a_channels, a_bps;
-    float a_sfreq;
-    float a_osfreq;
+    double a_sfreq;
+    double a_osfreq;
 
     double default_duration;
     double codec_delay;
@@ -564,16 +564,21 @@ static void parse_trackencodings(struct demuxer *demuxer,
     track->num_encodings = encodings->n_content_encoding;
 }
 
+static bool valid_samplerate(double rate)
+{
+    return rate > 0 && rate <= INT_MAX;
+}
+
 static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
                              struct ebml_audio *audio)
 {
-    if (audio->n_sampling_frequency) {
+    if (audio->n_sampling_frequency && valid_samplerate(audio->sampling_frequency)) {
         track->a_sfreq = audio->sampling_frequency;
         MP_DBG(demuxer, "|   + Sampling frequency: %f\n", track->a_sfreq);
     } else {
         track->a_sfreq = 8000;
     }
-    if (audio->n_output_sampling_frequency) {
+    if (audio->n_output_sampling_frequency && valid_samplerate(audio->output_sampling_frequency)) {
         track->a_osfreq = audio->output_sampling_frequency;
         MP_DBG(demuxer, "|   + Output sampling frequency: %f\n", track->a_osfreq);
     } else {
