@@ -104,11 +104,13 @@ void hwdec_devices_request_for_img_fmt(struct mp_hwdec_devices *devs,
 char *hwdec_devices_get_names(struct mp_hwdec_devices *devs)
 {
     char *res = NULL;
+    mp_mutex_lock(&devs->lock);
     for (int n = 0; n < devs->num_hwctxs; n++) {
         if (res)
             ta_xstrdup_append(&res, ",");
         ta_xstrdup_append(&res, devs->hwctxs[n]->driver_name);
     }
+    mp_mutex_unlock(&devs->lock);
     return res;
 }
 
