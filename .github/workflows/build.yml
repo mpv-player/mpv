@@ -649,7 +649,7 @@ jobs:
           sudo pkg update
           sudo pkg install -y \
               alsa-lib \
-              cmake \
+              cmake-core \
               curl \
               evdev-proto \
               ffmpeg \
