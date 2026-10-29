@@ -478,6 +478,10 @@ void ao_drain(struct ao *ao)
 
     mp_mutex_lock(&p->lock);
     while (!p->paused && p->playing) {
+        // Untimed AOs never signal an underrun, they are done once they took
+        // everything.
+        if (ao->untimed && !p->pending && !mp_async_queue_get_samples(p->queue))
+            break;
         mp_mutex_unlock(&p->lock);
         double delay = ao_get_delay(ao);
         mp_mutex_lock(&p->lock);
@@ -687,6 +691,10 @@ static bool ao_play_data(struct ao *ao)
 
     if (got_eof)
         goto eof;
+
+    // For ao_drain(), an untimed AO took everything.
+    if (ao->untimed && !samples)
+        mp_cond_broadcast(&p->wakeup);
 
     return samples > 0 && (samples < space || ao->untimed);
 
