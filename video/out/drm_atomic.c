@@ -209,7 +209,7 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
         drmModeFreePlane(drmplane);
         drmplane = NULL;
 
-        if (possible_crtcs & (1 << crtc_index)) {
+        if (possible_crtcs & (1u << crtc_index)) {
             plane = drm_object_create(log, ctx->fd, plane_id, DRM_MODE_OBJECT_PLANE);
 
             if (!plane) {

@@ -583,7 +583,7 @@ static bool setup_crtc(struct vo_drm_state *drm, const drmModeRes *res)
         // iterate all global CRTCs
         for (unsigned int j = 0; j < res->count_crtcs; ++j) {
             // check whether this CRTC works with the encoder
-            if (!(encoder->possible_crtcs & (1 << j)))
+            if (!(encoder->possible_crtcs & (1u << j)))
                 continue;
 
             drm->encoder = encoder;
