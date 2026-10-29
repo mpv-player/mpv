@@ -94,7 +94,7 @@ void present_sync_swap(struct mp_present *present)
     }
 
     cur->skipped_vsyncs = 0;
-    int64_t ust_passed = ust ? ust - last_ust: 0;
+    int64_t ust_passed = ust - last_ust;
     int64_t msc_passed = msc ? msc - last_msc: 0;
     if (msc_passed && ust_passed)
         cur->vsync_duration = ust_passed / msc_passed;
