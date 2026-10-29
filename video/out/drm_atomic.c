@@ -188,6 +188,10 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
             break;
         }
     }
+    if (crtc_index < 0) {
+        mp_err(log, "CRTC %d is not in the DRM resources\n", crtc_id);
+        goto fail;
+    }
 
     for (int i = 0; i < res->count_connectors; i++) {
         drmModeConnector *connector = drmModeGetConnector(fd, res->connectors[i]);
