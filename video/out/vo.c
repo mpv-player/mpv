@@ -553,6 +553,9 @@ static void update_display_fps(struct vo *vo)
     double display_fps = vo->opts->display_fps_override;
     if (display_fps <= 0)
         display_fps = in->reported_display_fps;
+    // Tiny rates overflow the int64_t vsync math.
+    if (!(display_fps >= 1e-6))
+        display_fps = 0;
 
     if (in->display_fps != display_fps) {
         in->nominal_vsync_interval =  display_fps > 0 ? 1e9 / display_fps : 0;
