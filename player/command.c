@@ -2306,7 +2306,8 @@ static int mp_property_list_tracks(void *ctx, struct m_property *prop,
                 res = append_track_info(res, track);
                 spacing = 1;
             }
-            spacing = 2;
+            if (spacing)
+                spacing = 2;
         }
 
         struct demuxer *demuxer = mpctx->demuxer;
