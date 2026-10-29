@@ -426,7 +426,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     mp_smtc_init(mp_new_client(mpctx->clients, "SystemMediaTransportControls"));
 #endif
 
-    mp_dnd_init(mp_new_client(mpctx->clients, "dnd"));
+    mp_dnd_init(mp_new_weak_client(mpctx->clients, "dnd"));
 
     mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
 
