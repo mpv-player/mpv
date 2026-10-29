@@ -62,6 +62,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     check_error(mpv_set_option_string(ctx, "msg-level", "all=trace"));
     check_error(mpv_set_option_string(ctx, "network-timeout", "1"));
+    check_error(mpv_set_option_string(ctx, "input-builtin-bindings", "no"));
 
 #if MPV_RUN
     check_error(mpv_set_option_string(ctx, "vo", "null"));
