@@ -5507,11 +5507,13 @@ fread_pic(FILE *fp, mp_image_t *dst, size_t bytesPerLine, size_t h, size_t strid
     size_t bytesRead = 0, expectedBytes = h * bytesPerLine;
     size_t src_off = offset, dst_off = 0;
     if (stride == dst->stride[0]) {
-        fseek(fp, src_off, SEEK_SET);
+        if (fseek(fp, src_off, SEEK_SET))
+            return false;
         bytesRead = fread(dst->planes[0], 1, expectedBytes, fp);
     } else {
         for (int i = 0; i < h; i++) {
-            fseek(fp, src_off, SEEK_SET);
+            if (fseek(fp, src_off, SEEK_SET))
+                break;
             size_t r = fread(dst->planes[0] + dst_off, 1, bytesPerLine, fp);
             if (r != bytesPerLine)
                 break;
