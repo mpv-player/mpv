@@ -1895,7 +1895,8 @@ static void demux_drop_buffers_lavf(demuxer_t *demuxer)
     if (!priv->stream || priv->stream->seekable)
         av_seek_frame(priv->avfc, -1, 0, 1);
     demux_flush(demuxer);
-    stream_drop_buffers(priv->stream);
+    if (priv->stream)
+        stream_drop_buffers(priv->stream);
     avio_flush(priv->avfc->pb);
     if (priv->stream && !priv->stream->seekable) {
         // The stream may have been repositioned externally (disc seeks).
