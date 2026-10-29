@@ -518,7 +518,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         .filename = !bstrcasecmp0(ext, "m3u8") || !bstrcasecmp0(ext, "m3u") ||
                     check <= DEMUX_CHECK_REQUEST ? priv->filename : "",
         .buf_size = 0,
-        .buf = av_mallocz(PROBE_BUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE),
+        .buf = av_malloc(PROBE_BUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE),
         .mime_type = lavfdopts->allow_mimetype ? mime_type : NULL,
     };
     if (!avpd.buf)
@@ -535,6 +535,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
             int nsize = av_clip(avpd.buf_size * 2, INITIAL_PROBE_SIZE,
                                 PROBE_BUF_SIZE);
             nsize = stream_read_peek(s, avpd.buf, nsize);
+            memset(avpd.buf + nsize, 0, AV_INPUT_BUFFER_PADDING_SIZE);
             if (nsize <= avpd.buf_size)
                 final_probe = true;
             avpd.buf_size = nsize;
