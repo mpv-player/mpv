@@ -164,6 +164,11 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
 
 #if HAVE_RFORK
     fres = rfork_thread(RFSPAWN, stacks[0], child_main, &child_args);
+    // On other architectures than amd64 and i386, FreeBSD's rfork_thread()
+    // cannot switch stacks and fails with EOPNOTSUPP when given one. With NULL
+    // it runs the child on our stack.
+    if (fres < 0 && errno == EOPNOTSUPP)
+        fres = rfork_thread(RFSPAWN, NULL, child_main, &child_args);
 #elif HAVE_CLONE
     fres = clone(child_main, stacks[0], CLONE_VM | CLONE_VFORK | SIGCHLD, &child_args);
 #else
