@@ -100,6 +100,15 @@ char *mp_format_double(void *talloc_ctx, double val, int precision,
     bstr str = {0};
     const char *fmt = plus_sign ? "%+.*f" : "%.*f";
     bstr_xappend_asprintf(talloc_ctx, &str, fmt, precision, val);
+    // Don't print a sign for small negative values that round to zero.
+    if (str.start[0] == '-' && bstrspn(bstr_cut(str, 1), "0.") == str.len - 1) {
+        if (plus_sign) {
+            str.start[0] = '+';
+        } else {
+            memmove(str.start, str.start + 1, str.len);
+            str.len--;
+        }
+    }
     size_t pos = str.len;
     if (trim) {
         while (--pos && str.start[pos] == '0')

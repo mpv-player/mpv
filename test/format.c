@@ -95,5 +95,14 @@ int main(void)
     assert_string_equal(mp_format_double(ta_ctx, -INFINITY, 6, true,   true, false), "-inf%");
     assert_string_equal(mp_format_double(ta_ctx, -INFINITY, 6, true,   true,  true), "-inf%");
 
+    assert_string_equal(mp_format_double(ta_ctx, -0.0001, 2, false, false, false), "0.00");
+    assert_string_equal(mp_format_double(ta_ctx, -0.0001, 2, false, false,  true), "0");
+    assert_string_equal(mp_format_double(ta_ctx, -0.0001, 2, false,  true,  true), "0%");
+    assert_string_equal(mp_format_double(ta_ctx, -0.0001, 2, true,  false, false), "+0.00");
+    assert_string_equal(mp_format_double(ta_ctx, -0.0001, 2, true,  false,  true), "+0");
+    assert_string_equal(mp_format_double(ta_ctx,    -0.0, 0, false, false, false), "0");
+    assert_string_equal(mp_format_double(ta_ctx,    -0.0, 6, true,  false,  true), "+0");
+    assert_string_equal(mp_format_double(ta_ctx, -0.0001, 6, false, false,  true), "-0.0001");
+
     talloc_free(ta_ctx);
 }
