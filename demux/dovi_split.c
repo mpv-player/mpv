@@ -77,10 +77,12 @@ struct mp_dovi_split *mp_dovi_split_create(struct demuxer *demuxer,
         goto fail;
 
     AVCodecParameters *par = mp_codec_params_to_av(bl->codec);
-    if (par) {
-        avcodec_parameters_copy(s->bsf->par_in, par);
-        avcodec_parameters_free(&par);
-    }
+    if (!par)
+        goto fail;
+    ret = avcodec_parameters_copy(s->bsf->par_in, par);
+    avcodec_parameters_free(&par);
+    if (ret < 0)
+        goto fail;
     s->bsf->time_base_in = mp_get_codec_timebase(bl->codec);
 
     if (av_opt_set(s->bsf, "mode", "el", AV_OPT_SEARCH_CHILDREN) < 0)
