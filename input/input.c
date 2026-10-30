@@ -936,8 +936,8 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y, bool quiet)
     if (ictx->mouse_mangle) {
         struct mp_rect *src = &ictx->mouse_src;
         struct mp_rect *dst = &ictx->mouse_dst;
-        x = MPCLAMP(x, dst->x0, dst->x1) - dst->x0;
-        y = MPCLAMP(y, dst->y0, dst->y1) - dst->y0;
+        x = MPCLAMP(x, dst->x0, dst->x1 - 1) - dst->x0;
+        y = MPCLAMP(y, dst->y0, dst->y1 - 1) - dst->y0;
         if (ictx->mouse_src_mangle) {
             x = x * 1.0 / (dst->x1 - dst->x0) * (src->x1 - src->x0) + src->x0;
             y = y * 1.0 / (dst->y1 - dst->y0) * (src->y1 - src->y0) + src->y0;
