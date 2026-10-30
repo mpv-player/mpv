@@ -189,6 +189,12 @@ struct drm_atomic_context *drm_atomic_create_context(struct mp_log *log, int fd,
         }
     }
 
+    ctx->request = drmModeAtomicAlloc();
+    if (!ctx->request) {
+        mp_err(log, "Failed to allocate atomic request\n");
+        goto fail;
+    }
+
     for (int i = 0; i < res->count_connectors; i++) {
         drmModeConnector *connector = drmModeGetConnector(fd, res->connectors[i]);
         if (connector) {
