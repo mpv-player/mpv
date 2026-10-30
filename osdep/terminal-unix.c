@@ -362,9 +362,12 @@ static void do_deactivate_getch2(void)
     getch2_active = 0;
 }
 
+static struct sigaction old_sigcont, old_sigtstp, old_sigwinch, old_sigttin,
+                        old_sigttou, old_sigint, old_sigquit, old_sigterm;
+
 // sigaction wrapper
 static int setsigaction(int signo, void (*handler) (int),
-                        int flags, bool do_mask)
+                        int flags, bool do_mask, struct sigaction *old)
 {
     struct sigaction sa;
     sa.sa_handler = handler;
@@ -375,7 +378,7 @@ static int setsigaction(int signo, void (*handler) (int),
         sigemptyset(&sa.sa_mask);
 
     sa.sa_flags = flags | SA_RESTART;
-    return sigaction(signo, &sa, NULL);
+    return sigaction(signo, &sa, old);
 }
 
 static void getch2_poll(void)
@@ -557,9 +560,17 @@ void terminal_setup_getch(struct input_ctx *ictx)
         return;
     }
 
-    setsigaction(SIGINT,  quit_request_sighandler, SA_RESETHAND, false);
-    setsigaction(SIGQUIT, quit_request_sighandler, 0, true);
-    setsigaction(SIGTERM, quit_request_sighandler, 0, true);
+    setsigaction(SIGINT,  quit_request_sighandler, SA_RESETHAND, false, &old_sigint);
+    setsigaction(SIGQUIT, quit_request_sighandler, 0, true, &old_sigquit);
+    setsigaction(SIGTERM, quit_request_sighandler, 0, true, &old_sigterm);
+}
+
+static void restore_sigaction(int signo, void (*handler) (int),
+                              const struct sigaction *old)
+{
+    struct sigaction cur;
+    if (!sigaction(signo, NULL, &cur) && cur.sa_handler == handler)
+        sigaction(signo, old, NULL);
 }
 
 void terminal_uninit(void)
@@ -568,14 +579,16 @@ void terminal_uninit(void)
         return;
 
     // restore signals
-    setsigaction(SIGCONT, SIG_DFL, 0, false);
-    setsigaction(SIGTSTP, SIG_DFL, 0, false);
-    setsigaction(SIGWINCH, SIG_DFL, 0, false);
-    setsigaction(SIGINT,  SIG_DFL, 0, false);
-    setsigaction(SIGQUIT, SIG_DFL, 0, false);
-    setsigaction(SIGTERM, SIG_DFL, 0, false);
-    setsigaction(SIGTTIN, SIG_DFL, 0, false);
-    setsigaction(SIGTTOU, SIG_DFL, 0, false);
+    restore_sigaction(SIGCONT, stop_cont_sighandler, &old_sigcont);
+    restore_sigaction(SIGTSTP, stop_cont_sighandler, &old_sigtstp);
+    restore_sigaction(SIGWINCH, winch_sighandler, &old_sigwinch);
+    if (input_ctx) {
+        restore_sigaction(SIGINT, quit_request_sighandler, &old_sigint);
+        restore_sigaction(SIGQUIT, quit_request_sighandler, &old_sigquit);
+        restore_sigaction(SIGTERM, quit_request_sighandler, &old_sigterm);
+    }
+    restore_sigaction(SIGTTIN, SIG_IGN, &old_sigttin);
+    restore_sigaction(SIGTTOU, SIG_IGN, &old_sigttou);
 
     if (input_ctx) {
         (void)write(death_pipe[1], &(char){0}, 1);
@@ -657,11 +670,11 @@ void terminal_init(void)
     tcgetattr(tty_in, &tio_orig);
 
     // handlers to fix terminal settings
-    setsigaction(SIGCONT, stop_cont_sighandler, 0, true);
-    setsigaction(SIGTSTP, stop_cont_sighandler, 0, true);
-    setsigaction(SIGWINCH, winch_sighandler, 0, true);
-    setsigaction(SIGTTIN, SIG_IGN, 0, true);
-    setsigaction(SIGTTOU, SIG_IGN, 0, true);
+    setsigaction(SIGCONT, stop_cont_sighandler, 0, true, &old_sigcont);
+    setsigaction(SIGTSTP, stop_cont_sighandler, 0, true, &old_sigtstp);
+    setsigaction(SIGWINCH, winch_sighandler, 0, true, &old_sigwinch);
+    setsigaction(SIGTTIN, SIG_IGN, 0, true, &old_sigttin);
+    setsigaction(SIGTTOU, SIG_IGN, 0, true, &old_sigttou);
 
     getch2_poll();
 }
