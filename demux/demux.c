@@ -407,6 +407,7 @@ struct demux_stream {
     bool still_image;       // stream consists of multiple sparse still images
     bool refreshing;        // finding old position after track switches
     bool eof;               // end of demuxed stream? (true if no more packets)
+    struct mp_codec_params *staged_codec; // next sh->codec, see demux_update()
 
     bool global_correct_dts;// all observed so far
     bool global_correct_pos;
@@ -3430,7 +3431,15 @@ void demux_update(demuxer_t *demuxer, double pts)
         demuxer->num_editions = in->num_staged_editions;
         demuxer->edition = in->staged_edition;
     }
-    if (demuxer->events & (DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS))
+    for (int n = 0; n < in->num_streams; n++) {
+        struct demux_stream *ds = in->streams[n]->ds;
+        if (ds->staged_codec) {
+            in->streams[n]->codec = ds->staged_codec;
+            ds->staged_codec = NULL;
+        }
+    }
+    if (demuxer->events & (DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS |
+                           DEMUX_EVENT_CODEC))
         demux_update_replaygain(demuxer);
     if (demuxer->events & DEMUX_EVENT_DURATION)
         demuxer->duration = in->duration;
@@ -4342,6 +4351,20 @@ void demux_set_stream_group(struct demuxer *demuxer,
         struct sh_stream *m = group->members[i];
         select_dependent_tracks(in, m, MP_NOPTS_VALUE, m->ds->selected);
     }
+    mp_mutex_unlock(&in->lock);
+}
+
+// Replace the codec params of a stream that was already added.
+void demux_set_stream_codec(struct demuxer *demuxer, struct sh_stream *sh,
+                            struct mp_codec_params *codec)
+{
+    struct demux_internal *in = demuxer->in;
+    mp_assert(demuxer == in->d_thread);
+    mp_assert(sh->ds); // stream must have been added
+
+    mp_mutex_lock(&in->lock);
+    sh->ds->staged_codec = codec;
+    in->events |= DEMUX_EVENT_CODEC;
     mp_mutex_unlock(&in->lock);
 }
 
