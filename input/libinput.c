@@ -57,6 +57,7 @@ struct libinput_priv {
     struct udev *u;
     int message_pipe[2];
     double dx, dy;
+    int mods;
     //xkb states
     struct xkb_context *ctx;
     struct xkb_keymap *keymap;
@@ -197,6 +198,7 @@ static void input_key(struct mp_input_src *src, struct libinput_event *event)
     int mods = get_mods(src);
     xkb_keysym_t sym = xkb_state_key_get_one_sym(p->state, keycode);
     xkb_state_update_key(p->state, keycode, pressed ? XKB_KEY_DOWN : XKB_KEY_UP);
+    p->mods = get_mods(src);
 
     int mpkey = lookupkey(sym);
     if (mpkey) {
@@ -226,14 +228,15 @@ static void update_leds(struct mp_input_src *src, struct libinput_event *event)
 
 static void input_wheel(struct mp_input_src *src, bool horiz, double value)
 {
+    struct libinput_priv *p = src->priv;
     if (value > 0 && !horiz)
-        mp_input_put_wheel(src->input_ctx, MP_WHEEL_DOWN, +value);
+        mp_input_put_wheel(src->input_ctx, MP_WHEEL_DOWN | p->mods, +value);
     if (value < 0 && !horiz)
-        mp_input_put_wheel(src->input_ctx, MP_WHEEL_UP, -value);
+        mp_input_put_wheel(src->input_ctx, MP_WHEEL_UP | p->mods, -value);
     if (value > 0 && horiz)
-        mp_input_put_wheel(src->input_ctx, MP_WHEEL_RIGHT, +value);
+        mp_input_put_wheel(src->input_ctx, MP_WHEEL_RIGHT | p->mods, +value);
     if (value < 0 && horiz)
-        mp_input_put_wheel(src->input_ctx, MP_WHEEL_LEFT, -value);
+        mp_input_put_wheel(src->input_ctx, MP_WHEEL_LEFT | p->mods, -value);
 }
 
 static void input_tablet_pos(struct mp_input_src *src, struct libinput_event_tablet_tool *ev)
@@ -293,7 +296,7 @@ static void process_event(struct mp_input_src *src, struct libinput_event *event
             }
         }
         if (button)
-            mp_input_put_key(src->input_ctx, button | state);
+            mp_input_put_key(src->input_ctx, button | state | p->mods);
         break;
     }
     case LIBINPUT_EVENT_POINTER_SCROLL_WHEEL: {
