@@ -57,19 +57,19 @@ static int as_execvpe(const char *path, const char *file, char *const argv[],
         return execve(file, argv, envp);
 
     size_t flen = strlen(file);
-    while (path && path[0]) {
+    while (path) {
         size_t plen = strcspn(path, ":");
         // Ignore paths that are too long.
         char fn[PATH_MAX];
         if (plen + 1 + flen + 1 < sizeof(fn)) {
             memcpy(fn, path, plen);
             fn[plen] = '/';
-            memcpy(fn + plen + 1, file, flen + 1);
+            memcpy(fn + plen + (plen > 0), file, flen + 1);
             execve(fn, argv, envp);
             if (errno != EACCES && errno != ENOENT && errno != ENOTDIR)
                 break;
         }
-        path += plen + (path[plen] == ':' ? 1 : 0);
+        path = path[plen] ? path + plen + 1 : NULL;
     }
     return -1;
 }
@@ -164,6 +164,11 @@ static pid_t spawn_process_inner(const char *path, struct mp_subprocess_opts *op
 
 #if HAVE_RFORK
     fres = rfork_thread(RFSPAWN, stacks[0], child_main, &child_args);
+    // On other architectures than amd64 and i386, FreeBSD's rfork_thread()
+    // cannot switch stacks and fails with EOPNOTSUPP when given one. With NULL
+    // it runs the child on our stack.
+    if (fres < 0 && errno == EOPNOTSUPP)
+        fres = rfork_thread(RFSPAWN, NULL, child_main, &child_args);
 #elif HAVE_CLONE
     fres = clone(child_main, stacks[0], CLONE_VM | CLONE_VFORK | SIGCHLD, &child_args);
 #else
@@ -268,8 +273,6 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
     bool killed_by_us = false;
     int cancel_fd = -1;
     char *path = getenv("PATH");
-    if (!path)
-        path = ""; // failure, who cares
 
     *res = (struct mp_subprocess_result){0};
 
@@ -293,6 +296,11 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
             if (mp_make_cloexec_pipe(comm_pipe[n]) < 0)
                 goto done;
             MPSWAP(int, comm_pipe[n][0], comm_pipe[n][1]);
+            int flags = fcntl(comm_pipe[n][0], F_GETFL);
+            if (flags == -1)
+                goto done;
+            if (fcntl(comm_pipe[n][0], F_SETFL, flags | O_NONBLOCK) == -1)
+                goto done;
 
             struct sigaction sa = {.sa_handler = SIG_IGN, .sa_flags = SA_RESTART};
             sigfillset(&sa.sa_mask);
@@ -378,7 +386,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
                     }
                     ssize_t r = write(comm_pipe[n][0], fd->write_buf->start,
                                       fd->write_buf->len);
-                    if (r < 0 && errno == EINTR)
+                    if (r < 0 && (errno == EINTR || errno == EAGAIN))
                         continue;
                     if (r < 0) {
                         // Let's not signal an error for now - caller can check
