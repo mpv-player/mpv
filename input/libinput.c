@@ -254,8 +254,10 @@ static void process_event(struct mp_input_src *src, struct libinput_event *event
     enum libinput_event_type type = libinput_event_get_type(event);
     switch (type) {
     case LIBINPUT_EVENT_KEYBOARD_KEY: {
-        input_key(src, event);
-        update_leds(src, event);
+        if (p->ctx && p->keymap && p->state) {
+            input_key(src, event);
+            update_leds(src, event);
+        }
         break;
     }
     case LIBINPUT_EVENT_POINTER_MOTION: {
@@ -431,21 +433,6 @@ static void read_libinput_thread(struct mp_input_src *src, void *param)
         MP_ERR(src, "Failed to init libinput context.\n");
         goto fail;
     }
-    p->ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-    if (!p->ctx) {
-        MP_ERR(src, "Failed to init xkb context.\n");
-        goto fail;
-    }
-    p->keymap = xkb_keymap_new_from_names(p->ctx, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
-    if (!p->keymap) {
-        MP_ERR(src, "Failed to init xkb keymap.\n");
-        goto fail;
-    }
-    p->state = xkb_state_new(p->keymap);
-    if (!p->state) {
-        MP_ERR(src, "Failed to init xkb state.\n");
-        goto fail;
-    }
     if (libinput_udev_assign_seat(p->li, "seat0")) {
         MP_ERR(src, "Failed to assign seat.");
         goto fail;
@@ -454,6 +441,22 @@ static void read_libinput_thread(struct mp_input_src *src, void *param)
         MP_ERR(src, "Failed to init message pipe.");
         goto fail;
     }
+    p->ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+    if (!p->ctx) {
+        MP_ERR(src, "Failed to init xkb context. Keyboard will not work.\n");
+        goto done;
+    }
+    p->keymap = xkb_keymap_new_from_names(p->ctx, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
+    if (!p->keymap) {
+        MP_ERR(src, "Failed to init xkb keymap. Keyboard will not work.\n");
+        goto done;
+    }
+    p->state = xkb_state_new(p->keymap);
+    if (!p->state) {
+        MP_ERR(src, "Failed to init xkb state. Keyboard will not work.\n");
+        goto done;
+    }
+done:
     mp_input_src_init_done(src);
 
     // Make sure mouse cursor is visible
