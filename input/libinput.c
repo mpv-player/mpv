@@ -209,6 +209,21 @@ static void input_key(struct mp_input_src *src, struct libinput_event *event)
     }
 }
 
+static void update_leds(struct mp_input_src *src, struct libinput_event *event)
+{
+    struct libinput_priv *p = src->priv;
+    enum libinput_led leds = 0;
+
+    if (xkb_state_led_name_is_active(p->state, XKB_LED_NAME_NUM) == 1)
+        leds |= LIBINPUT_LED_NUM_LOCK;
+    if (xkb_state_led_name_is_active(p->state, XKB_LED_NAME_CAPS) == 1)
+        leds |= LIBINPUT_LED_CAPS_LOCK;
+    if (xkb_state_led_name_is_active(p->state, XKB_LED_NAME_SCROLL) == 1)
+        leds |= LIBINPUT_LED_SCROLL_LOCK;
+
+    libinput_device_led_update(libinput_event_get_device(event), leds);
+}
+
 static void input_wheel(struct mp_input_src *src, bool horiz, double value)
 {
     if (value > 0 && !horiz)
@@ -237,6 +252,7 @@ static void process_event(struct mp_input_src *src, struct libinput_event *event
     switch (type) {
     case LIBINPUT_EVENT_KEYBOARD_KEY: {
         input_key(src, event);
+        update_leds(src, event);
         break;
     }
     case LIBINPUT_EVENT_POINTER_MOTION: {
