@@ -54,6 +54,7 @@ struct priv {
     struct outer_state {
         bool bare;          // declared by the disc, no codec parameters yet
         int64_t seg;        // id of the segment its last packet mapped into
+        struct mp_codec_params *codec; // adopted after it was published
     } *ostate;
     int num_ostate;
 
@@ -123,6 +124,12 @@ static struct outer_state *get_ostate(struct priv *p, struct sh_stream *sh)
             p->ostate[n] = (struct outer_state){.seg = -1};
     }
     return &p->ostate[sh->index];
+}
+
+static struct mp_codec_params *codec_params(struct priv *p, struct sh_stream *sh)
+{
+    struct mp_codec_params *c = get_ostate(p, sh)->codec;
+    return c ? c : sh->codec;
 }
 
 // Tell the disc VM which audio track is playing, but only when the user moved
@@ -196,33 +203,41 @@ static void set_dvd_sub_palette(struct demuxer *demuxer, struct sh_stream *sh)
     sh->codec->extradata_size = strlen(s);
 }
 
-static void set_disc_aspect(struct demuxer *demuxer, struct sh_stream *sh)
+static void set_disc_aspect(struct demuxer *demuxer, struct mp_codec_params *c)
 {
     double ar;
-    if (sh->type != STREAM_VIDEO || sh->codec->disp_w <= 0 ||
-        sh->codec->disp_h <= 0 ||
+    if (c->type != STREAM_VIDEO || c->disp_w <= 0 || c->disp_h <= 0 ||
         stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
             != STREAM_OK)
         return;
-    struct mp_image_params f = {.w = sh->codec->disp_w, .h = sh->codec->disp_h};
+    struct mp_image_params f = {.w = c->disp_w, .h = c->disp_h};
     mp_image_params_set_dsize(&f, 1728 * ar, 1728);
-    sh->codec->par_w = f.p_w;
-    sh->codec->par_h = f.p_h;
+    c->par_w = f.p_w;
+    c->par_h = f.p_h;
 }
 
 // Take ownership of a slave sh_stream's codec params into the outer demuxer
-// so it survives a slave reopen.
-static void adopt_codec_params(struct sh_stream *outer, struct sh_stream *src)
+// so it survives a slave reopen. Other threads read the params of a published
+// outer stream, so they are not written and only replaced on the player thread.
+static void adopt_codec_params(struct demuxer *demuxer, struct sh_stream *outer,
+                               struct sh_stream *src)
 {
-    if (outer->codec != src->codec) {
-        if (!outer->ds)
-            talloc_free(outer->codec);
-        outer->codec = src->codec;
-        talloc_steal(outer, outer->codec);
+    struct priv *p = demuxer->priv;
+    struct mp_codec_params *cur = outer->ds ? codec_params(p, outer) : outer->codec;
+    if (cur == src->codec)
+        return;
+    struct mp_codec_params *c = talloc_steal(outer, src->codec);
+    c->first_packet = NULL;
+    c->decoder = NULL;
+    c->decoder_desc = NULL;
+    set_disc_aspect(demuxer, c);
+    if (outer->ds) {
+        get_ostate(p, outer)->codec = c;
+        demux_set_stream_codec(demuxer, outer, c);
+    } else {
+        talloc_free(outer->codec);
+        outer->codec = c;
     }
-    outer->codec->first_packet = NULL;
-    outer->codec->decoder = NULL;
-    outer->codec->decoder_desc = NULL;
 }
 
 // Whether a slave stream carries a Blu-ray presentation stream the player
@@ -351,7 +366,7 @@ static void sync_streams(struct demuxer *demuxer)
                        n, stream_type_name(src->type), src->demuxer_id,
                        src->codec->codec ? src->codec->codec : "?");
             outer = demux_alloc_sh_stream(src->type);
-            adopt_codec_params(outer, src);
+            adopt_codec_params(demuxer, outer, src);
             outer->demuxer_id = src->demuxer_id;
             outer->dependent_track = src->dependent_track;
             if (src->type == STREAM_AUDIO && src->demuxer_id == nav_audio_id) {
@@ -359,7 +374,6 @@ static void sync_streams(struct demuxer *demuxer)
                            nav_audio_id);
                 outer->default_track = true;
             }
-            set_disc_aspect(demuxer, outer);
             get_disc_track_info(demuxer->stream, outer, p->is_dvd);
             if (p->is_dvd && outer->type == STREAM_SUB)
                 set_dvd_sub_palette(demuxer, outer);
@@ -371,21 +385,18 @@ static void sync_streams(struct demuxer *demuxer)
             MP_VERBOSE(demuxer, "stream %d (id=0x%x) %s parameters arrived\n",
                        n, src->demuxer_id,
                        src->codec->codec ? src->codec->codec : "?");
-            if (outer->type != STREAM_SUB) {
-                adopt_codec_params(outer, src);
-                set_disc_aspect(demuxer, outer);
-            }
+            if (outer->type != STREAM_SUB)
+                adopt_codec_params(demuxer, outer, src);
             get_ostate(p, outer)->bare = false;
         } else if (outer->type != STREAM_SUB && outer->codec && src->codec) {
             // Codec change on a reused outer, mostly useful for BD menus, which
             // may be MPEG-2 while the video track is H.264.
             const char *new_codec = src->codec->codec;
-            const char *cur_codec = outer->codec->codec;
+            const char *cur_codec = codec_params(p, outer)->codec;
             if (new_codec && cur_codec && strcmp(new_codec, cur_codec) != 0) {
                 MP_VERBOSE(demuxer, "stream %d (id=0x%x) codec changed: %s -> %s\n",
                            n, src->demuxer_id, cur_codec, new_codec);
-                adopt_codec_params(outer, src);
-                set_disc_aspect(demuxer, outer);
+                adopt_codec_params(demuxer, outer, src);
             }
         }
 
@@ -1006,7 +1017,7 @@ static bool d_read_packet(struct demuxer *demuxer, struct demux_packet **out_pkt
     // so every packet must carry the signal.
     if (sh->type == STREAM_VIDEO || sh->type == STREAM_AUDIO) {
         pkt->segmented = true;
-        pkt->codec = sh->codec;
+        pkt->codec = codec_params(p, sh);
     }
 
     // Drop the audio between the landing and the seek target (see d_seek).
