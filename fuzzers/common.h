@@ -17,11 +17,13 @@
 
 #pragma once
 
+#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <mpv/client.h>
 
@@ -51,7 +53,18 @@ static inline bool str_startswith(const char *str, size_t str_len,
 static inline void set_fontconfig_sysroot(void)
 {
 #ifdef MPV_FONTCONFIG_SYSROOT
-    setenv("FONTCONFIG_SYSROOT", MPV_STRINGIFY(MPV_FONTCONFIG_SYSROOT), 1);
+    const char *sysroot = MPV_STRINGIFY(MPV_FONTCONFIG_SYSROOT);
+    char path[PATH_MAX];
+    if (sysroot[0] != '/') {
+        ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
+        if (len < 0)
+            exit(1);
+        path[len] = '\0';
+        char *name = strrchr(path, '/') + 1;
+        snprintf(name, path + sizeof(path) - name, "%s", sysroot);
+        sysroot = path;
+    }
+    setenv("FONTCONFIG_SYSROOT", sysroot, 1);
 #endif
 }
 
