@@ -40,7 +40,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    if (p->cfg_fps) {
+    if (p->cfg_fps >= 1e-6) {
         int64_t ft = 1e9 / p->cfg_fps;
         int64_t prev_vsync = mp_time_ns() / ft;
         int64_t target_time = (prev_vsync + 1) * ft;
