@@ -439,6 +439,8 @@ void update_demuxer_properties(struct MPContext *mpctx)
     }
     if (events & DEMUX_EVENT_DURATION)
         mp_notify(mpctx, MP_EVENT_DURATION_UPDATE, NULL);
+    if (events & DEMUX_EVENT_CODEC)
+        mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
     if (events & DEMUX_EVENT_LISTS) {
         // Demuxer just published a new chapter / edition list at runtime.
         char *chapter_file = mpctx->opts->chapter_file;
