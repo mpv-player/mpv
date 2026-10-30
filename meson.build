@@ -793,11 +793,12 @@ endif
 
 libinput = dependency('libinput', version: '>= 1.19', required: get_option('libinput'))
 libudev = dependency('libudev', required: get_option('libinput'))
-features += {'libinput': libinput.found()}
-features += {'libudev': libudev.found()}
+libxkbcommon = dependency('xkbcommon', version: '>= 0.3.0', required: get_option('libinput'))
+features += {'libinput': libinput.found() and libudev.found() and libxkbcommon.found()}
 if features['libinput']
     dependencies += libinput
     dependencies += libudev
+    dependencies += libxkbcommon
     sources += files('input/libinput.c')
 endif
 
