@@ -831,6 +831,8 @@ static void on_done(struct priv *p, CURLcode code)
     // Roll completed bytes into request_start so retries and chunk
     // continuations resume at the next missing byte.
     uint64_t received = p->request_received;
+    if (received)
+        p->retry_count = 0;
     p->request_start += received;
     p->request_received = 0;
 
