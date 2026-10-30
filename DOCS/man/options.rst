@@ -4647,6 +4647,19 @@ Input
 ``--input-gamepad=<yes|no>``
     Enable/disable SDL2 Gamepad support. Disabled by default.
 
+``--input-libinput=<yes|no>``
+    Enable/disable libinput input support. Disabled by default.
+    This is useful for mouse/touchpad, touchscreen, tablet tool, and enhanced
+    keyboard support when mpv is running with ``--vo=drm``,
+    ``--gpu-context=drm``, or ``--gpu-context=displayvk``. The mpv process must
+    have direct access to input devices for this to work.
+    Specify ``--input-terminal=no`` to avoid keyboard inputs being doubled.
+
+    Under DRM, no visible mouse cursor will be rendered even when this option is
+    enabled. Observe the ``mouse-pos`` property and render the cursor yourself
+    with ``osd-overlay`` or ``overlay-add`` command if a visible cursor is
+    desired.
+
 ``--input-cursor=<yes|no>``
     Permit mpv to receive pointer events reported by the video output
     driver. Necessary to use the OSC. Support depends on the VO in use.
