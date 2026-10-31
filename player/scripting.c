@@ -258,21 +258,39 @@ static void load_builtin_script(struct MPContext *mpctx, int slot, bool enable,
     }
 }
 
+static bool builtin_script_enabled(struct MPContext *mpctx, const char *name)
+{
+    return bstr_in_list0(bstr0(name), mpctx->opts->builtin_scripts);
+}
+
 void mp_load_builtin_scripts(struct MPContext *mpctx)
 {
-    load_builtin_script(mpctx, 0, mpctx->opts->lua_load_osc, "@osc.lua");
-    load_builtin_script(mpctx, 1, mpctx->opts->lua_load_ytdl, "@ytdl_hook.lua");
-    load_builtin_script(mpctx, 2, mpctx->opts->lua_load_stats, "@stats.lua");
-    load_builtin_script(mpctx, 3, mpctx->opts->lua_load_console, "@console.lua");
-    load_builtin_script(mpctx, 4, mpctx->opts->lua_load_auto_profiles,
+    struct MPOpts *opts = mpctx->opts;
+
+    load_builtin_script(mpctx, 0, opts->lua_load_osc &&
+                        builtin_script_enabled(mpctx, "osc"), "@osc.lua");
+    load_builtin_script(mpctx, 1, opts->lua_load_ytdl &&
+                        builtin_script_enabled(mpctx, "ytdl_hook"), "@ytdl_hook.lua");
+    load_builtin_script(mpctx, 2, opts->lua_load_stats &&
+                        builtin_script_enabled(mpctx, "stats"), "@stats.lua");
+    load_builtin_script(mpctx, 3, opts->lua_load_console &&
+                        builtin_script_enabled(mpctx, "console"), "@console.lua");
+    load_builtin_script(mpctx, 4, opts->lua_load_auto_profiles &&
+                        builtin_script_enabled(mpctx, "auto_profiles"),
                         "@auto_profiles.lua");
-    load_builtin_script(mpctx, 5, mpctx->opts->lua_load_select, "@select.lua");
-    load_builtin_script(mpctx, 6, mpctx->opts->lua_load_positioning, "@positioning.lua");
-    load_builtin_script(mpctx, 7, mpctx->opts->lua_load_commands, "@commands.lua");
+    load_builtin_script(mpctx, 5, opts->lua_load_select &&
+                        builtin_script_enabled(mpctx, "select"), "@select.lua");
+    load_builtin_script(mpctx, 6, opts->lua_load_positioning &&
+                        builtin_script_enabled(mpctx, "positioning"),
+                        "@positioning.lua");
+    load_builtin_script(mpctx, 7, opts->lua_load_commands &&
+                        builtin_script_enabled(mpctx, "commands"), "@commands.lua");
 
     // select.lua uses context_menu.lua in D3D11 exclusive fullscreen.
     struct m_config_option *co = m_config_get_co(mpctx->mconfig, bstr0("d3d11-exclusive-fs"));
-    bool context_menu = mpctx->opts->lua_load_context_menu || (co && *(bool *)co->data);
+    bool context_menu = (opts->lua_load_context_menu &&
+                         builtin_script_enabled(mpctx, "context_menu")) ||
+                        (co && *(bool *)co->data);
     load_builtin_script(mpctx, 8, context_menu, "@context_menu.lua");
 }
 

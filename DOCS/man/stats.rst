@@ -3,7 +3,7 @@ STATS
 
 This builtin script displays information and statistics for the currently
 played file. It is enabled by default if mpv was compiled with Lua support.
-It can be disabled entirely using the ``--load-stats-overlay=no`` option.
+It can be disabled entirely using the ``--builtin-scripts-remove=stats`` option.
 
 Usage
 -----

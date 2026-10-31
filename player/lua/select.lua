@@ -1425,10 +1425,17 @@ end
 
 -- The native menu can't be shown over a D3D11 exclusive fullscreen output.
 local function use_context_menu_lua()
-    return mp.get_property_native("load-context-menu") or
-           (mp.get_property("current-gpu-context") == "d3d11" and
-            mp.get_property_native("fullscreen") and
-            mp.get_property_native("d3d11-exclusive-fs"))
+    if mp.get_property_native("load-context-menu") then
+        for _, script in ipairs(mp.get_property_native("builtin-scripts")) do
+            if script == "context_menu" then
+                return true
+            end
+        end
+    end
+
+    return mp.get_property("current-gpu-context") == "d3d11" and
+           mp.get_property_native("fullscreen") and
+           mp.get_property_native("d3d11-exclusive-fs")
 end
 
 mp.add_key_binding(nil, "context-menu", function (info)
