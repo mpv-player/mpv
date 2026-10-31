@@ -230,14 +230,7 @@ static bool init_gbm(struct ra_ctx *ctx)
 
     MP_VERBOSE(ctx->vo, "Initializing GBM surface (%d x %d)\n",
         p->draw_surface_size.width, p->draw_surface_size.height);
-    if (p->num_gbm_modifiers == 0) {
-        p->gbm.surface = gbm_surface_create(
-            p->gbm.device,
-            p->draw_surface_size.width,
-            p->draw_surface_size.height,
-            p->gbm_format,
-            GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
-    } else {
+    if (p->num_gbm_modifiers > 0) {
         p->gbm.surface = gbm_surface_create_with_modifiers(
             p->gbm.device,
             p->draw_surface_size.width,
@@ -245,6 +238,19 @@ static bool init_gbm(struct ra_ctx *ctx)
             p->gbm_format,
             p->gbm_modifiers,
             p->num_gbm_modifiers);
+        if (!p->gbm.surface) {
+            MP_VERBOSE(ctx->vo, "gbm_surface_create_with_modifiers failed\n");
+        }
+    }
+    if (!p->gbm.surface) {
+        // Either gbm_surface_create_with_modifiers failed or
+        // p->num_gbm_modifiers == 0
+        p->gbm.surface = gbm_surface_create(
+            p->gbm.device,
+            p->draw_surface_size.width,
+            p->draw_surface_size.height,
+            p->gbm_format,
+            GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     }
     if (!p->gbm.surface) {
         MP_ERR(ctx->vo, "Failed to create GBM surface.\n");
