@@ -110,6 +110,10 @@ class CocoaCB: Common, EventSubscriber {
         return kCVReturnSuccess
     }
 
+    func getEmbeddedBackingScaleFactor() -> CGFloat {
+        return window?.backingScaleFactor ?? 1.0
+    }
+
     override func updateICCProfile() {
         guard let colorSpace = window?.screen?.colorSpace else {
             log.warning("Couldn't update ICC Profile, no color space available")
@@ -204,7 +208,7 @@ class CocoaCB: Common, EventSubscriber {
     }
 
     override func windowDidChangeBackingProperties() {
-        layer?.contentsScale = window?.backingScaleFactor ?? 1
+        layer?.contentsScale = getEmbeddedBackingScaleFactor()
     }
 
     override func windowWillStartLiveResize() {
