@@ -183,16 +183,20 @@ static bool output_next_field(struct mp_refqueue *q)
 
     mp_assert(q->pos >= 0);
 
-    // If there's no (reasonable) timestamp, also skip the field.
-    if (q->pos == 0)
-        return false;
-
     double pts = q->queue[q->pos]->pts;
-    double next_pts = q->queue[q->pos - 1]->pts;
-    if (pts == MP_NOPTS_VALUE || next_pts == MP_NOPTS_VALUE)
+    if (pts == MP_NOPTS_VALUE)
         return false;
 
-    double frametime = next_pts - pts;
+    // Use the pkt_duration of the current frame when next frame is unavailable,
+    // otherwise the second field of the last frame is never outputted
+    double frametime = q->queue[q->pos]->pkt_duration;
+    if (q->pos > 0) {
+        double next_pts = q->queue[q->pos - 1]->pts;
+        if (next_pts == MP_NOPTS_VALUE)
+            return false;
+        frametime = next_pts - pts;
+    }
+
     if (frametime <= 0.0 || frametime >= 1.0)
         return false;
 
