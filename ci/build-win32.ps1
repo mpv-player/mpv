@@ -7,7 +7,7 @@ if (-not (Test-Path $subprojects)) {
     New-Item -Path $subprojects -ItemType Directory | Out-Null
 }
 
-$amfVersion = "1.5.0"
+$amfVersion = "1.5.3"
 $amfUrl = "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v$amfVersion/AMF-headers-v$amfVersion.tar.gz"
 $amfArchive = "AMF-headers-v$amfVersion.tar.gz"
 $amfExtractPath = "$subprojects/amf-headers"
@@ -330,6 +330,7 @@ meson setup build `
     -Dffmpeg:libdav1d=enabled `
     -Dffmpeg:libjxl=enabled `
     -Dffmpeg:libaom=enabled `
+    -Dffmpeg:amf=enabled `
     -Dharfbuzz:freetype=enabled `
     -Dlcms2:fastfloat=true `
     -Dlcms2:jpeg=disabled `
