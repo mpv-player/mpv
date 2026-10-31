@@ -439,6 +439,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 const struct vo_driver video_out_x11 = {
     .description = "X11 (software scaling)",
     .name = "x11",
+    .is_software = true,
     .priv_size = sizeof(struct priv),
     .preinit = preinit,
     .query_format = query_format,
