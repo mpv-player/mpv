@@ -836,6 +836,8 @@ static const m_option_t mp_opts[] = {
 
     {"stop-playback-on-init-failure", OPT_BOOL(stop_playback_on_init_failure)},
 
+    {"gpu-loss-recovery-attempts", OPT_INT(gpu_loss_recovery_attempts), M_RANGE(-1, INT_MAX)},
+
     {"loop-playlist", OPT_CHOICE(loop_times,
         {"no", 1},
         {"inf", -1}, {"yes", -1},
@@ -1042,6 +1044,7 @@ static const struct MPOpts mp_default_opts = {
 #endif
     .auto_load_scripts = true,
     .loop_times = 1,
+    .gpu_loss_recovery_attempts = 1,
     .ordered_chapters = true,
     .chapter_merge_threshold = 100,
     .chapter_seek_threshold = 5.0,

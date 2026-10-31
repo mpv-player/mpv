@@ -111,6 +111,7 @@ struct priv {
     int sc_width, sc_height; // Swap chain width and height
     int swapinterval;
     bool flipped;
+    bool device_lost;
 
     struct angle_opts *opts;
 };
@@ -460,8 +461,17 @@ static void d3d11_swap_buffers(struct ra_ctx *ctx)
         MP_ARRAY_SIZE(rtvs), rtvs, &dsv);
 
     HRESULT hr = IDXGISwapChain_Present(p->dxgi_swapchain, p->swapinterval, 0);
-    if (FAILED(hr))
-        MP_FATAL(ctx->vo, "Couldn't present: %s\n", mp_HRESULT_to_str(hr));
+    if (FAILED(hr) && !p->device_lost) {
+        HRESULT reason = ID3D11Device_GetDeviceRemovedReason(p->d3d11_device);
+        if (FAILED(reason)) {
+            MP_ERR(ctx->vo, "Direct3D 11 device lost: %s\n",
+                   mp_HRESULT_to_str(reason));
+            p->device_lost = true;
+            vo_event(ctx->vo, VO_EVENT_GPU_CONTEXT_LOST);
+        } else {
+            MP_FATAL(ctx->vo, "Couldn't present: %s\n", mp_HRESULT_to_str(hr));
+        }
+    }
 
     // Restore the RTVs and release the objects
     ID3D11DeviceContext_OMSetRenderTargets(p->d3d11_context,

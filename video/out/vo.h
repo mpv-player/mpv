@@ -48,10 +48,13 @@ enum {
     // For VOCTRL_GET_HIDPI_SCALE changes.
     VO_EVENT_DPI                        = 1 << 6,
     VO_EVENT_FOCUS                      = 1 << 7,
+    // The GPU context was lost and needs to be recreated.
+    VO_EVENT_GPU_CONTEXT_LOST           = 1 << 8,
 
     // Set of events the player core may be interested in.
     VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE | VO_EVENT_DPI |
-                     VO_EVENT_FOCUS | VO_EVENT_AMBIENT_LIGHTING_CHANGED,
+                     VO_EVENT_FOCUS | VO_EVENT_AMBIENT_LIGHTING_CHANGED |
+                     VO_EVENT_GPU_CONTEXT_LOST,
 };
 
 enum mp_voctrl {
