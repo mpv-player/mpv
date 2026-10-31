@@ -830,7 +830,11 @@ static void adjust_working_area_for_extended_frame(RECT *wa_rect, RECT *wnd_rect
     RECT frame = {0};
 
     if (DwmGetWindowAttribute(wnd, DWMWA_EXTENDED_FRAME_BOUNDS,
-                              &frame, sizeof(RECT)) == S_OK) {
+                              &frame, sizeof(RECT)) == S_OK &&
+        rect_w(frame) > 0 && rect_h(frame) > 0 &&
+        frame.left >= wnd_rect->left && frame.top >= wnd_rect->top &&
+        frame.right <= wnd_rect->right && frame.bottom <= wnd_rect->bottom)
+    {
         wa_rect->left -= frame.left - wnd_rect->left;
         wa_rect->top -= frame.top - wnd_rect->top;
         wa_rect->right += wnd_rect->right - frame.right;
@@ -1440,11 +1444,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         bool updated = (m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_maximized) ||
                         m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_minimized));
         if (updated || w32->pending_resize) {
-            // We call window resize here, only to recalculate possible window
-            // size after changing the style, but we want to preserve the client
-            // size.
-            w32->window_state_changed = true;
-            window_resize(w32);
+            // Native maximize has already selected the work-area rectangle.
+            // Re-entering geometry calculation here can overwrite it with
+            // stale startup bounds, especially on a high-DPI display.
+            if (wParam != SIZE_MAXIMIZED) {
+                // We call window resize here, only to recalculate possible window
+                // size after changing the style, but we want to preserve the client
+                // size.
+                w32->window_state_changed = true;
+                window_resize(w32);
+            }
             events |= VO_EVENT_WIN_STATE;
         }
 
@@ -1475,6 +1484,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         return TRUE;
     case WM_DPICHANGED:
         update_display_info(w32);
+
+        if (IsMaximized(w32->window) || w32->current_fs)
+            break;
 
         RECT *rc = (RECT*)lParam;
         w32->current_rect = *rc;
