@@ -543,9 +543,12 @@ static void pass_ootf(struct gl_shader_cache *sc, enum mp_csp_light light,
     switch (light)
     {
     case MP_CSP_LIGHT_SCENE_HLG: {
-        // HLG OOTF from BT.2100, scaled to the chosen display peak
-        float gamma = MPMAX(1.0, 1.2 + 0.42 * log10(peak * MP_REF_WHITE / 1000.0));
-        GLSLF("color.rgb *= vec3(%f * pow(dot(src_luma, color.rgb), %f));\n",
+        // HLG OOTF from BT.2100, scaled to the chosen display peak, with the
+        // extended range system gamma of BT.2100-3 note 5f for every peak.
+        // The luma is floored because the gamma drops below 1 for dim
+        // displays, where the power of a zero luma is infinite.
+        float gamma = 1.2 * pow(1.111, log2(peak * MP_REF_WHITE / 1000.0));
+        GLSLF("color.rgb *= vec3(%f * pow(max(dot(src_luma, color.rgb), 1e-6), %f));\n",
               peak / pow(12.0 / MP_REF_WHITE_HLG, gamma), gamma - 1.0);
         break;
     }
@@ -579,9 +582,9 @@ static void pass_inverse_ootf(struct gl_shader_cache *sc, enum mp_csp_light ligh
     switch (light)
     {
     case MP_CSP_LIGHT_SCENE_HLG: {
-        float gamma = MPMAX(1.0, 1.2 + 0.42 * log10(peak * MP_REF_WHITE / 1000.0));
+        float gamma = 1.2 * pow(1.111, log2(peak * MP_REF_WHITE / 1000.0));
         GLSLF("color.rgb *= vec3(1.0/%f);\n", peak / pow(12.0 / MP_REF_WHITE_HLG, gamma));
-        GLSLF("color.rgb /= vec3(max(1e-6, pow(dot(src_luma, color.rgb), %f)));\n",
+        GLSLF("color.rgb /= vec3(pow(max(dot(src_luma, color.rgb), 1e-6), %f));\n",
               (gamma - 1.0) / gamma);
         break;
     }
