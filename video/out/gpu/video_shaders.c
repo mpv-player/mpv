@@ -413,9 +413,11 @@ void pass_linearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
               VLOG_D, VLOG_C, VLOG_B, gl_sc_bvec(sc, 3));
         break;
     case PL_COLOR_TRC_S_LOG1:
-        GLSLF("color.rgb = pow(vec3(10.0), (color.rgb - vec3(%f)) * vec3(1.0/%f))\n"
-              "            - vec3(%f);\n",
-              SLOG_C, SLOG_A, SLOG_B);
+        GLSLF("color.rgb = mix((color.rgb - vec3(%f)) * vec3(1.0/5.0),    \n"
+              "    pow(vec3(10.0), (color.rgb - vec3(%f)) * vec3(1.0/%f)) \n"
+              "        - vec3(%f),                                        \n"
+              "    %s(lessThanEqual(vec3(%f), color.rgb)));               \n",
+              SLOG_Q, SLOG_C, SLOG_A, SLOG_B, gl_sc_bvec(sc, 3), SLOG_Q);
         break;
     case PL_COLOR_TRC_S_LOG2:
         GLSLF("color.rgb = mix((color.rgb - vec3(%f)) * vec3(1.0/%f),      \n"
@@ -507,8 +509,10 @@ void pass_delinearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
               VLOG_C / M_LN10, VLOG_B, VLOG_D, gl_sc_bvec(sc, 3));
         break;
     case PL_COLOR_TRC_S_LOG1:
-        GLSLF("color.rgb = vec3(%f) * log(color.rgb + vec3(%f)) + vec3(%f);\n",
-              SLOG_A / M_LN10, SLOG_B, SLOG_C);
+        GLSLF("color.rgb = mix(vec3(5.0) * color.rgb + vec3(%f),               \n"
+              "                vec3(%f) * log(color.rgb + vec3(%f)) + vec3(%f), \n"
+              "                %s(lessThanEqual(vec3(0.0), color.rgb)));       \n",
+              SLOG_Q, SLOG_A / M_LN10, SLOG_B, SLOG_C, gl_sc_bvec(sc, 3));
         break;
     case PL_COLOR_TRC_S_LOG2:
         GLSLF("color.rgb = mix(vec3(%f) * color.rgb + vec3(%f),                \n"
