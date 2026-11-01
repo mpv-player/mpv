@@ -481,9 +481,9 @@ void pass_delinearize(struct gl_shader_cache *sc, enum pl_color_transfer trc)
         GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.8));)
         break;
     case PL_COLOR_TRC_PRO_PHOTO:
-        GLSLF("color.rgb = mix(color.rgb * vec3(16.0),                        \n"
-              "                pow(color.rgb, vec3(1.0/1.8)),                 \n"
-              "                %s(lessThanEqual(vec3(0.001953), color.rgb))); \n",
+        GLSLF("color.rgb = mix(color.rgb * vec3(16.0),                           \n"
+              "                pow(color.rgb, vec3(1.0/1.8)),                    \n"
+              "                %s(lessThanEqual(vec3(0.001953125), color.rgb))); \n",
               gl_sc_bvec(sc, 3));
         break;
     case PL_COLOR_TRC_PQ:
