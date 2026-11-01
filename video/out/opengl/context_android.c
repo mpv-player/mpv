@@ -15,20 +15,87 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <dlfcn.h>
+#include <stdint.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
 #include "video/out/android_common.h"
+#include "video/mp_image.h"
 #include "egl_helpers.h"
 #include "common/common.h"
 #include "context.h"
+
+// Values from <android/data_space.h>, spelled out because
+// ANativeWindow_setBuffersDataSpace() needs API 28 and mpv-android's
+// minSdk is lower, so the function is looked up at runtime instead.
+#define MP_ADATASPACE_SRGB       142671872 // BT709  | TRANSFER_SRGB   | RANGE_FULL
+#define MP_ADATASPACE_BT2020_PQ  163971072 // BT2020 | TRANSFER_ST2084 | RANGE_FULL
+#define MP_ADATASPACE_BT2020_HLG 168165376 // BT2020 | TRANSFER_HLG    | RANGE_FULL
+
+typedef int32_t (*set_dataspace_fn)(ANativeWindow *window, int32_t dataspace);
 
 struct priv {
     struct GL gl;
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
+    set_dataspace_fn set_dataspace;
+    int32_t dataspace;
 };
+
+// The function lives in libnativewindow.so (API 28+). mpv only links
+// libandroid.so, and linker namespaces hide libnativewindow from
+// dlsym(RTLD_DEFAULT), so open it explicitly.
+static set_dataspace_fn load_set_dataspace(void)
+{
+    static const char *const libs[] = { "libnativewindow.so", "libandroid.so" };
+    for (size_t i = 0; i < MP_ARRAY_SIZE(libs); i++) {
+        void *h = dlopen(libs[i], RTLD_NOW | RTLD_LOCAL);
+        if (!h)
+            continue;
+        void *fn = dlsym(h, "ANativeWindow_setBuffersDataSpace");
+        if (fn)
+            return (set_dataspace_fn)fn; // keep the library loaded
+        dlclose(h);
+    }
+    return (set_dataspace_fn)dlsym(RTLD_DEFAULT, "ANativeWindow_setBuffersDataSpace");
+}
+
+// Tag the output buffers with an HDR dataspace so SurfaceFlinger/HWC treat
+// the window as HDR (same as MediaCodec output). Without this every frame is
+// treated as sRGB and mpv tone-maps HDR down to SDR.
+static bool android_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+{
+    struct priv *p = ctx->priv;
+    ANativeWindow *win = vo_android_native_window(ctx->vo);
+    if (!p->set_dataspace || !win)
+        return false;
+
+    int32_t ds = MP_ADATASPACE_SRGB;
+    if (params) {
+        switch (params->color.transfer) {
+        case PL_COLOR_TRC_PQ:  ds = MP_ADATASPACE_BT2020_PQ;  break;
+        case PL_COLOR_TRC_HLG: ds = MP_ADATASPACE_BT2020_HLG; break;
+        default: params = NULL; break; // not HDR: stay sRGB, let mpv tone-map
+        }
+    }
+
+    if (ds != p->dataspace) {
+        if (p->set_dataspace(win, ds) != 0) {
+            MP_WARN(ctx, "HDR output: failed to set dataspace 0x%x\n", (unsigned)ds);
+            return false;
+        }
+        p->dataspace = ds;
+        MP_INFO(ctx, "HDR output: dataspace set to 0x%x\n", (unsigned)ds);
+    }
+
+    if (!params)
+        return false;
+    params->color.primaries = PL_COLOR_PRIM_BT_2020;
+    return true;
+}
 
 static void android_swap_buffers(struct ra_ctx *ctx)
 {
@@ -58,6 +125,15 @@ static bool android_init(struct ra_ctx *ctx)
 
     if (!vo_android_init(ctx->vo))
         goto fail;
+
+    p->dataspace = -1;
+    p->set_dataspace = load_set_dataspace();
+    if (p->set_dataspace) {
+        MP_INFO(ctx, "HDR output: ANativeWindow_setBuffersDataSpace available\n");
+    } else {
+        MP_WARN(ctx, "HDR output: ANativeWindow_setBuffersDataSpace not found (%s)\n",
+                dlerror());
+    }
 
     p->egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
@@ -92,6 +168,7 @@ static bool android_init(struct ra_ctx *ctx)
 
     struct ra_ctx_params params = {
         .swap_buffers = android_swap_buffers,
+        .set_color    = android_set_color,
     };
 
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
@@ -115,6 +192,10 @@ static bool android_reconfig(struct ra_ctx *ctx)
         int32_t current_format = ANativeWindow_getFormat(native_window);
         ANativeWindow_setBuffersGeometry(native_window, w, h, current_format);
     }
+
+    // The window may be new; re-apply the dataspace on the next frame.
+    struct priv *p = ctx->priv;
+    p->dataspace = -1;
 
     ctx->vo->dwidth = w;
     ctx->vo->dheight = h;
