@@ -160,7 +160,8 @@ int vo_drm_control(struct vo *vo, int *events, int request, void *arg);
 
 bool vo_drm_color_supported_by_display(struct vo_drm_state *drm, struct pl_color_space color);
 double vo_drm_get_display_fps(struct vo_drm_state *drm);
-bool vo_drm_set_color(struct vo *vo, struct pl_color_space *color);
+void vo_drm_set_color(struct vo *vo, struct pl_color_space *color);
+void vo_drm_set_colorspace_blob(struct vo *vo, struct pl_color_space *color);
 void vo_drm_set_monitor_par(struct vo *vo);
 void vo_drm_uninit(struct vo *vo);
 void vo_drm_wait_events(struct vo *vo, int64_t until_time_ns);
