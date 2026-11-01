@@ -1014,7 +1014,7 @@ gbm_opt = get_option('gbm').require(
     features['drm'],
     error_message: 'drm was not found!'
 )
-gbm = dependency('gbm', version: '>= 17.1.0', required: gbm_opt)
+gbm = dependency('gbm', version: '>= 21.3.0', required: gbm_opt)
 features += {'gbm': gbm.found()}
 if features['gbm']
     dependencies += gbm
