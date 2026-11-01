@@ -630,18 +630,30 @@ jobs:
 
   freebsd:
     runs-on: ubuntu-latest # until https://github.com/actions/runner/issues/385
-    timeout-minutes: 15 # avoid any weirdness with the VM
+    timeout-minutes: 30 # avoid any weirdness with the VM
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86-64, arm64]
     defaults:
       run:
         shell: cpa.sh {0} --sync-files none
     steps:
       - uses: actions/checkout@v7
 
+      - name: Get CPU count
+        id: cpu_count
+        shell: bash
+        run: |
+          echo "count=$(nproc)" >> $GITHUB_OUTPUT
+
       - name: Start FreeBSD VM
         uses: cross-platform-actions/action@v1.7.0
         with:
           operating_system: freebsd
+          architecture: ${{ matrix.arch }}
           version: '15.1'
+          cpu_count: ${{ steps.cpu_count.outputs.count }}
           sync_files: runner-to-vm
 
       - name: Install dependencies
