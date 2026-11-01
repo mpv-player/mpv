@@ -217,6 +217,21 @@ static bool init_egl(struct ra_ctx *ctx)
     return true;
 }
 
+static struct gbm_surface *create_gbm_surface(struct ra_ctx *ctx,
+                                              const uint64_t *modifiers,
+                                              unsigned int num_modifiers)
+{
+    struct priv *p = ctx->priv;
+    return gbm_surface_create_with_modifiers2(
+        p->gbm.device,
+        p->draw_surface_size.width,
+        p->draw_surface_size.height,
+        p->gbm_format,
+        modifiers,
+        num_modifiers,
+        GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+}
+
 static bool init_gbm(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv;
@@ -230,27 +245,12 @@ static bool init_gbm(struct ra_ctx *ctx)
 
     MP_VERBOSE(ctx->vo, "Initializing GBM surface (%d x %d)\n",
         p->draw_surface_size.width, p->draw_surface_size.height);
-    if (p->num_gbm_modifiers > 0) {
-        p->gbm.surface = gbm_surface_create_with_modifiers(
-            p->gbm.device,
-            p->draw_surface_size.width,
-            p->draw_surface_size.height,
-            p->gbm_format,
-            p->gbm_modifiers,
-            p->num_gbm_modifiers);
-        if (!p->gbm.surface) {
-            MP_VERBOSE(ctx->vo, "gbm_surface_create_with_modifiers failed\n");
-        }
-    }
-    if (!p->gbm.surface) {
-        // Either gbm_surface_create_with_modifiers failed or
-        // p->num_gbm_modifiers == 0
-        p->gbm.surface = gbm_surface_create(
-            p->gbm.device,
-            p->draw_surface_size.width,
-            p->draw_surface_size.height,
-            p->gbm_format,
-            GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
+    p->gbm.surface = create_gbm_surface(ctx, p->gbm_modifiers, p->num_gbm_modifiers);
+    // GBM may not support the modifiers the plane advertises.
+    if (!p->gbm.surface && p->num_gbm_modifiers) {
+        MP_VERBOSE(ctx->vo, "Failed to create GBM surface with explicit modifiers: %s\n",
+                   mp_strerror(errno));
+        p->gbm.surface = create_gbm_surface(ctx, NULL, 0);
     }
     if (!p->gbm.surface) {
         MP_ERR(ctx->vo, "Failed to create GBM surface.\n");
