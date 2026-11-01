@@ -5560,6 +5560,10 @@ static void cmd_overlay_add(void *pcmd)
         MP_ERR(mpctx, "overlay-add: inconsistent parameters\n");
         goto error;
     }
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    // The source is memory, an fd or a file, never the fuzzer input.
+    goto error;
+#endif
     struct overlay overlay = {
         .source = mp_image_alloc(IMGFMT_BGRA, w, h),
         .x = x,
