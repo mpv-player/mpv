@@ -323,6 +323,7 @@ struct vo_driver {
 
     const char *name;
     const char *description;
+    bool is_software;
 
     /*
      *   returns: zero on successful initialization, non-zero on error.
@@ -335,6 +336,12 @@ struct vo_driver {
      * returns: 0 on not supported, otherwise 1
      */
     int (*query_format)(struct vo *vo, int format);
+
+    /*
+     * Return the maximum dimension (width or height) of a single texture that
+     * this VO can handle.
+     */
+    int (*get_max_texture_size)(struct vo *vo);
 
     /*
      * Initialize or reconfigure the display driver.
@@ -524,6 +531,8 @@ struct vo {
 
 struct mpv_global;
 struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex);
+struct vo *vo_handle_max_texture_size(struct vo* vo, struct mpv_global *global,
+                                      struct vo_extra *ex, int size);
 int vo_reconfig(struct vo *vo, struct mp_image_params *p);
 int vo_reconfig2(struct vo *vo, struct mp_image *img);
 
