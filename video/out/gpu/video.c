@@ -2587,37 +2587,38 @@ static void pass_convert_yuv(struct gl_video *p)
 
     if (p->image_params.repr.sys == PL_COLOR_SYSTEM_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
-        // C'bc = (B'-Y'c) / 1.9404  | C'bc <= 0
-        //      = (B'-Y'c) / 1.5816  | C'bc >  0
+        // C'bc = (B'-Y'c) / (2 Nb)  | C'bc <= 0
+        //      = (B'-Y'c) / (2 Pb)  | C'bc >  0
         //
-        // C'rc = (R'-Y'c) / 1.7184  | C'rc <= 0
-        //      = (R'-Y'c) / 0.9936  | C'rc >  0
+        // C'rc = (R'-Y'c) / (2 Nr)  | C'rc <= 0
+        //      = (R'-Y'c) / (2 Pr)  | C'rc >  0
         //
-        // as per the BT.2020 specification, table 4. This is a non-linear
-        // transformation because (constant) luminance receives non-equal
-        // contributions from the three different channels.
+        // with Nb = OETF(1 - Kb), Pb = 1 - OETF(Kb), Nr = OETF(1 - Kr) and
+        // Pr = 1 - OETF(Kr), as per the BT.2020-2 specification, table 4.
+        // This is a non-linear transformation because (constant) luminance
+        // receives non-equal contributions from the three different channels.
         GLSLF("// constant luminance conversion \n"
-              "color.br = color.br * mix(vec2(1.5816, 0.9936),              \n"
-              "                         vec2(1.9404, 1.7184),               \n"
-              "                         %s(lessThanEqual(color.br, vec2(0))))\n"
-              "          + color.gg;                                        \n",
+              "color.br = color.br * mix(vec2(1.5819708492989484, 0.99382959526841756), \n"
+              "                         vec2(1.9403433056341009, 1.7182419845671139),  \n"
+              "                         %s(lessThanEqual(color.br, vec2(0))))           \n"
+              "          + color.gg;                                                   \n",
               gl_sc_bvec(p->sc, 2));
-        // Expand channels to camera-linear light. This shader currently just
-        // assumes everything uses the BT.2020 12-bit gamma function, since the
-        // difference between 10 and 12-bit is negligible for anything other
-        // than 12-bit content.
-        GLSLF("color.rgb = mix(color.rgb * vec3(1.0/4.5),                       \n"
-              "                pow((color.rgb + vec3(0.0993))*vec3(1.0/1.0993), \n"
-              "                    vec3(1.0/0.45)),                             \n"
-              "                %s(lessThanEqual(vec3(0.08145), color.rgb)));    \n",
+        // Expand channels to camera-linear light, through the BT.2020 gamma
+        // function with the exact alpha and beta of BT.2020-2, which its 10
+        // and 12-bit values approximate
+        GLSLF("color.rgb = mix(color.rgb * vec3(1.0/4.5),                                             \n"
+              "                pow((color.rgb + vec3(0.09929682680944294))*vec3(1.0/1.0992968268094429), \n"
+              "                    vec3(1.0/0.45)),                                                   \n"
+              "                %s(lessThanEqual(vec3(0.081242858298635133), color.rgb)));            \n",
               gl_sc_bvec(p->sc, 3));
         // Calculate the green channel from the expanded RYcB
         // The BT.2020 specification says Yc = 0.2627*R + 0.6780*G + 0.0593*B
         GLSL(color.g = (color.g - 0.2627*color.r - 0.0593*color.b)*1.0/0.6780;)
         // Recompress to receive the R'G'B' result, same as other systems
-        GLSLF("color.rgb = mix(color.rgb * vec3(4.5),                       \n"
-              "                vec3(1.0993) * pow(color.rgb, vec3(0.45)) - vec3(0.0993), \n"
-              "                %s(lessThanEqual(vec3(0.0181), color.rgb))); \n",
+        GLSLF("color.rgb = mix(color.rgb * vec3(4.5),                                     \n"
+              "                vec3(1.0992968268094429) * pow(color.rgb, vec3(0.45))      \n"
+              "                    - vec3(0.09929682680944294),                           \n"
+              "                %s(lessThanEqual(vec3(0.018053968510807807), color.rgb))); \n",
               gl_sc_bvec(p->sc, 3));
     }
 
