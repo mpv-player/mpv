@@ -338,6 +338,8 @@ typedef struct MPContext {
     struct vo_chain *vo_chain;
 
     struct vo *video_out;
+    int gpu_loss_recovery_count;
+
     // next_frame[0] is the next frame, next_frame[1] the one after that.
     // The +1 is for adding 1 additional frame in backstep mode.
     struct mp_image *next_frames[VO_MAX_REQ_FRAMES + 1];
@@ -698,6 +700,7 @@ void reinit_video_chain(struct MPContext *mpctx);
 void reinit_video_chain_src(struct MPContext *mpctx, struct track *track);
 int reinit_video_filters(struct MPContext *mpctx);
 void write_video(struct MPContext *mpctx);
+void mp_force_video_reinit(struct MPContext *mpctx);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
