@@ -187,6 +187,21 @@ if get_option('libmpv')
     endif
 endif
 
+if get_option('cplayer') and features['lua']
+    lua_tests = ['audio-hotplug-test', 'nan-test', 'observe-all', 'osd-test',
+                 'test-hooks']
+    if features['posix']
+        lua_tests += 'command-test'
+    endif
+    foreach script : lua_tests
+        test(script, mpv, suite: 'lua',
+             args: ['--no-config', '--vo=null', '--ao=null', '--idle=no',
+                    '--screenshot-dir=' + outdir,
+                    '--script=' + join_paths(source_root, 'TOOLS', 'lua', script + '.lua'),
+                    'av://lavfi:testsrc=d=2'])
+    endforeach
+endif
+
 # Supported libavutil versions that work with these tests.
 # Will need to be manually updated when ffmpeg adds/removes more formats in the future.
 if libavutil.version().version_compare('>= 60.8.100') and libavutil.version().version_compare('< 61.0.100')
