@@ -2,7 +2,7 @@ POSITIONING
 ===========
 
 This script provides script bindings to pan videos and images. It can be
-disabled using the ``--load-positioning=no`` option.
+disabled using the ``--builtin-scripts-remove=positioning`` option.
 
 Script bindings
 ---------------

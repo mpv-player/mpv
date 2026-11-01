@@ -6,7 +6,7 @@ offer basic mouse-controllability. It is intended to make interaction easier
 for new users and to enable precise and direct seeking.
 
 The OSC is enabled by default if mpv was compiled with Lua support. It can be
-disabled entirely using the ``--osc=no`` option.
+disabled entirely using the ``--builtin-scripts-remove=osc`` option.
 
 Using the OSC
 -------------
