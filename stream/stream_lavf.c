@@ -339,6 +339,10 @@ static int open_f(stream_t *stream)
     stream->seekable = false;
 
     int flags = stream->mode == STREAM_WRITE ? AVIO_FLAG_WRITE : AVIO_FLAG_READ;
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if (flags & AVIO_FLAG_WRITE)
+        goto out;
+#endif
 
     const char *filename = stream->url;
     if (!filename) {
