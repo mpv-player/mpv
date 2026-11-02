@@ -556,6 +556,18 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
             double endpts = get_play_end_pts(mpctx);
             if (endpts != MP_NOPTS_VALUE)
                 endpts *= mpctx->play_dir;
+            // Keep the frame covering an exact A/V seek. Starting at the next
+            // frame would make initial audio sync discard the intervening audio.
+            if (hrseek && mpctx->play_dir > 0 && mpctx->ao_chain &&
+                !mpctx->hrseek_backstep && !mpctx->hrseek_lastframe &&
+                mpctx->saved_frame && mpctx->saved_frame->pts < hrseek_pts &&
+                img->pts > hrseek_pts + tolerance && mpctx->max_frames != 0 &&
+                (endpts == MP_NOPTS_VALUE || hrseek_pts < endpts))
+            {
+                mpctx->saved_frame->pts = hrseek_pts;
+                add_new_frame(mpctx, mpctx->saved_frame);
+                mpctx->saved_frame = NULL;
+            }
             if ((endpts != MP_NOPTS_VALUE && img->pts >= endpts) ||
                 mpctx->max_frames == 0)
             {
