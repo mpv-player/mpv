@@ -435,8 +435,8 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
     if (p->buffer_size - p->count < bytes) {
         // No room in the buffer. Pause the transfer and wait for the consumer.
         p->paused = true;
-        mp_mutex_unlock(&p->mtx);
         MP_TRACE(p, "pausing curl transfer, buffer full (%zu bytes)\n", p->count);
+        mp_mutex_unlock(&p->mtx);
         return CURL_WRITEFUNC_PAUSE;
     }
 

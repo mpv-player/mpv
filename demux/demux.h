@@ -122,6 +122,7 @@ enum demux_event {
     DEMUX_EVENT_METADATA = 1 << 2,  // metadata or stream_metadata changed
     DEMUX_EVENT_DURATION = 1 << 3,  // duration updated
     DEMUX_EVENT_LISTS = 1 << 4,     // chapters / editions list changed
+    DEMUX_EVENT_CODEC = 1 << 5,     // codec params of a stream replaced
     DEMUX_EVENT_ALL = 0xFFFF,
 };
 
@@ -337,6 +338,8 @@ void demux_set_stream_absent(struct demuxer *demuxer, struct sh_stream *sh,
                              bool absent);
 void demux_set_stream_group(struct demuxer *demuxer,
                             struct sh_stream_group *group);
+void demux_set_stream_codec(struct demuxer *demuxer, struct sh_stream *sh,
+                            struct mp_codec_params *codec);
 
 bool demux_cancel_test(struct demuxer *demuxer);
 bool demux_read_interrupted(struct demuxer *demuxer);
