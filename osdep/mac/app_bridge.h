@@ -107,6 +107,7 @@ void cocoa_uninit_media_keys(void);
 void cocoa_set_input_context(struct input_ctx *input_context);
 void cocoa_set_mpv_handle(struct mpv_handle *ctx);
 void cocoa_init_cocoa_cb(void);
+void cocoa_init_embedded_view(int64_t wid);
 // multithreaded wrapper for mpv_main
 int cocoa_main(int argc, char *argv[]);
 
