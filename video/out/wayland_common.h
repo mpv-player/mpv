@@ -177,7 +177,6 @@ struct vo_wayland_state {
     struct mp_present *present;
     int64_t refresh_interval;
     bool present_clock;
-    bool present_v2;
     bool use_present;
 
     /* single-pixel-buffer */
@@ -243,5 +242,6 @@ void vo_wayland_uninit(struct vo *vo);
 void vo_wayland_wait_events(struct vo *vo, int64_t until_time_ns);
 void vo_wayland_wait_frame(struct vo_wayland_state *wl);
 void vo_wayland_wakeup(struct vo *vo);
+int vo_wayland_proxy_get_version(struct wl_proxy *proxy);
 
 #endif /* MPLAYER_WAYLAND_COMMON_H */
