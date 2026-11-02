@@ -341,6 +341,8 @@ static int open_f(stream_t *stream, const struct stream_open_args *args)
     }
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    if (is_fdclose)
+        p->close = false;
     if (p->fd != 42) {
         s_close(stream);
         return STREAM_ERROR;
