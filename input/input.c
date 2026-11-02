@@ -124,6 +124,9 @@ struct input_ctx {
     int last_doubleclick_key_down;
     double last_doubleclick_time;
 
+    // VO focused state
+    bool vo_focused;
+
     // VO dragging state
     bool dragging_button_down;
     int mouse_drag_x, mouse_drag_y;
@@ -872,6 +875,14 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t)
     input_unlock(ictx);
 }
 
+void mp_input_put_key_focused(struct input_ctx *ictx, int code)
+{
+    input_lock(ictx);
+    if(ictx->vo_focused)
+        feed_key(ictx, code, 1, false);
+    input_unlock(ictx);
+}
+
 void mp_input_put_wheel(struct input_ctx *ictx, int direction, double value)
 {
     if (value == 0.0)
@@ -976,6 +987,18 @@ static void set_mouse_pos(struct input_ctx *ictx, int x, int y, bool quiet)
         mp_cmd_t *drag_cmd = mp_input_parse_cmd(ictx, bstr0("begin-vo-dragging"), "<internal>");
         queue_cmd(ictx, drag_cmd);
     }
+}
+
+void mp_input_set_focused(struct input_ctx *ictx, bool vo_focused)
+{
+    input_lock(ictx);
+    bool changed = ictx->vo_focused ^ vo_focused;
+    if (changed) {
+        ictx->vo_focused = vo_focused;
+        if (!vo_focused)
+            feed_key(ictx, MP_INPUT_RELEASE_ALL, 1, false);
+    }
+    input_unlock(ictx);
 }
 
 void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y)
