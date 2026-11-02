@@ -918,8 +918,8 @@ static const m_option_t mp_opts[] = {
 #endif
     {"input-terminal", OPT_BOOL(consolecontrols), .flags = UPDATE_TERM},
 
-    {"input-ipc-server", OPT_STRING(ipc_path), .flags = M_OPT_FILE},
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    {"input-ipc-server", OPT_STRING(ipc_path), .flags = M_OPT_FILE},
     {"input-ipc-client", OPT_STRING(ipc_client)},
 #endif
 

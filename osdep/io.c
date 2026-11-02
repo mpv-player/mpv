@@ -157,6 +157,37 @@ void mp_flush_wakeup_pipe(int pipe_end)
 }
 #endif
 
+#if defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION) && !defined(_WIN32)
+// Fuzzed commands and options make mpv write files anywhere. Fuzzing builds
+// write to anonymous memory and only pretend to change the file system.
+int mp_open(const char *filename, int oflag, ...)
+{
+    if (oflag & (O_WRONLY | O_RDWR | O_CREAT | O_TRUNC))
+        return memfd_create("mpv", oflag & O_CLOEXEC ? MFD_CLOEXEC : 0);
+    return (open)(filename, oflag);
+}
+
+int mp_mkdir(const char *path, mode_t mode)
+{
+    return 0;
+}
+
+int mp_unlink(const char *path)
+{
+    return 0;
+}
+
+int mp_rename(const char *oldpath, const char *newpath)
+{
+    return 0;
+}
+
+int mp_utime(const char *path, const struct utimbuf *times)
+{
+    return 0;
+}
+#endif
+
 #ifdef _WIN32
 
 #include <windows.h>

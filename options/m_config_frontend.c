@@ -185,15 +185,9 @@ static void backup_dtor(void *p)
 
 #define BACKUP_LOCAL 1
 #define BACKUP_NVAL 2
-static void ensure_backup(struct m_opt_backup **list, int flags,
-                          struct m_config_option *co)
+static void add_backup(struct m_opt_backup **list, int flags,
+                       struct m_config_option *co)
 {
-    if (!co->data)
-        return;
-    for (struct m_opt_backup *cur = *list; cur; cur = cur->next) {
-        if (cur->co->data == co->data) // comparing data ptr catches aliases
-            return;
-    }
     struct m_opt_backup *bc = talloc_ptrtype(NULL, bc);
     talloc_set_destructor(bc, backup_dtor);
     *bc = (struct m_opt_backup) {
@@ -208,6 +202,18 @@ static void ensure_backup(struct m_opt_backup **list, int flags,
     *list = bc;
     if (bc->flags & BACKUP_LOCAL)
         co->is_set_locally = true;
+}
+
+static void ensure_backup(struct m_opt_backup **list, int flags,
+                          struct m_config_option *co)
+{
+    if (!co->data)
+        return;
+    for (struct m_opt_backup *cur = *list; cur; cur = cur->next) {
+        if (cur->co->data == co->data) // comparing data ptr catches aliases
+            return;
+    }
+    add_backup(list, flags, co);
 }
 
 static void restore_backups(struct m_opt_backup **list, struct m_config *config)
@@ -268,8 +274,12 @@ void m_config_backup_all_opts(struct m_config *config)
 
 void m_config_backup_watch_later_opts(struct m_config *config)
 {
-    for (int n = 0; n < config->num_opts; n++)
-        ensure_backup(&config->watch_later_backup_opts, 0, &config->opts[n]);
+    // Runs once on the empty list, which is looked up by name.
+    mp_assert(!config->watch_later_backup_opts);
+    for (int n = 0; n < config->num_opts; n++) {
+        if (config->opts[n].data)
+            add_backup(&config->watch_later_backup_opts, 0, &config->opts[n]);
+    }
 }
 
 static int compare_opt_name(const void *pa, const void *pb)

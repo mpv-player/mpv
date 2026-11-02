@@ -256,6 +256,23 @@ void freelocale(locale_t);
 
 extern char **environ;
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+#include <stdio.h>
+#include <utime.h>
+
+int mp_open(const char *filename, int oflag, ...);
+int mp_mkdir(const char *path, mode_t mode);
+int mp_unlink(const char *path);
+int mp_rename(const char *oldpath, const char *newpath);
+int mp_utime(const char *path, const struct utimbuf *times);
+
+#define open(...) mp_open(__VA_ARGS__)
+#define mkdir(...) mp_mkdir(__VA_ARGS__)
+#define unlink(...) mp_unlink(__VA_ARGS__)
+#define rename(...) mp_rename(__VA_ARGS__)
+#define utime(...) mp_utime(__VA_ARGS__)
+#endif
+
 #endif /* _WIN32 */
 
 #endif

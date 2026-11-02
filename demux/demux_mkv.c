@@ -123,8 +123,8 @@ typedef struct mkv_track {
     float v_projection_pose_roll;
 
     uint32_t a_channels, a_bps;
-    float a_sfreq;
-    float a_osfreq;
+    double a_sfreq;
+    double a_osfreq;
 
     double default_duration;
     double codec_delay;
@@ -564,16 +564,21 @@ static void parse_trackencodings(struct demuxer *demuxer,
     track->num_encodings = encodings->n_content_encoding;
 }
 
+static bool valid_samplerate(double rate)
+{
+    return rate > 0 && rate <= INT_MAX;
+}
+
 static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
                              struct ebml_audio *audio)
 {
-    if (audio->n_sampling_frequency) {
+    if (audio->n_sampling_frequency && valid_samplerate(audio->sampling_frequency)) {
         track->a_sfreq = audio->sampling_frequency;
         MP_DBG(demuxer, "|   + Sampling frequency: %f\n", track->a_sfreq);
     } else {
         track->a_sfreq = 8000;
     }
-    if (audio->n_output_sampling_frequency) {
+    if (audio->n_output_sampling_frequency && valid_samplerate(audio->output_sampling_frequency)) {
         track->a_osfreq = audio->output_sampling_frequency;
         MP_DBG(demuxer, "|   + Output sampling frequency: %f\n", track->a_osfreq);
     } else {
@@ -2152,7 +2157,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track, int idx)
         AV_WL16(data + 8, sh_a->bits_per_coded_sample);
         AV_WL32(data + 10, track->a_osfreq);
         mkv_demuxer_t *mkv_d = demuxer->priv;
-        AV_WL32(data + 14, mkv_d->duration * track->a_osfreq);
+        double samples = mkv_d->duration * track->a_osfreq;
+        AV_WL32(data + 14, samples > 0 ? MPMIN(samples, UINT32_MAX) : 0);
     } else if (!strcmp(codec, "opus")) {
         // Hardcode the rate libavcodec's opus decoder outputs, so that
         // AV_PKT_DATA_SKIP_SAMPLES actually works. The Matroska header only
