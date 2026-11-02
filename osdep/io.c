@@ -122,7 +122,7 @@ FILE *mp_fopen(const char *filename, const char *mode)
 #ifndef _WIN32
 int mp_dup_cloexec(int fd)
 {
-    return fcntl(fd, F_DUPFD_CLOEXEC);
+    return fcntl(fd, F_DUPFD_CLOEXEC, 0);
 }
 
 int mp_make_cloexec_pipe(int pipes[2])
