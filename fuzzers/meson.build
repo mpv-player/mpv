@@ -77,4 +77,9 @@ fuzzers += executable('fuzzer_json', 'fuzzer_json.c',
                       objects: libmpv.extract_all_objects(recursive: true),
                       dependencies: dependencies)
 
+fuzzers += executable('fuzzer_ipc', 'fuzzer_ipc.c',
+                      link_language: 'cpp', include_directories: [incdir, incdir_public],
+                      objects: libmpv.extract_all_objects(recursive: true),
+                      dependencies: dependencies)
+
 alias_target('fuzzers', fuzzers)
