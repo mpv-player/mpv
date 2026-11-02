@@ -67,6 +67,11 @@ foreach cmd : ['file', '-config-file', '-input-conf']
                           dependencies: libmpv_dep)
 endforeach
 
+fuzzers += executable('fuzzer_sub_file', 'fuzzer_load.c',
+                      link_language: 'cpp',
+                      c_args: ['-DMPV_LOAD="file"', '-DMPV_LOADFILE', '-DMPV_SUB_FILE'],
+                      dependencies: libmpv_dep)
+
 fuzzers += executable('fuzzer_options_parser', 'fuzzer_options_parser.c',
                       link_language: 'cpp', include_directories: incdir_public,
                       objects: libmpv.extract_all_objects(recursive: true),
