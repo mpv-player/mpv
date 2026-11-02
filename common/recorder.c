@@ -135,6 +135,9 @@ struct mp_recorder *mp_recorder_create(struct mpv_global *global,
                                        struct demux_attachment **attachments,
                                        int num_attachments)
 {
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    return NULL;
+#endif
     struct mp_recorder *priv = talloc_zero(NULL, struct mp_recorder);
 
     priv->global = global;

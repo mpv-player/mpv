@@ -96,6 +96,9 @@ const struct m_sub_options encode_config = {
 
 struct encode_lavc_context *encode_lavc_init(struct mpv_global *global)
 {
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    return NULL;
+#endif
     struct encode_lavc_context *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct encode_lavc_context){
         .global = global,
