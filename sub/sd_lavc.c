@@ -744,6 +744,23 @@ static double step_sub(struct sd *sd, double now, int movement)
     return best < 0 ? now : priv->seekpoints[best].pts;
 }
 
+static struct sub_lines *get_lines(struct sd *sd)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+    struct sub_lines *res = talloc_zero(NULL, struct sub_lines);
+
+    // The seekpoints hold the timings of every subtitle decoded so far.
+    for (int n = 0; n < priv->num_seekpoints; n++) {
+        struct sub_line line = {
+            .start = priv->seekpoints[n].pts,
+            .end   = priv->seekpoints[n].endpts,
+        };
+        MP_TARRAY_APPEND(res, res->entries, res->num_entries, line);
+    }
+
+    return res;
+}
+
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 {
     struct sd_lavc_priv *priv = sd->priv;
@@ -791,4 +808,5 @@ const struct sd_functions sd_lavc = {
     .control = control,
     .reset = reset,
     .uninit = uninit,
+    .get_lines = get_lines,
 };

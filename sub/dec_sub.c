@@ -605,7 +605,11 @@ static void dedup_sub_lines(struct sub_lines *lines)
                 continue;
             }
 
-            if (!strcmp(lines->entries[i].text, next.text)) {
+            // Image subtitles have no text to compare, and the decoder does
+            // not report one twice anyway.
+            if (lines->entries[i].text && next.text &&
+                !strcmp(lines->entries[i].text, next.text))
+            {
                 lines->entries[i].end = MPMAX(next.end, lines->entries[i].end);
                 TA_FREEP(&next.text);
                 ++current_shift, --lines->num_entries;
