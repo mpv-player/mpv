@@ -1,1 +1,0 @@
-add optional `pretty` argument to `utils.format_json()`

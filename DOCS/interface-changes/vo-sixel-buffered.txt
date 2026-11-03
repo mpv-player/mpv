@@ -1,1 +1,0 @@
-deprecate `--vo-sixel-buffered`, each frame is written to the terminal in one piece

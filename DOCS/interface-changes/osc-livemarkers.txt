@@ -1,1 +1,0 @@
-remove `osc-livemarkers` script-opt because chapter markers are now updated without reiniting the OSC

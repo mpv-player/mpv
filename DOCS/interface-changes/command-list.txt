@@ -1,1 +1,0 @@
-'command-list' now also returns a default value and available choices where applicable for each command argument.

@@ -1,1 +1,0 @@
-the `expand-properties` command modifier also applies to string lists now

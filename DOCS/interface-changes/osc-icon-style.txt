@@ -1,1 +1,0 @@
-add `osc-icon_style` option

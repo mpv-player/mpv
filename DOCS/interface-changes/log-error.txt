@@ -1,1 +1,0 @@
-deprecate `mp.input.log_error()`
