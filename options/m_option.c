@@ -3112,7 +3112,7 @@ static bool obj_settings_list_insert_at(struct mp_log *log,
     int num = obj_settings_list_num_items(*p_obj_list);
     // Limit list entries to 100. obj_settings_list is not designed to hold more
     // items, and it quickly starts taking ages to add all items.
-    if (num > 100) {
+    if (num >= 100) {
         mp_warn(log, "Object settings list capacity exceeded: "
                      "a maximum of 100 elements is allowed.\n");
         return false;
