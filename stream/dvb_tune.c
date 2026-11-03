@@ -208,7 +208,7 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
     fparams.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
     int pat_fd;
-    if ((pat_fd = open(demux_dev, O_RDWR)) < 0) {
+    if ((pat_fd = open(demux_dev, O_RDWR | O_CLOEXEC)) < 0) {
         MP_ERR(priv, "Opening PAT demux failed: %d", errno);
         return -1;
     }
