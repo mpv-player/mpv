@@ -3102,6 +3102,12 @@ static void obj_settings_list_del_at(m_obj_settings_t **p_obj_list, int idx)
     *p_obj_list = talloc_realloc(NULL, obj_list, struct m_obj_settings, num);
 }
 
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+#define OBJ_SETTINGS_LIST_MAX 8
+#else
+#define OBJ_SETTINGS_LIST_MAX 100
+#endif
+
 // Insert such that *p_obj_list[idx] is set to item.
 // If idx < 0, set idx = count + idx + 1 (i.e. -1 inserts it as last element).
 // Memory referenced by *item is not copied.
@@ -3110,11 +3116,12 @@ static bool obj_settings_list_insert_at(struct mp_log *log,
                                         m_obj_settings_t *item)
 {
     int num = obj_settings_list_num_items(*p_obj_list);
-    // Limit list entries to 100. obj_settings_list is not designed to hold more
+    // Limit list entries. obj_settings_list is not designed to hold more
     // items, and it quickly starts taking ages to add all items.
-    if (num >= 100) {
+    if (num >= OBJ_SETTINGS_LIST_MAX) {
         mp_warn(log, "Object settings list capacity exceeded: "
-                     "a maximum of 100 elements is allowed.\n");
+                     "a maximum of %d elements is allowed.\n",
+                OBJ_SETTINGS_LIST_MAX);
         return false;
     }
     if (idx < 0)
