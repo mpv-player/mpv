@@ -306,7 +306,12 @@ static MP_THREAD_VOID ipc_thread(void *p)
 
     MP_VERBOSE(arg, "Starting IPC master\n");
 
+#ifdef SOCK_CLOEXEC
+    ipc_fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+#else
     ipc_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    mp_set_cloexec(ipc_fd);
+#endif
     if (ipc_fd < 0) {
         MP_ERR(arg, "Could not create IPC socket\n");
         goto done;
@@ -363,7 +368,12 @@ static MP_THREAD_VOID ipc_thread(void *p)
             goto done;
 
         if (fds[1].revents & POLLIN) {
+#ifdef SOCK_CLOEXEC
+            int client_fd = accept4(ipc_fd, NULL, NULL, SOCK_CLOEXEC);
+#else
             int client_fd = accept(ipc_fd, NULL, NULL);
+            mp_set_cloexec(client_fd);
+#endif
             if (client_fd < 0) {
                 MP_ERR(arg, "Could not accept IPC client\n");
                 goto done;
@@ -404,6 +414,7 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
         if (fd < 0) {
             MP_ERR(arg, "Invalid IPC client argument: '%s'\n", opts->ipc_client);
         } else {
+            mp_set_cloexec(fd);
             ipc_start_client_json(arg, -1, fd);
         }
     }
