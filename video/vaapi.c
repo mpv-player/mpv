@@ -264,7 +264,7 @@ static void drm_destroy(void *native_ctx)
 static void drm_create(struct mp_log *log, VADisplay **out_display,
                        void **out_native_ctx, const char *path)
 {
-    int drm_fd = open(path, O_RDWR);
+    int drm_fd = open(path, O_RDWR | O_CLOEXEC);
     if (drm_fd < 0)
         return;
 
