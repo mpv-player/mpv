@@ -330,7 +330,7 @@ static MP_THREAD_VOID ipc_thread(void *p)
         goto done;
     }
 
-    ipc_un.sun_family = AF_UNIX,
+    ipc_un.sun_family = AF_UNIX;
     strncpy(ipc_un.sun_path, arg->path, sizeof(ipc_un.sun_path) - 1);
 
     if (ipc_un.sun_path[0] == '@') {
