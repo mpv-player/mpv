@@ -30,6 +30,7 @@
 
 #include "mpv/render_gl.h"
 #include "options/m_config.h"
+#include "osdep/io.h"
 #include "video/fmt-conversion.h"
 #include "video/out/drm_common.h"
 #include "video/out/gpu/hwdec.h"
@@ -264,7 +265,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
 
     // Now actually dup the fds
     for (int i = 0; i < desc->nb_objects; i++) {
-        p->desc.objects[i].fd = fcntl(desc->objects[i].fd, F_DUPFD_CLOEXEC, 0);
+        p->desc.objects[i].fd = mp_dup_cloexec(desc->objects[i].fd);
         if (p->desc.objects[i].fd == -1) {
             MP_ERR(mapper, "Failed to duplicate dmabuf fd: %s\n",
                    mp_strerror(errno));
