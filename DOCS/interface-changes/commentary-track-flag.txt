@@ -1,2 +1,1 @@
-add `commentary` to the track flags accepted by `sub-add`, `audio-add` and
-`video-add`, and report it back on reload
+add `commentary` to the track flags accepted by `sub-add`, `audio-add` and `video-add`, and report it back on reload
