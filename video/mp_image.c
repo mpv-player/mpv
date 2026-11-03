@@ -858,7 +858,7 @@ bool mp_image_params_valid(const struct mp_image_params *p)
         return false;
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-    if (p->w > 16384 || p->h > 16384)
+    if (p->w > 16384 || p->h > 16384 || p->w * p->h > 2048 * 2048)
         return false;
 #endif
 
