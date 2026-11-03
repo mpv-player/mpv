@@ -129,7 +129,7 @@ static int scan_from_subfile(struct mp_als *state,
                              void *out)
 {
     mp_assert(state->device_dir);
-    int fd = openat(dirfd(state->device_dir), subpath, O_RDONLY);
+    int fd = openat(dirfd(state->device_dir), subpath, O_RDONLY | O_CLOEXEC);
     if (fd < 0)
         return -1;
 
