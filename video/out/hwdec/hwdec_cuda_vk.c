@@ -89,7 +89,7 @@ static bool cuda_ext_vk_init(struct ra_hwdec_mapper *mapper,
     mapper->tex[n] = ratex;
 
 #if !HAVE_WIN32_DESKTOP
-    mem_fd = dup(evk->pltex->shared_mem.handle.fd);
+    mem_fd = mp_dup_cloexec(evk->pltex->shared_mem.handle.fd);
     if (mem_fd < 0)
         goto error;
 #endif
