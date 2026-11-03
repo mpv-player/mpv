@@ -375,8 +375,16 @@ static MP_THREAD_VOID ipc_thread(void *p)
             mp_set_cloexec(client_fd);
 #endif
             if (client_fd < 0) {
-                MP_ERR(arg, "Could not accept IPC client\n");
-                goto done;
+                int err = errno;
+                if (err == EINTR || err == ECONNABORTED)
+                    continue;
+                MP_ERR(arg, "Could not accept IPC client: %s\n", mp_strerror(err));
+                if (err != EMFILE && err != ENFILE && err != ENOBUFS && err != ENOMEM)
+                    goto done;
+                // The client stays queued and keeps the socket readable, so
+                // wait before trying again.
+                poll(fds, 1, 100);
+                continue;
             }
 
             ipc_start_client_json(arg, client_num++, client_fd);
