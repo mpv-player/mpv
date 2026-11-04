@@ -146,6 +146,11 @@ static MP_THREAD_VOID mpv_event_loop_fn(void *arg)
 
 void mp_dnd_init(mpv_handle *mpv)
 {
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    // Nothing drops files here, the thread only makes coverage timing dependent.
+    mpv_destroy(mpv);
+    return;
+#endif
     mp_thread mpv_event_loop;
     if (!mp_thread_create(&mpv_event_loop, mpv_event_loop_fn, mpv))
         mp_thread_detach(mpv_event_loop);
