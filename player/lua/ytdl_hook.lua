@@ -1143,11 +1143,6 @@ local function run_ytdl_hook(url)
                 local site = entry.url
                 local title = entry.title
 
-                if title ~= nil then
-                    title = string.gsub(title, '%s+', ' ')
-                    table.insert(playlist, "#EXTINF:0," .. title)
-                end
-
                 --[[ some extractors will still return the full info for
                      all clips in the playlist and the URL will point
                      directly to the file in that case, which we don't
@@ -1178,6 +1173,10 @@ local function run_ytdl_hook(url)
                 end
 
                 if playlist_url then
+                    if title ~= nil then
+                        title = string.gsub(title, '%s+', ' ')
+                        table.insert(playlist, "#EXTINF:0," .. title)
+                    end
                     table.insert(playlist, playlist_url)
                     -- save the cookies in a table for the playlist hook
                     playlist_cookies[playlist_url] = entry.cookies or json.cookies
