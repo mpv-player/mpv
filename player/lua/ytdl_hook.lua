@@ -765,7 +765,7 @@ local function add_single_video(json)
                 msg.verbose("Skipping subtitle ["..lang.."] with protocol "..
                             sub_info.protocol)
             elseif sub_info.data ~= nil then
-                sub = "memory://"..sub_info.data
+                sub = "data://text/plain,"..sub_info.data
             elseif sub_info.url ~= nil and
                 url_is_safe(sub_info.url) then
                 sub = sub_info.url
