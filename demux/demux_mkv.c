@@ -416,10 +416,12 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
                 mp_warn(log, "missing comp_settings, unable to reconstruct the data.\n");
                 goto error;
             }
-            dest = talloc_size(track->parser_tmp, size + enc->comp_settings_len);
+            dest = talloc_size(track->parser_tmp,
+                               size + enc->comp_settings_len + AV_LZO_INPUT_PADDING);
             memcpy(dest, enc->comp_settings, enc->comp_settings_len);
             memcpy(dest + enc->comp_settings_len, src, size);
             size += enc->comp_settings_len;
+            memset(dest + size, 0, AV_LZO_INPUT_PADDING);
         }
     }
 
