@@ -68,6 +68,48 @@ static inline void set_fontconfig_sysroot(void)
 #endif
 }
 
+static inline bool wait_event(mpv_handle *ctx, mpv_event_id id)
+{
+    while (1) {
+        mpv_event *event = mpv_wait_event(ctx, -1);
+        if (event->event_id == id)
+            return true;
+        if (event->event_id == MPV_EVENT_SHUTDOWN)
+            return false;
+    }
+}
+
+// Waits for the core thread to process the current iteration and any pending requests.
+static inline bool sync_core(mpv_handle *ctx)
+{
+    uint64_t sync_id = 1;
+    mpv_observe_property(ctx, sync_id, "user-data/fuzzer-sync", MPV_FORMAT_NONE);
+    bool ok;
+    while (1) {
+        mpv_event *event = mpv_wait_event(ctx, -1);
+        ok = event->event_id != MPV_EVENT_SHUTDOWN;
+        if (!ok || (event->event_id == MPV_EVENT_PROPERTY_CHANGE &&
+                    event->reply_userdata == sync_id))
+            break;
+    }
+    mpv_unobserve_property(ctx, sync_id);
+    return ok;
+}
+
+static inline void initialize(mpv_handle *ctx)
+{
+    check_error(mpv_initialize(ctx));
+    if (!wait_event(ctx, MPV_EVENT_IDLE) || !sync_core(ctx))
+        exit(1);
+}
+
+static inline void destroy(mpv_handle *ctx)
+{
+    if (mpv_command(ctx, (const char *[]){"quit", NULL}) != MPV_ERROR_UNINITIALIZED)
+        sync_core(ctx);
+    mpv_terminate_destroy(ctx);
+}
+
 #ifndef PLAYBACK_TIME_LIMIT
 #define PLAYBACK_TIME_LIMIT 1
 #endif
