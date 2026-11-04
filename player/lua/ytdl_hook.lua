@@ -413,7 +413,7 @@ local function edl_track_joined(fragments, protocol, is_live, base)
         table.insert(parts, edl_escape(join_url(base, fragment)))
         if fragment.duration then
             parts[#parts] =
-                parts[#parts] .. ",length="..fragment.duration
+                parts[#parts] .. ",length="..edl_escape(fragment.duration)
         end
     end
     return edl .. table.concat(parts, ";") .. ";"
@@ -1125,7 +1125,7 @@ local function run_ytdl_hook(url)
                             else
                                 subfile = subfile..edl_escape("memory://WEBVTT")
                             end
-                            subfile = subfile..",length="..entry.duration..";"
+                            subfile = subfile..",length="..edl_escape(entry.duration)..";"
                         end
                         msg.debug(j.." sub EDL: "..subfile)
                         mp.commandv("sub-add", subfile, "auto", req.ext, j)
