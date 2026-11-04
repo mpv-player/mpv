@@ -795,7 +795,7 @@ local function add_single_video(json)
 
         for i = #json.thumbnails, 1, -1 do
             local thumb_info = json.thumbnails[i]
-            if thumb_info.url ~= nil then
+            if thumb_info.url ~= nil and url_is_safe(thumb_info.url) then
                 if o.thumbnails == 'all' then
                     msg.verbose("adding thumbnail")
                     mp.commandv("video-add", thumb_info.url, "auto")
