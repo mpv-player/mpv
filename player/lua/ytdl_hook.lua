@@ -1164,6 +1164,9 @@ local function run_ytdl_hook(url)
                 -- links without protocol as returned by --flat-playlist
                 if not site then
                     msg.error("Playlist entry does not have unique URL, can't add it.")
+                elseif site:find("%c") then
+                    -- a line break would add entries to the playlist
+                    msg.error("Playlist entry URL contains control characters, can't add it.")
                 elseif not site:find("://") then
                     -- youtube extractor provides only IDs,
                     -- others come prefixed with the extractor name and ":"
