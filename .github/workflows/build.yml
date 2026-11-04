@@ -340,6 +340,7 @@ jobs:
   macos:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: "macos-15"
