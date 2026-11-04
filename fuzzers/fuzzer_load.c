@@ -101,7 +101,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     url = "av://lavfi:yuvtestsrc=d=1";
 #endif
 
-    check_error(mpv_initialize(ctx));
+    initialize(ctx);
 
     const char *cmd[] = {"load" MPV_LOAD, url, NULL};
     check_error(mpv_command(ctx, cmd));

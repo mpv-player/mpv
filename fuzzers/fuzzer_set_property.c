@@ -68,7 +68,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     check_error(mpv_set_option_string(ctx, "vo", "null"));
     check_error(mpv_set_option_string(ctx, "ao", "null"));
 
-    check_error(mpv_initialize(ctx));
+    initialize(ctx);
 #endif
 
     int ret;

@@ -55,7 +55,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     check_error(mpv_set_option_string(ctx, "network-timeout", "1"));
     check_error(mpv_set_option_string(ctx, "input-builtin-bindings", "no"));
 
-    check_error(mpv_initialize(ctx));
+    initialize(ctx);
 
     const char *cmd[] = {"loadfile", data, NULL};
     check_error(mpv_command(ctx, cmd));
