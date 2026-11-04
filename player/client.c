@@ -669,6 +669,12 @@ int mpv_initialize_opts(mpv_handle *ctx, char **options)
 {
     lock_core(ctx);
     int res = mp_initialize(ctx->mpctx, options) ? MPV_ERROR_INVALID_PARAMETER : 0;
+#ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
+    // Only the options parser fuzzer passes options. It wants them parsed and
+    // applied, not played.
+    if (options)
+        ctx->mpctx->stop_play = PT_QUIT;
+#endif
     mp_wakeup_core(ctx->mpctx);
     unlock_core(ctx);
     return res;
