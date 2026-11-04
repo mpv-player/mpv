@@ -391,9 +391,6 @@ jobs:
           brew install -q autoconf automake curl pkgconf libtool python freetype fribidi little-cms2 \
             luajit libass meson rust uchardet mujs molten-vk vulkan-loader vulkan-headers \
             libarchive libbluray libcaca libcdio-paranoia libdvdnav libdvdread libsixel rubberband vapoursynth zimg
-          if [[ "${{ matrix.os }}" == "xcode-27" ]]; then
-             brew reinstall -q --build-from-source libarchive svt-av1
-          fi
           brew install -q --HEAD libplacebo
           brew install -q --HEAD ffmpeg-full
           brew link ffmpeg-full
