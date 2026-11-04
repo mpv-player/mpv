@@ -107,7 +107,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     mpv_destroy(client);
-    mpv_terminate_destroy(ctx);
+    destroy(ctx);
 
     return 0;
 }

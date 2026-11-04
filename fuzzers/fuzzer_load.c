@@ -110,7 +110,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     player_loop(ctx);
 #endif
 
-    mpv_terminate_destroy(ctx);
+    destroy(ctx);
 
     if (close(fd))
         exit(1);
