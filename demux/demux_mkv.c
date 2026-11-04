@@ -378,6 +378,10 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
 
             size = zstream.total_out;
             inflateEnd(&zstream);
+            // The output can be the input of a following LZO encoding, so zero
+            // its input padding.
+            mp_require(zstream.avail_out >= AV_LZO_INPUT_PADDING);
+            memset(dest + size, 0, AV_LZO_INPUT_PADDING);
 #endif
         } else if (enc->comp_algo == 2) {
             /* lzo encoded track */
@@ -411,6 +415,10 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
                 dstlen = MPMAX(1, 2 * dstlen);
             }
             size = dstlen - out_avail;
+            // The output can be the input of a following LZO encoding, so zero
+            // its input padding. The output padding always covers it.
+            static_assert(AV_LZO_OUTPUT_PADDING >= AV_LZO_INPUT_PADDING, "");
+            memset(dest + size, 0, AV_LZO_INPUT_PADDING);
         } else if (enc->comp_algo == 3) {
             if (enc->comp_settings_len == 0 || !enc->comp_settings) {
                 mp_warn(log, "missing comp_settings, unable to reconstruct the data.\n");
@@ -944,6 +952,7 @@ static void parse_trackentry(struct demuxer *demuxer,
         int len = entry->codec_private.len;
         track->private_data = talloc_size(track, len + AV_LZO_INPUT_PADDING);
         memcpy(track->private_data, entry->codec_private.start, len);
+        memset(track->private_data + len, 0, AV_LZO_INPUT_PADDING);
         track->private_size = len;
         MP_DBG(demuxer, "|  + CodecPrivate, length %u\n", track->private_size);
     }
