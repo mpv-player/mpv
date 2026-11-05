@@ -784,17 +784,19 @@ if features['rubberband']
     sources += files('audio/filter/af_rubberband.c')
 endif
 
-sdl2 = dependency('sdl2', required: false)
+sdl3 = dependency('sdl3', version: '>= 3.2.0', required: false)
 
-sdl2_gamepad = get_option('sdl2-gamepad').require(
-    sdl2.found(),
-    error_message: 'sdl2 was not found!',
+sdl_gamepad = get_option('sdl-gamepad').require(
+    sdl3.found(),
+    error_message: 'sdl3 (>= 3.2.0) was not found!',
 )
-features += {'sdl2-gamepad': sdl2_gamepad.allowed()}
-if features['sdl2-gamepad']
+features += {'sdl-gamepad': sdl_gamepad.allowed()}
+if features['sdl-gamepad']
     sources += files('input/sdl_gamepad.c')
-    dependencies += sdl2
+    dependencies += sdl3
 endif
+
+sdl2 = dependency('sdl2', required: false)
 
 uchardet_opt = get_option('uchardet').require(
     features['iconv'],
@@ -1946,8 +1948,12 @@ if get_option('fuzzers')
     subdir('fuzzers')
 endif
 
-if features['sdl2-audio'] or features['sdl2-gamepad'] or features['sdl2-video']
+if features['sdl2-audio'] or features['sdl2-video']
     warning('You are building with optional SDL2 support. If you encounter build issues, try disabling it.')
+endif
+
+if features['sdl-gamepad']
+    warning('You are building with optional SDL3 support. If you encounter build issues, try disabling it.')
 endif
 
 summary({'cocoa': features['cocoa'] and features['swift'],
