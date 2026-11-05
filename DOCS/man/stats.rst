@@ -28,11 +28,6 @@ stats:
 4      Active key bindings (scroll)
 5      Selected Tracks Info (scroll)
 0      Internal stuff (scroll)
-====   ==================
-
-If stats were displayed by toggling, these key bindings are also active:
-
-====   ==================
 ESC    Close the stats
 ====   ==================
 
