@@ -53,7 +53,9 @@ static bool probe_multi_rar(struct stream *s)
         // Look for rar mark head & main head (assume they're in order).
         if (hdr[6] == 0x00 && hdr[7 + 2] == 0x73) {
             int rflags = hdr[7 + 3] | (hdr[7 + 4] << 8);
-            return rflags & 0x100;
+            // First volume, or a volume with old-style names (.rar, .r00,
+            // ...), where the .rar is always the first one.
+            return (rflags & 0x100) || (rflags & 0x11) == 0x01;
         }
     }
     return false;
