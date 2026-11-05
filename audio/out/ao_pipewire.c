@@ -199,7 +199,17 @@ static void on_process(void *userdata)
     end_time += MP_TIME_S_TO_NS(time.buffered) / ao->samplerate;
     end_time -= pw_stream_get_nsec(p->stream) - time.now;
 
-    int samples = ao_read_data(ao, data, nframes, end_time, NULL, false, false);
+    int samples;
+    if (ao_spdif_pause_active(ao)) {
+        // A bitstream can't have gaps: the sink can't fill IEC 61937 with
+        // silence and replays stale data. Prefill with pause bursts (they
+        // stay if the buffer lock is busy) and always queue a full buffer.
+        ao_fill_silence(ao, data, 0, nframes);
+        ao_read_data(ao, data, nframes, end_time, NULL, true, false);
+        samples = nframes;
+    } else {
+        samples = ao_read_data(ao, data, nframes, end_time, NULL, false, false);
+    }
     b->size = samples;
 
     for (int i = 0; i < buf->n_datas; i++) {
