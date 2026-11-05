@@ -65,7 +65,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
 static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
                           struct bstr name);
 
-#define HWDEC_DELAY_QUEUE_COUNT 2
+#define HWDEC_DELAY_QUEUE_COUNT 4
 #define HWDEC_WAIT_KEYFRAME_COUNT 96
 
 // Fallback number of extra surfaces for fixed-size hw frame pools, if the
