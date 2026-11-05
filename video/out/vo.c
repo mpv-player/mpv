@@ -778,7 +778,7 @@ static int64_t get_display_synced_frame_end(struct vo *vo)
     if (in->base_vsync && in->vsync_interval > 1 && in->current_frame) {
         res = in->base_vsync;
         int extra = !!in->rendering;
-        res += (in->current_frame->num_vsyncs + extra) * in->vsync_interval;
+        res += (in->current_frame->num_vsyncs + extra + 1) * in->vsync_interval;
         if (!in->current_frame->display_synced)
             res = 0;
     }
@@ -794,7 +794,7 @@ static bool still_displaying(struct vo *vo)
 
     int64_t frame_end = get_display_synced_frame_end(vo);
     if (frame_end > 0) {
-        working = frame_end > in->base_vsync;
+        working = frame_end > in->base_vsync + in->vsync_interval;
         goto done;
     }
 
