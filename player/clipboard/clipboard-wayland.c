@@ -336,12 +336,18 @@ static void clipboard_wayland_uninit(struct clipboard_wayland_priv *wl)
         wl_display_disconnect(wl->display);
 }
 
-static bool clipboard_wayland_init(struct clipboard_wayland_priv *wl, bool monitor)
+static bool clipboard_wayland_init(struct clipboard_wayland_priv *wl, bool monitor,
+                                   const char *display_name)
 {
-    if (!getenv("WAYLAND_DISPLAY") && !getenv("WAYLAND_SOCKET"))
+    if (display_name && !display_name[0])
+        display_name = NULL;
+    if (!display_name && !getenv("WAYLAND_DISPLAY") &&
+        !getenv("WAYLAND_SOCKET"))
+    {
         goto err;
+    }
 
-    wl->display = wl_display_connect(NULL);
+    wl->display = wl_display_connect(display_name);
     if (!wl->display)
         goto err;
 
@@ -520,7 +526,8 @@ static int init(struct clipboard_ctx *cl, struct clipboard_init_params *params)
 
     if (mp_make_wakeup_pipe(priv->message_pipe) < 0)
         goto pipe_err;
-    if (!clipboard_wayland_init(priv, params->flags & CLIPBOARD_INIT_ENABLE_MONITORING))
+    if (!clipboard_wayland_init(priv, params->flags & CLIPBOARD_INIT_ENABLE_MONITORING,
+                                params->wayland_display))
         goto init_err;
     if (mp_thread_create(&priv->thread, clipboard_thread, cl->priv))
         goto thread_err;

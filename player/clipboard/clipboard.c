@@ -199,6 +199,7 @@ void reinit_clipboard(struct MPContext *mpctx)
         struct clipboard_init_params params = {
             .mpctx = mpctx,
             .backends = opts->backends,
+            .wayland_display = mpctx->opts->vo->wayland_display,
         };
         params.flags |= opts->monitor ? CLIPBOARD_INIT_ENABLE_MONITORING : 0;
         params.flags |= opts->xwayland ? CLIPBOARD_INIT_ENABLE_XWAYLAND : 0;
