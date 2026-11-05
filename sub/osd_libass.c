@@ -239,8 +239,8 @@ void osd_mangle_ass(bstr *dst, const char *in, bool replace_newlines)
             in += 1;
             continue;
         }
-        // Libass will strip leading whitespace
-        if (in[0] == ' ' && (in == start || in[-1] == '\n')) {
+        // Libass will strip leading and trailing whitespace
+        if (in[0] == ' ' && (in == start || in[-1] == '\n' || in[1] == '\n' || in[1] == '\0')) {
             bstr_xappend(NULL, dst, bstr0("\\h"));
             in += 1;
             continue;
