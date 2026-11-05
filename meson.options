@@ -80,7 +80,7 @@ option('gl-cocoa', type: 'feature', value: 'auto', description: 'OpenGL Cocoa ba
 option('gl-dxinterop', type: 'feature', value: 'auto', description: 'OpenGL/DirectX Interop backend')
 option('gl-win32', type: 'feature', value: 'auto', description: 'OpenGL Win32 backend')
 option('gl-x11', type: 'feature', value: 'disabled', description: 'OpenGL X11/GLX (deprecated/legacy)')
-option('sdl2-video', type: 'feature', value: 'disabled', description: 'SDL2 video output')
+option('sdl-video', type: 'feature', value: 'disabled', description: 'SDL3 video output')
 option('shaderc', type: 'feature', value: 'auto', description: 'libshaderc SPIR-V compiler')
 option('sixel', type: 'feature', value:'auto', description: 'Sixel video output')
 option('spirv-cross', type: 'feature', value: 'auto', description: 'SPIRV-Cross SPIR-V shader converter')

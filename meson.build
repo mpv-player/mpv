@@ -1031,14 +1031,14 @@ if features['jpeg']
     dependencies += jpeg
 endif
 
-sdl2_video = get_option('sdl2-video').require(
-    sdl2.found(),
-    error_message: 'sdl2 was not found!',
+sdl_video = get_option('sdl-video').require(
+    sdl3.found(),
+    error_message: 'sdl3 (>= 3.2.0) was not found!',
 )
-features += {'sdl2-video': sdl2_video.allowed()}
-if features['sdl2-video']
+features += {'sdl-video': sdl_video.allowed()}
+if features['sdl-video']
     sources += files('video/out/vo_sdl.c')
-    dependencies += sdl2
+    dependencies += sdl3
 endif
 
 shaderc = dependency('shaderc', required:
@@ -1948,11 +1948,11 @@ if get_option('fuzzers')
     subdir('fuzzers')
 endif
 
-if features['sdl2-audio'] or features['sdl2-video']
+if features['sdl2-audio']
     warning('You are building with optional SDL2 support. If you encounter build issues, try disabling it.')
 endif
 
-if features['sdl-gamepad']
+if features['sdl-gamepad'] or features['sdl-video']
     warning('You are building with optional SDL3 support. If you encounter build issues, try disabling it.')
 endif
 

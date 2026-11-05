@@ -1,5 +1,5 @@
 /*
- * video output driver for SDL 2.0+
+ * video output driver for SDL3
  *
  * Copyright (C) 2012 Rudolf Polzer <divVerent@xonotic.org>
  *
@@ -26,8 +26,9 @@
 #include <time.h>
 #include <errno.h>
 #include <assert.h>
+#include <math.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #include "input/input.h"
 #include "input/keycodes.h"
@@ -46,7 +47,7 @@
 #include "vo.h"
 
 struct formatmap_entry {
-    Uint32 sdl;
+    SDL_PixelFormat sdl;
     unsigned int mpv;
     int is_rgba;
 };
@@ -56,18 +57,18 @@ const struct formatmap_entry formats[] = {
     {SDL_PIXELFORMAT_UYVY, IMGFMT_UYVY, 0},
     //{SDL_PIXELFORMAT_YVYU, IMGFMT_YVYU, 0},
 #if BYTE_ORDER == BIG_ENDIAN
-    {SDL_PIXELFORMAT_RGB888, IMGFMT_0RGB, 0}, // RGB888 means XRGB8888
+    {SDL_PIXELFORMAT_XRGB8888, IMGFMT_0RGB, 0},
     {SDL_PIXELFORMAT_RGBX8888, IMGFMT_RGB0, 0}, // has no alpha -> bad for OSD
-    {SDL_PIXELFORMAT_BGR888, IMGFMT_0BGR, 0}, // BGR888 means XBGR8888
+    {SDL_PIXELFORMAT_XBGR8888, IMGFMT_0BGR, 0},
     {SDL_PIXELFORMAT_BGRX8888, IMGFMT_BGR0, 0}, // has no alpha -> bad for OSD
     {SDL_PIXELFORMAT_ARGB8888, IMGFMT_ARGB, 1}, // matches SUBBITMAP_BGRA
     {SDL_PIXELFORMAT_RGBA8888, IMGFMT_RGBA, 1},
     {SDL_PIXELFORMAT_ABGR8888, IMGFMT_ABGR, 1},
     {SDL_PIXELFORMAT_BGRA8888, IMGFMT_BGRA, 1},
 #else
-    {SDL_PIXELFORMAT_RGB888, IMGFMT_BGR0, 0}, // RGB888 means XRGB8888
+    {SDL_PIXELFORMAT_XRGB8888, IMGFMT_BGR0, 0},
     {SDL_PIXELFORMAT_RGBX8888, IMGFMT_0BGR, 0}, // has no alpha -> bad for OSD
-    {SDL_PIXELFORMAT_BGR888, IMGFMT_RGB0, 0}, // BGR888 means XBGR8888
+    {SDL_PIXELFORMAT_XBGR8888, IMGFMT_RGB0, 0},
     {SDL_PIXELFORMAT_BGRX8888, IMGFMT_0RGB, 0}, // has no alpha -> bad for OSD
     {SDL_PIXELFORMAT_ARGB8888, IMGFMT_BGRA, 1}, // matches SUBBITMAP_BGRA
     {SDL_PIXELFORMAT_RGBA8888, IMGFMT_ABGR, 1},
@@ -123,11 +124,10 @@ const struct keymap_entry keys[] = {
     {SDLK_VOLUMEUP, MP_KEY_VOLUME_UP},
     {SDLK_VOLUMEDOWN, MP_KEY_VOLUME_DOWN},
     {SDLK_KP_COMMA, MP_KEY_KPDEC},
-    {SDLK_AUDIONEXT, MP_KEY_NEXT},
-    {SDLK_AUDIOPREV, MP_KEY_PREV},
-    {SDLK_AUDIOSTOP, MP_KEY_STOP},
-    {SDLK_AUDIOPLAY, MP_KEY_PLAY},
-    {SDLK_AUDIOMUTE, MP_KEY_MUTE},
+    {SDLK_MEDIA_NEXT_TRACK, MP_KEY_NEXT},
+    {SDLK_MEDIA_PREVIOUS_TRACK, MP_KEY_PREV},
+    {SDLK_MEDIA_STOP, MP_KEY_STOP},
+    {SDLK_MEDIA_PLAY, MP_KEY_PLAY},
     {SDLK_F1, MP_KEY_F + 1},
     {SDLK_F2, MP_KEY_F + 2},
     {SDLK_F3, MP_KEY_F + 3},
@@ -169,8 +169,7 @@ const struct mousemap_entry mousebtns[] = {
 struct priv {
     SDL_Window *window;
     SDL_Renderer *renderer;
-    int renderer_index;
-    SDL_RendererInfo renderer_info;
+    SDL_PropertiesID renderer_props;
     SDL_Texture *tex;
     int tex_swapped;
     struct mp_image_params params;
@@ -181,8 +180,8 @@ struct priv {
     struct osd_bitmap_surface {
         int change_id;
         struct osd_target {
-            SDL_Rect source;
-            SDL_Rect dest;
+            SDL_FRect source;
+            SDL_FRect dest;
             SDL_Texture *tex;
             SDL_Texture *tex2;
         } *targets;
@@ -216,8 +215,8 @@ static bool lock_texture(struct vo *vo, struct mp_image *texmpi)
     }
     void *pixels;
     int pitch;
-    if (SDL_LockTexture(vc->tex, NULL, &pixels, &pitch)) {
-        MP_ERR(vo, "SDL_LockTexture failed\n");
+    if (!SDL_LockTexture(vc->tex, NULL, &pixels, &pitch)) {
+        MP_ERR(vo, "SDL_LockTexture failed: %s\n", SDL_GetError());
         return false;
     }
     texmpi->planes[0] = pixels;
@@ -242,27 +241,30 @@ static bool lock_texture(struct vo *vo, struct mp_image *texmpi)
     return true;
 }
 
-static bool is_good_renderer(SDL_RendererInfo *ri,
-                             const char *driver_name_wanted, bool allow_sw,
+static const SDL_PixelFormat *get_texture_formats(struct priv *vc)
+{
+    return SDL_GetPointerProperty(vc->renderer_props,
+                                  SDL_PROP_RENDERER_TEXTURE_FORMATS_POINTER,
+                                  NULL);
+}
+
+static bool is_good_renderer(struct priv *vc, const char *name,
                              struct formatmap_entry *osd_format)
 {
-    if (driver_name_wanted && driver_name_wanted[0])
-        if (strcmp(driver_name_wanted, ri->name))
-            return false;
-
-    if (!allow_sw &&
-        !(ri->flags & SDL_RENDERER_ACCELERATED))
+    if (!vc->allow_sw && !strcmp(name, SDL_SOFTWARE_RENDERER))
         return false;
 
-    int i, j;
-    for (i = 0; i < ri->num_texture_formats; ++i)
-        for (j = 0; j < MP_ARRAY_SIZE(formats); ++j)
-            if (ri->texture_formats[i] == formats[j].sdl)
-                if (formats[j].is_rgba) {
-                    if (osd_format)
-                        *osd_format = formats[j];
-                    return true;
-                }
+    const SDL_PixelFormat *texfmts = get_texture_formats(vc);
+    if (!texfmts)
+        return false;
+
+    for (int i = 0; texfmts[i] != SDL_PIXELFORMAT_UNKNOWN; ++i)
+        for (int j = 0; j < MP_ARRAY_SIZE(formats); ++j)
+            if (texfmts[i] == formats[j].sdl && formats[j].is_rgba) {
+                if (osd_format)
+                    *osd_format = formats[j];
+                return true;
+            }
 
     return false;
 }
@@ -295,66 +297,48 @@ static void destroy_renderer(struct vo *vo)
         SDL_DestroyRenderer(vc->renderer);
         vc->renderer = NULL;
     }
+    vc->renderer_props = 0;
 }
 
-static bool try_create_renderer(struct vo *vo, int i, const char *driver)
+static bool try_create_renderer(struct vo *vo, const char *driver)
 {
     struct priv *vc = vo->priv;
 
-    // first probe
-    SDL_RendererInfo ri;
-    if (SDL_GetRenderDriverInfo(i, &ri))
-        return false;
-    if (!is_good_renderer(&ri, driver, vc->allow_sw, NULL))
-        return false;
-
-    vc->renderer = SDL_CreateRenderer(vc->window, i, 0);
+    vc->renderer = SDL_CreateRenderer(vc->window, driver);
     if (!vc->renderer) {
-        MP_ERR(vo, "SDL_CreateRenderer failed\n");
+        MP_VERBOSE(vo, "Could not create a renderer: %s\n", SDL_GetError());
         return false;
     }
 
-    if (SDL_GetRendererInfo(vc->renderer, &vc->renderer_info)) {
-        MP_ERR(vo, "SDL_GetRendererInfo failed\n");
+    const char *name = SDL_GetRendererName(vc->renderer);
+    vc->renderer_props = SDL_GetRendererProperties(vc->renderer);
+    if (!name || !vc->renderer_props ||
+        !is_good_renderer(vc, name, &vc->osd_format))
+    {
+        if (name)
+            MP_VERBOSE(vo, "Renderer '%s' does not fulfill requirements "
+                       "on this system\n", name);
         destroy_renderer(vo);
         return false;
     }
 
-    if (!is_good_renderer(&vc->renderer_info, NULL, vc->allow_sw,
-                          &vc->osd_format)) {
-        MP_ERR(vo, "Renderer '%s' does not fulfill "
-                                  "requirements on this system\n",
-                                  vc->renderer_info.name);
-        destroy_renderer(vo);
-        return false;
-    }
-
-    if (vc->renderer_index != i) {
-        MP_INFO(vo, "Using %s\n", vc->renderer_info.name);
-        vc->renderer_index = i;
-    }
+    MP_INFO(vo, "Using %s\n", name);
 
     return true;
 }
 
 static int init_renderer(struct vo *vo)
 {
-    struct priv *vc = vo->priv;
+    // SDL_HINT_RENDER_DRIVER is honoured when no name is passed
+    if (try_create_renderer(vo, NULL))
+        return 0;
 
     int n = SDL_GetNumRenderDrivers();
-    int i;
-
-    if (vc->renderer_index >= 0)
-        if (try_create_renderer(vo, vc->renderer_index, NULL))
+    for (int i = 0; i < n; ++i) {
+        const char *name = SDL_GetRenderDriver(i);
+        if (name && try_create_renderer(vo, name))
             return 0;
-
-    for (i = 0; i < n; ++i)
-        if (try_create_renderer(vo, i, SDL_GetHint(SDL_HINT_RENDER_DRIVER)))
-            return 0;
-
-    for (i = 0; i < n; ++i)
-        if (try_create_renderer(vo, i, NULL))
-            return 0;
+    }
 
     MP_ERR(vo, "No supported renderer\n");
     return -1;
@@ -367,7 +351,8 @@ static void resize(struct vo *vo, int w, int h)
     vo->dheight = h;
     vo_get_src_dst_rects(vo, &vc->src_rect, &vc->dst_rect,
                          &vc->osd_res);
-    SDL_RenderSetLogicalSize(vc->renderer, w, h);
+    SDL_SetRenderLogicalPresentation(vc->renderer, w, h,
+                                     SDL_LOGICAL_PRESENTATION_LETTERBOX);
     vo->want_redraw = true;
     vo_wakeup(vo);
 }
@@ -391,7 +376,7 @@ static void check_resize(struct vo *vo)
 
 static inline void set_screensaver(bool enabled)
 {
-    if (!!enabled == !!SDL_IsScreenSaverEnabled())
+    if (!!enabled == !!SDL_ScreenSaverEnabled())
         return;
 
     if (enabled)
@@ -405,25 +390,27 @@ static void set_fullscreen(struct vo *vo)
     struct priv *vc = vo->priv;
     struct mp_vo_opts *opts = vc->opts_cache->opts;
     int fs = opts->fullscreen;
-    SDL_bool prev_screensaver_state = SDL_IsScreenSaverEnabled();
+    bool prev_screensaver_state = SDL_ScreenSaverEnabled();
 
-    Uint32 fs_flag;
-    if (vc->switch_mode)
-        fs_flag = SDL_WINDOW_FULLSCREEN;
-    else
-        fs_flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
-
-    Uint32 old_flags = SDL_GetWindowFlags(vc->window);
-    int prev_fs = !!(old_flags & fs_flag);
-    if (fs == prev_fs)
+    bool prev_fs = !!(SDL_GetWindowFlags(vc->window) & SDL_WINDOW_FULLSCREEN);
+    if (!!fs == prev_fs)
         return;
 
-    Uint32 flags = 0;
-    if (fs)
-        flags |= fs_flag;
+    if (fs) {
+        SDL_DisplayMode closest;
+        const SDL_DisplayMode *mode = NULL;
+        if (vc->switch_mode &&
+            SDL_GetClosestFullscreenDisplayMode(
+                SDL_GetDisplayForWindow(vc->window), vo->dwidth, vo->dheight,
+                0, false, &closest))
+            mode = &closest;
+        if (!SDL_SetWindowFullscreenMode(vc->window, mode))
+            MP_WARN(vo, "SDL_SetWindowFullscreenMode failed: %s\n",
+                    SDL_GetError());
+    }
 
-    if (SDL_SetWindowFullscreen(vc->window, flags)) {
-        MP_ERR(vo, "SDL_SetWindowFullscreen failed\n");
+    if (!SDL_SetWindowFullscreen(vc->window, fs)) {
+        MP_ERR(vo, "SDL_SetWindowFullscreen failed: %s\n", SDL_GetError());
         return;
     }
 
@@ -436,13 +423,14 @@ static void set_fullscreen(struct vo *vo)
 static void update_screeninfo(struct vo *vo, struct mp_rect *screenrc)
 {
     struct priv *vc = vo->priv;
-    SDL_DisplayMode mode;
-    if (SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(vc->window),
-                                  &mode)) {
-        MP_ERR(vo, "SDL_GetCurrentDisplayMode failed\n");
+    const SDL_DisplayMode *mode =
+        SDL_GetCurrentDisplayMode(SDL_GetDisplayForWindow(vc->window));
+    if (!mode) {
+        MP_ERR(vo, "SDL_GetCurrentDisplayMode failed: %s\n", SDL_GetError());
+        *screenrc = (struct mp_rect){0, 0, vo->dwidth, vo->dheight};
         return;
     }
-    *screenrc = (struct mp_rect){0, 0, mode.w, mode.h};
+    *screenrc = (struct mp_rect){0, 0, mode->w, mode->h};
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
@@ -465,11 +453,12 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     if (vc->tex)
         SDL_DestroyTexture(vc->tex);
-    Uint32 texfmt = SDL_PIXELFORMAT_UNKNOWN;
-    int i, j;
-    for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
-        for (j = 0; j < MP_ARRAY_SIZE(formats); ++j)
-            if (vc->renderer_info.texture_formats[i] == formats[j].sdl)
+    vc->tex = NULL;
+    SDL_PixelFormat texfmt = SDL_PIXELFORMAT_UNKNOWN;
+    const SDL_PixelFormat *texfmts = get_texture_formats(vc);
+    for (int i = 0; texfmts && texfmts[i] != SDL_PIXELFORMAT_UNKNOWN; ++i)
+        for (int j = 0; j < MP_ARRAY_SIZE(formats); ++j)
+            if (texfmts[i] == formats[j].sdl)
                 if (params->imgfmt == formats[j].mpv)
                     texfmt = formats[j].sdl;
     if (texfmt == SDL_PIXELFORMAT_UNKNOWN) {
@@ -482,7 +471,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
                                 SDL_TEXTUREACCESS_STREAMING,
                                 params->w, params->h);
     if (!vc->tex) {
-        MP_ERR(vo, "Could not create a texture\n");
+        MP_ERR(vo, "Could not create a texture: %s\n", SDL_GetError());
         return -1;
     }
 
@@ -535,42 +524,39 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
     while (SDL_WaitEventTimeout(&ev, timeout_ms)) {
         timeout_ms = 0;
         switch (ev.type) {
-        case SDL_WINDOWEVENT:
-            switch (ev.window.event) {
-            case SDL_WINDOWEVENT_EXPOSED:
-                vo->want_redraw = true;
-                break;
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                check_resize(vo);
-                vo_event(vo, VO_EVENT_RESIZE);
-                break;
-            case SDL_WINDOWEVENT_ENTER:
-                mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_ENTER);
-                break;
-            case SDL_WINDOWEVENT_LEAVE:
-                mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
-                break;
-            case SDL_WINDOWEVENT_FOCUS_LOST:
-            case SDL_WINDOWEVENT_FOCUS_GAINED:
-                vo_event(vo, VO_EVENT_FOCUS);
-                break;
-            }
+        case SDL_EVENT_WINDOW_EXPOSED:
+            vo->want_redraw = true;
             break;
-        case SDL_QUIT:
+        case SDL_EVENT_WINDOW_RESIZED:
+            check_resize(vo);
+            vo_event(vo, VO_EVENT_RESIZE);
+            break;
+        case SDL_EVENT_WINDOW_MOUSE_ENTER:
+            mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_ENTER);
+            break;
+        case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+            mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
+            break;
+        case SDL_EVENT_WINDOW_FOCUS_LOST:
+        case SDL_EVENT_WINDOW_FOCUS_GAINED:
+            vo_event(vo, VO_EVENT_FOCUS);
+            break;
+        case SDL_EVENT_QUIT:
             mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
-        case SDL_TEXTINPUT: {
+        case SDL_EVENT_TEXT_INPUT: {
             int sdl_mod = SDL_GetModState();
             int mpv_mod = 0;
-            // we ignore KMOD_LSHIFT, KMOD_RSHIFT and KMOD_RALT (if
+            // we ignore SDL_KMOD_LSHIFT, SDL_KMOD_RSHIFT and SDL_KMOD_RALT (if
             // mp_input_use_alt_gr() is true) because these are already
             // factored into ev.text.text
-            if (sdl_mod & (KMOD_LCTRL | KMOD_RCTRL))
+            if (sdl_mod & (SDL_KMOD_LCTRL | SDL_KMOD_RCTRL))
                 mpv_mod |= MP_KEY_MODIFIER_CTRL;
-            if ((sdl_mod & KMOD_LALT) ||
-                ((sdl_mod & KMOD_RALT) && !mp_input_use_alt_gr(vo->input_ctx)))
+            if ((sdl_mod & SDL_KMOD_LALT) ||
+                ((sdl_mod & SDL_KMOD_RALT) &&
+                 !mp_input_use_alt_gr(vo->input_ctx)))
                 mpv_mod |= MP_KEY_MODIFIER_ALT;
-            if (sdl_mod & (KMOD_LGUI | KMOD_RGUI))
+            if (sdl_mod & (SDL_KMOD_LGUI | SDL_KMOD_RGUI))
                 mpv_mod |= MP_KEY_MODIFIER_META;
             struct bstr t = {
                 ev.text.text, strlen(ev.text.text)
@@ -578,39 +564,40 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
             mp_input_put_key_utf8(vo->input_ctx, mpv_mod, t);
             break;
         }
-        case SDL_KEYDOWN: {
+        case SDL_EVENT_KEY_DOWN: {
             // Issue: we don't know in advance whether this keydown event
-            // will ALSO cause a SDL_TEXTINPUT event
+            // will ALSO cause a SDL_EVENT_TEXT_INPUT event
             // So we're conservative, and only map non printable keycodes
             // (e.g. function keys, arrow keys, etc.)
             // However, this does lose some keypresses at least on X11
-            // (e.g. Ctrl-A generates SDL_KEYDOWN only, but the key is
-            // 'a'... and 'a' is normally also handled by SDL_TEXTINPUT).
+            // (e.g. Ctrl-A generates SDL_EVENT_KEY_DOWN only, but the key is
+            // 'a'... and 'a' is normally also handled by SDL_EVENT_TEXT_INPUT).
             // The default config does not use Ctrl, so this is fine...
             int keycode = 0;
             int i;
             for (i = 0; i < MP_ARRAY_SIZE(keys); ++i)
-                if (keys[i].sdl == ev.key.keysym.sym) {
+                if (keys[i].sdl == ev.key.key) {
                     keycode = keys[i].mpv;
                     break;
                 }
             if (keycode) {
-                if (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
+                if (ev.key.mod & (SDL_KMOD_LSHIFT | SDL_KMOD_RSHIFT))
                     keycode |= MP_KEY_MODIFIER_SHIFT;
-                if (ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL))
+                if (ev.key.mod & (SDL_KMOD_LCTRL | SDL_KMOD_RCTRL))
                     keycode |= MP_KEY_MODIFIER_CTRL;
-                if (ev.key.keysym.mod & (KMOD_LALT | KMOD_RALT))
+                if (ev.key.mod & (SDL_KMOD_LALT | SDL_KMOD_RALT))
                     keycode |= MP_KEY_MODIFIER_ALT;
-                if (ev.key.keysym.mod & (KMOD_LGUI | KMOD_RGUI))
+                if (ev.key.mod & (SDL_KMOD_LGUI | SDL_KMOD_RGUI))
                     keycode |= MP_KEY_MODIFIER_META;
                 mp_input_put_key(vo->input_ctx, keycode);
             }
             break;
         }
-        case SDL_MOUSEMOTION:
-            mp_input_set_mouse_pos(vo->input_ctx, ev.motion.x, ev.motion.y, false);
+        case SDL_EVENT_MOUSE_MOTION:
+            mp_input_set_mouse_pos(vo->input_ctx, (int)ev.motion.x,
+                                   (int)ev.motion.y, false);
             break;
-        case SDL_MOUSEBUTTONDOWN: {
+        case SDL_EVENT_MOUSE_BUTTON_DOWN: {
             int i;
             for (i = 0; i < MP_ARRAY_SIZE(mousebtns); ++i)
                 if (mousebtns[i].sdl == ev.button.button) {
@@ -619,7 +606,7 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
                 }
             break;
         }
-        case SDL_MOUSEBUTTONUP: {
+        case SDL_EVENT_MOUSE_BUTTON_UP: {
             int i;
             for (i = 0; i < MP_ARRAY_SIZE(mousebtns); ++i)
                 if (mousebtns[i].sdl == ev.button.button) {
@@ -628,16 +615,14 @@ static void wait_events(struct vo *vo, int64_t until_time_ns)
                 }
             break;
         }
-        case SDL_MOUSEWHEEL: {
-#if SDL_VERSION_ATLEAST(2, 0, 4)
+        case SDL_EVENT_MOUSE_WHEEL: {
             double multiplier = ev.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -1 : 1;
-#else
-            double multiplier = 1;
-#endif
             int y_code = ev.wheel.y > 0 ? MP_WHEEL_UP : MP_WHEEL_DOWN;
-            mp_input_put_wheel(vo->input_ctx, y_code, abs(ev.wheel.y) * multiplier);
+            mp_input_put_wheel(vo->input_ctx, y_code,
+                               fabs(ev.wheel.y) * multiplier);
             int x_code = ev.wheel.x > 0 ? MP_WHEEL_RIGHT : MP_WHEEL_LEFT;
-            mp_input_put_wheel(vo->input_ctx, x_code, abs(ev.wheel.x) * multiplier);
+            mp_input_put_wheel(vo->input_ctx, x_code,
+                               fabs(ev.wheel.x) * multiplier);
             break;
         }
         }
@@ -669,13 +654,13 @@ static inline void upload_to_texture(struct vo *vo, SDL_Texture *tex,
 
     void *pixels;
     int pitch;
-    if (SDL_LockTexture(tex, NULL, &pixels, &pitch)) {
-        MP_ERR(vo, "Could not lock texture\n");
+    if (!SDL_LockTexture(tex, NULL, &pixels, &pitch)) {
+        MP_ERR(vo, "Could not lock texture: %s\n", SDL_GetError());
     } else {
-        SDL_ConvertPixels(w, h, SDL_PIXELFORMAT_ARGB8888,
-                          bitmap, stride,
-                          vc->osd_format.sdl,
-                          pixels, pitch);
+        if (!SDL_ConvertPixels(w, h, SDL_PIXELFORMAT_ARGB8888,
+                               bitmap, stride, vc->osd_format.sdl,
+                               pixels, pitch))
+            MP_ERR(vo, "SDL_ConvertPixels failed: %s\n", SDL_GetError());
         SDL_UnlockTexture(tex);
     }
 }
@@ -731,10 +716,10 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
         struct osd_target *target = sfc->targets + i;
         struct sub_bitmap *bmp = imgs->parts + i;
 
-        target->source = (SDL_Rect){
+        target->source = (SDL_FRect){
             0, 0, bmp->w, bmp->h
         };
-        target->dest = (SDL_Rect){
+        target->dest = (SDL_FRect){
             bmp->x, bmp->y, bmp->dw, bmp->dh
         };
 
@@ -747,9 +732,8 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
             target->tex = SDL_CreateTexture(vc->renderer,
                     vc->osd_format.sdl, SDL_TEXTUREACCESS_STREAMING,
                     bmp->w, bmp->h);
-        if (!target->tex) {
-            MP_ERR(vo, "Could not create texture\n");
-        }
+        if (!target->tex)
+            MP_ERR(vo, "Could not create a texture: %s\n", SDL_GetError());
         if (target->tex) {
             SDL_SetTextureBlendMode(target->tex,
                                     SDL_BLENDMODE_BLEND);
@@ -766,9 +750,8 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
             target->tex2 = SDL_CreateTexture(vc->renderer,
                     vc->osd_format.sdl, SDL_TEXTUREACCESS_STREAMING,
                     bmp->w, bmp->h);
-        if (!target->tex2) {
-            MP_ERR(vo, "Could not create texture\n");
-        }
+        if (!target->tex2)
+            MP_ERR(vo, "Could not create a texture: %s\n", SDL_GetError());
         if (target->tex2) {
             SDL_SetTextureBlendMode(target->tex2,
                                     SDL_BLENDMODE_ADD);
@@ -789,11 +772,11 @@ static void draw_osd_part(struct vo *vo, int index)
     for (i = 0; i < sfc->num_targets; i++) {
         struct osd_target *target = sfc->targets + i;
         if (target->tex)
-            SDL_RenderCopy(vc->renderer, target->tex,
-                           &target->source, &target->dest);
+            SDL_RenderTexture(vc->renderer, target->tex,
+                              &target->source, &target->dest);
         if (target->tex2)
-            SDL_RenderCopy(vc->renderer, target->tex2,
-                           &target->source, &target->dest);
+            SDL_RenderTexture(vc->renderer, target->tex2,
+                              &target->source, &target->dest);
     }
 }
 
@@ -827,8 +810,6 @@ static int preinit(struct vo *vo)
     vc->opts_cache = m_config_cache_alloc(vc, vo->global, &vo_sub_opts);
 
     // predefine SDL defaults (SDL env vars shall override)
-    SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1",
-                            SDL_HINT_DEFAULT);
     SDL_SetHintWithPriority(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0",
                             SDL_HINT_DEFAULT);
 
@@ -836,44 +817,49 @@ static int preinit(struct vo *vo)
     SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, vc->vsync ? "1" : "0",
                             SDL_HINT_OVERRIDE);
 
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
-        MP_ERR(vo, "SDL_Init failed\n");
+    if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
+        MP_ERR(vo, "SDL_Init failed: %s\n", SDL_GetError());
         return -1;
     }
 
     // then actually try
-    vc->window = SDL_CreateWindow("MPV", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                  640, 480, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
+    vc->window = SDL_CreateWindow("MPV", 640, 480,
+                                  SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     if (!vc->window) {
-        MP_ERR(vo, "SDL_CreateWindow failed\n");
-        return -1;
+        MP_ERR(vo, "SDL_CreateWindow failed: %s\n", SDL_GetError());
+        goto fail;
     }
 
-    // try creating a renderer (this also gets the renderer_info data
+    // try creating a renderer (this also provides the texture format list
     // for query_format to use!)
-    if (init_renderer(vo) != 0) {
-        SDL_DestroyWindow(vc->window);
-        vc->window = NULL;
-        return -1;
-    }
+    if (init_renderer(vo) != 0)
+        goto fail;
 
     vc->wakeup_event = SDL_RegisterEvents(1);
-    if (vc->wakeup_event == (Uint32)-1)
+    if (!vc->wakeup_event)
         MP_ERR(vo, "SDL_RegisterEvents() failed.\n");
 
     MP_WARN(vo, "Warning: this legacy VO has bad performance. Consider fixing "
                 "your graphics drivers, or not forcing the sdl VO.\n");
 
     return 0;
+
+fail:
+    destroy_renderer(vo);
+    if (vc->window)
+        SDL_DestroyWindow(vc->window);
+    vc->window = NULL;
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    return -1;
 }
 
 static int query_format(struct vo *vo, int format)
 {
     struct priv *vc = vo->priv;
-    int i, j;
-    for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
-        for (j = 0; j < MP_ARRAY_SIZE(formats); ++j)
-            if (vc->renderer_info.texture_formats[i] == formats[j].sdl)
+    const SDL_PixelFormat *texfmts = get_texture_formats(vc);
+    for (int i = 0; texfmts && texfmts[i] != SDL_PIXELFORMAT_UNKNOWN; ++i)
+        for (int j = 0; j < MP_ARRAY_SIZE(formats); ++j)
+            if (texfmts[i] == formats[j].sdl)
                 if (format == formats[j].mpv)
                     return 1;
     return 0;
@@ -901,7 +887,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         SDL_UnlockTexture(vc->tex);
     }
 
-    SDL_Rect src, dst;
+    SDL_FRect src, dst;
     src.x = vc->src_rect.x0;
     src.y = vc->src_rect.y0;
     src.w = vc->src_rect.x1 - vc->src_rect.x0;
@@ -911,7 +897,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     dst.w = vc->dst_rect.x1 - vc->dst_rect.x0;
     dst.h = vc->dst_rect.y1 - vc->dst_rect.y0;
 
-    SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
+    SDL_RenderTexture(vc->renderer, vc->tex, &src, &dst);
 
     draw_osd(vo);
 
@@ -922,16 +908,29 @@ done:
 static struct mp_image *get_window_screenshot(struct vo *vo)
 {
     struct priv *vc = vo->priv;
-    struct mp_image *image = mp_image_alloc(vc->osd_format.mpv, vo->dwidth,
-                                                                vo->dheight);
-    if (!image)
-        return NULL;
-    if (SDL_RenderReadPixels(vc->renderer, NULL, vc->osd_format.sdl,
-                             image->planes[0], image->stride[0])) {
-        MP_ERR(vo, "SDL_RenderReadPixels failed\n");
-        talloc_free(image);
+    SDL_Surface *surf = SDL_RenderReadPixels(vc->renderer, NULL);
+    if (!surf) {
+        MP_ERR(vo, "SDL_RenderReadPixels failed: %s\n", SDL_GetError());
         return NULL;
     }
+
+    struct mp_image *image = mp_image_alloc(vc->osd_format.mpv,
+                                            surf->w, surf->h);
+    if (!image) {
+        SDL_DestroySurface(surf);
+        return NULL;
+    }
+
+    if (!SDL_ConvertPixels(surf->w, surf->h, surf->format, surf->pixels,
+                           surf->pitch, vc->osd_format.sdl,
+                           image->planes[0], image->stride[0])) {
+        MP_ERR(vo, "SDL_ConvertPixels failed: %s\n", SDL_GetError());
+        talloc_free(image);
+        SDL_DestroySurface(surf);
+        return NULL;
+    }
+
+    SDL_DestroySurface(surf);
     return image;
 }
 
@@ -956,7 +955,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *(struct mp_image **)data = get_window_screenshot(vo);
         return true;
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        SDL_ShowCursor(*(bool *)data);
+        if (*(bool *)data)
+            SDL_ShowCursor();
+        else
+            SDL_HideCursor();
         return true;
     case VOCTRL_KILL_SCREENSAVER:
         vc->screensaver_enabled = false;
@@ -979,11 +981,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
 #define OPT_BASE_STRUCT struct priv
 
 const struct vo_driver video_out_sdl = {
-    .description = "SDL 2.0 Renderer",
+    .description = "SDL3 Renderer",
     .name = "sdl",
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
-        .renderer_index = -1,
         .vsync = true,
     },
     .options = (const struct m_option []){
