@@ -5425,7 +5425,7 @@ libavfilter, within the system audio API resampler, or any other places).
 
 ``--audio-resample-filter-size=<length>``
     Length of the filter with respect to the lower sampling rate. (default:
-    16)
+    32)
 
 ``--audio-resample-phase-shift=<count>``
     Log2 of the number of polyphase entries. (..., 10->1024, 11->2048,
