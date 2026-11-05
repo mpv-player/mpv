@@ -1395,15 +1395,15 @@ double vo_get_estimated_vsync_jitter(struct vo *vo)
 // end. Returns positive values if the frame is yet to be finished, negative
 // values if it already finished.
 // This can only be called while no new frame is queued (after
-// vo_is_ready_for_frame). Returns 0 for non-display synced frames, or if the
-// deadline for continuous display was missed.
+// vo_is_ready_for_frame). Returns NAN for non-display synced frames, or if
+// there is no display timing, e.g. right after a pause or a missed deadline.
 double vo_get_delay(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     int64_t res = get_display_synced_frame_end(vo);
     mp_mutex_unlock(&in->lock);
-    return res ? MP_TIME_NS_TO_S(res - mp_time_ns()) : 0;
+    return res ? MP_TIME_NS_TO_S(res - mp_time_ns()) : NAN;
 }
 
 void vo_discard_timing_info(struct vo *vo)

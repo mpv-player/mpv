@@ -901,12 +901,19 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     double av_diff = mpctx->last_av_difference;
     MP_STATS(mpctx, "value %f avdiff", av_diff);
 
+    // Estimate the video position, so we can calculate a good A/V difference
+    // value below. This is used to estimate A/V drift.
+    double time_left = vo_get_delay(vo);
+
     // Intended number of additional display frames to drop (<0) or repeat (>0)
     int drop_repeat = 0;
 
     // If we are too far ahead/behind, attempt to drop/repeat frames.
-    // Tolerate some desync to avoid frame dropping due to jitter.
-    if (drop && fabs(av_diff) >= 0.020 && fabs(av_diff) / vsync >= 1)
+    // Tolerate some desync to avoid frame dropping due to jitter. Without
+    // display timing the difference is stale, and only a shown frame brings
+    // the timing back.
+    if (drop && !isnan(time_left) && fabs(av_diff) >= 0.020 &&
+        fabs(av_diff) / vsync >= 1)
         drop_repeat = -av_diff / vsync; // round towards 0
 
     // We can only drop all frames at most. We can repeat much more frames,
@@ -919,10 +926,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     if (mpctx->num_past_frames <= 1 && num_vsyncs < 1)
         num_vsyncs = 1;
 
-    // Estimate the video position, so we can calculate a good A/V difference
-    // value below. This is used to estimate A/V drift.
-    double time_left = vo_get_delay(vo);
-
     // We also know that the timing is (necessarily) off, because we have to
     // align frame timings on the vsync boundaries. This is unavoidable, and
     // for the sake of the A/V sync calculations we pretend it's perfect.
@@ -933,7 +936,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // If syncing took too long, disregard timing of the first frame.
     if (mpctx->num_past_frames == 2 && time_left < 0) {
         vo_discard_timing_info(vo);
-        time_left = 0;
+        time_left = NAN;
     }
 
     if (drop_repeat) {
@@ -942,7 +945,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     }
 
     mpctx->total_avsync_change = 0;
-    update_av_diff(mpctx, time_left * opts->playback_speed);
+    // Without display timing it is unknown when the frame will be displayed,
+    // keep the last A/V difference.
+    if (!isnan(time_left))
+        update_av_diff(mpctx, time_left * opts->playback_speed);
 
     mpctx->past_frames[0].num_vsyncs = num_vsyncs;
 
@@ -953,7 +959,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     }
 
     // A bad guess, only needed when reverting to audio sync.
-    mpctx->time_frame = time_left;
+    mpctx->time_frame = isnan(time_left) ? 0 : time_left;
 
     frame->vsync_interval = vsync;
     frame->vsync_offset = -prev_error;
