@@ -47,6 +47,7 @@ void present_sync_get_info(struct mp_present *present, struct vo_vsync_info *inf
     info->vsync_duration = present->vsync_duration;
     info->skipped_vsyncs = -1;
     info->last_queue_display_time = present->queue_display_time;
+    info->prev_display_time = present->prev_display_time;
 }
 
 void present_sync_swap(struct mp_present *present)
@@ -54,6 +55,7 @@ void present_sync_swap(struct mp_present *present)
     present->swaps++;
     present->pending = true;
     present->queue_display_time = -1;
+    present->prev_display_time = 0;
 
     // Every swap since the last presented frame takes a vsync.
     int64_t behind = MPMAX(present->swaps - present->presented, 0);
@@ -68,6 +70,9 @@ void present_sync_swap(struct mp_present *present)
     int64_t now = mp_time_ns();
     int64_t now_monotonic = MP_TIME_S_TO_NS(ts.tv_sec) + ts.tv_nsec;
     int64_t ust_mp_time = now - (now_monotonic - present->ust);
+    // The last presented frame is the previous swap, its time is exact.
+    if (behind == 1)
+        present->prev_display_time = ust_mp_time;
     int64_t vd = present->vsync_duration;
     int64_t display = ust_mp_time + behind * vd;
     // A frame swapped more than a vsync after the last presented one cannot

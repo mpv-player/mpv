@@ -34,6 +34,7 @@ struct mp_present {
     int64_t vsync_duration;     // -1 until known
     bool pending;
     int64_t queue_display_time;
+    int64_t prev_display_time;
 };
 
 struct mp_present *mp_present_initialize(void *talloc_ctx, struct mp_vo_opts *opts);
