@@ -697,7 +697,7 @@ bool vo_x11_init(struct vo *vo)
 
     x11_error_output = x11->log;
     XSetErrorHandler(x11_errorhandler);
-    x11->present = mp_present_initialize(x11, x11->opts, VO_MAX_SWAPCHAIN_DEPTH);
+    x11->present = mp_present_initialize(x11, x11->opts);
 
     dispName = XDisplayName(NULL);
 
@@ -1384,7 +1384,8 @@ void vo_x11_check_events(struct vo *vo)
                     present_event = (XPresentCompleteNotifyEvent *)cookie->data;
                     present_sync_update_values(x11->present,
                                                present_event->ust * 1000,
-                                               present_event->msc);
+                                               present_event->msc, 0,
+                                               ++x11->present_events);
                 }
             }
             XFreeEventData(x11->display, cookie);

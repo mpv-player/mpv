@@ -57,11 +57,11 @@ static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
     struct vo_wayland_state *wl = ctx->vo->wl;
     struct priv *p = ctx->priv;
 
-    if ((!p->use_fifo && wl->opts->wl_internal_vsync == 1) || wl->opts->wl_internal_vsync == 2)
-        vo_wayland_wait_frame(wl);
-
     if (wl->use_present)
         present_sync_swap(wl->present);
+
+    if ((!p->use_fifo && wl->opts->wl_internal_vsync == 1) || wl->opts->wl_internal_vsync == 2)
+        vo_wayland_wait_frame(wl);
 }
 
 static void wayland_vk_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)

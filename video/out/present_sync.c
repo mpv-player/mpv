@@ -17,110 +17,76 @@
 
 #include <time.h>
 
-#include "misc/linked_list.h"
+#include "common/common.h"
 #include "mpv_talloc.h"
 #include "osdep/timer.h"
 #include "present_sync.h"
 
-/* General nonsense about this mechanism.
- *
- * This requires that the caller has access to two, related values:
- * (ust, msc): clock time and incrementing counter of last vsync (this is
- *             increased continuously, even if we don't swap)
- *
- * Note that this concept originates from the GLX_OML_sync_control extension
- * which includes another parameter: sbc (swap counter of frame that was
- * last displayed). Both the xorg present extension and wayland's
- * presentation-time protocol do not include sbc values so they are omitted
- * from this mechanism. mpv does not need to keep track of sbc calls and can
- * have reliable presentation without it.
+/* The backend reports when a swapped frame was shown, with the swap it
+ * belongs to. vo.c expects last_queue_display_time to be the display time of
+ * the frame just swapped, so the swap reports the time of the last presented
+ * frame plus one vsync for every swap since it. Whether the feedback of the
+ * swapped frame itself arrives before the swap returns depends on the
+ * compositor, the swap count gives the same result either way.
  */
+
+struct mp_present *mp_present_initialize(void *talloc_ctx, struct mp_vo_opts *opts)
+{
+    struct mp_present *present = talloc_zero(talloc_ctx, struct mp_present);
+    present->opts = opts;
+    present->vsync_duration = -1;
+    return present;
+}
 
 void present_sync_get_info(struct mp_present *present, struct vo_vsync_info *info)
 {
-    struct mp_present_entry *cur = present->head;
-    while (cur) {
-        if (cur->queue_display_time)
-            break;
-        cur = cur->list_node.next;
-    }
-    if (!cur)
+    if (!present->pending)
         return;
+    present->pending = false;
 
-    info->vsync_duration = cur->vsync_duration;
-    info->skipped_vsyncs = cur->skipped_vsyncs;
-    info->last_queue_display_time = cur->queue_display_time;
-
-    // Remove from the list, zero out everything, and append at the end
-    LL_REMOVE(list_node, present, cur);
-    *cur = (struct mp_present_entry){0};
-    LL_APPEND(list_node, present, cur);
-}
-
-struct mp_present *mp_present_initialize(void *talloc_ctx, struct mp_vo_opts *opts, int entries)
-{
-    struct mp_present *present = talloc_zero(talloc_ctx, struct mp_present);
-    for (int i = 0; i < entries; i++) {
-        struct mp_present_entry *entry = talloc_zero(present, struct mp_present_entry);
-        LL_APPEND(list_node, present, entry);
-    }
-    present->opts = opts;
-    return present;
+    info->vsync_duration = present->vsync_duration;
+    info->skipped_vsyncs = -1;
+    info->last_queue_display_time = present->queue_display_time;
 }
 
 void present_sync_swap(struct mp_present *present)
 {
-    struct mp_present_entry *cur = present->head;
-    while (cur) {
-        if (!cur->queue_display_time)
-            break;
-        cur = cur->list_node.next;
-    }
-    if (!cur)
+    present->swaps++;
+    present->pending = true;
+    present->queue_display_time = -1;
+
+    // Every swap since the last presented frame takes a vsync.
+    int64_t behind = MPMAX(present->swaps - present->presented, 0);
+    if (!present->presented || behind > present->opts->swapchain_depth + 1 ||
+        (behind && present->vsync_duration <= 0))
         return;
-
-    int64_t ust = cur->ust;
-    int64_t msc = cur->msc;
-    int64_t last_ust = cur->list_node.prev ? cur->list_node.prev->ust : 0;
-    int64_t last_msc = cur->list_node.prev ? cur->list_node.prev->msc : 0;
-
-    // Avoid attempting to use any presentation statistics if the ust is 0 or has
-    // not actually updated (i.e. the last_ust is equal to ust).
-    if (!ust || ust == last_ust) {
-        cur->skipped_vsyncs = -1;
-        cur->vsync_duration = -1;
-        cur->queue_display_time = -1;
-        return;
-    }
-
-    cur->skipped_vsyncs = 0;
-    int64_t ust_passed = ust - last_ust;
-    int64_t msc_passed = msc ? msc - last_msc: 0;
-    if (msc_passed && ust_passed)
-        cur->vsync_duration = ust_passed / msc_passed;
 
     struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts))
         return;
 
+    int64_t now = mp_time_ns();
     int64_t now_monotonic = MP_TIME_S_TO_NS(ts.tv_sec) + ts.tv_nsec;
-    int64_t ust_mp_time = mp_time_ns() - (now_monotonic - ust);
-    cur->queue_display_time = ust_mp_time;
+    int64_t ust_mp_time = now - (now_monotonic - present->ust);
+    int64_t vd = present->vsync_duration;
+    int64_t display = ust_mp_time + behind * vd;
+    // A frame swapped more than a vsync after the last presented one cannot
+    // be displayed before the first vsync after the swap.
+    if (vd > 0 && now > ust_mp_time)
+        display = MPMAX(display, ust_mp_time + ((now - ust_mp_time) / vd + 1) * vd);
+    present->queue_display_time = display;
 }
 
 void present_sync_update_values(struct mp_present *present, int64_t ust,
-                                int64_t msc)
+                                int64_t msc, int64_t refresh_ns, int64_t index)
 {
-    struct mp_present_entry *cur = present->head;
-    int index = 0;
-    while (cur && ++index) {
-        if (!cur->ust || index == present->opts->swapchain_depth)
-            break;
-        cur = cur->list_node.next;
+    if (present->presented && msc > present->msc && ust > present->ust) {
+        present->vsync_duration = (ust - present->ust) / (msc - present->msc);
+    } else if (refresh_ns > 0) {
+        present->vsync_duration = refresh_ns;
     }
-    if (!cur)
-        return;
 
-    cur->ust = ust;
-    cur->msc = msc;
+    present->presented = index;
+    present->ust = ust;
+    present->msc = msc;
 }
