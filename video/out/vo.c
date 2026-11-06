@@ -119,6 +119,13 @@ static const struct vo_driver *const video_out_drivers[] =
     &video_out_lavc,
 };
 
+enum paced_state {
+    PACED_OFF,          // not asked for, or display synced frames
+    PACED_ON,
+    PACED_COMPOSED,     // the compositor composes the frames at its own pace
+    PACED_NO_MULTIPLE,  // no multiple of the frame rate fits the refresh rate range
+};
+
 struct vo_internal {
     mp_thread thread;
     struct mp_dispatch_queue *dispatch;
@@ -175,6 +182,12 @@ struct vo_internal {
     int64_t drop_hold;              // no queue drop before this display time unless the last one helped
     bool queue_drop;                // drop the next timed frame
     int64_t presentation_delay;     // display time minus pts of the last timed frame, INT64_MIN if none
+    int64_t present_lead;           // paced presents go out this long before their refresh time
+    int64_t paced_refresh;          // refresh time the last paced present was meant for, 0 if none
+    bool paced_first;               // the last paced present was the first of its frame
+    bool composed;                  // the compositor composes the frames at its own pace
+    int paced_state;                // enum paced_state, logged when it changes
+    int paced_times;                // presents per frame while paced
 
     struct vo_frame *current_frame; // last frame queued to the VO
 
@@ -728,6 +741,7 @@ static void forget_frames(struct vo *vo)
     in->drop_hold = 0;
     in->queue_drop = false;
     in->presentation_delay = INT64_MIN;
+    in->paced_refresh = 0;
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
     in->current_frame_id += VO_MAX_REQ_FRAMES + 1;
@@ -1008,6 +1022,69 @@ static void wait_until(struct vo *vo, int64_t target)
     mp_mutex_unlock(&in->lock);
 }
 
+static void wait_until_exactly(int64_t target)
+{
+    mp_sleep_ns(target - MP_TIME_MS_TO_NS(1) - mp_time_ns());
+    while (mp_time_ns() < target) {}
+}
+
+static void set_paced_state(struct vo *vo, enum paced_state state, int times,
+                            double value)
+{
+    struct vo_internal *in = vo->in;
+    if (state == in->paced_state && times == in->paced_times)
+        return;
+    in->paced_state = state;
+    in->paced_times = times;
+    switch (state) {
+    case PACED_ON:
+        MP_VERBOSE(vo, "Pacing presents: %d per frame, %.2f Hz\n", times, value);
+        break;
+    case PACED_COMPOSED:
+        MP_VERBOSE(vo, "Pacing off: compositor composes the frames\n");
+        break;
+    case PACED_NO_MULTIPLE:
+        MP_VERBOSE(vo, "Pacing off: no multiple of the frame rate in the "
+                   "refresh rate range\n");
+        break;
+    default:
+        break;
+    }
+}
+
+static void setup_paced_presents(struct vo *vo, struct vo_frame *frame)
+{
+    struct vo_internal *in = vo->in;
+    frame->vsync_interval = 0;
+    if (vo->opts->video_sync != VS_DISP_VRR || frame->display_synced ||
+        frame->duration <= 0 || in->nominal_vsync_interval <= 0)
+    {
+        set_paced_state(vo, PACED_OFF, 0, 0);
+        return;
+    }
+    // A compositor that composes the frames paces them itself.
+    if (in->composed) {
+        set_paced_state(vo, PACED_COMPOSED, 0, 0);
+        return;
+    }
+    // The margin is for the display's own interval, a cap below it is the
+    // user's choice of a rate the display follows.
+    double shortest = in->nominal_vsync_interval * 1.25;
+    if (vo->opts->vrr_max_fps > 0)
+        shortest = MPMAX(shortest, 1e9 / vo->opts->vrr_max_fps);
+    double longest = 1e9 / vo->opts->vrr_min_fps;
+    int most = floor(frame->duration / shortest);
+    int fewest = ceil(frame->duration / (longest * 0.9));
+    if (most < 1 || most < fewest) {
+        set_paced_state(vo, PACED_NO_MULTIPLE, 0, 0);
+        return;
+    }
+    frame->num_vsyncs = most;
+    frame->vsync_interval = frame->duration / most;
+    frame->vsync_offset = 0;
+    set_paced_state(vo, PACED_ON, most, 1e9 / frame->vsync_interval);
+}
+
 static bool render_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
@@ -1026,15 +1103,18 @@ static bool render_frame(struct vo *vo)
         talloc_free(in->current_frame);
         in->current_frame = in->frame_queued;
         in->frame_queued = NULL;
+        setup_paced_presents(vo, in->current_frame);
     } else if (in->paused || !in->current_frame || !in->hasframe ||
-               (in->current_frame->display_synced && in->current_frame->num_vsyncs < 1) ||
-               !in->current_frame->display_synced)
+               in->current_frame->num_vsyncs < 1 ||
+               !(in->current_frame->display_synced ||
+                 in->current_frame->vsync_interval > 0))
     {
         goto done;
     }
 
     frame = vo_frame_ref(in->current_frame);
     mp_assert(frame);
+    bool paced = !frame->display_synced && frame->vsync_interval > 0;
 
     if (frame->display_synced) {
         frame->pts = 0;
@@ -1048,6 +1128,18 @@ static bool render_frame(struct vo *vo)
 
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? sync_target : pts - in->flip_queue_offset;
+    if (paced) {
+        int64_t spacing = frame->vsync_interval;
+        int64_t first = pts + (int64_t)frame->vsync_offset - in->present_lead;
+        if (frame->vsync_offset > 0 && now > first + spacing) {
+            int skip = MPMIN((now - first) / spacing,
+                             (int64_t)in->current_frame->num_vsyncs - 1);
+            in->current_frame->vsync_offset += skip * spacing;
+            in->current_frame->num_vsyncs -= skip;
+            frame->vsync_offset = in->current_frame->vsync_offset;
+        }
+        target = pts + (int64_t)frame->vsync_offset - in->present_lead;
+    }
 
     // When the presentation feedback gives the vsync times, a timed frame is
     // due on the vsync nearest to its pts and is presented half a vsync
@@ -1062,8 +1154,8 @@ static bool render_frame(struct vo *vo)
     // rate that divides the refresh rate.
     // A frame due on a vsync that already got a frame cannot be shown in time.
     int64_t due = INT64_MIN;
-    if (!frame->display_synced && duration >= 0 && in->vsync_feedback &&
-        in->vsync_lattice && in->vsync_interval > 1)
+    if (!frame->display_synced && !paced && duration >= 0 &&
+        in->vsync_feedback && in->vsync_lattice && in->vsync_interval > 1)
     {
         // vsync_lattice is a vsync of the display, the dues go on its grid.
         double slots = (pts - in->vsync_lattice) / in->vsync_interval;
@@ -1118,6 +1210,9 @@ static bool render_frame(struct vo *vo)
             in->current_frame->ideal_frame_vsync += in->current_frame->ideal_frame_vsync_duration;
         }
         in->dropped_frame |= in->current_frame->num_vsyncs < 1;
+    } else if (paced) {
+        if (in->current_frame->num_vsyncs > 1)
+            in->current_frame->vsync_offset += in->current_frame->vsync_interval;
     }
     if (in->current_frame->num_vsyncs > 0)
         in->current_frame->num_vsyncs -= 1;
@@ -1158,7 +1253,7 @@ static bool render_frame(struct vo *vo)
         // Can the core queue new video now? Non-display-sync uses a separate
         // timer instead, but possibly benefits from preparing a frame early.
         bool can_queue = !in->frame_queued &&
-            (in->current_frame->num_vsyncs < 1 || !use_vsync);
+            (in->current_frame->num_vsyncs < 1 || !(use_vsync || paced));
         // This draw covers every redraw request made so far.
         in->request_redraw = false;
         mp_mutex_unlock(&in->lock);
@@ -1172,7 +1267,11 @@ static bool render_frame(struct vo *vo)
 
         stats_time_end(in->stats, "video-draw");
 
-        wait_until(vo, target);
+        if (paced) {
+            wait_until_exactly(target);
+        } else {
+            wait_until(vo, target);
+        }
 
         stats_time_start(in->stats, "video-flip");
 
@@ -1197,6 +1296,20 @@ static bool render_frame(struct vo *vo)
         in->rendering = false;
 
         in->vsync_feedback = have_feedback;
+        in->composed = have_feedback && vsync.composed;
+        if (paced) {
+            if (vsync.prev_display_time > 0 && in->paced_refresh > 0) {
+                int64_t late = vsync.prev_display_time - in->paced_refresh;
+                in->present_lead = MPCLAMP(in->present_lead + late / 4, 0,
+                                           (int64_t)(frame->vsync_interval / 2));
+                if (in->paced_first)
+                    in->presentation_delay = late;
+            }
+            in->paced_refresh = pts + (int64_t)frame->vsync_offset;
+            in->paced_first = frame->vsync_offset == 0;
+        } else {
+            in->paced_refresh = 0;
+        }
         if (due != INT64_MIN) {
             if (have_feedback) {
                 in->presentation_delay = vsync.last_queue_display_time - pts;
@@ -1204,7 +1317,7 @@ static bool render_frame(struct vo *vo)
             } else {
                 in->prev_late = INT_MIN;
             }
-        } else {
+        } else if (!paced) {
             in->presentation_delay = INT64_MIN;
         }
         if (have_feedback && !frame->display_synced && in->vsync_interval > 1) {
@@ -1239,7 +1352,7 @@ static bool render_frame(struct vo *vo)
         in->request_redraw = false;
 
     if (in->current_frame && in->current_frame->num_vsyncs &&
-        in->current_frame->display_synced)
+        (in->current_frame->display_synced || in->current_frame->vsync_interval > 0))
         more_frames = true;
 
     if (in->frame_queued && in->frame_queued->display_synced)
@@ -1416,6 +1529,8 @@ void vo_set_paused(struct vo *vo, bool paused)
             in->request_redraw = true;
             wakeup_core(vo);
         }
+        if (in->paused && in->current_frame && !in->current_frame->display_synced)
+            in->current_frame->num_vsyncs = 0;
         reset_vsync_timings(vo);
         in->prev_late = INT_MIN;
         in->queue_drop = false;

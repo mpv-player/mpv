@@ -199,7 +199,10 @@ static const m_option_t mp_vo_opt_list[] = {
         {"display-adrop", VS_DISP_ADROP},
         {"display-vdrop", VS_DISP_VDROP},
         {"display-desync", VS_DISP_NONE},
+        {"display-vrr", VS_DISP_VRR},
         {"desync", VS_NONE})},
+    {"video-sync-vrr-min-fps", OPT_DOUBLE(vrr_min_fps), M_RANGE(1, DBL_MAX)},
+    {"video-sync-vrr-max-fps", OPT_DOUBLE(vrr_max_fps), M_RANGE(0, DBL_MAX)},
 #if HAVE_X11
     {"x11-netwm", OPT_CHOICE(x11_netwm, {"auto", 0}, {"no", -1}, {"yes", 1})},
     {"x11-bypass-compositor", OPT_CHOICE(x11_bypass_compositor,
@@ -293,6 +296,7 @@ const struct m_sub_options vo_sub_opts = {
         .mmcss_profile = "Playback",
         .ontop_level = -1,
         .timing_offset = 0.050,
+        .vrr_min_fps = 48,
         .swapchain_depth = 2,
         .focus_on = 1,
     },

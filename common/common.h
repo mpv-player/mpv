@@ -110,6 +110,7 @@ enum video_sync {
     VS_DISP_ADROP,
     VS_DISP_VDROP,
     VS_DISP_NONE,
+    VS_DISP_VRR,
     VS_NONE,
 };
 

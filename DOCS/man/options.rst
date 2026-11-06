@@ -8369,8 +8369,25 @@ Video Sync
     :display-desync:    Sync video to display, and let audio play on its own.
                         May desync with audio by an arbitrary amount, until it
                         is manually fixed with a seek.
+    :display-vrr:       For displays with a variable refresh rate. Video is
+                        timed to audio as in ``audio`` mode, and every frame is
+                        presented several times at even intervals, at the
+                        highest multiple of the video frame rate that fits the
+                        refresh rate range of the display, so the display
+                        refreshes in step with the video and audio is not
+                        resampled. Set the range with
+                        ``--video-sync-vrr-min-fps`` and
+                        ``--video-sync-vrr-max-fps``.
     :desync:            Sync video according to system clock, and let audio play
                         on its own.
+
+``--video-sync-vrr-min-fps=<fps>``
+    The lowest refresh rate the display supports with a variable refresh rate
+    (default: 48). ``--video-sync=display-vrr`` presents above this rate.
+
+``--video-sync-vrr-max-fps=<fps>``
+    The highest rate ``--video-sync=display-vrr`` presents at (default: 0,
+    which means the refresh rate of the display mode).
 
 ``--video-sync-max-factor=<value>``
     Maximum multiple for which to try to fit the video's FPS to the display's
