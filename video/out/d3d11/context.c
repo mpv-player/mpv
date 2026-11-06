@@ -414,6 +414,13 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
 
         info->last_queue_display_time = mp_time_ns() +
             (qpc_to_ns(sw, last_queue_display_time_qpc) - qpc_ns_now(sw));
+
+        if (stats.PresentCount == submit_count - 1 &&
+            stats.PresentRefreshCount == stats.SyncRefreshCount)
+        {
+            info->prev_display_time = mp_time_ns() +
+                (qpc_to_ns(sw, stats.SyncQPCTime.QuadPart) - qpc_ns_now(sw));
+        }
     }
 }
 
