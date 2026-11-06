@@ -502,6 +502,8 @@ local function formats_to_edl(json, formats, use_all_formats)
         has_video_only = has_video_only or video_only
     end
 
+    local has_video_track = false
+    local has_audio_track = false
     local has_requested_video = false
     local has_requested_audio = false
     local next_program_id = 0
@@ -529,6 +531,7 @@ local function formats_to_edl(json, formats, use_all_formats)
                 media_type = "video",
                 codec = map_codec_to_mpv(track.vcodec),
             }
+            has_video_track = true
             if is_default then
                 has_requested_video = true
             end
@@ -539,6 +542,7 @@ local function formats_to_edl(json, formats, use_all_formats)
                 codec = map_codec_to_mpv(track.acodec) or
                         ext_map[track.ext],
             }
+            has_audio_track = true
             if is_default then
                 has_requested_audio = true
             end
@@ -638,7 +642,10 @@ local function formats_to_edl(json, formats, use_all_formats)
         return nil
     end
 
-    if has_requested_audio ~= has_requested_video then
+    -- Only deselect the type that wasn't requested if there are tracks of
+    -- that type, so that e.g. thumbnails of audio-only sources stay selected.
+    if has_requested_audio ~= has_requested_video and
+       has_audio_track and has_video_track then
         local not_req_prop = has_requested_video and "aid" or "vid"
         if mp.get_property(not_req_prop) == "auto" then
             mp.set_property("file-local-options/" .. not_req_prop, "no")
