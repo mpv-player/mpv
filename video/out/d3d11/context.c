@@ -402,12 +402,18 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
         int64_t last_queue_display_time_qpc = stats.SyncQPCTime.QuadPart +
             queued_frames * p->vsync_duration_qpc;
 
-        // Only set the estimated display time if it's after the last submission
-        // time. It could be before if mpv skips a lot of frames.
-        if (last_queue_display_time_qpc >= p->last_submit_qpc) {
-            info->last_queue_display_time = mp_time_ns() +
-                (qpc_to_ns(sw, last_queue_display_time_qpc) - qpc_ns_now(sw));
+        // The guess assumes a present on every vsync and is early after a
+        // skipped one. The frame cannot be displayed before the first vsync
+        // after it was submitted.
+        int64_t first_vsync_qpc = stats.SyncQPCTime.QuadPart;
+        if (p->last_submit_qpc > first_vsync_qpc) {
+            int64_t passed = (p->last_submit_qpc - first_vsync_qpc) / p->vsync_duration_qpc;
+            first_vsync_qpc += (passed + 1) * p->vsync_duration_qpc;
         }
+        last_queue_display_time_qpc = MPMAX(last_queue_display_time_qpc, first_vsync_qpc);
+
+        info->last_queue_display_time = mp_time_ns() +
+            (qpc_to_ns(sw, last_queue_display_time_qpc) - qpc_ns_now(sw));
     }
 }
 
