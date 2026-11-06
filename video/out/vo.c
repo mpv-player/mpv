@@ -163,6 +163,12 @@ struct vo_internal {
     int64_t drop_count;
     bool dropped_frame;             // the previous frame was dropped
 
+    // Timed frames on the vsync grid, see render_frame().
+    bool vsync_feedback;            // the last flip got a display time from the VO
+    int64_t last_due;               // vsync the last presented timed frame was due on
+    int64_t vsync_lattice;          // a vsync of the display, steadied against the feedback's jitter, 0 if none
+    bool round_up;                  // a pts halfway between two vsyncs goes on the later one
+
     struct vo_frame *current_frame; // last frame queued to the VO
 
     int64_t wakeup_pts;             // time at which to pull frame from decoder
@@ -296,6 +302,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
         .req_frames = 1,
         .frame_refs = 2, // current_frame + frame_queued
         .estimated_vsync_jitter = -1,
+        .last_due = INT64_MIN,
         .stats = stats_ctx_create(vo, global, "vo"),
     };
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
@@ -560,6 +567,7 @@ static void update_display_fps(struct vo *vo)
     if (in->display_fps != display_fps) {
         in->nominal_vsync_interval =  display_fps > 0 ? 1e9 / display_fps : 0;
         in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
+        in->vsync_lattice = 0;
         in->display_fps = display_fps;
 
         MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
@@ -703,6 +711,8 @@ static void forget_frames(struct vo *vo)
     in->hasframe_rendered = false;
     in->drop_count = 0;
     in->delayed_count = 0;
+    in->vsync_feedback = false;
+    in->last_due = INT64_MIN;
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
     in->current_frame_id += VO_MAX_REQ_FRAMES + 1;
@@ -903,6 +913,21 @@ void vo_wait_frame(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 }
 
+// Whether a timed frame that is vsyncs late catches up on its own within a
+// second. A frame rate below the refresh rate leaves vsyncs without a new
+// frame, and a frame that waits behind another catches up by those. The
+// 1000/1001 rates on a 60 Hz display take 17 s per vsync though, a wait
+// that long costs more than a dropped frame.
+static bool late_frame_catches_up(struct vo_internal *in, int64_t duration,
+                                  int vsyncs)
+{
+    double spare = duration - in->vsync_interval;
+    if (spare <= 0)
+        return false;
+    double frames = vsyncs * in->vsync_interval / spare;
+    return frames * duration <= MP_TIME_S_TO_NS(1);
+}
+
 // Wait until realtime is >= ts
 // called without lock
 static void wait_until(struct vo *vo, int64_t target)
@@ -959,8 +984,53 @@ static bool render_frame(struct vo *vo)
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? sync_target : pts - in->flip_queue_offset;
 
-    // "normal" strict drop threshold.
-    in->dropped_frame = duration >= 0 && end_time < now;
+    // When the presentation feedback gives the vsync times, a timed frame is
+    // due on the vsync nearest to its pts and is presented half a vsync
+    // before it, clear of the pickup a compositor does right after the
+    // previous vsync, where a present lands on either side of it, and well
+    // ahead of the latch at its own.
+    // The pts phase on the vsync lattice decides the vsync, with a hysteresis
+    // across the half vsync, a pts within a tenth of a vsync of it keeps the
+    // rounding direction, which frames clearly on one side set. So the jitter
+    // of the pts cannot flip frames between two vsyncs while they sit halfway,
+    // which lasts a few frames for most rates, as long as the file for a
+    // rate that divides the refresh rate.
+    // A frame due on a vsync that already got a frame cannot be shown in time.
+    int64_t due = INT64_MIN;
+    if (!frame->display_synced && duration >= 0 && in->vsync_feedback &&
+        in->vsync_lattice && in->vsync_interval > 1)
+    {
+        // vsync_lattice is a vsync of the display, the dues go on its grid.
+        double slots = (pts - in->vsync_lattice) / in->vsync_interval;
+        double below = floor(slots);
+        double phase = slots - below;
+        if (phase > 0.1 && phase < 0.4) {
+            in->round_up = false;
+        } else if (phase > 0.6 && phase < 0.9) {
+            in->round_up = true;
+        }
+        bool up = phase < 0.4 ? false : phase > 0.6 ? true : in->round_up;
+        due = in->vsync_lattice + (int64_t)(in->vsync_interval * (below + up));
+        target = due - (int64_t)(in->vsync_interval * 0.5);
+    }
+    // The frame rate counts as matched to the refresh rate when a frame that
+    // waits a vsync behind another does not catch up within a second. A
+    // frame due on a vsync that already got one can only be shown on the
+    // next vsync, it takes that one when the wait clears soon, and is
+    // dropped otherwise, every frame after it would wait as well.
+    bool rate_matched = due != INT64_MIN &&
+                        !late_frame_catches_up(in, duration, 1);
+    bool due_taken = due != INT64_MIN && due <= in->last_due;
+    if (due_taken && !rate_matched) {
+        int64_t shift = in->last_due + (int64_t)in->vsync_interval - due;
+        due += shift;
+        target += shift;
+        due_taken = false;
+    }
+
+    // "normal" strict drop threshold, or the frame cannot be displayed in
+    // time because of the frames before it.
+    in->dropped_frame = duration >= 0 && (end_time < now || due_taken);
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
@@ -988,6 +1058,9 @@ static bool render_frame(struct vo *vo)
 
     // Always render when paused (it's typically the last frame for a while).
     in->dropped_frame &= !in->paused;
+
+    if (!in->dropped_frame && due != INT64_MIN)
+        in->last_due = due;
 
     bool use_vsync = in->current_frame->display_synced && !in->paused;
     if (use_vsync && !in->expecting_vsync) // first DS frame in a row
@@ -1030,9 +1103,10 @@ static bool render_frame(struct vo *vo)
         };
         if (vo->driver->get_vsync)
             vo->driver->get_vsync(vo, &vsync);
+        bool have_feedback = vsync.last_queue_display_time > 0;
 
         // Make up some crap if presentation feedback is missing.
-        if (vsync.last_queue_display_time <= 0)
+        if (!have_feedback)
             vsync.last_queue_display_time = mp_time_ns();
 
         stats_time_end(in->stats, "video-flip");
@@ -1041,6 +1115,21 @@ static bool render_frame(struct vo *vo)
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
 
+        in->vsync_feedback = have_feedback;
+        if (have_feedback && !frame->display_synced && in->vsync_interval > 1) {
+            // The reported display times jitter, a 60 Hz mode on a panel that
+            // scans at 240 Hz reports vsyncs on the panel's grid, so the vsync
+            // lattice the timed frames go on follows them slowly, snapped to
+            // the reported vsync, then pulled a sixteenth of the way to it.
+            int64_t t = vsync.last_queue_display_time;
+            if (!in->vsync_lattice) {
+                in->vsync_lattice = t;
+            } else {
+                in->vsync_lattice += (int64_t)(in->vsync_interval *
+                    llrint((t - in->vsync_lattice) / in->vsync_interval));
+                in->vsync_lattice += (t - in->vsync_lattice) / 16;
+            }
+        }
         update_vsync_timing_after_swap(vo, &vsync);
     }
 
