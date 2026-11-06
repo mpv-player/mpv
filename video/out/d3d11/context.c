@@ -129,6 +129,7 @@ struct priv {
     int64_t last_sync_qpc_time;
     int64_t vsync_duration_qpc;
     int64_t last_submit_qpc;
+    IDXGISwapChainMedia *media;
 
     struct mp_dxgi_factory_ctx dxgi_ctx;
 };
@@ -422,6 +423,10 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
                 (qpc_to_ns(sw, stats.SyncQPCTime.QuadPart) - qpc_ns_now(sw));
         }
     }
+
+    DXGI_FRAME_STATISTICS_MEDIA media;
+    if (p->media && SUCCEEDED(IDXGISwapChainMedia_GetFrameStatisticsMedia(p->media, &media)))
+        info->composed = media.CompositionMode == DXGI_FRAME_PRESENTATION_MODE_COMPOSED;
 }
 
 static bool d3d11_set_fullscreen(struct ra_ctx *ctx)
@@ -535,6 +540,7 @@ static void d3d11_uninit(struct ra_ctx *ctx)
 
     if (ctx->ra)
         ra_tex_free(ctx->ra, &p->backbuffer);
+    SAFE_RELEASE(p->media);
     SAFE_RELEASE(p->swapchain);
     if (!ctx->opts.composition) {
         vo_w32_uninit(ctx->vo);
@@ -631,6 +637,10 @@ static bool d3d11_init(struct ra_ctx *ctx)
     };
     if (!mp_d3d11_create_swapchain(p->device, ctx->log, &scopts, &p->swapchain))
         goto error;
+
+    // For its frame statistics, which say whether DWM composes the window.
+    IDXGISwapChain_QueryInterface(p->swapchain, &IID_IDXGISwapChainMedia,
+                                  (void **)&p->media);
 
     if (ctx->opts.composition)
         vo_w32_swapchain(ctx->vo, p->swapchain);

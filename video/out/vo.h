@@ -317,6 +317,11 @@ struct vo_vsync_info {
     // call was displayed, when the backend knows that time exactly by now.
     // 0 if unknown or unsupported.
     int64_t prev_display_time;
+
+    // The last displayed frame was composed by the compositor rather than
+    // flipped to the display, as is or as an overlay plane.
+    // false if unknown or unsupported.
+    bool composed;
 };
 
 struct vo_driver {
