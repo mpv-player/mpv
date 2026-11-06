@@ -699,6 +699,9 @@ static struct mp_filter *vf_amf_frc_create(struct mp_filter *parent,
         return NULL;
     }
 
+    MP_WARN(f, "Warning: amf_frc is deprecated and will be removed in a future "
+               "release. Use --vf=lavfi=[frc_amf] instead.\n");
+
     mp_filter_add_pin(f, MP_PIN_IN, "in");
     mp_filter_add_pin(f, MP_PIN_OUT, "out");
 

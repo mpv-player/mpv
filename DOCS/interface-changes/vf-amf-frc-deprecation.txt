@@ -1,0 +1,1 @@
+deprecate `--vf=amf_frc`, instead use `--vf=lavfi=[frc_amf]` as a replacement
