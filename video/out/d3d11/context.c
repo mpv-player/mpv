@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <math.h>
+
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "osdep/timer.h"
@@ -366,9 +368,19 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
         sqt_passed = stats.SyncQPCTime.QuadPart - p->last_sync_qpc_time;
     p->last_sync_qpc_time = stats.SyncQPCTime.QuadPart;
 
-    // If any vsyncs have passed, estimate the physical frame rate
-    if (src_passed && sqt_passed)
+    // The predictions below need the vsync duration. The one estimated from
+    // the statistics, the time between their vsyncs over their refresh count,
+    // is off for a window presenting below the refresh rate, the refresh
+    // count skips the vsyncs DWM did not compose, and the vsync times of a
+    // 60 Hz mode on a panel that scans at 240 Hz sit on the panel's grid. The
+    // VO knows the refresh rate, use its interval and keep the estimate for a
+    // VO without one.
+    double vsync_ns = vo_get_vsync_interval(sw->ctx->vo);
+    if (vsync_ns > 0) {
+        p->vsync_duration_qpc = llrint(vsync_ns * p->perf_freq / 1e9);
+    } else if (src_passed && sqt_passed) {
         p->vsync_duration_qpc = sqt_passed / src_passed;
+    }
     if (p->vsync_duration_qpc)
         info->vsync_duration = qpc_to_ns(sw, p->vsync_duration_qpc);
 
