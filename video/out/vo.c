@@ -174,6 +174,7 @@ struct vo_internal {
     int drop_level;                 // lateness at the last queue drop, 0 if none
     int64_t drop_hold;              // no queue drop before this display time unless the last one helped
     bool queue_drop;                // drop the next timed frame
+    int64_t presentation_delay;     // display time minus pts of the last timed frame, INT64_MIN if none
 
     struct vo_frame *current_frame; // last frame queued to the VO
 
@@ -310,6 +311,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
         .estimated_vsync_jitter = -1,
         .last_due = INT64_MIN,
         .prev_late = INT_MIN,
+        .presentation_delay = INT64_MIN,
         .stats = stats_ctx_create(vo, global, "vo"),
     };
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
@@ -725,6 +727,7 @@ static void forget_frames(struct vo *vo)
     in->drop_level = 0;
     in->drop_hold = 0;
     in->queue_drop = false;
+    in->presentation_delay = INT64_MIN;
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
     in->current_frame_id += VO_MAX_REQ_FRAMES + 1;
@@ -1196,10 +1199,13 @@ static bool render_frame(struct vo *vo)
         in->vsync_feedback = have_feedback;
         if (due != INT64_MIN) {
             if (have_feedback) {
+                in->presentation_delay = vsync.last_queue_display_time - pts;
                 check_timed_frame_late(vo, due, vsync.last_queue_display_time);
             } else {
                 in->prev_late = INT_MIN;
             }
+        } else {
+            in->presentation_delay = INT64_MIN;
         }
         if (have_feedback && !frame->display_synced && in->vsync_interval > 1) {
             // The reported display times jitter, a 60 Hz mode on a panel that
@@ -1584,6 +1590,15 @@ double vo_get_delay(struct vo *vo)
     int64_t res = get_display_synced_frame_end(vo);
     mp_mutex_unlock(&in->lock);
     return res ? MP_TIME_NS_TO_S(res - mp_time_ns()) : NAN;
+}
+
+double vo_get_presentation_delay(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    int64_t res = in->presentation_delay;
+    mp_mutex_unlock(&in->lock);
+    return res == INT64_MIN ? NAN : MP_TIME_NS_TO_S(res);
 }
 
 int64_t vo_get_delayed_count(struct vo *vo)
