@@ -31,6 +31,20 @@
 #include <windows.h>
 #include <spatialaudioclient.h>
 
+/*
+ * spatialaudioclient.h declares these IIDs as external constants but does not
+ * provide their definitions in the Windows SDK import libraries used by the
+ * native Clang toolchain. Define the SDK interface GUIDs in this translation
+ * unit so lld-link can resolve the COM activation and stream interface IDs.
+ */
+DEFINE_GUID(IID_ISpatialAudioClient,
+    0xbbf8e066, 0xaaaa, 0x49be, 0x9a, 0x4d,
+    0xfd, 0x2a, 0x85, 0x8e, 0xa2, 0x7f);
+
+DEFINE_GUID(IID_ISpatialAudioObjectRenderStream,
+    0xbab5f473, 0xb423, 0x477b, 0x85, 0xf5,
+    0xb5, 0xa3, 0x32, 0xa0, 0x41, 0x53);
+
 #include "ao.h"
 #include "ao_wasapi.h"
 #include "audio/chmap_sel.h"
