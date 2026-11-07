@@ -222,6 +222,8 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
 
     ao->device = talloc_strdup(ao, dev);
     ao->stream_silence = flags & AO_INIT_STREAM_SILENCE;
+    ao->spdif_pause_bursts = flags & AO_INIT_SPDIF_PAUSE_BURSTS;
+    ao->spdif_pause_pos = 0;
 
     init_buffer_pre(ao);
 

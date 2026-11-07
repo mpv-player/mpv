@@ -163,16 +163,60 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
     }
 
     // pad with silence (underflow/paused/eof)
-    if (pad_silence) {
-        for (int n = 0; n < ao->num_planes; n++) {
-            af_fill_silence((char *)data[n] + pos * ao->sstride,
-                    (samples - pos) * ao->sstride,
-                    ao->format);
-        }
-    }
+    if (pad_silence)
+        ao_fill_silence(ao, data, pos, samples - pos);
 
     ao_post_process_data(ao, data, pos);
     return pos;
+}
+
+bool ao_spdif_pause_active(struct ao *ao)
+{
+    return ao->spdif_pause_bursts && af_fmt_is_spdif(ao->format);
+}
+
+// IEC 61937 pause bursts: Pa, Pb, Pc (data type 3: pause), Pd (payload length
+// in bits: 32), then the gap length and zero padding up to the repetition
+// period. The minimum repetition periods follow Kodi: 4 frames for E-AC-3,
+// TrueHD and other 192 kHz formats, 3 frames otherwise. The phase carries over
+// between calls, so bursts stay evenly spaced across buffer boundaries.
+static void fill_spdif_pause(struct ao *ao, uint8_t *dst, int samples)
+{
+    bool hbr = ao->samplerate > 48000;
+    int period = (hbr ? 4 : 3) * ao->channels.num; // in 16-bit words
+    // Gap, in samples at the encoded rate, of one burst period.
+    int encoded_rate = hbr ? ao->samplerate / 4 : ao->samplerate;
+    uint16_t gap = MPMAX(1, (hbr ? 4 : 3) * encoded_rate / ao->samplerate);
+    size_t words = (size_t)samples * ao->sstride / 2;
+    for (size_t i = 0; i < words; i++) {
+        uint16_t w = 0;
+        switch ((ao->spdif_pause_pos + i) % period) {
+        case 0: w = 0xF872; break;  // Pa
+        case 1: w = 0x4E1F; break;  // Pb
+        case 2: w = 0x0003; break;  // Pc: pause
+        case 3: w = 32;     break;  // Pd: 32 bits of payload
+        case 4: w = gap;    break;
+        }
+        // Little endian, like libavformat's spdif muxer output.
+        dst[i * 2] = w & 0xFF;
+        dst[i * 2 + 1] = w >> 8;
+    }
+    ao->spdif_pause_pos = (ao->spdif_pause_pos + words) % period;
+}
+
+void ao_fill_silence(struct ao *ao, void **data, int offset, int samples)
+{
+    if (samples <= 0)
+        return;
+    if (ao_spdif_pause_active(ao)) {
+        // spdif formats are always interleaved
+        fill_spdif_pause(ao, (uint8_t *)data[0] + offset * ao->sstride, samples);
+        return;
+    }
+    for (int n = 0; n < ao->num_planes; n++) {
+        af_fill_silence((char *)data[n] + offset * ao->sstride,
+                        samples * ao->sstride, ao->format);
+    }
 }
 
 static int ao_read_data_locked(struct ao *ao, void **data, int samples,

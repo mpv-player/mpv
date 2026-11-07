@@ -46,6 +46,8 @@ struct ao {
     struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
     int init_flags; // AO_INIT_* flags
     bool stream_silence;        // if audio inactive, just play silence
+    bool spdif_pause_bursts;    // spdif silence as IEC 61937 pause bursts
+    uint64_t spdif_pause_pos;   // 16-bit words of pause bursts written
 
     // The device as selected by the user, usually using ao_device_desc.name
     // from an entry from the list returned by driver->list_devices. If the
@@ -201,6 +203,12 @@ struct ao_driver {
 // These functions can be called by AOs.
 
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking);
+
+// Fill samples of silence starting at data. For spdif formats with
+// spdif_pause_bursts, this writes IEC 61937 pause bursts. Returns whether the
+// AO fills spdif silence that way (pull AOs can then always pad).
+bool ao_spdif_pause_active(struct ao *ao);
+void ao_fill_silence(struct ao *ao, void **data, int offset, int samples);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
