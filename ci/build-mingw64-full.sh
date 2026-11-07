@@ -139,6 +139,7 @@ mpv_args=(
     -Dmujs:default_library=static
     -Dlua=luajit
     -D{amf,d3d11,iconv,javascript,lcms2,libarchive,libbluray,libcurl}=enabled
+    -D{sdl2-audio,sdl2-gamepad,sdl2-video}=enabled
     -D{shaderc,sixel,spirv-cross,subrandr,uchardet,vapoursynth,vulkan}=enabled
     -D{win32-smtc,zimg}=enabled
 )
