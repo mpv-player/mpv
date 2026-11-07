@@ -367,7 +367,7 @@ meson setup build `
     -Dx11=disabled
 if ($SpatialAudioObjectOnly) {
     $config = Get-Content -Path "build/config.h" -Raw
-    if ($config -notmatch '(?m)^#define HAVE_WASAPI_SPATIAL 1\s*) {
+    if ($config.IndexOf("#define HAVE_WASAPI_SPATIAL 1", [StringComparison]::Ordinal) -lt 0) {
         throw "Meson did not enable HAVE_WASAPI_SPATIAL; check the Windows SDK and Meson feature detection."
     }
 
