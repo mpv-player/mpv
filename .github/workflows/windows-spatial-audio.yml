@@ -4,18 +4,10 @@ on:
   push:
     branches:
       - "feature/wasapi-spatial-audio"
-  pull_request:
-    branches:
-      - master
-    paths:
-      - "audio/out/**"
-      - "meson.build"
-      - "ci/build-win32.ps1"
-      - ".github/workflows/windows-spatial-audio.yml"
   workflow_dispatch:
 
 concurrency:
-  group: windows-spatial-audio-${{ github.ref }}
+  group: windows-spatial-audio-\${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -30,8 +22,8 @@ jobs:
       CXX_LD: "lld-link"
       RUST_LD: "lld-link"
       WINDRES: "llvm-rc"
-      CCACHE_BASEDIR: ${{ github.workspace }}
-      CCACHE_DIR: "${{ github.workspace }}\\.ccache"
+      CCACHE_BASEDIR: \${{ github.workspace }}
+      CCACHE_DIR: "\${{ github.workspace }}\.ccache"
       CCACHE_MAXSIZE: 500M
 
     steps:
@@ -44,13 +36,21 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v7
 
+      - name: Restore compiler cache
+        uses: actions/cache/restore@v6
+        with:
+          path: \${{ env.CCACHE_DIR }}
+          key: windows-sdk-x64-\${{ runner.os }}-\${{ github.sha }}
+          restore-keys: |
+            windows-sdk-x64-\${{ runner.os }}-
+
       - name: Install build tools
         shell: pwsh
         run: |
           python -m pip install --upgrade meson
           winget install --exact --id Ccache.Ccache --accept-source-agreements --accept-package-agreements
           winget install --exact --id NASM.NASM --accept-source-agreements --accept-package-agreements
-          "${env:LOCALAPPDATA}\\Microsoft\\WinGet\\Links" >> $env:GITHUB_PATH
+          "$env:LOCALAPPDATA\Microsoft\WinGet\Links" >> $env:GITHUB_PATH
           rustup default nightly
 
       - name: Update Meson wraps
@@ -65,7 +65,7 @@ jobs:
       - name: Locate Visual Studio
         shell: pwsh
         run: |
-          $vswhere = "${env:ProgramFiles(x86)}\\Microsoft Visual Studio\\Installer\\vswhere.exe"
+          $vswhere = "\${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
           $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           if (-not $vsPath) {
             throw "Visual Studio C++ build tools were not found on this runner."
@@ -75,7 +75,7 @@ jobs:
       - name: Verify Windows Spatial Audio SDK header
         shell: pwsh
         run: |
-          $sdkInclude = Join-Path "${env:ProgramFiles(x86)}\\Windows Kits\\10\\Include" "*\\um\\spatialaudioclient.h"
+          $sdkInclude = Join-Path "\${env:ProgramFiles(x86)}\Windows Kits\10\Include" "*\um\spatialaudioclient.h"
           $headers = Get-ChildItem -Path $sdkInclude -ErrorAction SilentlyContinue
           if (-not $headers) {
             throw "spatialaudioclient.h was not found in the installed Windows SDK."
@@ -87,13 +87,13 @@ jobs:
         shell: pwsh
         run: |
           $env:PATH = ($env:PATH -split ';' | Where-Object {
-            $_ -ne 'C:\\Program Files\\LLVM\\bin' -and
-            $_ -ne 'C:\\Program Files\\CMake\\bin' -and
-            $_ -ne 'C:\\Strawberry\\c\\bin'
+            $_ -ne 'C:\Program Files\LLVM\bin' -and
+            $_ -ne 'C:\Program Files\CMake\bin' -and
+            $_ -ne 'C:\Strawberry\c\bin'
           }) -join ';'
-          $env:PATH += ';C:\\Program Files\\NASM'
+          $env:PATH += ';C:\Program Files\NASM'
 
-          Import-Module "$env:VS\\Common7\\Tools\\Microsoft.VisualStudio.DevShell.dll"
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
 
           clang --version
@@ -108,7 +108,7 @@ jobs:
           if (-not (Test-Path "build/config.h")) {
             throw "Meson did not generate build/config.h."
           }
-          $enabled = Select-String -Path "build/config.h" -Pattern '^\\s*#define HAVE_WASAPI_SPATIAL 1\\s*$' -Quiet
+          $enabled = Select-String -Path "build/config.h" -Pattern '^\s*#define HAVE_WASAPI_SPATIAL 1\s*$' -Quiet
           if (-not $enabled) {
             Write-Host "Relevant Meson feature configuration:"
             Select-String -Path "build/config.h" -Pattern 'WASAPI|WIN32_DESKTOP'
@@ -117,7 +117,7 @@ jobs:
           Write-Host "HAVE_WASAPI_SPATIAL=1"
 
       - name: Print Meson build log on failure
-        if: ${{ failure() && steps.build.outcome == 'failure' }}
+        if: \${{ failure() && steps.build.outcome == 'failure' }}
         shell: pwsh
         run: |
           if (Test-Path "build/meson-logs/meson-log.txt") {
@@ -134,19 +134,19 @@ jobs:
         shell: pwsh
         run: |
           $env:PATH = ($env:PATH -split ';' | Where-Object {
-            $_ -ne 'C:\\Program Files\\LLVM\\bin' -and
-            $_ -ne 'C:\\Program Files\\CMake\\bin' -and
-            $_ -ne 'C:\\Strawberry\\c\\bin'
+            $_ -ne 'C:\Program Files\LLVM\bin' -and
+            $_ -ne 'C:\Program Files\CMake\bin' -and
+            $_ -ne 'C:\Strawberry\c\bin'
           }) -join ';'
-          $env:PATH += ';C:\\Program Files\\NASM'
+          $env:PATH += ';C:\Program Files\NASM'
 
-          Import-Module "$env:VS\\Common7\\Tools\\Microsoft.VisualStudio.DevShell.dll"
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
 
           meson test -C build -t 2
 
       - name: Print Meson test log on failure
-        if: ${{ failure() && steps.tests.outcome == 'failure' }}
+        if: \${{ failure() && steps.tests.outcome == 'failure' }}
         shell: pwsh
         run: |
           if (Test-Path "build/meson-logs/testlog.txt") {
@@ -154,10 +154,10 @@ jobs:
           }
 
       - name: Upload Windows SDK build
-        if: ${{ success() }}
+        if: \${{ success() }}
         uses: actions/upload-artifact@v7
         with:
-          name: mpv-spatial-audio-windows-sdk-x64-${{ github.run_number }}
+          name: mpv-spatial-audio-windows-sdk-x64-\${{ github.run_number }}
           path: |
             build/mpv.exe
             build/mpv.com
@@ -167,8 +167,8 @@ jobs:
           retention-days: 14
 
       - name: Save compiler cache
-        if: ${{ always() }}
-        uses: actions/cache@v6
+        if: \${{ always() }}
+        uses: actions/cache/save@v6
         with:
-          path: ${{ env.CCACHE_DIR }}
-          key: windows-sdk-x64-${{ runner.os }}-${{ github.sha }}
+          path: \${{ env.CCACHE_DIR }}
+          key: windows-sdk-x64-\${{ runner.os }}-\${{ github.sha }}
