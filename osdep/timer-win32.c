@@ -20,7 +20,6 @@
 #include <ntstatus.h>
 #include <mmsystem.h>
 #include <stdlib.h>
-#include <versionhelpers.h>
 
 #include <intrin.h>
 
@@ -139,9 +138,11 @@ void mp_raw_time_init(void)
             hires_res = res;
     }
 
-    // "always"/"never"/"perwait"  (or "auto" - same as unset)
+    // "always"/"never"/"perwait"  (or "auto" - same as unset). The perwait
+    // release is not thread-safe and will release timer resolution while other
+    // threads might still be waiting...
     if (!(v = getenv("MPV_HRT")) || !strcmp(v, "auto"))
-        v = IsWindows10OrGreater() ? "perwait" : "always";
+        v = "always";
 
     if (!strcmp(v, "perwait")) {
         // no-op, already per-wait
