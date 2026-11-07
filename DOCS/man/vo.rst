@@ -277,8 +277,8 @@ Available video output drivers are:
         Always resize the backbuffer to window size.
 
 ``sdl``
-    SDL 2.0+ Render video output driver, depending on system with or without
-    hardware acceleration. Should work on all platforms supported by SDL 2.0.
+    SDL3 Render video output driver, depending on system with or without
+    hardware acceleration. Should work on all platforms supported by SDL3.
     For tuning, refer to your copy of the file ``SDL_hints.h``.
 
     .. note:: This driver is for compatibility with systems that don't provide
@@ -291,6 +291,9 @@ Available video output drivers are:
 
     ``--sdl-switch-mode``
         Instruct SDL to switch the monitor video mode when going fullscreen.
+
+    ``--sdl-vsync``
+        Enable vertical synchronization. Enabled by default.
 
 ``dmabuf-wayland``
     Special Wayland output driver designed for use with either drm stateless

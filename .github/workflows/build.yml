@@ -603,7 +603,7 @@ jobs:
               python3 \
               rubberband \
               rust \
-              sdl2 \
+              sdl3 \
               shaderc \
               spirv-cross \
               spirv-headers \
@@ -684,7 +684,7 @@ jobs:
               rubberband \
               rust \
               sekrit-twc-zimg \
-              sdl2 \
+              sdl3 \
               sndio \
               uchardet \
               v4l_compat \
