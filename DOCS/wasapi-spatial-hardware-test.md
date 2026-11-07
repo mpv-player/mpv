@@ -8,10 +8,11 @@ This test is for the native Windows SDK build that contains the optional
 3. A real multichannel PCM source plays through that stream and is heard through
    the intended headphone/speaker setup.
 
-The GitHub Actions runner can validate the first two build-time properties and
-compile/link the program. It cannot validate your physical endpoint, Windows
-Spatial Sound setting, headphone chain, or what you hear. The final listening
-check must be run on the target Windows PC.
+The GitHub Actions runner can validate source compilation/linking and that
+the binary registers the driver. It cannot validate activation against your
+physical endpoint, the Windows Spatial Sound setting, the headphone chain, or
+what you hear. Stream activation and listening must be checked on the target
+Windows PC.
 
 ## Requirements
 
