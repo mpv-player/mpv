@@ -372,7 +372,7 @@ if ($SpatialAudioObjectOnly) {
     }
 
     $targetLine = & ninja -C build -t targets all |
-        Where-Object { $_ -match 'ao_wasapi_spatial\.c\.(obj|o):' } |
+        Where-Object { $_.Contains('ao_wasapi_spatial.c.obj:') -or $_.Contains('ao_wasapi_spatial.c.o:') } |
         Select-Object -First 1
     if (-not $targetLine) {
         throw "Meson did not generate a Ninja object target for ao_wasapi_spatial.c."
