@@ -65,7 +65,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
 static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
                           struct bstr name);
 
-#define HWDEC_DELAY_QUEUE_COUNT 2
+#define HWDEC_DELAY_QUEUE_COUNT 4
 #define HWDEC_WAIT_KEYFRAME_COUNT 96
 
 // Fallback number of extra surfaces for fixed-size hw frame pools, if the
@@ -799,9 +799,12 @@ static void init_avctx(struct mp_filter *vd)
         if (ctx->hwdec.pix_fmt != AV_PIX_FMT_NONE)
             avctx->get_format = get_format_hwdec;
 
-        // Some APIs benefit from this, for others it's additional bloat.
-        if (ctx->hwdec.copying)
+        // Allow decoder to finish decoding before the frames are passed to the
+        // renderer.
+        if (ctx->hwdec.copying || ctx->hwdec.use_hw_frames)
             ctx->max_delay_queue = HWDEC_DELAY_QUEUE_COUNT;
+        if (ctx->max_delay_queue && !ctx->hwdec.use_hw_frames)
+            avctx->extra_hw_frames = ctx->max_delay_queue;
         ctx->hw_probing = true;
 
         threads = ctx->hwdec_opts->hwdec_threads;
@@ -956,9 +959,8 @@ static void uninit_avctx(struct mp_filter *vd)
 // on to at any given time.
 static int hwdec_get_extra_frames(vd_ffmpeg_ctx *ctx)
 {
-    // Structural surface requirement of the player (e.g. the enhancement-layer
-    // pairing queue); applies on top of any user override.
-    int hint = ctx->extra_hw_frames_hint;
+    // Surface requirement of the player + decoder queue.
+    int hint = ctx->extra_hw_frames_hint + ctx->max_delay_queue;
 
     int extra = ctx->hwdec_opts->hwdec_extra_frames;
     if (extra >= 0)
