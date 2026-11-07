@@ -862,6 +862,11 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         mpctx->video_status < STATUS_PLAYING)
         return;
 
+    if (opts->playback_speed != mpctx->display_sync_speed) {
+        mpctx->display_sync_error = 0.0;
+        mpctx->display_sync_speed = opts->playback_speed;
+    }
+
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
                     mode == VS_DISP_RESAMPLE_NONE;
     bool drop = mode == VS_DISP_VDROP || mode == VS_DISP_RESAMPLE ||
