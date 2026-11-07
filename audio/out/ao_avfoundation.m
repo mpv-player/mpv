@@ -34,8 +34,10 @@
 
 @interface AVObserver : NSObject {
     struct ao *ao;
+    dispatch_queue_t queue;
 }
 - (void)handleRestartNotification:(NSNotification*)notification;
+- (void)invalidate;
 @end
 
 struct priv {
@@ -45,6 +47,7 @@ struct priv {
     CMAudioFormatDescriptionRef format_description;
     AVObserver *observer;
     int64_t end_time_av;
+    bool active; // Media data requests enabled; only accessed on queue.
 };
 
 static int64_t CMTimeGetNanoseconds(CMTime time)
@@ -79,6 +82,7 @@ static void feed(struct ao *ao)
     bool eof;
     int real_sample_count = ao_read_data(ao, data, request_sample_count, end_time_av - cur_time_av + cur_time_mp + time_delta, &eof, false, true);
     if (eof) {
+        p->active = false;
         [p->renderer stopRequestingMediaData];
         ao_stop_streaming(ao);
     }
@@ -140,15 +144,43 @@ finish:
     if (sample_buffer) CFRelease(sample_buffer);
 }
 
-static void start(struct ao *ao)
+static void request_media_data(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    p->active = true;
+    [p->renderer requestMediaDataWhenReadyOnQueue:p->queue usingBlock:^{
+        feed(ao);
+    }];
+}
+
+// These helpers are only called on p->queue, like feed().
+static void start_on_queue(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
     p->end_time_av = -1;
     [p->synchronizer setRate:1];
-    [p->renderer requestMediaDataWhenReadyOnQueue:p->queue usingBlock:^{
-        feed(ao);
-    }];
+    request_media_data(ao);
+}
+
+static void stop_on_queue(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    p->active = false;
+    [p->renderer stopRequestingMediaData];
+    [p->renderer flush];
+    [p->synchronizer setRate:0];
+}
+
+static void start(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    dispatch_sync(p->queue, ^{
+        start_on_queue(ao);
+    });
 }
 
 static void stop(struct ao *ao)
@@ -156,9 +188,7 @@ static void stop(struct ao *ao)
     struct priv *p = ao->priv;
 
     dispatch_sync(p->queue, ^{
-        [p->renderer stopRequestingMediaData];
-        [p->renderer flush];
-        [p->synchronizer setRate:0];
+        stop_on_queue(ao);
     });
 }
 
@@ -166,11 +196,16 @@ static bool set_pause(struct ao *ao, bool paused)
 {
     struct priv *p = ao->priv;
 
-    if (paused) {
-        [p->synchronizer setRate:0];
-    } else {
-        [p->synchronizer setRate:1];
-    }
+    dispatch_sync(p->queue, ^{
+        if (paused) {
+            p->active = false;
+            [p->renderer stopRequestingMediaData];
+            [p->synchronizer setRate:0];
+        } else {
+            [p->synchronizer setRate:1];
+            request_media_data(ao);
+        }
+    });
 
     return true;
 }
@@ -202,16 +237,41 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     self = [super init];
     if (self) {
         ao = _ao;
+        queue = ((struct priv *)ao->priv)->queue;
+        dispatch_retain(queue);
     }
     return self;
 }
 - (void)handleRestartNotification:(NSNotification*)notification {
-    char *name = cfstr_get_cstr((CFStringRef)notification.name);
-    MP_WARN(ao, "restarting due to system notification; this will cause desync\n");
-    MP_VERBOSE(ao, "notification name: %s\n", name);
-    talloc_free(name);
-    stop(ao);
-    start(ao);
+    // Notifications can arrive on any thread, including queue. Never wait
+    // for it here: the posting thread may be holding an AVFoundation lock.
+    // The copied block retains self, which keeps queue alive after uninit.
+    dispatch_async(queue, ^{
+        if (!ao)
+            return;
+        char *name = cfstr_get_cstr((CFStringRef)notification.name);
+        MP_WARN(ao, "restarting due to system notification; this will cause desync\n");
+        MP_VERBOSE(ao, "notification name: %s\n", name);
+        talloc_free(name);
+        struct priv *p = ao->priv;
+        bool active = p->active;
+        stop_on_queue(ao);
+        if (active) {
+            start_on_queue(ao);
+        } else {
+            // The flushed buffers are gone; resume from the current time.
+            p->end_time_av = -1;
+        }
+    });
+}
+- (void)invalidate {
+    // Called on queue before the AO and renderer are freed. Even a callback
+    // submitted by an in-flight notification after this point is harmless.
+    ao = NULL;
+}
+- (void)dealloc {
+    dispatch_release(queue);
+    [super dealloc];
 }
 @end
 
@@ -333,14 +393,17 @@ static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    stop(ao);
+    [[NSNotificationCenter defaultCenter] removeObserver:p->observer];
+    dispatch_sync(p->queue, ^{
+        [p->observer invalidate];
+        stop_on_queue(ao);
+    });
 
     [p->renderer release];
     [p->synchronizer release];
     dispatch_release(p->queue);
     CFRelease(p->format_description);
 
-    [[NSNotificationCenter defaultCenter] removeObserver:p->observer];
     [p->observer release];
 
 #if TARGET_OS_IPHONE
