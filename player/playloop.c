@@ -897,6 +897,27 @@ static void handle_vo_events(struct MPContext *mpctx)
         mp_notify(mpctx, MP_EVENT_FOCUS, NULL);
     if (events & VO_EVENT_AMBIENT_LIGHTING_CHANGED)
         mp_notify(mpctx, MP_EVENT_AMBIENT_LIGHTING_CHANGED, NULL);
+
+    if (events & VO_EVENT_GPU_CONTEXT_LOST) {
+        int limit = mpctx->opts->gpu_loss_recovery_attempts;
+        if (limit == 0) {
+            MP_ERR(mpctx, "GPU context lost, recovery disabled\n");
+            mpctx->stop_play = PT_QUIT;
+        } else if (limit > 0 && mpctx->gpu_loss_recovery_count >= limit) {
+            MP_ERR(mpctx, "GPU context lost, recovery attempt limit reached\n");
+            mpctx->stop_play = PT_QUIT;
+        } else {
+            if (limit != -1)
+                mpctx->gpu_loss_recovery_count++;
+            bool had_chain = mpctx->vo_chain;
+            MP_WARN(mpctx, "GPU context lost, recreating video output\n");
+            mp_force_video_reinit(mpctx);
+            if (!mpctx->video_out || (had_chain && !mpctx->vo_chain)) {
+                MP_ERR(mpctx, "Failed to recreate video output\n");
+                mpctx->stop_play = PT_QUIT;
+            }
+        }
+    }
 }
 
 static void handle_sstep(struct MPContext *mpctx)

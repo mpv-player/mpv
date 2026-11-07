@@ -569,6 +569,12 @@ Playback Control
     files. If the automatically selected track fails to initialize, the next
     best track is tried before this option takes effect.
 
+``--gpu-loss-recovery-attempts=<N|inf>``
+    Maximum number of attempts to recreate the video output after GPU context
+    loss, per file (default: 1). ``0`` disables recovery, ``inf`` allows
+    unlimited attempts, and positive values allow that many attempts, per file.
+    If recovery fails or the limit is reached, mpv exits.
+
 ``--play-direction=<forward|+|backward|->``
     Control the playback direction (default: forward). Setting ``backward``
     will attempt to play the file in reverse direction, with decreasing
