@@ -19,12 +19,16 @@
 #include <stdatomic.h>
 #include <string.h>
 
+/*
+ * Define the COM interface GUIDs from the Windows SDK headers in this
+ * translation unit. This must precede headers that include guiddef.h.
+ */
+#include <initguid.h>
+
 #include <audioclient.h>
 #include <mmdeviceapi.h>
 #include <propsys.h>
 #include <windows.h>
-
-#include <initguid.h>
 #include <spatialaudioclient.h>
 
 #include "ao.h"
