@@ -10,7 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 function Stop-Test([string]$Message) {
-    Write-Error $Message
+    Write-Host $Message -ForegroundColor Red
     exit 2
 }
 
