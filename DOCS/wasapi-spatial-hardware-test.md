@@ -1,7 +1,7 @@
 # Windows Spatial Audio hardware validation
 
 This test is for the native Windows SDK build that contains the optional
-\`wasapi-spatial\` audio output. It separates three checks:
+`wasapi-spatial` audio output. It separates three checks:
 
 1. The binary registers the new audio output driver.
 2. Windows activates a Spatial Audio stream for the selected endpoint.
@@ -30,45 +30,45 @@ Atmos/DTS:X dynamic-object metadata. Decode those formats to PCM before testing.
 
 ## 1. Check the endpoint list
 
-Put \`mpv.com\` and \`wasapi-spatial-test.ps1\` in the same directory, then open
+Put `mpv.com` and `wasapi-spatial-test.ps1` in the same directory, then open
 PowerShell in that directory:
 
-\`\`\`powershell
+```powershell
 .\wasapi-spatial-test.ps1 -ListDevices
-\`\`\`
+```
 
 This asks mpv to enumerate endpoints through the Spatial Audio output driver.
-Use \`-AudioDevice "device-name-or-id"\` in the playback command if you need to
-select a particular endpoint. The default is \`auto\`.
+Use `-AudioDevice "device-name-or-id"` in the playback command if you need to
+select a particular endpoint. The default is `auto`.
 
 ## 2. Run a strict Spatial Audio playback test
 
 Use a multichannel PCM file:
 
-\`\`\`powershell
+```powershell
 .\wasapi-spatial-test.ps1 -MediaPath "D:\Audio\surround-5.1.flac"
-\`\`\`
+```
 
 To select a specific endpoint and log to a known location:
 
-\`\`\`powershell
+```powershell
 $testArgs = @{
     MediaPath = "D:\Audio\surround-7.1.flac"
     AudioDevice = "Your Windows output device"
     LogPath = "$PWD\wasapi-spatial-test.log"
 }
 .\wasapi-spatial-test.ps1 @testArgs
-\`\`\`
+```
 
-The script deliberately uses \`--ao=wasapi-spatial\` without a fallback driver.
+The script deliberately uses `--ao=wasapi-spatial` without a fallback driver.
 This is important: a successful ordinary WASAPI fallback must not be mistaken
 for a successful Spatial Audio test.
 
 A successful stream activation should produce a line similar to:
 
-\`\`\`text
+```text
 Using Windows Spatial Audio: ... at ... Hz (... static objects).
-\`\`\`
+```
 
 That confirms stream activation, not by itself correct speaker mapping or
 subjective headphone virtualization. Listen to the channel-identification
@@ -79,29 +79,29 @@ height channels are rendered as expected.
 
 After the strict test, compare the same PCM file through regular WASAPI:
 
-\`\`\`powershell
+```powershell
 .\mpv.com --no-config --ao=wasapi --audio-device=auto "D:\Audio\surround-5.1.flac"
-\`\`\`
+```
 
 For normal use, the optional fallback form is:
 
-\`\`\`powershell
+```powershell
 .\mpv.com --no-config --ao=wasapi-spatial,wasapi "D:\Audio\surround-5.1.flac"
-\`\`\`
+```
 
 The fallback form is convenient for playback but is not suitable for proving
 that Spatial Audio initialized. Use the strict command/script above for that.
 
 ## 4. What to attach when the test fails
 
-Keep the complete \`wasapi-spatial-test.log\` and report:
+Keep the complete `wasapi-spatial-test.log` and report:
 
 - Windows version and build.
 - The exact output endpoint selected.
 - Whether Windows Sonic for Headphones was selected.
 - The source file's channel layout (for example, 5.1 or 7.1 PCM).
-- Whether ordinary \`--ao=wasapi\` plays the same file.
-- Whether the log contains \`Using Windows Spatial Audio:\` and, if not, the
+- Whether ordinary `--ao=wasapi` plays the same file.
+- Whether the log contains `Using Windows Spatial Audio:` and, if not, the
   HRESULT/error immediately preceding the failure.
 
 Do not post private media files or personal device identifiers. A redacted
