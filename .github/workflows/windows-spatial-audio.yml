@@ -39,31 +39,36 @@ jobs:
           $ErrorActionPreference = "Stop"
           python -m pip install --upgrade meson
 
-          # Avoid winget source/region failures on hosted runners. Download the
-          # official NASM 3.02 installer directly and verify its SHA-256 first.
+          # Download the official NASM 3.02 Windows archive directly.
+          # Pin and verify the archive hash before extracting any executable.
           $nasmVersion = "3.02"
-          $nasmInstaller = Join-Path $env:RUNNER_TEMP "nasm-$nasmVersion-installer-x64.exe"
-          $nasmUrl = "https://www.nasm.us/pub/nasm/releasebuilds/$nasmVersion/win64/nasm-$nasmVersion-installer-x64.exe"
-          Invoke-WebRequest -Uri $nasmUrl -OutFile $nasmInstaller
+          $nasmArchive = Join-Path $env:RUNNER_TEMP "nasm-$nasmVersion-win64.zip"
+          $nasmUrl = "https://www.nasm.us/pub/nasm/releasebuilds/$nasmVersion/win64/nasm-$nasmVersion-win64.zip"
+          Invoke-WebRequest -Uri $nasmUrl -OutFile $nasmArchive
 
-          $expectedHash = "0DDB40310861EB29F4D649FEB9466779982A2D251C0DB2B9CF0D21CF591171F3"
-          $actualHash = (Get-FileHash -Path $nasmInstaller -Algorithm SHA256).Hash
+          $expectedHash = "161D0BFAFF53C2F9E9F3E69FD0672323EBABAFD1268976A5CEC11BE92A19AEE7"
+          $actualHash = (Get-FileHash -Path $nasmArchive -Algorithm SHA256).Hash
           if ($actualHash -ne $expectedHash) {
-            throw "NASM installer SHA-256 mismatch. Expected $expectedHash, got $actualHash."
+            throw "NASM archive SHA-256 mismatch. Expected $expectedHash, got $actualHash."
           }
 
-          $nasmInstallDir = Join-Path $env:ProgramFiles "NASM"
-          & $nasmInstaller /S "/D=$nasmInstallDir"
-          if ($LASTEXITCODE -ne 0) {
-            throw "NASM installer failed with exit code $LASTEXITCODE."
+          $nasmExtractDir = Join-Path $env:RUNNER_TEMP "nasm-$nasmVersion"
+          if (Test-Path $nasmExtractDir) {
+            Remove-Item -Path $nasmExtractDir -Recurse -Force
           }
+          New-Item -Path $nasmExtractDir -ItemType Directory -Force | Out-Null
+          Expand-Archive -Path $nasmArchive -DestinationPath $nasmExtractDir -Force
 
-          $nasmExe = Join-Path $nasmInstallDir "nasm.exe"
-          if (-not (Test-Path $nasmExe)) {
-            throw "NASM installation completed without producing $nasmExe."
+          $nasmExe = Get-ChildItem -Path $nasmExtractDir -Filter "nasm.exe" -File -Recurse |
+            Select-Object -First 1
+          if (-not $nasmExe) {
+            throw "The verified NASM archive did not contain nasm.exe."
           }
-          "$nasmInstallDir" >> $env:GITHUB_PATH
-          & $nasmExe -v
+          $nasmDir = $nasmExe.DirectoryName
+          "NASM_DIR=$nasmDir" >> $env:GITHUB_ENV
+          "$nasmDir" >> $env:GITHUB_PATH
+          Write-Host "Using NASM from $($nasmExe.FullName)"
+          & $nasmExe.FullName -v
 
           rustup default nightly
 
@@ -108,9 +113,11 @@ jobs:
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
 
-          # Ensure the VS developer-shell environment still exposes NASM to CMake.
-          $nasmDir = Join-Path $env:ProgramFiles "NASM"
-          $env:PATH = "$nasmDir;$env:PATH"
+          # Ensure the VS developer-shell environment still exposes the verified NASM archive to CMake.
+          if (-not $env:NASM_DIR -or -not (Test-Path (Join-Path $env:NASM_DIR "nasm.exe"))) {
+            throw "The verified NASM executable is unavailable after activating the VS developer shell."
+          }
+          $env:PATH = "$env:NASM_DIR;$env:PATH"
           $nasm = Get-Command nasm.exe -ErrorAction Stop
           Write-Host "Using NASM: $($nasm.Source)"
           & $nasm.Source -v
