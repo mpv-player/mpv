@@ -1296,8 +1296,17 @@ PROTOCOLS
 ``mpv://...``
 
     mpv protocol. This is used for starting mpv from URL handler. The protocol
-    is stripped and the rest is passed to the player as a normal open argument.
+    is stripped and the rest is opened as a playlist entry of network origin.
     Only safe network protocols are allowed to be opened this way.
+
+    A protocol that inlines further URLs is refused even when every URL it
+    names is safe. ``edl://`` is one of these: its specification can reference
+    local files, so it is treated as a local-file protocol. A source whose
+    playback needs an EDL, because its video and audio are separate streams
+    for example, therefore fails through ``mpv://`` while the same URL works
+    from the command line. Pass ``--load-unsafe-playlists`` to allow it. That
+    disables the safety checks for playlist entries, so only pass it when the
+    URLs reaching the handler are trusted.
 
 ``http://...``, ``https://``, ...
 
