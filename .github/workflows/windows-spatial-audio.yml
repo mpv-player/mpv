@@ -67,7 +67,7 @@ jobs:
           }
           Write-Host "Found Windows Spatial Audio SDK header: $($headers[0].FullName)"
 
-      - name: Compile Spatial Audio source with Visual Studio Clang and Windows SDK
+      - name: Build complete mpv with Visual Studio Clang and Windows SDK
         id: build
         shell: pwsh
         run: |
@@ -86,7 +86,7 @@ jobs:
           meson --version
 
           try {
-            ./ci/build-win32.ps1 -SpatialAudioObjectOnly
+            ./ci/build-win32.ps1
           } catch {
             if (Test-Path "build/meson-logs/meson-log.txt") {
               Get-Content "build/meson-logs/meson-log.txt"
@@ -108,3 +108,39 @@ jobs:
           }
           Write-Host "HAVE_WASAPI_SPATIAL=1"
 
+
+      - name: Run Meson tests
+        id: tests
+        shell: pwsh
+        run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object {
+            $_ -ne 'C:\Program Files\LLVM\bin' -and
+            $_ -ne 'C:\Program Files\CMake\bin' -and
+            $_ -ne 'C:\Strawberry\c\bin'
+          }) -join ';'
+          $env:PATH += ';C:\Program Files\NASM'
+
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
+
+          try {
+            meson test -C build -t 2
+          } catch {
+            if (Test-Path "build/meson-logs/testlog.txt") {
+              Get-Content "build/meson-logs/testlog.txt"
+            }
+            throw
+          }
+
+      - name: Upload complete Windows SDK build
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: mpv-spatial-audio-windows-sdk-x64-${{ github.run_number }}
+          path: |
+            build/mpv.exe
+            build/mpv.com
+            build/mpv-*.bat
+            build/vulkan-1.dll
+          if-no-files-found: error
+          retention-days: 14
