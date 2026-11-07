@@ -410,7 +410,7 @@ jobs:
           brew deps ffmpeg-full | grep -v "^libplacebo$" | xargs brew install -q
           brew list libplacebo &>/dev/null && brew upgrade --fetch-HEAD libplacebo || brew install -q --HEAD libplacebo
           brew list ffmpeg-full &>/dev/null && brew upgrade --fetch-HEAD ffmpeg-full || brew install -q --HEAD ffmpeg-full
-          brew link ffmpeg-full
+          brew link libplacebo ffmpeg-full
           brew cleanup -s
 
       - name: Build with meson
