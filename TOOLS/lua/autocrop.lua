@@ -52,7 +52,7 @@ local options = {
     suppress_osd = false,
 }
 
-require "mp.options".read_options(options)
+require "mp.options".read_options(options, nil, function () end)
 
 local cropdetect_label = mp.get_script_name() .. "-cropdetect"
 
