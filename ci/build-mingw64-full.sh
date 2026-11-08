@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
 # Static mpv and libmpv builds on top of the FFmpeg-Builds container images
-# (ghcr.io/btbn/ffmpeg-builds/<target>-<variant>, see
-# https://github.com/BtbN/FFmpeg-Builds). The image ships the cross toolchain,
+# (ghcr.io/ffmpeg-builds/ffmpeg-builds/<target>-<variant>, see
+# https://github.com/FFmpeg-Builds/FFmpeg-Builds). The image ships the cross toolchain,
 # a matching /cross.meson and every FFmpeg dependency as static library in
 # $FFBUILD_PREFIX, so only FFmpeg itself and the things FFmpeg does not need
 # are built here. Run it from the mpv source tree inside the container:
 #
 #   docker run --rm -v "$PWD:/mpv" -w /mpv \
-#       ghcr.io/btbn/ffmpeg-builds/win64-gpl:latest ./ci/build-mingw64-full.sh
+#       ghcr.io/ffmpeg-builds/ffmpeg-builds/win64-gpl:latest ./ci/build-mingw64-full.sh
 #
 # The mpv binaries end up in artifact/, the libmpv package in artifact-libmpv/.
 set -euo pipefail
