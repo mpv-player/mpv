@@ -527,14 +527,14 @@ if features['win32-desktop']
                           cc.find_library('dwmapi'),
                           cc.find_library('gdi32'),
                           cc.find_library('imm32'),
-                          cc.find_library('ntdll'),
                           cc.find_library('ole32'),
                           cc.find_library('pathcch'),
                           cc.find_library('shcore'),
                           cc.find_library('user32'),
                           cc.find_library('uuid'),
                           cc.find_library('uxtheme'),
-                          cc.find_library('version')]
+                          cc.find_library('version'),
+                          cc.find_library('winmm')]
     dependencies += win32_desktop_libs
     path_source = files('osdep/path-win.c')
     if not get_option('fuzzers')
