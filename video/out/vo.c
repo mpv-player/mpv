@@ -907,6 +907,8 @@ void vo_wait_frame(struct vo *vo)
 static void wait_until(int64_t target)
 {
     mp_sleep_ns(target - mp_time_ns());
+    // A sleep can end before its time.
+    while (mp_time_ns() < target) {}
 }
 
 static bool render_frame(struct vo *vo)
