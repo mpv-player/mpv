@@ -150,6 +150,7 @@ void update_core_idle_state(struct MPContext *mpctx)
         mpctx->playback_active = active;
 
         update_screensaver_state(mpctx);
+        mp_set_idle_power_mode(!active);
 
         mp_notify(mpctx, MP_EVENT_CORE_IDLE, NULL);
     }

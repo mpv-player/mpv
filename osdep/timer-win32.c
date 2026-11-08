@@ -18,7 +18,6 @@
 #include <windows.h>
 #include <mmsystem.h>
 #include <stdlib.h>
-#include <versionhelpers.h>
 
 #include <intrin.h>
 
@@ -32,6 +31,7 @@ static LARGE_INTEGER perf_freq;
 // ms values
 static int hires_max = 50;
 static int hires_res = 1;
+static bool hires_playback;
 
 int mp_start_hires_timers(int wait_ms)
 {
@@ -51,6 +51,18 @@ void mp_end_hires_timers(int res_ms)
 #if !HAVE_UWP
     if (res_ms > 0)
         timeEndPeriod(res_ms);
+#endif
+}
+
+void mp_set_idle_power_mode(bool idle)
+{
+#if !HAVE_UWP
+    if (!hires_playback)
+        return;
+    if (idle)
+        timeEndPeriod(hires_res);
+    else
+        timeBeginPeriod(hires_res);
 #endif
 }
 
@@ -124,11 +136,14 @@ void mp_raw_time_init(void)
             hires_res = res / MP_TIME_MS_TO_NS(1);
     }
 
-    // "always"/"never"/"perwait"  (or "auto" - same as unset)
+    // "always"/"never"/"perwait"/"playback"  (or "auto" - same as unset)
     if (!(v = getenv("MPV_HRT")) || !strcmp(v, "auto"))
-        v = IsWindows10OrGreater() ? "perwait" : "always";
+        v = "playback";
 
-    if (!strcmp(v, "perwait")) {
+    if (!strcmp(v, "playback")) {
+        hires_max = 0;
+        hires_playback = true;
+    } else if (!strcmp(v, "perwait")) {
         // no-op, already per-wait
     } else if (!strcmp(v, "never")) {
         hires_max = 0;
