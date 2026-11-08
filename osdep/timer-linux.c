@@ -37,6 +37,10 @@ void mp_sleep_ns(int64_t ns)
     nanosleep(&ts, NULL);
 }
 
+void mp_set_idle_power_mode(bool idle)
+{
+}
+
 uint64_t mp_raw_time_ns(void)
 {
     struct timespec tp = {0};

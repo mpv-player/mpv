@@ -34,6 +34,10 @@ void mp_sleep_ns(int64_t ns)
     mach_wait_until(deadline);
 }
 
+void mp_set_idle_power_mode(bool idle)
+{
+}
+
 uint64_t mp_raw_time_ns(void)
 {
     return mp_raw_time_ns_from_mach(mach_absolute_time());

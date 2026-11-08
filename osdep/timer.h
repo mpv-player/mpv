@@ -19,6 +19,7 @@
 #define MPLAYER_TIMER_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include "config.h"
 
 // Initialize timer, must be called at least once at start.
@@ -41,6 +42,10 @@ uint64_t mp_raw_time_ns(void);
 
 // Sleep in nanoseconds.
 void mp_sleep_ns(int64_t ns);
+
+// Set idle power mode. This may adjust the system's timer resolution or other
+// power-related settings to favor either power saving over timing precision.
+void mp_set_idle_power_mode(bool idle);
 
 #if HAVE_DARWIN
 // Converts mach time to raw time in nanoseconds and returns it.
