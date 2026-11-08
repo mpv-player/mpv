@@ -3,6 +3,7 @@ param(
     [string]$MediaPath,
     [string]$MpvPath = (Join-Path $PSScriptRoot "mpv.com"),
     [string]$AudioDevice = "auto",
+    [string]$AudioChannels = "fl-fr-fc-lfe-bl-br-sl-sr-tfl-tfr-tbl-tbr",
     [string]$LogPath = (Join-Path (Get-Location) "wasapi-spatial-test.log"),
     [switch]$ListDevices
 )
@@ -38,6 +39,10 @@ $logDirectory = Split-Path -Parent $LogPath
 if ($logDirectory -and -not (Test-Path -LiteralPath $logDirectory)) {
     New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
 }
+# Never let a previous successful run satisfy this test.
+if (Test-Path -LiteralPath $LogPath -PathType Leaf) {
+    Remove-Item -LiteralPath $LogPath -Force
+}
 
 Write-Host "Checking that this mpv build registers wasapi-spatial..."
 $aoHelp = (& $MpvPath "--no-config" "--ao=help" 2>&1 | Out-String)
@@ -52,17 +57,21 @@ Write-Host "Audio driver registration: OK" -ForegroundColor Green
 
 Write-Host ""
 Write-Host "Starting STRICT Spatial Audio playback (no WASAPI fallback)."
-Write-Host "Device: $AudioDevice"
-Write-Host "Media:  $MediaPath"
-Write-Host "Log:    $LogPath"
+Write-Host "Device:       $AudioDevice"
+Write-Host "Channel map:  $AudioChannels"
+Write-Host "Media:        $MediaPath"
+Write-Host "Log:          $LogPath"
 Write-Host ""
+Write-Host "The default test requires 12 static objects and a 12-channel 7.1.4 AO."
 Write-Host "Playback may take the full duration of the media. Press Ctrl+C to stop."
 
 $arguments = @(
     "--no-config",
     "--ao=wasapi-spatial",
     "--audio-device=$AudioDevice",
-    "--msg-level=ao=debug",
+    "--audio-channels=$AudioChannels",
+    "--ad-lavc-downmix=no",
+    "--msg-level=all=debug",
     "--log-file=$LogPath"
 )
 
@@ -74,26 +83,38 @@ if (Test-Path -LiteralPath $LogPath -PathType Leaf) {
     $logText = Get-Content -LiteralPath $LogPath -Raw
 }
 
-if ($logText -match "Using Windows Spatial Audio:") {
+$escapedChannels = [regex]::Escape($AudioChannels)
+$spatialMatch = [regex]::Match(
+    $logText,
+    "(?m)Using Windows Spatial Audio:.*$escapedChannels.*\(12 static objects\)\."
+)
+$aoMatch = [regex]::Match(
+    $logText,
+    "(?m)AO: \[wasapi-spatial\].*$escapedChannels\s+12ch"
+)
+
+if ($spatialMatch.Success -and $aoMatch.Success) {
     Write-Host ""
-    Write-Host "SPATIAL AUDIO STREAM INITIALIZED." -ForegroundColor Green
-    $match = [regex]::Match($logText, "Using Windows Spatial Audio:.*")
-    if ($match.Success) {
-        Write-Host $match.Value
-    }
-    Write-Host "Check the listening result and the full log before marking the hardware test complete."
+    Write-Host "STRICT SPATIAL AUDIO VALIDATION PASSED." -ForegroundColor Green
+    Write-Host $spatialMatch.Value
+    Write-Host $aoMatch.Value
+    Write-Host "Listening quality and long-run stability still require hardware verification."
 } else {
-    Write-Warning "The log did not contain the Spatial Audio initialization message."
-    Write-Warning "Read the log for the activation HRESULT and endpoint details: $LogPath"
+    Write-Warning "Strict Spatial Audio validation failed."
+    if (-not $spatialMatch.Success) {
+        Write-Warning "Expected the selected channel map and exactly 12 static objects."
+    }
+    if (-not $aoMatch.Success) {
+        Write-Warning "Expected the wasapi-spatial AO to report the selected map and 12ch."
+    }
+    Write-Warning "Inspect the fresh log: $LogPath"
 }
 
 if ($mpvExit -ne 0) {
     Write-Warning "mpv exited with code $mpvExit."
     exit $mpvExit
 }
-
-if ($logText -notmatch "Using Windows Spatial Audio:") {
+if (-not ($spatialMatch.Success -and $aoMatch.Success)) {
     exit 1
 }
-
 exit 0

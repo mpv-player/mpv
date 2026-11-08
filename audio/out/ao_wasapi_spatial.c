@@ -16,6 +16,7 @@
  */
 
 #include <stdint.h>
+#include <libavutil/mathematics.h>
 #include <stdatomic.h>
 #include <string.h>
 
@@ -79,6 +80,10 @@ struct priv {
     ISpatialAudioObjectRenderStream *stream;
     IAudioClock *clock;
     UINT64 clock_frequency;
+    UINT64 qpc_frequency;
+    UINT64 last_clock_position;
+    UINT64 last_clock_qpc;
+    bool clock_sample_valid;
     WAVEFORMATEX *object_format;
 
     AudioObjectType native_mask;
@@ -138,6 +143,7 @@ static bool stop_stream(struct ao *ao)
 
     HRESULT hr = ISpatialAudioObjectRenderStream_Stop(p->stream);
     p->started = false;
+    p->clock_sample_valid = false;
     if (FAILED(hr)) {
         MP_ERR(ao, "Stopping the spatial audio stream failed: %s\n",
                mp_HRESULT_to_str(hr));
@@ -156,6 +162,7 @@ static bool reset_stream(struct ao *ao)
     HRESULT hr = ISpatialAudioObjectRenderStream_Reset(p->stream);
     release_objects(ao);
     p->submitted_frames = 0;
+    p->clock_sample_valid = false;
     if (FAILED(hr)) {
         MP_ERR(ao, "Resetting the spatial audio stream failed: %s\n",
                mp_HRESULT_to_str(hr));
@@ -178,6 +185,7 @@ static bool start_stream(struct ao *ao)
         return false;
     }
     p->started = true;
+    p->clock_sample_valid = false;
     return true;
 }
 
@@ -389,12 +397,64 @@ static bool activate_spatial(struct ao *ao)
             p->clock_frequency = 0;
         }
     }
+    LARGE_INTEGER qpc_frequency;
+    if (QueryPerformanceFrequency(&qpc_frequency) &&
+        qpc_frequency.QuadPart > 0)
+    {
+        p->qpc_frequency = (UINT64)qpc_frequency.QuadPart;
+    } else {
+        p->qpc_frequency = 0;
+    }
+    if (p->clock && p->clock_frequency && p->qpc_frequency) {
+        MP_DBG(ao, "IAudioClock enabled: frequency=%llu, QPC frequency=%llu.\\n",
+               (unsigned long long)p->clock_frequency,
+               (unsigned long long)p->qpc_frequency);
+    } else {
+        MP_VERBOSE(ao, "IAudioClock/QPC unavailable; using buffer-based "
+                   "output-time estimation.\\n");
+    }
 
     MP_INFO(ao, "Using Windows Spatial Audio: %s at %d Hz "
             "(%d static objects).\n",
             mp_chmap_to_str(&ao->channels), ao->samplerate,
             p->num_objects);
     return true;
+}
+
+/*
+ * IAudioClock::GetPosition returns a device position together with the QPC
+ * timestamp at which that position was sampled (in 100-ns units). Correct the
+ * device position to the current QPC time so scheduling delays between the
+ * clock query and ao_read_data() do not skew mpv's output timestamp.
+ */
+static bool get_qpc_time_100ns(struct priv *p, UINT64 *time)
+{
+    LARGE_INTEGER counter;
+    if (!p->qpc_frequency || !QueryPerformanceCounter(&counter))
+        return false;
+
+    *time = (UINT64)av_rescale(counter.QuadPart, 10000000,
+                               (int64_t)p->qpc_frequency);
+    return true;
+}
+
+static double estimate_played_frames(struct ao *ao, UINT64 position,
+                                     UINT64 qpc_position, bool have_qpc)
+{
+    struct priv *p = ao->priv;
+    double played = (double)position * ao->samplerate /
+                    (double)p->clock_frequency;
+
+    UINT64 now_qpc = 0;
+    if (have_qpc && get_qpc_time_100ns(p, &now_qpc) &&
+        now_qpc >= qpc_position)
+    {
+        UINT64 elapsed_100ns = now_qpc - qpc_position;
+        // Ignore implausible timestamps (for example, a broken device clock).
+        if (elapsed_100ns < 10ULL * 10000000ULL)
+            played += (double)elapsed_100ns * ao->samplerate / 10000000.0;
+    }
+    return played;
 }
 
 static int64_t estimate_output_time(struct ao *ao, UINT32 frames)
@@ -405,15 +465,48 @@ static int64_t estimate_output_time(struct ao *ao, UINT32 frames)
     if (p->clock && p->clock_frequency) {
         UINT64 position = 0;
         UINT64 qpc_position = 0;
-        if (SUCCEEDED(IAudioClock_GetPosition(
-                p->clock, &position, &qpc_position)))
-        {
-            double played = (double)position * ao->samplerate /
-                            (double)p->clock_frequency;
+        HRESULT hr = IAudioClock_GetPosition(p->clock, &position,
+                                              &qpc_position);
+        bool have_sample = SUCCEEDED(hr);
+        if (have_sample) {
+            if (hr == S_FALSE)
+                MP_VERBOSE(ao, "IAudioClock returned a possibly inaccurate "
+                           "position sample.\\n");
+            p->last_clock_position = position;
+            p->last_clock_qpc = qpc_position;
+            p->clock_sample_valid = true;
+        } else {
+            MP_TRACE(ao, "IAudioClock_GetPosition failed: %s; "
+                     "using the last valid clock sample if available.\\n",
+                     mp_HRESULT_to_str(hr));
+            if (p->clock_sample_valid) {
+                position = p->last_clock_position;
+                qpc_position = p->last_clock_qpc;
+                UINT64 now_qpc = 0;
+                if (!get_qpc_time_100ns(p, &now_qpc) ||
+                    now_qpc < qpc_position ||
+                    now_qpc - qpc_position >= 10ULL * 10000000ULL)
+                {
+                    p->clock_sample_valid = false;
+                } else {
+                    have_sample = true;
+                }
+            }
+        }
+
+        if (have_sample) {
+            double played = estimate_played_frames(
+                ao, position, qpc_position, p->qpc_frequency != 0);
+            // Device position must never imply that more frames played than
+            // this stream has actually submitted since the last reset.
+            if (played > (double)p->submitted_frames)
+                played = (double)p->submitted_frames;
             if ((double)p->submitted_frames > played)
                 queued_frames += (double)p->submitted_frames - played;
         }
     } else {
+        // Without IAudioClock, retain the conservative two-buffer estimate:
+        // one buffer is being filled and one is assumed queued at the device.
         queued_frames += frames;
     }
 
