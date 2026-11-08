@@ -147,7 +147,7 @@ jobs:
         target: [win64, winarm64]
         variant: [gpl, lgpl]
     container:
-      image: ghcr.io/btbn/ffmpeg-builds/${{ matrix.target }}-${{ matrix.variant }}:latest
+      image: ghcr.io/ffmpeg-builds/ffmpeg-builds/${{ matrix.target }}-${{ matrix.variant }}:latest
       env:
         WINEPREFIX: /tmp/wine
     steps:

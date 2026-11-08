@@ -31,13 +31,13 @@ Alternatively, consider using [mpv-winbuild-cmake](https://github.com/shinchiro/
 which bootstraps a MinGW-w64 toolchain and builds mpv along with its dependencies.
 
 The full Windows builds on the [release page](https://github.com/mpv-player/mpv/releases)
-are cross-compiled in the [FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds)
+are cross-compiled in the [FFmpeg-Builds](https://github.com/FFmpeg-Builds/FFmpeg-Builds)
 container images, which provide a toolchain and all dependencies as static
 libraries. [ci/build-mingw64-full.sh](https://github.com/mpv-player/mpv/blob/master/ci/build-mingw64-full.sh)
 reproduces such a build from the mpv source tree:
 
 ``` bash
-docker run --rm -v "$PWD:/mpv" -w /mpv ghcr.io/btbn/ffmpeg-builds/win64-gpl:latest ./ci/build-mingw64-full.sh
+docker run --rm -v "$PWD:/mpv" -w /mpv ghcr.io/ffmpeg-builds/ffmpeg-builds/win64-gpl:latest ./ci/build-mingw64-full.sh
 ```
 
 ### Example with Meson
