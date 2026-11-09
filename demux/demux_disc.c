@@ -24,7 +24,6 @@
 #include "common/msg.h"
 
 #include "stream/stream.h"
-#include "video/mp_image.h"
 #include "demux.h"
 #include "packet.h"
 #include "stheader.h"
@@ -206,14 +205,12 @@ static void set_dvd_sub_palette(struct demuxer *demuxer, struct sh_stream *sh)
 static void set_disc_aspect(struct demuxer *demuxer, struct mp_codec_params *c)
 {
     int ar[2];
-    if (c->type != STREAM_VIDEO || c->disp_w <= 0 || c->disp_h <= 0 ||
+    if (c->type != STREAM_VIDEO ||
         stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, ar)
             != STREAM_OK)
         return;
-    struct mp_image_params f = {.w = c->disp_w, .h = c->disp_h};
-    mp_image_params_set_dsize(&f, ar[0], ar[1]);
-    c->par_w = f.p_w;
-    c->par_h = f.p_h;
+    c->dar_w = ar[0];
+    c->dar_h = ar[1];
 }
 
 // Take ownership of a slave sh_stream's codec params into the outer demuxer
