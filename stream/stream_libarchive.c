@@ -153,6 +153,7 @@ static int64_t skip_cb(struct archive *arch, void *priv, int64_t request)
     if (!volume_seek(vol))
         return -1;
     int64_t old = stream_tell(vol->src);
+    request = MPMIN(request, INT64_MAX - old);
     stream_seek_skip(vol->src, old + request);
     return stream_tell(vol->src) - old;
 }
