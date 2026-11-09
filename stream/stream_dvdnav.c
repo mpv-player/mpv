@@ -71,6 +71,7 @@ struct priv {
     char *filename;                     // path
     int64_t duration;                   // in 90 kHz PTS ticks
     int title;
+    int cell_title;                     // title of the last cell change
     bool had_initial_vts;
 
     int dvd_speed;
@@ -962,6 +963,13 @@ static int process_event(stream_t *s, int event, void *buf, int len)
             priv->duration = ev->pgc_length;
         priv->cell_start = true;
 
+        int tit = 0, part = 0;
+        if (dvdnav_current_title_info(dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
+            if (priv->cell_title >= 0 && tit != priv->cell_title)
+                bump_discontinuity(priv, false);
+            priv->cell_title = tit;
+        }
+
         MP_VERBOSE(s, "cell change: cell=%d pg=%d pgc_len=%.3f "
                    "cur_time=%.3f domain=%s\n",
                    ev->cellN, ev->pgN, DVD_TIME_TO_S(ev->pgc_length),
@@ -1552,6 +1560,7 @@ static int open_s_internal(stream_t *stream)
     priv->sub_physical = -1;
     priv->sub_visible = false;
     priv->tl_anchor = true;
+    priv->cell_title = -1;
 
     p->opts = mp_get_config_group(stream, stream->global, &dvd_conf);
 
