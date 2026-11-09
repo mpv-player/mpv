@@ -4139,6 +4139,10 @@ Property list
     The working directory of the mpv process. Can be useful for JSON IPC users,
     because the command line player usually works with relative paths.
 
+    On Unix-like systems, it is taken from the ``PWD`` environment variable and
+    keeps symbolic links. If ``PWD`` is stale and does not refer to the current
+    directory, the path with symbolic links resolved is used instead.
+
 ``current-watch-later-dir``
     The directory in which watch later config files are stored. This returns
     ``--watch-later-dir``, or the default directory if ``--watch-later-dir`` has
