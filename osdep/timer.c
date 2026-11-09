@@ -50,6 +50,15 @@ int64_t mp_time_ns_from_raw_time(uint64_t raw_time)
     return raw_time - raw_time_offset;
 }
 
+#if HAVE_POSIX
+int64_t mp_time_ns_from_clock(clockid_t clk_id, int64_t clk_time)
+{
+    struct timespec ts;
+    clock_gettime(clk_id, &ts);
+    return mp_time_ns() - (MP_TIME_S_TO_NS(ts.tv_sec) + ts.tv_nsec - clk_time);
+}
+#endif
+
 double mp_time_sec(void)
 {
     return mp_time_ns() / 1e9;
