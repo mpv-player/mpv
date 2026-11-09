@@ -165,6 +165,8 @@ struct mp_codec_params {
     double fps;           // frames per second (set only if constant fps)
     bool reliable_fps;    // the fps field is definitely not broken
     int par_w, par_h;     // pixel aspect ratio (0 if unknown/square)
+    int dar_w, dar_h;     // display aspect ratio for any picture size, used
+                          // instead of par_w/par_h (0 if unknown)
     int disp_w, disp_h;   // display size
     int rotate;           // intended display rotation, in degrees, [0, 359]
     int stereo_mode;      // mp_stereo3d_mode (0 if none/unknown)
