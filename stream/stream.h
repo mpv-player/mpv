@@ -84,7 +84,7 @@ enum stream_ctrl {
     STREAM_CTRL_GET_CURRENT_TIME,
     STREAM_CTRL_GET_CHAPTER_TIME,
     STREAM_CTRL_SEEK_TO_TIME,        // struct stream_seek_req*
-    STREAM_CTRL_GET_ASPECT_RATIO,
+    STREAM_CTRL_GET_ASPECT_RATIO,    // int[2], display aspect ratio
     STREAM_CTRL_GET_NUM_ANGLES,
     STREAM_CTRL_GET_ANGLE,
     STREAM_CTRL_SET_ANGLE,
