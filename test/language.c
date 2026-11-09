@@ -39,6 +39,11 @@ int main(void)
     assert_int_equal(mp_match_lang(LANGS("eng")                  , "eng")    , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("en")                   , "eng")    , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("eng")                  , "en")     , INT_MAX);
+    assert_int_equal(mp_match_lang(LANGS("ms")                   , "msa")    , INT_MAX);
+    assert_int_equal(mp_match_lang(LANGS("ms")                   , "may")    , INT_MAX);
+    assert_int_equal(mp_match_lang(LANGS("ms")                   , "zsm")    , INT_MAX);
+    assert_int_equal(mp_match_lang(LANGS("ms")                   , "zlm")    , INT_MAX);
+    assert_int_equal(mp_match_lang(LANGS("zsm")                  , "ms")     , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("en")                   , "en")     , INT_MAX);
     assert_int_equal(mp_match_lang(LANGS("pt-BR", "pt-PT", "pt") , "pt-PT")  , INT_MAX - 1);
     assert_int_equal(mp_match_lang(LANGS("pt-BR", "en-US", "pt") , "pt-PT")  , INT_MAX - 1000);

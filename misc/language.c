@@ -233,6 +233,8 @@ static const struct lang {
     {L(za), L(zha)},
     {L(zh), L(chi)},
     {L(zho), L(chi)},
+    {L(zlm), L(may)},
+    {L(zsm), L(may)},
     {L(zu), L(zul)},
 };
 
