@@ -169,7 +169,10 @@ char *mp_getcwd(void *talloc_ctx)
 {
 #if !HAVE_DOS_PATHS
     char *e_wd = getenv("PWD");
-    if (e_wd)
+    struct stat pwd_st, dot_st;
+    if (e_wd && mp_path_is_absolute(bstr0(e_wd)) &&
+        stat(e_wd, &pwd_st) == 0 && stat(".", &dot_st) == 0 &&
+        pwd_st.st_dev == dot_st.st_dev && pwd_st.st_ino == dot_st.st_ino)
         return talloc_strdup(talloc_ctx, e_wd);
 #endif
 
