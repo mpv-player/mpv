@@ -151,6 +151,7 @@ enum stream_nav_action {
     STREAM_NAV_KEY_BLUE,
     STREAM_NAV_MOUSE_MOVE,     // mouse moved; .x,.y are video-space coords
     STREAM_NAV_MOUSE_CLICK,    // mouse button activated at .x,.y
+    STREAM_NAV_SKIP_STILL,     // end the held still, its time ran out
 };
 
 struct stream_nav_cmd {
@@ -176,6 +177,7 @@ static inline bool stream_nav_action_activates(enum stream_nav_action a)
     case STREAM_NAV_KEY_GREEN:
     case STREAM_NAV_KEY_YELLOW:
     case STREAM_NAV_KEY_BLUE:
+    case STREAM_NAV_SKIP_STILL:
         return true;
     default:
         return false;
@@ -192,7 +194,8 @@ struct mp_dvdnav_highlight {
 struct stream_nav_state {
     bool nav_active;         // interactive disc navigation is enabled
     bool menu_active;        // a selectable menu/highlight is currently visible
-    bool still_active;       // holding an indefinite still frame
+    bool still_active;       // holding a still frame
+    double still_length;     // seconds the still lasts, 0 until user input
     int  src_w, src_h;       // dimensions of the coordinate space mouse uses
     struct mp_dvdnav_highlight hl; // focused button highlight (DVD only)
     uint32_t change_id; // Bumped whenever any of the above changes

@@ -23,6 +23,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "input/input.h"
+#include "osdep/timer.h"
 #include "player/command.h"
 
 #include "stream/stream.h"
@@ -74,6 +75,9 @@ struct disc_nav_state {
     // Last menu_active pushed through property-change notification.
     bool last_menu_active;
     bool menu_active_seen;
+
+    double still_shown;   // Elapsed time a timed still has been on screen.
+    double still_counted; // Last mp_time_sec() the still was checked.
 };
 
 static bool is_dvd_sub_track(struct track *t)
@@ -482,6 +486,32 @@ static void ensure_menu_sub_selection(struct MPContext *mpctx, bool menu_on)
     }
 }
 
+static void run_timed_still(struct MPContext *mpctx, struct stream *s,
+                            struct stream_nav_state *nav)
+{
+    struct disc_nav_state *st = get_state(mpctx);
+    double now = mp_time_sec();
+    if (st->still_counted)
+        st->still_shown += now - st->still_counted;
+    bool running = nav->still_active && nav->still_length > 0 &&
+                   !mpctx->paused && mpctx->video_status == STATUS_EOF &&
+                   mpctx->audio_status == STATUS_EOF;
+    st->still_counted = running ? now : 0;
+    if (!nav->still_active)
+        st->still_shown = 0;
+    if (!running)
+        return;
+    double left = nav->still_length - st->still_shown;
+    if (left > 0) {
+        mp_set_timeout(mpctx, left);
+        return;
+    }
+    st->still_shown = st->still_counted = 0;
+    struct stream_nav_cmd cmd = {.action = STREAM_NAV_SKIP_STILL};
+    stream_control(s, STREAM_CTRL_NAV_CMD, &cmd);
+    mp_wakeup_core(mpctx);
+}
+
 void disc_nav_update(struct MPContext *mpctx)
 {
     struct stream *s = disc_nav_get_stream(mpctx);
@@ -550,6 +580,7 @@ void disc_nav_update(struct MPContext *mpctx)
         mp_notify_property(mpctx, "disc-menu-active");
     }
 
+    run_timed_still(mpctx, s, &nav);
     check_async_discontinuity(mpctx, s, &nav);
     sync_current_edition(mpctx, s, &nav);
     sync_disc_track_selection(mpctx, s, &nav);
