@@ -2130,7 +2130,9 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct sh_stream *sh = track->stream;
 
     double par = 0.0;
-    if (p.par_h)
+    if (p.dar_h && p.disp_w)
+        par = p.dar_w * (double) p.disp_h / (p.dar_h * (double) p.disp_w);
+    else if (p.par_h)
         par = p.par_w / (double) p.par_h;
 
     int order = -1;
