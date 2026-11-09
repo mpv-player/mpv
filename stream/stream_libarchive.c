@@ -104,7 +104,7 @@ static bool volume_seek(struct mp_archive_volume *vol)
     return r;
 }
 
-static ssize_t read_cb(struct archive *arch, void *priv, const void **buffer)
+static la_ssize_t read_cb(struct archive *arch, void *priv, const void **buffer)
 {
     struct mp_archive_volume *vol = priv;
     if (!vol->src)
@@ -118,8 +118,8 @@ static ssize_t read_cb(struct archive *arch, void *priv, const void **buffer)
 }
 
 // lazy seek to avoid problems with end seeking over http
-static int64_t seek_cb(struct archive *arch, void *priv,
-                       int64_t offset, int whence)
+static la_int64_t seek_cb(struct archive *arch, void *priv,
+                          la_int64_t offset, int whence)
 {
     struct mp_archive_volume *vol = priv;
     if (!vol->src)
@@ -145,7 +145,7 @@ static int64_t seek_cb(struct archive *arch, void *priv,
     return vol->seek_to;
 }
 
-static int64_t skip_cb(struct archive *arch, void *priv, int64_t request)
+static la_int64_t skip_cb(struct archive *arch, void *priv, la_int64_t request)
 {
     struct mp_archive_volume *vol = priv;
     if (!vol->src)
@@ -499,7 +499,7 @@ static int archive_entry_fill_buffer(stream_t *s, void *buffer, int max_len)
     if (!p->mpa)
         return 0;
     locale_t oldlocale = uselocale(p->mpa->locale);
-    int r = archive_read_data(p->mpa->arch, buffer, max_len);
+    la_ssize_t r = archive_read_data(p->mpa->arch, buffer, max_len);
     if (r < 0) {
         MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
         if (mp_archive_check_fatal(p->mpa, r)) {
