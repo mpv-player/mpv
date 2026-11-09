@@ -68,7 +68,6 @@
           <string>io.mpv.mk3d</string>
           <string>io.mpv.mts</string>
           <string>io.mpv.nsv</string>
-          <string>io.mpv.vcd</string>
           <string>io.mpv.vob</string>
           <string>io.mpv.webm</string>
           <string>io.mpv.wmv</string>
@@ -191,7 +190,6 @@
         <array>
           <string>cdda</string>
           <string>dvd</string>
-          <string>vcd</string>
           <string>bd</string>
         </array>
       </dict>
@@ -744,29 +742,6 @@
           <key>public.filename-extension</key>
           <array>
             <string>nuv</string>
-          </array>
-        </dict>
-      </dict>
-      <dict>
-        <key>UTTypeConformsTo</key>
-        <array>
-          <string>public.movie</string>
-        </array>
-        <key>UTTypeDescription</key>
-        <string>Video CD File</string>
-        <key>UTTypeIconFile</key>
-        <string>document.icns</string>
-        <key>UTTypeIdentifier</key>
-        <string>io.mpv.vcd</string>
-        <key>UTTypeReferenceURL</key>
-        <string>https://en.wikipedia.org/wiki/Video_CD</string>
-        <key>UTTypeTagSpecification</key>
-        <dict>
-          <key>public.filename-extension</key>
-          <array>
-            <string>vcd</string>
-            <string>svcd</string>
-            <string>dat</string>
           </array>
         </dict>
       </dict>
