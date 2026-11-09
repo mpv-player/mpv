@@ -92,6 +92,24 @@
         <key>CFBundleTypeIconFile</key>
         <string>document.icns</string>
         <key>CFBundleTypeName</key>
+        <string>Disc File</string>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Alternate</string>
+        <key>LSTypeIsPackage</key>
+        <false/>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>io.mpv.bdmv</string>
+          <string>io.mpv.ifo</string>
+          <string>public.iso-image</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleTypeIconFile</key>
+        <string>document.icns</string>
+        <key>CFBundleTypeName</key>
         <string>Subtitles File</string>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
@@ -930,6 +948,48 @@
           <key>public.filename-extension</key>
           <array>
             <string>y4m</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.data</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>DVD Information File</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.ifo</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/DVD-Video</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>ifo</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.data</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>Blu-ray Disc Information File</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.bdmv</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/Blu-ray</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>bdmv</string>
           </array>
         </dict>
       </dict>
