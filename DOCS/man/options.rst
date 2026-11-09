@@ -8677,12 +8677,14 @@ Miscellaneous
 
 ``--metadata-codepage=<codepage>``
     Codepage for various input metadata (default: ``auto``). This affects how
-    file tags, chapter titles, etc. are interpreted. In most cases, this merely
-    evaluates to UTF-8 as non-UTF-8 codepages are obscure.
+    file tags, chapter titles, archive entry names, etc. are interpreted. In
+    most cases, this merely evaluates to UTF-8 as non-UTF-8 codepages are
+    obscure.
 
     See ``--sub-codepage`` option on how codepages are specified and further
     details regarding autodetection and codepage conversion. (The underlying
-    code is the same.)
+    code is the same.) Archive entry names that are valid UTF-8 are never
+    recoded, even with a ``+`` prefix.
 
     Conversion is not applied to metadata that is updated at runtime.
 
