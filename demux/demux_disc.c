@@ -237,6 +237,24 @@ static void adopt_codec_params(struct demuxer *demuxer, struct sh_stream *outer,
     }
 }
 
+static void update_disc_aspect(struct demuxer *demuxer)
+{
+    struct priv *p = demuxer->priv;
+    for (int n = 0; n < p->num_outer_streams; n++) {
+        struct sh_stream *sh = p->outer_streams[n];
+        if (sh->type != STREAM_VIDEO)
+            continue;
+        struct mp_codec_params *cur = codec_params(p, sh);
+        struct mp_codec_params c = *cur;
+        set_disc_aspect(demuxer, &c);
+        if (c.dar_w == cur->dar_w && c.dar_h == cur->dar_h)
+            continue;
+        struct outer_state *os = get_ostate(p, sh);
+        os->codec = talloc_dup(sh, &c);
+        demux_set_stream_codec(demuxer, sh, os->codec);
+    }
+}
+
 // Whether a slave stream carries a Blu-ray presentation stream the player
 // decodes itself.
 static bool bd_stream_pid_valid(struct sh_stream *src)
@@ -701,6 +719,7 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
         refresh_disc_metadata(demuxer);
         // The jump may have changed what the disc plays.
         register_declared_streams(demuxer);
+        update_disc_aspect(demuxer);
     }
 
     // A DVD jump is fully handled by this seek, adopt the current counter.
