@@ -159,7 +159,8 @@ struct bluray_priv_s {
     uint32_t nav_change_id;          // bumped on overlay FLUSH/HIDE events
     uint32_t discontinuity_id;       // bumped on actions that may hop (SELECT...)
     bool data_delivered;             // any byte returned from fill_buffer yet
-    bool still_active;               // holding an indefinite still.
+    bool still_active;               // holding a still
+    int still_length;                // its seconds, 0 until user input
     uint64_t next_read_pos;          // expected bd_tell() of the next read
     bool read_pos_known;             // next_read_pos is valid
     bool resync_owed;                // jump settled, resync seek not acked yet
@@ -717,14 +718,16 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
         case BD_EVENT_STILL:
             mp_mutex_lock(&b->overlay_lock);
             b->still_active = ev.param != 0;
+            b->still_length = 0;
             mp_mutex_unlock(&b->overlay_lock);
             break;
         case BD_EVENT_STILL_TIME:
-            // TODO: consider timed stills support
-            // param == 0 is an indefinite still
-            if (ev.param == 0) {
+            // param == 0 is an indefinite still. The player ends a timed one,
+            // and it sees the still only with menus.
+            if (ev.param == 0 || b->hdmv_mode) {
                 mp_mutex_lock(&b->overlay_lock);
                 b->still_active = true;
+                b->still_length = ev.param;
                 mp_mutex_unlock(&b->overlay_lock);
             } else if (!bd_read_skip_still(b->bd)) {
                 // No next clip, so libbluray has nothing left to act on.
@@ -906,9 +909,9 @@ static int bluray_stream_fill_buffer(stream_t *s, void *buf, int len)
             return 0;
         }
 
-        // Holding an indefinite still frame: report EOF. The player keeps
-        // showing the last frame; user interaction releases the still and
-        // resumes reading through a discontinuity_id bump.
+        // Holding a still frame: report EOF. The player keeps showing the
+        // last frame. User interaction or the end of a timed still releases
+        // it and resumes reading through a discontinuity_id bump.
         if (still_active) {
             // Drain queued events first, the still may already be released.
             // libbluray re-emits STILL_TIME on every read while holding, it
@@ -1254,6 +1257,9 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             bd_mouse_select(b->bd, -1, nav->x, nav->y);
             key = BD_VK_MOUSE_ACTIVATE;
             break;
+        case STREAM_NAV_SKIP_STILL:
+            bd_read_skip_still(b->bd);
+            break;
         }
         if (key != BD_VK_NONE)
             bd_user_input(b->bd, -1, key);
@@ -1305,6 +1311,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             st->nav_active = true;
             st->menu_active = b->ig.visible || b->pg.visible;
             st->still_active = b->still_active;
+            st->still_length = b->still_length;
             st->src_w = MPMAX(b->ig.disp_w, b->pg.disp_w);
             st->src_h = MPMAX(b->ig.disp_h, b->pg.disp_h);
             st->change_id = b->nav_change_id;
