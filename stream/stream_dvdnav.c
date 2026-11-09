@@ -1694,10 +1694,7 @@ const stream_info_t stream_info_dvdnav = {
 
 static bool check_ifo(const char *path)
 {
-    if (strcasecmp(mp_basename(path), "video_ts.ifo"))
-        return false;
-
-    return dvd_probe(path, ".ifo", "DVDVIDEO-VMG");
+    return dvd_probe(path, ".ifo", "DVDVIDEO");
 }
 
 static int ifo_dvdnav_stream_open(stream_t *stream)
@@ -1733,7 +1730,7 @@ static int ifo_dvdnav_stream_open(stream_t *stream)
     }
 
     // We allow the path to point to a directory containing VIDEO_TS/, a
-    // directory containing VIDEO_TS.IFO, or that file itself.
+    // directory containing VIDEO_TS.IFO, or any IFO file in it.
     if (!check_ifo(path)) {
         // On UNIX, just assume the filename is always uppercase.
         char *npath = mp_path_join(priv, path, "VIDEO_TS.IFO");
