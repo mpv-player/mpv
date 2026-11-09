@@ -136,11 +136,11 @@ static int64_t seek_cb(struct archive *arch, void *priv,
     case SEEK_END: ;
         int64_t size = stream_get_size(vol->src);
         if (size < 0)
-            return -1;
+            return ARCHIVE_FAILED;
         vol->seek_to = size + offset;
         break;
     default:
-        return -1;
+        return ARCHIVE_FATAL;
     }
     return vol->seek_to;
 }
