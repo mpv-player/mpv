@@ -16,6 +16,7 @@ struct mp_archive {
     char buffer[4096];
     int flags;
     int num_volumes; // INT_MAX if unknown (initial state)
+    char *meta_cp;
 
     // Current entry, as set by mp_archive_next_entry().
     struct archive_entry *entry;

@@ -20,7 +20,10 @@
 
 #include "misc/bstr.h"
 #include "common/common.h"
+#include "demux/demux.h"
+#include "misc/charset_conv.h"
 #include "misc/thread_tools.h"
+#include "options/m_config.h"
 #include "stream.h"
 
 #include "stream_libarchive.h"
@@ -326,6 +329,8 @@ static struct mp_archive *mp_archive_new_raw(struct mp_log *log,
 {
     struct mp_archive *mpa = talloc_zero(NULL, struct mp_archive);
     mpa->log = log;
+    struct demux_opts *opts = mp_get_config_group(mpa, src->global, &demux_conf);
+    mpa->meta_cp = opts->meta_cp;
     mpa->locale = newlocale(LC_CTYPE_MASK, "C.UTF-8", (locale_t)0);
     if (!mpa->locale) {
         mpa->locale = newlocale(LC_CTYPE_MASK, "", (locale_t)0);
@@ -432,15 +437,24 @@ bool mp_archive_next_entry(struct mp_archive *mpa)
             continue;
         // Some archives may have no filenames, or libarchive won't return some.
         const char *fn = archive_entry_pathname(entry);
-        char buf[64];
-        if (!fn || bstr_validate_utf8(bstr0(fn)) < 0)
+        if (!fn)
             fn = archive_entry_pathname_utf8(entry);
-        if (!fn || bstr_validate_utf8(bstr0(fn)) < 0) {
+        char buf[64];
+        if (!fn) {
             snprintf(buf, sizeof(buf), "mpv_unknown#%d", mpa->entry_num);
             fn = buf;
         }
+        // Forced codepage applies only to the raw filenames.
+        const char *cp = mpa->meta_cp;
+        if (cp[0] == '+')
+            cp++;
+        bstr name = bstr0(fn);
+        cp = mp_charset_guess(mpa, mpa->log, name, cp, 0);
+        bstr conv = mp_iconv_to_utf8(mpa->log, name, cp, 0);
         mpa->entry = entry;
-        mpa->entry_filename = talloc_strdup(mpa, fn);
+        mpa->entry_filename = bstrto0(mpa, conv);
+        if (conv.start != name.start)
+            talloc_free(conv.start);
         mpa->entry_num += 1;
         success = true;
         break;
