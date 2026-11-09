@@ -205,13 +205,13 @@ static void set_dvd_sub_palette(struct demuxer *demuxer, struct sh_stream *sh)
 
 static void set_disc_aspect(struct demuxer *demuxer, struct mp_codec_params *c)
 {
-    double ar;
+    int ar[2];
     if (c->type != STREAM_VIDEO || c->disp_w <= 0 || c->disp_h <= 0 ||
-        stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
+        stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, ar)
             != STREAM_OK)
         return;
     struct mp_image_params f = {.w = c->disp_w, .h = c->disp_h};
-    mp_image_params_set_dsize(&f, 1728 * ar, 1728);
+    mp_image_params_set_dsize(&f, ar[0], ar[1]);
     c->par_w = f.p_w;
     c->par_h = f.p_h;
 }
