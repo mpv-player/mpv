@@ -1742,7 +1742,7 @@ const stream_info_t stream_info_bluray = {
 
 static bool check_bdmv(const char *path)
 {
-    if (strcasecmp(mp_basename(path), "MovieObject.bdmv"))
+    if (!bstr_case_endswith(bstr0(path), bstr0(".bdmv")))
         return false;
 
     FILE *temp = fopen(path, "rb");
@@ -1754,7 +1754,10 @@ static bool check_bdmv(const char *path)
 
     if (fread(data, 50, 1, temp) == 1) {
         bstr bdata = {data, 50};
-        ret = bstr_startswith0(bdata, "MOBJ0100") || // AVCHD
+        ret = bstr_startswith0(bdata, "INDX0100") || // AVCHD
+              bstr_startswith0(bdata, "INDX0200") || // Blu-ray
+              bstr_startswith0(bdata, "INDX0300") || // UHD BD
+              bstr_startswith0(bdata, "MOBJ0100") || // AVCHD
               bstr_startswith0(bdata, "MOBJ0200") || // Blu-ray
               bstr_startswith0(bdata, "MOBJ0300");   // UHD BD
     }
@@ -1815,7 +1818,8 @@ static int bdmv_dir_stream_open(stream_t *stream)
     }
 
     // We allow the path to point to a directory containing BDMV/, a
-    // directory containing MovieObject.bdmv, or that file itself.
+    // directory containing MovieObject.bdmv, or index.bdmv or
+    // MovieObject.bdmv in it.
     if (!check_bdmv(path)) {
         // On UNIX, just assume the filename has always this case.
         char *npath = mp_path_join(priv, path, "MovieObject.bdmv");
