@@ -345,11 +345,24 @@ static void w32_register(struct MPContext *mpctx)
                 NULL, L"mpv.exe -- \"%L\"");
 
     // Register file associations
+    char *disc_exts[] = {
+#if HAVE_DVDNAV || HAVE_DVDA || HAVE_LIBBLURAY
+        "iso",
+#endif
+#if HAVE_DVDNAV || HAVE_DVDA
+        "ifo",
+#endif
+#if HAVE_LIBBLURAY
+        "bdmv",
+#endif
+        NULL
+    };
     char **exts_groups[] = {
 #if HAVE_LIBARCHIVE
         mpctx->opts->archive_exts,
 #endif
         mpctx->opts->audio_exts,
+        disc_exts,
         mpctx->opts->image_exts,
         mpctx->opts->playlist_exts,
         mpctx->opts->video_exts,

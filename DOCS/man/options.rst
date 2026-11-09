@@ -8764,7 +8764,8 @@ Miscellaneous
 
     The list of the file extensions to register, can be controlled with the
     ``--video-exts``, ``--audio-exts``, ``--image-exts``, ``--playlist-exts``
-    and ``--archive-exts`` options.
+    and ``--archive-exts`` options. Disc images (``.iso``) and the ``.ifo``
+    and ``.bdmv`` files of DVD and Blu-ray folders are registered as well.
 
     By default, mpv will be registered for the current user. To register it for
     all users, run mpv as an administrator with this option. However, this is
