@@ -301,6 +301,8 @@ static void w32_register(struct MPContext *mpctx)
     mp_msg(log, MSGL_INFO, "Registering mpv for %s...\n",
            root == HKEY_LOCAL_MACHINE ? "all users" : "the current user");
 
+    remove_registration(log, root);
+
     // Register mpv as an application
     // <https://learn.microsoft.com/windows/win32/shell/app-registration>
     reg_add_str(log, root, KEY_MPV_APP_PATH(".exe"), NULL, mpv_path);
