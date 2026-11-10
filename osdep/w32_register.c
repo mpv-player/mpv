@@ -438,6 +438,8 @@ static void w32_register(struct MPContext *mpctx)
     if (SUCCEEDED(PathCchRemoveFileSpec(mpv_path, MP_PATH_MAX)))
         reg_add_str(log, root, KEY_MPV_UNINSTALL, L"InstallLocation", mpv_path);
 
+    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+
     mp_msg(log, MSGL_INFO, "mpv has been successfully registered.\n");
     mp_msg(log, MSGL_INFO, "Note: The mpv binary has not been copied or moved. Please keep it in the current directory.\n");
     mp_msg(log, MSGL_INFO, "If you move it, simply run this process again to re-register.\n");
@@ -492,6 +494,8 @@ static void w32_unregister(struct MPContext *mpctx)
     }
 
     reg_del(log, root, KEY_MPV_UNINSTALL, NULL);
+
+    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
 
     mp_msg(log, MSGL_INFO, "mpv has been successfully unregistered.\n");
     mp_msg(log, MSGL_INFO, "You may now safely delete the mpv binary if desired.\n");
