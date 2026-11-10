@@ -1118,6 +1118,7 @@ static MP_THREAD_VOID vo_thread(void *ptr)
     bool vo_paused = false;
 
     mp_thread_set_name("vo");
+    mp_thread_set_min_timer_slack();
 
     if (vo->driver->get_image) {
         in->dr_helper = dr_helper_create(in->dispatch, get_image_vo, vo);
