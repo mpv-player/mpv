@@ -1961,7 +1961,7 @@ local function bar_layout(direction, slim)
     lo = add_layout("menu")
     lo.geometry = geo
     lo.style = osc_styles.topButtonsBar
-    lo.hitbox = { x1 = edge_x1 }
+    lo.hitbox = { x1 = 0 }
 
     -- Playlist prev/next
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
@@ -1987,7 +1987,7 @@ local function bar_layout(direction, slim)
         lo.geometry = geo
         lo.style = osc_styles.vidtitleBar
         if i == last_custom_button then
-            lo.hitbox = { x2 = edge_x2 }
+            lo.hitbox = { x2 = math.huge }
         end
     end
 
