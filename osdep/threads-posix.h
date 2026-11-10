@@ -28,6 +28,9 @@
 #if HAVE_BSD_THREAD_NAME
 #include <pthread_np.h>
 #endif
+#if HAVE_PR_SET_TIMERSLACK
+#include <sys/prctl.h>
+#endif
 #include "osdep/compiler.h"
 #include "timer.h"
 
@@ -227,6 +230,13 @@ static inline void mp_thread_set_name(const char *name)
     pthread_set_name_np(pthread_self(), name);
 #elif HAVE_MAC_THREAD_NAME
     pthread_setname_np(name);
+#endif
+}
+
+static inline void mp_thread_set_min_timer_slack(void)
+{
+#if HAVE_PR_SET_TIMERSLACK
+    prctl(PR_SET_TIMERSLACK, 1UL);
 #endif
 }
 
