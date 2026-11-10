@@ -258,7 +258,6 @@ static void remove_registration(struct mp_log *log, HKEY root)
 }
 
 #define REGISTER_AUTOPLAY_HANDLER(media, event, action)                        \
-    reg_add_str(log, root, KEY_MPV_PROG_ID(media) L"\\shell", NULL, L"open");  \
     reg_add_str(log, root, KEY_MPV_PROG_ID(media) L"\\shell\\open\\command",   \
                 NULL, L"mpv.exe " media L":// --" media L"-device=%L");        \
     reg_add_str(log, root,                                                     \
@@ -320,7 +319,6 @@ static void w32_register(struct MPContext *mpctx)
     // reg_add_str(log, root, KEY_MPV_APP, L"FriendlyAppName", MPV_FRIENDLY_NAME);
 
     // Add shell open command
-    reg_add_str(log, root, KEY_MPV_APP L"\\shell", NULL, L"open");
     reg_add_str(log, root, KEY_MPV_APP L"\\shell\\open\\command", NULL,
                 L"mpv.exe -- \"%L\"");
 
@@ -339,7 +337,6 @@ static void w32_register(struct MPContext *mpctx)
     reg_add_dwr(log, root, KEY_MPV_PROG_ID("url"), L"EditFlags", FTA_Show);
     reg_add_str(log, root, KEY_MPV_PROG_ID("url"), L"FriendlyTypeName",
                 L"mpv URL handler");
-    reg_add_str(log, root, KEY_MPV_PROG_ID("url") L"\\shell", NULL, L"open");
     reg_add_str(log, root, KEY_MPV_PROG_ID("url") L"\\shell\\open\\command",
                 NULL, L"mpv.exe -- \"%L\"");
     reg_add_str(log, root, KEY_MPV_PROG_ID("url") L"\\shell\\open\\ddeexec",
@@ -383,7 +380,6 @@ static void w32_register(struct MPContext *mpctx)
 
     // Register file handler. Without a name, so it will be identified by its extension.
     reg_add_dwr(log, root, KEY_MPV_PROG_ID("file"), L"EditFlags", FTA_OpenIsSafe);
-    reg_add_str(log, root, KEY_MPV_PROG_ID("file") L"\\shell", NULL, L"open");
     reg_add_str(log, root, KEY_MPV_PROG_ID("file") L"\\shell\\open\\command",
                 NULL, L"mpv.exe -- \"%L\"");
 
