@@ -388,6 +388,7 @@ static int preinit(struct vo *vo)
                vo->drm->connector->connector_id, mp_strerror(errno));
         goto err;
     }
+    enqueue_frame(vo, p->bufs[0]);
 
     vo_drm_set_monitor_par(vo);
     p->sws = mp_sws_alloc(vo);
