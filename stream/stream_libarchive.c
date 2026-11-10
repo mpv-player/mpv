@@ -281,7 +281,7 @@ static const struct file_pattern patterns[] = {
     { ".part01.rar",   "%.*s.part%.2d.rar", standard_volume_url, 2,   99 },
     { ".part001.rar",  "%.*s.part%.3d.rar", standard_volume_url, 2,  999 },
     { ".part0001.rar", "%.*s.part%.4d.rar", standard_volume_url, 2, 9999 },
-    { ".rar",          "%.*s.%c%.2d",       old_rar_volume_url,  0,   99, true },
+    { ".rar",          "%.*s.%c%.2d",       old_rar_volume_url,  0,  899, true },
     { ".001",          "%.*s.%.3d",         standard_volume_url, 2, 9999 },
     { NULL, NULL, NULL, 0, 0 },
 };
@@ -516,7 +516,7 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
     struct priv *p = s->priv;
     if (p->mpa && !p->broken_seek) {
         locale_t oldlocale = uselocale(p->mpa->locale);
-        int r = archive_seek_data(p->mpa->arch, newpos, SEEK_SET);
+        int64_t r = archive_seek_data(p->mpa->arch, newpos, SEEK_SET);
         uselocale(oldlocale);
         if (r >= 0)
             return 1;
