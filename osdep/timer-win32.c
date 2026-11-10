@@ -29,9 +29,9 @@
 static LARGE_INTEGER perf_freq;
 
 // ms values
-static int hires_max = 50;
-static int hires_res = 1;
-static bool hires_playback;
+static int hires_max = 50;  // max timeout for which we enable perwait hi-resolution
+static int hires_res = 1;   // perwait resolution when enabled
+static bool hires_playback = true;  // enable high-resolution during playback
 
 int mp_start_hires_timers(int wait_ms)
 {
@@ -136,19 +136,22 @@ void mp_raw_time_init(void)
             hires_res = res / MP_TIME_MS_TO_NS(1);
     }
 
-    // "always"/"never"/"perwait"/"playback"  (or "auto" - same as unset)
+    // "always"/"never"/"perwait+playback"/"perwait"/"playback"  (or "auto" - same as unset)
     if (!(v = getenv("MPV_HRT")) || !strcmp(v, "auto"))
-        v = "playback";
+        v = "perwait+playback";
 
-    if (!strcmp(v, "playback")) {
+    if (!strcmp(v, "perwait+playback")) {
+        // no-op - hires_max and hires_playback already set
+    } else if (!strcmp(v, "playback")) {
         hires_max = 0;
-        hires_playback = true;
     } else if (!strcmp(v, "perwait")) {
-        // no-op, already per-wait
+        hires_playback = false;
     } else if (!strcmp(v, "never")) {
         hires_max = 0;
+        hires_playback = false;
     } else {  // "always" or unknown value
         hires_max = 0;
+        hires_playback = false;
         timeBeginPeriod(hires_res);
     }
 #endif
