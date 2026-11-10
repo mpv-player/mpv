@@ -381,9 +381,7 @@ static void w32_register(struct MPContext *mpctx)
                     mp_from_utf8(tmp, protocols_str));
     }
 
-    // Register file handler
-    reg_add_str(log, root, KEY_MPV_PROG_ID("file"), NULL, L"mpv");
-    reg_add_str(log, root, KEY_MPV_PROG_ID("file"), L"FriendlyTypeName", L"mpv Media File");
+    // Register file handler. Without a name, so it will be identified by its extension.
     reg_add_dwr(log, root, KEY_MPV_PROG_ID("file"), L"EditFlags", FTA_OpenIsSafe);
     reg_add_str(log, root, KEY_MPV_PROG_ID("file") L"\\shell", NULL, L"open");
     reg_add_str(log, root, KEY_MPV_PROG_ID("file") L"\\shell\\open\\command",
