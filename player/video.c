@@ -43,6 +43,7 @@
 #include "video/out/vo.h"
 
 #include "core.h"
+#include "history.h"
 #include "command.h"
 #include "screenshot.h"
 
@@ -79,6 +80,8 @@ int reinit_video_filters(struct MPContext *mpctx)
     if (!vo_c)
         return 0;
 
+    history_invalidate(mpctx);
+
     if (!recreate_video_filters(mpctx))
         return -1;
 
@@ -98,12 +101,19 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
 
 void reset_video_state(struct MPContext *mpctx)
 {
+    history_reset(mpctx);
     if (mpctx->vo_chain) {
-        vo_chain_reset_state(mpctx->vo_chain);
         struct track *t = mpctx->vo_chain->track;
         if (t && t->dec)
             mp_decoder_wrapper_set_play_dir(t->dec, mpctx->play_dir);
     }
+    reset_video_output_state(mpctx);
+}
+
+void reset_video_output_state(struct MPContext *mpctx)
+{
+    if (mpctx->vo_chain)
+        vo_chain_reset_state(mpctx->vo_chain);
 
     for (int n = 0; n < mpctx->num_next_frames; n++)
         mp_image_unrefp(&mpctx->next_frames[n]);
@@ -298,7 +308,8 @@ void reinit_video_chain_src(struct MPContext *mpctx, struct track *track)
     vo_c->vo = mpctx->video_out;
     vo_c->filter =
         mp_output_chain_create(mpctx->filter_root, MP_OUTPUT_CHAIN_VIDEO);
-    mp_output_chain_set_vo(vo_c->filter, vo_c->vo);
+    // The video history would keep the VO's DR buffers referenced.
+    mp_output_chain_set_vo(vo_c->filter, vo_c->vo, !mpctx->opts->video_history);
     vo_c->filter->update_subtitles = filter_update_subtitles;
     vo_c->filter->update_subtitles_ctx = mpctx;
 
@@ -357,7 +368,8 @@ static void check_framedrop(struct MPContext *mpctx, struct vo_chain *vo_c)
     // check for frame-drop:
     if (mpctx->video_status == STATUS_PLAYING && !mpctx->paused &&
         mpctx->audio_status == STATUS_PLAYING && !ao_untimed(mpctx->ao) &&
-        vo_c->track && vo_c->track->dec && (opts->frame_dropping & 2))
+        vo_c->track && vo_c->track->dec && (opts->frame_dropping & 2) &&
+        !history_active(mpctx))
     {
         float fps = vo_c->filter->container_fps;
         // it's a crappy heuristic; avoid getting upset by incorrect fps
@@ -539,7 +551,9 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
     if (needs_new_frame(mpctx)) {
         // Filter a new frame.
         struct mp_image *img = NULL;
-        struct mp_frame frame = mp_pin_out_read(vo_c->filter->f->pins[1]);
+        bool replay;
+        struct mp_frame frame = history_read(mpctx, MP_FRAME_VIDEO,
+                                              vo_c->filter->f->pins[1], &replay);
         if (frame.type == MP_FRAME_NONE) {
             r = vo_c->filter->got_output_eof ? VD_EOF : VD_WAIT;
         } else if (frame.type == MP_FRAME_EOF) {
@@ -559,7 +573,7 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
             if ((endpts != MP_NOPTS_VALUE && img->pts >= endpts) ||
                 mpctx->max_frames == 0)
             {
-                mp_pin_out_unread(vo_c->filter->f->pins[1], frame);
+                history_unread(mpctx, frame, vo_c->filter->f->pins[1], replay);
                 img = NULL;
                 r = VD_EOF;
             } else if (hrseek && (img->pts < hrseek_pts - tolerance ||
@@ -568,6 +582,8 @@ static int video_output_image(struct MPContext *mpctx, bool *logical_eof)
                 /* just skip - but save in case it was the last frame */
                 mp_image_setrefp(&mpctx->saved_frame, img);
             } else {
+                if (!replay)
+                    history_add(mpctx, frame);
                 if (hrseek && mpctx->hrseek_backstep) {
                     if (mpctx->saved_frame) {
                         add_new_frame(mpctx, mpctx->saved_frame);
@@ -1096,6 +1112,8 @@ void write_video(struct MPContext *mpctx)
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
         vo_c->filter->reconfig_happened = false;
     }
+
+    history_skip(mpctx, MP_FRAME_VIDEO, vo_c->filter->f->pins[1]);
 
     // Actual playback starts when both audio and video are ready.
     if (mpctx->video_status == STATUS_READY)

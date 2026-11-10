@@ -39,6 +39,7 @@
 
 #include "core.h"
 #include "command.h"
+#include "history.h"
 
 enum {
     AD_OK = 0,
@@ -110,6 +111,7 @@ int reinit_audio_filters(struct MPContext *mpctx)
     if (!ao_c)
         return 0;
 
+    history_invalidate(mpctx);
     double delay = mp_output_get_measured_total_delay(ao_c->filter);
 
     if (recreate_audio_filters(mpctx) < 0)
@@ -229,12 +231,19 @@ static void ao_chain_reset_state(struct ao_chain *ao_c)
 
 void reset_audio_state(struct MPContext *mpctx)
 {
+    history_reset(mpctx);
     if (mpctx->ao_chain) {
-        ao_chain_reset_state(mpctx->ao_chain);
         struct track *t = mpctx->ao_chain->track;
         if (t && t->dec)
             mp_decoder_wrapper_set_play_dir(t->dec, mpctx->play_dir);
     }
+    reset_audio_output_state(mpctx);
+}
+
+void reset_audio_output_state(struct MPContext *mpctx)
+{
+    if (mpctx->ao_chain)
+        ao_chain_reset_state(mpctx->ao_chain);
     mpctx->audio_status = mpctx->ao_chain ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
     mpctx->logged_async_diff = -1;
@@ -708,6 +717,8 @@ static void ao_process(struct mp_filter *f)
         return;
     }
 
+    history_skip(mpctx, MP_FRAME_AUDIO, f->ppins[0]);
+
     // Due to mp_async_queue_set_notifier() this function is called when the
     // queue becomes full. This affects state changes in the normal playloop,
     // so wake it up. But avoid redundant wakeups during normal playback.
@@ -721,10 +732,12 @@ static void ao_process(struct mp_filter *f)
     if (ao_c->untimed_throttle)
         return;
 
-    if (!mp_pin_can_transfer_data(ao_c->queue_filter->pins[0], f->ppins[0]))
+    bool replay = history_replaying(mpctx, MP_FRAME_AUDIO);
+    if (replay ? !mp_pin_in_needs_data(ao_c->queue_filter->pins[0]) :
+        !mp_pin_can_transfer_data(ao_c->queue_filter->pins[0], f->ppins[0]))
         return;
 
-    struct mp_frame frame = mp_pin_out_read(f->ppins[0]);
+    struct mp_frame frame = history_read(mpctx, MP_FRAME_AUDIO, f->ppins[0], &replay);
     if (frame.type == MP_FRAME_AUDIO) {
         struct mp_aframe *af = frame.data;
 
@@ -733,7 +746,7 @@ static void ao_process(struct mp_filter *f)
             endpts *= mpctx->play_dir;
             // Avoid decoding and discarding the entire rest of the file.
             if (mp_aframe_get_pts(af) >= endpts) {
-                mp_pin_out_unread(f->ppins[0], frame);
+                history_unread(mpctx, frame, f->ppins[0], replay);
                 if (!ao_c->out_eof) {
                     ao_c->out_eof = true;
                     mp_pin_in_write(ao_c->queue_filter->pins[0], MP_EOF_FRAME);
@@ -741,6 +754,8 @@ static void ao_process(struct mp_filter *f)
                 return;
             }
         }
+        if (!replay)
+            history_add(mpctx, frame);
         double startpts = mpctx->audio_status == STATUS_SYNCING ?
                                             ao_c->start_pts : MP_NOPTS_VALUE;
         mp_aframe_clip_timestamps(af, startpts, endpts);

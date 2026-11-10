@@ -85,6 +85,7 @@
 #include "osdep/terminal.h"
 
 #include "core.h"
+#include "history.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -1612,6 +1613,19 @@ static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
     demux_get_reader_state(mpctx->demuxer, &s);
 
     return m_property_bool_ro(action, arg, s.idle);
+}
+
+static int mp_property_video_history(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    if (action == M_PROPERTY_GET_TYPE) {
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    }
+    if (action != M_PROPERTY_GET)
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    history_get_state(ctx, arg);
+    return M_PROPERTY_OK;
 }
 
 static int mp_property_demuxer_cache_state(void *ctx, struct m_property *prop,
@@ -4743,6 +4757,7 @@ static const struct m_property mp_properties_base[] = {
     {"demuxer-cache-time", mp_property_demuxer_cache_time},
     {"demuxer-cache-idle", mp_property_demuxer_cache_idle},
     {"demuxer-start-time", mp_property_demuxer_start_time},
+    {"video-history-state", mp_property_video_history},
     {"demuxer-cache-state", mp_property_demuxer_cache_state},
     {"cache-buffering-state", mp_property_cache_buffering},
     {"paused-for-cache", mp_property_paused_for_cache},
@@ -4942,7 +4957,8 @@ static const char *const *const mp_event_property_change[] = {
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
       "secondary-sub-end", "sub-lines", "secondary-sub-lines", "video-out-params",
-      "video-dec-params", "video-params", "deinterlace-active", "video-target-params"),
+      "video-dec-params", "video-params", "deinterlace-active", "video-target-params",
+      "video-history-state"),
     E(MP_EVENT_DURATION_UPDATE, "duration"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
@@ -8452,6 +8468,12 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
     struct m_config_option *co = callback->co;
     void *opt_ptr = co ? co->data : NULL;
     uint64_t flags = callback->flags;
+
+    // These change what the decoders or filters output.
+    if (flags & (UPDATE_IMGPAR | UPDATE_HWDEC | UPDATE_AD) ||
+        opt_ptr == &opts->playback_speed || opt_ptr == &opts->playback_pitch ||
+        opt_ptr == &opts->pitch_correction)
+        history_invalidate(mpctx);
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx, false);

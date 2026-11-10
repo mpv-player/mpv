@@ -389,7 +389,8 @@ static void get_display_res(struct mp_stream_info *i, int *res)
         vo_control(p->vo, VOCTRL_GET_DISPLAY_RES, res);
 }
 
-void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
+void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo,
+                             bool allow_dr)
 {
     struct chain *p = c->f->priv;
 
@@ -398,6 +399,7 @@ void mp_output_chain_set_vo(struct mp_output_chain *c, struct vo *vo)
     p->stream_info.vflip = vo ? vo->driver->caps & VO_CAP_VFLIP : false;
     p->stream_info.rotate90 = vo ? vo->driver->caps & VO_CAP_ROTATE90 : false;
     p->stream_info.dr_vo = vo;
+    p->stream_info.disable_dr = !allow_dr;
     p->vo = vo;
     update_output_caps(p);
 }

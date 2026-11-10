@@ -1425,6 +1425,7 @@ struct mp_decoder_wrapper *mp_decoder_wrapper_create(struct mp_filter *parent,
             p->dec_root_filter->stream_info = &p->stream_info;
             p->stream_info = (struct mp_stream_info){
                 .dr_vo = sinfo->dr_vo,
+                .disable_dr = sinfo->disable_dr,
                 .hwdec_devs = sinfo->hwdec_devs,
             };
         }

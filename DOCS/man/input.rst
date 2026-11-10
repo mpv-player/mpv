@@ -2652,6 +2652,31 @@ Property list
     Whether the demuxer is idle, which means that the demuxer cache is filled
     to the requested amount, and is currently not reading more data.
 
+``video-history-state``
+    State of ``--video-history``. When querying the property with the client
+    API using ``MPV_FORMAT_NODE``, or with Lua ``mp.get_property_native``, this
+    will return a mpv_node with the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "status"  MPV_FORMAT_STRING
+            "ranges"  MPV_FORMAT_NODE_ARRAY
+                MPV_FORMAT_NODE_MAP
+                    "start"  MPV_FORMAT_DOUBLE
+                    "end"    MPV_FORMAT_DOUBLE
+            "bytes"   MPV_FORMAT_INT64
+
+    ``status`` is ``ready`` if there is a range that can be seeked to, and
+    ``filling`` if there is none yet. Otherwise, it is the reason why nothing
+    is cached: ``disabled``, ``no-video``, ``reverse-playback``,
+    ``unsupported-pipeline``, ``hardware-decoding`` or ``audio-passthrough``.
+
+    ``ranges`` are the time ranges that can be seeked to without decoding, in
+    no particular order.
+
+    ``bytes`` is the approximate memory used by the cached video and audio frames.
+
 ``demuxer-cache-state``
     Each entry in ``seekable-ranges`` represents a region in the demuxer cache
     that can be seeked to, with a ``start`` and ``end`` fields containing the
