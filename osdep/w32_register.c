@@ -214,6 +214,49 @@ static wchar_t *w32_get_shortcut_path(struct mp_log *log)
     return shortcut_path;
 }
 
+static void remove_registration(struct mp_log *log, HKEY root)
+{
+    reg_del(log, root, KEY_MPV_APP_PATH(".exe"), NULL);
+    reg_del(log, root, KEY_MPV_APP_PATH(".com"), NULL);
+    reg_del(log, root, KEY_MPV_APP, NULL);
+    reg_del(log, root, KEY_MPV_CAPABILITIES_APP, NULL);
+    reg_del(log, root, L"Software\\RegisteredApplications", MPV_NAME);
+
+    reg_del(log, root, KEY_MPV_PROG_ID("bluray"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("cdda"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("dvd"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("dvda"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("file"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("url"), NULL);
+
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayCDAudioOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayCDAudioOnArrival",
+            L"MpvPlayCDAudioOnArrival");
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDMovieOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDMovieOnArrival",
+            L"MpvPlayDVDMovieOnArrival");
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDAudioOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDAudioOnArrival",
+            L"MpvPlayDVDAudioOnArrival");
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayBluRayOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayBluRayOnArrival",
+            L"MpvPlayBluRayOnArrival");
+
+    wchar_t *shortcut_path = w32_get_shortcut_path(log);
+    if (shortcut_path) {
+        mp_msg(log, MSGL_V, "Removing shortcut: '%ls'\n", shortcut_path);
+        if (!DeleteFileW(shortcut_path)) {
+            DWORD err = GetLastError();
+            mp_msg(log, err == ERROR_FILE_NOT_FOUND ? MSGL_DEBUG : MSGL_ERR,
+                   "Failed to delete shortcut: '%ls' -> %s\n", shortcut_path,
+                   mp_LastError_to_str());
+        }
+        LocalFree(shortcut_path);
+    }
+
+    reg_del(log, root, KEY_MPV_UNINSTALL, NULL);
+}
+
 #define REGISTER_AUTOPLAY_HANDLER(media, event, action)                        \
     reg_add_str(log, root, KEY_MPV_PROG_ID(media) L"\\shell", NULL, L"open");  \
     reg_add_str(log, root, KEY_MPV_PROG_ID(media) L"\\shell\\open\\command",   \
@@ -455,45 +498,7 @@ static void w32_unregister(struct MPContext *mpctx)
     mp_msg(log, MSGL_INFO, "Unregistering mpv for %s...\n",
            root == HKEY_LOCAL_MACHINE ? "all users" : "the current user");
 
-    reg_del(log, root, KEY_MPV_APP_PATH(".exe"), NULL);
-    reg_del(log, root, KEY_MPV_APP_PATH(".com"), NULL);
-    reg_del(log, root, KEY_MPV_APP, NULL);
-    reg_del(log, root, KEY_MPV_CAPABILITIES_APP, NULL);
-    reg_del(log, root, L"Software\\RegisteredApplications", MPV_NAME);
-
-    reg_del(log, root, KEY_MPV_PROG_ID("bluray"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("cdda"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("dvd"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("dvda"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("file"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("url"), NULL);
-
-    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayCDAudioOnArrival", NULL);
-    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayCDAudioOnArrival",
-            L"MpvPlayCDAudioOnArrival");
-    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDMovieOnArrival", NULL);
-    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDMovieOnArrival",
-            L"MpvPlayDVDMovieOnArrival");
-    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDAudioOnArrival", NULL);
-    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDAudioOnArrival",
-            L"MpvPlayDVDAudioOnArrival");
-    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayBluRayOnArrival", NULL);
-    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayBluRayOnArrival",
-            L"MpvPlayBluRayOnArrival");
-
-    wchar_t *shortcut_path = w32_get_shortcut_path(log);
-    if (shortcut_path) {
-        mp_msg(log, MSGL_V, "Removing shortcut: '%ls'\n", shortcut_path);
-        if (!DeleteFileW(shortcut_path)) {
-            DWORD err = GetLastError();
-            mp_msg(log, err == ERROR_FILE_NOT_FOUND ? MSGL_DEBUG : MSGL_ERR,
-                   "Failed to delete shortcut: '%ls' -> %s\n", shortcut_path,
-                   mp_LastError_to_str());
-        }
-        LocalFree(shortcut_path);
-    }
-
-    reg_del(log, root, KEY_MPV_UNINSTALL, NULL);
+    remove_registration(log, root);
 
     SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
 
