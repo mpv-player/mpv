@@ -399,6 +399,7 @@ if not features['win32-threads']
                                          'pthread_condattr_setclock',
                                          args: '-D_GNU_SOURCE',
                                          dependencies: pthreads)}
+    features += {'pr-set-timerslack': cc.has_header_symbol('sys/prctl.h', 'PR_SET_TIMERSLACK')}
     dependencies += pthreads
 endif
 
