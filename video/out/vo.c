@@ -910,8 +910,6 @@ static void wait_until(struct vo *vo, int64_t target)
     struct vo_internal *in = vo->in;
     mp_mutex_lock(&in->lock);
     while (target > mp_time_ns()) {
-        if (in->queued_events & VO_EVENT_LIVE_RESIZING)
-            break;
         if (mp_cond_timedwait_until(&in->wakeup, &in->lock, target))
             break;
     }
