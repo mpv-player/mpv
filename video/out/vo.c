@@ -904,16 +904,9 @@ void vo_wait_frame(struct vo *vo)
 }
 
 // Wait until realtime is >= ts
-// called without lock
-static void wait_until(struct vo *vo, int64_t target)
+static void wait_until(int64_t target)
 {
-    struct vo_internal *in = vo->in;
-    mp_mutex_lock(&in->lock);
-    while (target > mp_time_ns()) {
-        if (mp_cond_timedwait_until(&in->wakeup, &in->lock, target))
-            break;
-    }
-    mp_mutex_unlock(&in->lock);
+    mp_sleep_ns(target - mp_time_ns());
 }
 
 static bool render_frame(struct vo *vo)
@@ -1016,7 +1009,7 @@ static bool render_frame(struct vo *vo)
 
         stats_time_end(in->stats, "video-draw");
 
-        wait_until(vo, target);
+        wait_until(target);
 
         stats_time_start(in->stats, "video-flip");
 
