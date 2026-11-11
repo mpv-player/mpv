@@ -2329,9 +2329,8 @@ static void reload_options(struct priv *p)
                      (old_type != image_lut.type));
 }
 
-static void configure_queue(struct vo *vo)
+static void configure_queue(struct priv *p, struct vo *vo)
 {
-    struct priv *p = vo->priv;
     // pl_queue also retains past frames for the symmetric mixing window,
     vo_set_queue_params(vo, 0, p->req_frames, 2 * p->req_frames - 1);
 }
@@ -2383,7 +2382,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
         reload_options(p);
-        configure_queue(vo);
+        configure_queue(p, vo);
 
         update_ra_ctx_options(vo, &p->ra_ctx->opts);
         if (p->ra_ctx->fns->update_render_opts)
@@ -2748,7 +2747,7 @@ static int preinit(struct vo *vo)
 
     p->pars = pl_options_alloc(p->pllog);
     update_render_options(p);
-    configure_queue(vo);
+    configure_queue(p, vo);
     return 0;
 
 err_out:
