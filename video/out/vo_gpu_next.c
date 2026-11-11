@@ -1937,6 +1937,20 @@ static int query_format(struct vo *vo, int format)
     return supported;
 }
 
+static void video_resize(struct priv *p, struct mp_rect src, struct mp_rect dst,
+                         struct mp_osd_res osd)
+{
+    if (mp_rect_equals(&p->src, &src) &&
+        mp_rect_equals(&p->dst, &dst) &&
+        osd_res_equals(p->osd_res, osd))
+        return;
+
+    p->osd_sync++;
+    p->osd_res = osd;
+    p->src = src;
+    p->dst = dst;
+}
+
 static void resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -1948,15 +1962,7 @@ static void resize(struct vo *vo)
         vo->want_redraw = true;
     }
 
-    if (mp_rect_equals(&p->src, &src) &&
-        mp_rect_equals(&p->dst, &dst) &&
-        osd_res_equals(p->osd_res, osd))
-        return;
-
-    p->osd_sync++;
-    p->osd_res = osd;
-    p->src = src;
-    p->dst = dst;
+    video_resize(p, src, dst, osd);
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params)
