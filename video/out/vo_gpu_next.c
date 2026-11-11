@@ -338,10 +338,9 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     return mpi;
 }
 
-static bool upload_overlay_tex(struct vo *vo, struct osd_entry *entry,
+static bool upload_overlay_tex(struct priv *p, struct osd_entry *entry,
                                const struct sub_bitmaps *item)
 {
-    struct priv *p = vo->priv;
     pl_fmt tex_fmt = p->osd_fmt[item->format];
     if (!entry->tex)
         MP_TARRAY_POP(p->sub_tex, p->num_sub_tex, &entry->tex);
@@ -361,7 +360,7 @@ static bool upload_overlay_tex(struct vo *vo, struct osd_entry *entry,
             .sampleable = true,
         });
         if (!ok) {
-            MP_ERR(vo, "Failed recreating OSD texture!\n");
+            MP_ERR(p, "Failed recreating OSD texture!\n");
             return false;
         }
     }
@@ -379,7 +378,7 @@ static bool upload_overlay_tex(struct vo *vo, struct osd_entry *entry,
         upload_params.priv = mp_image_new_ref(item->packed);
     }
     if (!pl_tex_upload(p->gpu, &upload_params)) {
-        MP_ERR(vo, "Failed uploading OSD texture!\n");
+        MP_ERR(p, "Failed uploading OSD texture!\n");
         talloc_free(upload_params.priv);
         entry->change_id = 0;
         return false;
@@ -537,7 +536,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
         if (!item->num_parts || !item->packed)
             continue;
         struct osd_entry *entry = &state->entries[item->render_index];
-        if (!upload_overlay_tex(vo, entry, item))
+        if (!upload_overlay_tex(p, entry, item))
             break;
 
         MP_TARRAY_GROW(p, entry->parts, item->num_parts * div[0] * div[1]);
@@ -903,9 +902,8 @@ static void hwdec_release_el(pl_gpu gpu, struct pl_frame *frame)
     slot_release(&p->el_hwdec);
 }
 
-static bool format_supported(struct vo *vo, int format, bool use_uint)
+static bool format_supported(struct priv *p, int format, bool use_uint)
 {
-    struct priv *p = vo->priv;
     struct pl_bit_encoding bits;
     struct pl_plane_data data[4] = {0};
     int planes = plane_data_from_imgfmt(data, &bits, format, use_uint);
@@ -944,15 +942,14 @@ static bool use_ref_luma(const struct pl_color_space *csp, const struct pl_color
     return false;
 }
 
-static bool upload_planes_sw(struct vo *vo, pl_gpu gpu, struct mp_image *mpi,
+static bool upload_planes_sw(struct priv *p, pl_gpu gpu, struct mp_image *mpi,
                              struct pl_frame *frame, pl_tex tex[4])
 {
-    struct priv *p = vo->priv;
     struct pl_plane_data data[4] = {0};
 
     // At this point, we know that the format is supported, query_format()
     // makes sure of that. Just check if we should use UINT as a fallback.
-    bool use_uint = !format_supported(vo, mpi->imgfmt, false);
+    bool use_uint = !format_supported(p, mpi->imgfmt, false);
     int planes = plane_data_from_imgfmt(data, &frame->repr.bits, mpi->imgfmt,
                                         use_uint);
     if (!planes)
@@ -1059,7 +1056,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
 
         stats_time_start(p->stats, "swdec-upload");
         timer_pool_start(p->sw_upload_timer);
-        bool ok = upload_planes_sw(vo, gpu, mpi, frame, tex);
+        bool ok = upload_planes_sw(p, gpu, mpi, frame, tex);
         timer_pool_stop(p->sw_upload_timer);
         stats_time_end(p->stats, "swdec-upload");
         if (!ok) {
@@ -1101,7 +1098,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             fp->el_frame.release = hwdec_release_el;
             setup_hwdec_plane_mapping(&fp->el_frame, &desc);
         } else if (el_ok) {
-            el_ok = upload_planes_sw(vo, gpu, el, &fp->el_frame, fp->el_tex);
+            el_ok = upload_planes_sw(p, gpu, el, &fp->el_frame, fp->el_tex);
         }
 
         if (el_ok) {
@@ -1157,8 +1154,7 @@ static void discard_frame(const struct pl_source_frame *src)
 
 static void info_callback(void *priv, const struct pl_render_info *info)
 {
-    struct vo *vo = priv;
-    struct priv *p = vo->priv;
+    struct priv *p = priv;
     if (info->index >= VO_PASS_PERF_MAX)
         return; // silently ignore clipped passes, whatever
 
@@ -1371,7 +1367,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                            !frame->still && frame->num_frames > 1 && !p->paused;
     double pts_offset = can_interpolate ? frame->ideal_frame_vsync : 0;
     params.info_callback = info_callback;
-    params.info_priv = vo;
+    params.info_priv = p;
     params.skip_caching_single_frame = !cache_frame;
     params.preserve_mixing_cache = p->next_opts->inter_preserve && !frame->still;
     if (frame->still || p->paused)
@@ -1839,9 +1835,9 @@ static int query_format(struct vo *vo, int format)
     if (ra_hwdec_get(&p->hwdec_ctx, format))
         return true;
 
-    bool supported = format_supported(vo, format, false);
+    bool supported = format_supported(p, format, false);
     if (!supported)
-        supported = format_supported(vo, format, true);
+        supported = format_supported(p, format, true);
 
     return supported;
 }
@@ -2363,18 +2359,17 @@ done:
     talloc_free(ta_ctx);
 }
 
-static void cache_init(struct vo *vo, struct cache *cache, size_t max_size,
+static void cache_init(struct priv *p, struct cache *cache, size_t max_size,
                        const char *dir_opt)
 {
-    struct priv *p = vo->priv;
     const char *name = cache == &p->shader_cache ? "shader" : "icc";
     const size_t limit = cache == &p->shader_cache ? 128 << 20 : 1536 << 20;
 
     char *dir;
     if (dir_opt && dir_opt[0]) {
-        dir = mp_get_user_path(vo, p->global, dir_opt);
+        dir = mp_get_user_path(p, p->global, dir_opt);
     } else {
-        dir = mp_find_user_file(vo, p->global, "cache", "");
+        dir = mp_find_user_file(p, p->global, "cache", "");
     }
     if (!dir || !dir[0])
         return;
@@ -2569,9 +2564,9 @@ static int preinit(struct vo *vo)
     mp_mutex_init(&p->dr_lock);
 
     if (gl_opts->shader_cache)
-        cache_init(vo, &p->shader_cache, 10 << 20, gl_opts->shader_cache_dir);
+        cache_init(p, &p->shader_cache, 10 << 20, gl_opts->shader_cache_dir);
     if (gl_opts->icc_opts->cache)
-        cache_init(vo, &p->icc_cache, 20 << 20, gl_opts->icc_opts->cache_dir);
+        cache_init(p, &p->icc_cache, 20 << 20, gl_opts->icc_opts->cache_dir);
 
     pl_gpu_set_cache(p->gpu, p->shader_cache.cache);
     p->rr = pl_renderer_create(p->pllog, p->gpu);
