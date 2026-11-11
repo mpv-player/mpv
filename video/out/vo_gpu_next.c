@@ -2716,7 +2716,7 @@ static int preinit(struct vo *vo)
     p->context = gpu_ctx_create(vo, ctx_opts);
     talloc_free(ctx_opts);
     if (!p->context)
-        goto err_out;
+        return -1;
     // For the time being
     p->ra_ctx = p->context->ra_ctx;
     p->pllog = p->context->pllog;
@@ -2749,10 +2749,6 @@ static int preinit(struct vo *vo)
     update_render_options(p);
     configure_queue(p, vo);
     return 0;
-
-err_out:
-    uninit(vo);
-    return -1;
 }
 
 static const struct pl_filter_config *map_scaler(struct priv *p,
