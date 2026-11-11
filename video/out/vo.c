@@ -452,7 +452,8 @@ static void check_estimated_display_fps(struct vo *vo)
     struct vo_internal *in = vo->in;
 
     bool use_estimated = false;
-    if (in->num_total_vsync_samples >= MAX_VSYNC_SAMPLES / 2 &&
+    if (!in->follows &&
+        in->num_total_vsync_samples >= MAX_VSYNC_SAMPLES / 2 &&
         in->estimated_vsync_interval <= 1e9 / 20.0 &&
         in->estimated_vsync_interval >= 1e9 / 400.0)
     {
