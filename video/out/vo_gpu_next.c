@@ -1618,71 +1618,49 @@ static enum hint_mode get_target_hint(struct priv *p, struct vo_frame *frame,
     return target_hint ? HINT_KEEP : HINT_NONE;
 }
 
-static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+static void skip_frame(struct priv *p, struct vo_frame *frame)
 {
-    struct priv *p = vo->priv;
+    struct frame_params fpar = get_frame_params(p, frame);
+    if (frame->current) {
+        // Advance the queue state to the current PTS to discard unused frames
+        struct pl_queue_params qparams = *pl_queue_params(
+            .pts = frame->current->pts + fpar.pts_offset,
+            .radius = pl_frame_mix_radius(&fpar.params),
+            .vsync_duration = fpar.can_interpolate ? frame->ideal_frame_vsync_duration : 0,
+            .drift_compensation = 0,
+        );
+        pl_queue_update(p->queue, NULL, &qparams);
+    }
+}
+
+// Render a frame to a target. hint is the color space requested for the
+// target when hinting is in use, NULL otherwise.
+static bool render_frame(struct priv *p, struct vo_frame *frame,
+                         const struct pl_swapchain_frame *swframe,
+                         const struct pl_color_space *hint,
+                         struct mp_image_params *target_params)
+{
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
-    begin_frame(p, frame);
-
     const struct gl_video_opts *opts = p->opts_cache->opts;
     struct frame_params fpar = get_frame_params(p, frame);
     struct pl_render_params params = fpar.params;
     bool can_interpolate = fpar.can_interpolate;
     double pts_offset = fpar.pts_offset;
 
-    struct ra_swapchain *sw = p->ra_ctx->swapchain;
-
-    p->display_csp = (struct pl_color_space){0};
-    // TODO: Implement this for all backends
-    if (sw->fns->target_csp)
-        p->display_csp = sw->fns->target_csp(sw);
-    p->display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
-
-    struct pl_color_space hint = {0};
-    bool external_params = false;
-    enum hint_mode hint_mode = get_target_hint(p, frame, &hint);
-    if (hint_mode == HINT_SET) {
-        external_params = set_colorspace_hint(p, &hint);
-    } else if (hint_mode == HINT_NONE) {
-        external_params = set_colorspace_hint(p, NULL);
-    }
-
-    bool target_hint = hint_mode != HINT_NONE;
     bool target_unknown;
     float target_ref_luma;
     struct pl_color_space target_csp = get_target_csp(p, &target_unknown, &target_ref_luma);
-    if (!target_hint)
-        hint.hdr.min_luma = target_csp.hdr.min_luma;
-
-    struct pl_swapchain_frame swframe;
-    bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
-    if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
-        if (frame->current) {
-            // Advance the queue state to the current PTS to discard unused frames
-            struct pl_queue_params qparams = *pl_queue_params(
-                .pts = frame->current->pts + pts_offset,
-                .radius = pl_frame_mix_radius(&params),
-                .vsync_duration = can_interpolate ? frame->ideal_frame_vsync_duration : 0,
-                .drift_compensation = 0,
-            );
-            pl_queue_update(p->queue, NULL, &qparams);
-        }
-        return VO_FALSE;
-    }
 
     bool valid = false;
     p->is_interpolated = false;
 
     // Calculate target
     struct pl_frame target;
-    if (external_params)
-        swframe.color_space = hint;
-    pl_frame_from_swapchain(&target, &swframe);
-    bool strict_sw_params = target_hint && p->next_opts->target_hint_strict;
-    p->fb_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
-    apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params,
-                         target_ref_luma, &target_csp);
+    pl_frame_from_swapchain(&target, swframe);
+    bool strict_sw_params = hint && p->next_opts->target_hint_strict;
+    apply_target_options(p, &target, hint ? hint->hdr.min_luma : target_csp.hdr.min_luma,
+                         strict_sw_params, target_ref_luma, &target_csp);
     bool clip_gamut = pl_primaries_valid(&target.color.hdr.prim);
     clip_gamut = clip_gamut && target.color.transfer != PL_COLOR_TRC_SCRGB;
     if (clip_gamut) {
@@ -1735,7 +1713,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current,
                     frame->current ? frame->current->params.stereo3d : 0, get_ref_luma(p));
     stats_time_end(p->stats, "osd-update");
-    apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
+    apply_crop(&target, p->dst, swframe->fbo->params.w, swframe->fbo->params.h);
     update_tm_viz(&pars->color_map_params, &target);
 
     struct pl_frame_mix mix = {0};
@@ -1756,15 +1734,15 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         struct pl_source_frame first;
         if (pl_queue_peek(p->queue, 0, &first) && qparams.pts < first.pts) {
             if (first.pts != frame->current->pts)
-                MP_VERBOSE(vo, "Current PTS(%f) != VPTS(%f)\n", frame->current->pts, first.pts);
-            MP_VERBOSE(vo, "Clamping first frame PTS from %f to %f\n", qparams.pts, first.pts);
+                MP_VERBOSE(p, "Current PTS(%f) != VPTS(%f)\n", frame->current->pts, first.pts);
+            MP_VERBOSE(p, "Clamping first frame PTS from %f to %f\n", qparams.pts, first.pts);
             qparams.pts = first.pts;
         }
         p->last_pts = qparams.pts;
 
         switch (pl_queue_update(p->queue, &mix, &qparams)) {
         case PL_QUEUE_ERR:
-            MP_ERR(vo, "Failed updating frames!\n");
+            MP_ERR(p, "Failed updating frames!\n");
             goto done;
         case PL_QUEUE_EOF:
             abort(); // we never signal EOF
@@ -1772,7 +1750,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             // This is expected to happen semi-frequently near the start and
             // end of a file, so only log it at high verbosity and move on.
             if (!frame->still)
-                MP_DBG(vo, "Render queue underrun.\n");
+                MP_DBG(p, "Render queue underrun.\n");
             break;
         case PL_QUEUE_OK:
             break;
@@ -1839,22 +1817,73 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     bool render_ok = pl_render_image_mix(p->rr, &mix, &target, &params);
     stats_time_end(p->stats, "render");
     if (!render_ok) {
-        MP_ERR(vo, "Failed rendering frame!\n");
+        MP_ERR(p, "Failed rendering frame!\n");
         goto done;
     }
 
     struct pl_frame ref_frame;
     pl_frames_infer_mix(p->rr, &mix, &target, &ref_frame);
 
-    struct mp_image_params target_params = {
-        .imgfmt_name = swframe.fbo->params.format
-                        ? swframe.fbo->params.format->name : NULL,
+    *target_params = (struct mp_image_params){
+        .imgfmt_name = swframe->fbo->params.format
+                        ? swframe->fbo->params.format->name : NULL,
         .w = mp_rect_w(p->dst),
         .h = mp_rect_h(p->dst),
         .color = target.color,
         .repr = target.repr,
         .rotate = target.rotation,
     };
+
+    p->is_interpolated = pts_offset != 0 && mix.num_frames > 1;
+    valid = true;
+    // fall through
+
+done:
+    if (!valid) // clear with purple to indicate error
+        pl_tex_clear(gpu, swframe->fbo, (float[4]){ 0.5, 0.0, 1.0, 1.0 });
+
+    pl_gpu_flush(gpu);
+    return valid;
+}
+
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+{
+    struct priv *p = vo->priv;
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+    begin_frame(p, frame);
+
+    p->display_csp = (struct pl_color_space){0};
+    // TODO: Implement this for all backends
+    if (sw->fns->target_csp)
+        p->display_csp = sw->fns->target_csp(sw);
+    p->display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
+
+    struct pl_color_space hint = {0};
+    bool external_params = false;
+    enum hint_mode hint_mode = get_target_hint(p, frame, &hint);
+    if (hint_mode == HINT_SET) {
+        external_params = set_colorspace_hint(p, &hint);
+    } else if (hint_mode == HINT_NONE) {
+        external_params = set_colorspace_hint(p, NULL);
+    }
+
+    struct pl_swapchain_frame swframe;
+    bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
+    if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
+        skip_frame(p, frame);
+        return VO_FALSE;
+    }
+
+    if (external_params)
+        swframe.color_space = hint;
+    p->fb_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
+
+    struct mp_image_params target_params;
+    bool ok = render_frame(p, frame, &swframe, hint_mode == HINT_NONE ? NULL : &hint,
+                           &target_params);
+    p->frame_pending = true;
+    if (!ok)
+        return VO_TRUE;
 
     mp_mutex_lock(&vo->params_mutex);
     p->target_params = target_params;
@@ -1866,16 +1895,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     }
     mp_mutex_unlock(&vo->params_mutex);
 
-    p->is_interpolated = pts_offset != 0 && mix.num_frames > 1;
-    valid = true;
-    // fall through
-
-done:
-    if (!valid) // clear with purple to indicate error
-        pl_tex_clear(gpu, swframe.fbo, (float[4]){ 0.5, 0.0, 1.0, 1.0 });
-
-    pl_gpu_flush(gpu);
-    p->frame_pending = true;
     return VO_TRUE;
 }
 
