@@ -1110,10 +1110,16 @@ static void record_present(struct vo_internal *in, struct present_record present
     in->presents[in->flips++ % MP_ARRAY_SIZE(in->presents)] = present;
 }
 
-// Wait until realtime is >= ts
-static void wait_until(int64_t target)
+// On Windows a sleep ends up to 1 ms late, adjust for that.
+#ifdef _WIN32
+#define SLEEP_SLACK_NS MP_TIME_MS_TO_NS(1)
+#else
+#define SLEEP_SLACK_NS 0
+#endif
+
+static void wait_until(int64_t target, bool exact)
 {
-    mp_sleep_ns(target - mp_time_ns());
+    mp_sleep_ns(target - (exact ? SLEEP_SLACK_NS : 0) - mp_time_ns());
     // A sleep can end before its time.
     while (mp_time_ns() < target) {}
 }
@@ -1301,7 +1307,7 @@ static bool render_frame(struct vo *vo)
 
         stats_time_end(in->stats, "video-draw");
 
-        wait_until(target);
+        wait_until(target, follows);
 
         stats_time_start(in->stats, "video-flip");
 
