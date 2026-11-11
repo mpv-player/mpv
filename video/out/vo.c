@@ -174,6 +174,8 @@ struct vo_internal {
     struct present_record presents[VO_MAX_SWAPCHAIN_DEPTH + 2];
     int64_t flips;                  // flips so far
     int64_t presentation_delay;     // display time minus pts of the last timed frame, INT64_MIN if none
+    int64_t vsync_grid;             // a recent vsync of the display, steadied against the feedback's jitter
+    int grid_misses;                // display times in a row that were not on the grid
 
     struct vo_frame *current_frame; // last frame queued to the VO
 
@@ -487,6 +489,26 @@ static void vsync_skip_detection(struct vo *vo)
         in->base_vsync += desync / 10;  // smooth out drift
 }
 
+// Keeps the vsync grid on the display's vsyncs, from the reported display
+// times. They jitter, so a time moves the grid only a sixteenth of the way to
+// it. A time near the middle between two vsyncs is neither of them and is
+// ignored. Eight of those in a row are a display on another grid, and a grid
+// not updated for a second has drifted. Both restart it.
+static void update_vsync_grid(struct vo_internal *in, int64_t vsync_time)
+{
+    double slots = llrint((vsync_time - in->vsync_grid) / in->vsync_interval);
+    int64_t vsync = in->vsync_grid + (int64_t)(slots * in->vsync_interval);
+    bool fresh = in->vsync_grid && slots * in->vsync_interval <= MP_TIME_S_TO_NS(1);
+    bool on_grid = fresh && llabs(vsync_time - vsync) < in->vsync_interval * 3 / 8;
+    in->grid_misses = on_grid ? 0 : in->grid_misses + 1;
+    if (on_grid) {
+        in->vsync_grid = vsync + (vsync_time - vsync) / 16;
+    } else if (!fresh || in->grid_misses >= 8) {
+        in->vsync_grid = vsync_time;
+        in->grid_misses = 0;
+    }
+}
+
 // Always called locked.
 static void update_vsync_timing_after_swap(struct vo *vo, int64_t vsync_time)
 {
@@ -571,6 +593,7 @@ static void update_display_fps(struct vo *vo)
     if (in->display_fps != display_fps) {
         in->nominal_vsync_interval =  display_fps > 0 ? 1e9 / display_fps : 0;
         in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
+        in->vsync_grid = 0;
         in->display_fps = display_fps;
 
         MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
@@ -1083,6 +1106,8 @@ static bool render_frame(struct vo *vo)
         } else if (frame->display_synced || !have_feedback) {
             in->presentation_delay = INT64_MIN;
         }
+        if (have_feedback && in->vsync_interval > 1)
+            update_vsync_grid(in, display_time);
         update_vsync_timing_after_swap(vo, display_time);
     }
 
