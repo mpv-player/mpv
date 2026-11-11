@@ -301,11 +301,11 @@ static void flip_page(struct vo *vo)
                              vo->dheight);
     wl_surface_commit(wl->surface);
 
-    if (wl->opts->wl_internal_vsync)
-        vo_wayland_wait_frame(wl);
-
     if (wl->use_present)
         present_sync_swap(wl->present);
+
+    if (wl->opts->wl_internal_vsync)
+        vo_wayland_wait_frame(wl);
 }
 
 static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
