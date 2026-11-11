@@ -1352,13 +1352,16 @@ static void update_tm_viz(struct pl_color_map_params *params,
 static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
                                      const struct mp_image *mpi);
 
-static bool draw_frame(struct vo *vo, struct vo_frame *frame)
-{
-    struct priv *p = vo->priv;
-    pl_options pars = p->pars;
-    pl_gpu gpu = p->gpu;
-    update_options(p);
+// Render parameters and timing of a frame
+struct frame_params {
+    struct pl_render_params params;
+    bool can_interpolate;
+    double pts_offset;
+};
 
+static struct frame_params get_frame_params(struct priv *p, struct vo_frame *frame)
+{
+    pl_options pars = p->pars;
     struct pl_render_params params = pars->params;
     const struct gl_video_opts *opts = p->opts_cache->opts;
     bool will_redraw = frame->display_synced && frame->num_vsyncs > 1;
@@ -1380,6 +1383,22 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     } else {
         params.distort_params = NULL;
     }
+
+    return (struct frame_params){ params, can_interpolate, pts_offset };
+}
+
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+{
+    struct priv *p = vo->priv;
+    pl_options pars = p->pars;
+    pl_gpu gpu = p->gpu;
+    update_options(p);
+
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    struct frame_params fpar = get_frame_params(p, frame);
+    struct pl_render_params params = fpar.params;
+    bool can_interpolate = fpar.can_interpolate;
+    double pts_offset = fpar.pts_offset;
 
     // Frames up to last_id were pushed before the seek. Redraws of them keep
     // the queue as it is, the reset happens with the first new frame.
