@@ -8340,8 +8340,12 @@ Video Sync
                         mode, because the player doesn't have to assume anything
                         about how the display behaves. The disadvantage is that
                         it can lead to occasional frame drops or repeats. If
-                        audio is disabled, this uses the system clock. This is
-                        the default mode.
+                        audio is disabled, this uses the system clock. With
+                        presentation feedback, a frame is presented half a
+                        vsync before the vsync nearest its time on a display
+                        with a fixed refresh rate, and at its exact time on a
+                        display that refreshes when a frame is presented (VRR).
+                        This is the default mode.
     :display-resample:  Resample audio to match the video. This mode will also
                         try to adjust audio speed to compensate for other drift.
                         (This means it will play the audio at a different speed
