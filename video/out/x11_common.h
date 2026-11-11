@@ -77,6 +77,7 @@ struct vo_x11_state {
     double screensaver_time_last;
 
     struct mp_present *present;
+    int64_t present_events;     // complete events so far, one per swap in order
     bool use_present;
     int present_code;
 

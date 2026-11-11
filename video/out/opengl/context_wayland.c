@@ -80,11 +80,11 @@ static void wayland_egl_swap_buffers(struct ra_ctx *ctx)
 
     eglSwapBuffers(p->egl_display, p->egl_surface);
 
-    if (wl->opts->wl_internal_vsync)
-        vo_wayland_wait_frame(wl);
-
     if (wl->use_present)
         present_sync_swap(wl->present);
+
+    if (wl->opts->wl_internal_vsync)
+        vo_wayland_wait_frame(wl);
 }
 
 static void wayland_egl_get_vsync(struct ra_ctx *ctx, struct vo_vsync_info *info)
