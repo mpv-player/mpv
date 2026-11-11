@@ -1304,6 +1304,11 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
     }
 }
 
+static enum pl_color_levels video_get_output_levels(struct priv *p)
+{
+    return p->output_levels ? p->output_levels : PL_COLOR_LEVELS_FULL;
+}
+
 static bool set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
 {
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
@@ -1312,7 +1317,7 @@ static bool set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
         .color = hint ? *hint : pl_color_space_srgb,
         .repr = {
             .sys = PL_COLOR_SYSTEM_RGB,
-            .levels = p->output_levels ? p->output_levels : PL_COLOR_LEVELS_FULL,
+            .levels = video_get_output_levels(p),
             .alpha = p->ra_ctx->opts.want_alpha ? PL_ALPHA_INDEPENDENT : PL_ALPHA_NONE,
         },
     };
@@ -1620,6 +1625,11 @@ static enum hint_mode get_target_hint(struct priv *p, struct vo_frame *frame,
     return target_hint ? HINT_KEEP : HINT_NONE;
 }
 
+static bool video_get_hdr_metadata(struct priv *p, struct pl_hdr_metadata *out)
+{
+    return pl_renderer_get_hdr_metadata(p->rr, out);
+}
+
 static void skip_frame(struct priv *p, struct vo_frame *frame)
 {
     struct frame_params fpar = get_frame_params(p, frame);
@@ -1894,7 +1904,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     if (vo->params) {
         // Augment metadata with the peak detection results
-        vo->has_peak_detect_values = pl_renderer_get_hdr_metadata(p->rr, &vo->params->color.hdr);
+        vo->has_peak_detect_values = video_get_hdr_metadata(p, &vo->params->color.hdr);
     }
     mp_mutex_unlock(&vo->params_mutex);
 
@@ -1976,6 +1986,11 @@ static void resize(struct vo *vo)
     video_resize(p, src, dst, osd);
 }
 
+static void video_config(struct priv *p, struct mp_image_params *params)
+{
+    p->image_params = *params;
+}
+
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
@@ -1983,7 +1998,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
 
     if (params)
-        p->image_params = *params;
+        video_config(p, params);
     resize(vo);
     mp_mutex_lock(&vo->params_mutex);
     vo->target_params = NULL;
@@ -2321,6 +2336,34 @@ static void configure_queue(struct vo *vo)
     vo_set_queue_params(vo, 0, p->req_frames, 2 * p->req_frames - 1);
 }
 
+static void video_set_paused(struct priv *p, bool paused)
+{
+    p->paused = paused;
+}
+
+static bool video_showing_interpolated_frame(struct priv *p)
+{
+    return p->is_interpolated;
+}
+
+static void video_reset(struct priv *p)
+{
+    // Defer until the first new frame (unique ID) actually arrives
+    p->want_seek_reset = true;
+}
+
+static void video_perfdata(struct priv *p, struct voctrl_performance_data *perf)
+{
+    copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh, &p->hwdec.perf, &p->sw_upload_perf);
+    copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw, NULL, NULL);
+}
+
+static void video_load_hwdecs(struct priv *p, struct mp_hwdec_devices *devs,
+                              struct hwdec_imgfmt_request *params)
+{
+    ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, devs, params);
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -2330,12 +2373,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(vo);
         return VO_TRUE;
     case VOCTRL_PAUSE:
-        if (p->is_interpolated)
+        if (video_showing_interpolated_frame(p))
             vo->want_redraw = true;
-        p->paused = true;
+        video_set_paused(p, true);
         return VO_TRUE;
     case VOCTRL_RESUME:
-        p->paused = false;
+        video_set_paused(p, false);
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
@@ -2357,16 +2400,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
 
     case VOCTRL_RESET:
-        // Defer until the first new frame (unique ID) actually arrives
-        p->want_seek_reset = true;
+        video_reset(p);
         return VO_TRUE;
 
-    case VOCTRL_PERFORMANCE_DATA: {
-        struct voctrl_performance_data *perf = data;
-        copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh, &p->hwdec.perf, &p->sw_upload_perf);
-        copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw, NULL, NULL);
+    case VOCTRL_PERFORMANCE_DATA:
+        video_perfdata(p, data);
         return true;
-    }
 
     case VOCTRL_SCREENSHOT:
         video_screenshot(p, data);
@@ -2377,7 +2416,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
 
     case VOCTRL_LOAD_HWDEC_API:
-        ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, vo->hwdec_devs, data);
+        video_load_hwdecs(p, vo->hwdec_devs, data);
         return true;
     }
 
