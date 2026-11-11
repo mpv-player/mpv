@@ -184,6 +184,10 @@ struct priv {
 
     struct mp_image_params image_params;
     struct mp_image_params target_params;
+
+    // What the swapchain reports about the display, read once per frame.
+    struct pl_color_space display_csp;
+    float display_ref_luma;
 };
 
 static void update_render_options(struct priv *p);
@@ -928,11 +932,7 @@ static float get_ref_luma(struct priv *p)
         return opts->hdr_reference_white;
 
     // auto: follow the system reference white, if available
-    struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    if (sw->fns->target_ref_luma)
-        return sw->fns->target_ref_luma(sw);
-
-    return 0;
+    return p->display_ref_luma;
 }
 
 static bool use_ref_luma(const struct pl_color_space *csp, const struct pl_color_space *target_csp)
@@ -1448,10 +1448,13 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
 
-    struct pl_color_space target_csp = {0};
+    p->display_csp = (struct pl_color_space){0};
     // TODO: Implement this for all backends
     if (sw->fns->target_csp)
-        target_csp = sw->fns->target_csp(sw);
+        p->display_csp = sw->fns->target_csp(sw);
+    p->display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
+
+    struct pl_color_space target_csp = p->display_csp;
     if (target_csp.primaries == PL_COLOR_PRIM_UNKNOWN)
         target_csp.primaries = mp_get_best_prim_container(&target_csp.hdr.prim);
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
