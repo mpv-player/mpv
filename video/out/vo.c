@@ -196,6 +196,7 @@ struct vo_internal {
     double round_edge;              // phase between two vsyncs past which a frame goes on the later one
     struct timed_lateness late;
     double shown_at_once;           // share of the recent frames the display showed right when presented
+    enum vo_refresh_kind refresh_kind; // the backend's word on the display, from the last flip
     bool follows;                   // the display shows presents immediately, logged when it changes
 
     struct vo_frame *current_frame; // last frame queued to the VO
@@ -1176,7 +1177,8 @@ static bool render_frame(struct vo *vo)
     // one present in ten half a vsync before its vsync on an idle desktop,
     // and a compositor repainting for something else holds the presents of a
     // display that follows for a moment.
-    bool follows = in->shown_at_once > 0.5;
+    bool follows = in->refresh_kind == VO_REFRESH_VARIABLE ||
+                   (in->refresh_kind != VO_REFRESH_FIXED && in->shown_at_once > 0.5);
     if (follows != in->follows) {
         MP_VERBOSE(vo, follows ? "Display shows presents immediately\n"
                                : "Display shows presents on its vsyncs\n");
@@ -1333,6 +1335,7 @@ static bool render_frame(struct vo *vo)
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
 
+        in->refresh_kind = have_feedback ? vsync.refresh_kind : VO_REFRESH_UNKNOWN;
         record_present(in, (struct present_record){present_time, pts, due});
         // The flip the backend reports as displayed, if it measured the time
         // and the flip is one of the last.
