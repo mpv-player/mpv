@@ -1846,8 +1846,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_frame ref_frame;
     pl_frames_infer_mix(p->rr, &mix, &target, &ref_frame);
 
-    mp_mutex_lock(&vo->params_mutex);
-    p->target_params = (struct mp_image_params){
+    struct mp_image_params target_params = {
         .imgfmt_name = swframe.fbo->params.format
                         ? swframe.fbo->params.format->name : NULL,
         .w = mp_rect_w(p->dst),
@@ -1856,6 +1855,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         .repr = target.repr,
         .rotate = target.rotation,
     };
+
+    mp_mutex_lock(&vo->params_mutex);
+    p->target_params = target_params;
     vo->target_params = &p->target_params;
 
     if (vo->params) {
