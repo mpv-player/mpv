@@ -2006,11 +2006,16 @@ static bool update_icc(struct priv *p, struct bstr icc)
     return ok;
 }
 
+static bool icc_auto_enabled(struct priv *p)
+{
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    return opts->icc_opts && opts->icc_opts->profile_auto && !p->icc_path;
+}
+
 // Returns whether the ICC profile was updated (even on failure)
 static bool update_auto_profile(struct priv *p, int *events)
 {
-    const struct gl_video_opts *opts = p->opts_cache->opts;
-    if (!opts->icc_opts || !opts->icc_opts->profile_auto || p->icc_path)
+    if (!icc_auto_enabled(p))
         return false;
 
     MP_VERBOSE(p, "Querying ICC profile...\n");
