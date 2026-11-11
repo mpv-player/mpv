@@ -2645,8 +2645,7 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
 
     // Drain any in-flight uploads.
-    if (p->gpu)
-        pl_gpu_finish(p->gpu);
+    pl_gpu_finish(p->gpu);
 
     pl_queue_destroy(&p->queue); // destroy this first
     for (int i = 0; i < MP_ARRAY_SIZE(p->osd_state.entries); i++)
@@ -2658,13 +2657,11 @@ static void uninit(struct vo *vo)
 
     timer_pool_destroy(p->sw_upload_timer);
 
-    if (vo->hwdec_devs) {
-        slot_uninit(p, &p->hwdec);
-        slot_uninit(p, &p->el_hwdec);
-        ra_hwdec_ctx_uninit(&p->hwdec_ctx);
-        hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
-        hwdec_devices_destroy(vo->hwdec_devs);
-    }
+    slot_uninit(p, &p->hwdec);
+    slot_uninit(p, &p->el_hwdec);
+    ra_hwdec_ctx_uninit(&p->hwdec_ctx);
+    hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
+    hwdec_devices_destroy(vo->hwdec_devs);
 
     mp_assert(p->num_dr_buffers == 0);
     mp_mutex_destroy(&p->dr_lock);
