@@ -987,7 +987,7 @@ static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
 
     int64_t ust = MP_TIME_S_TO_NS(sec) + MP_TIME_US_TO_NS(usec);
     present_sync_update_values(drm->present, mp_time_ns_from_clock(CLOCK_MONOTONIC, ust), msc, 0,
-                               drm->flip_swap);
+                               drm->flip_swap, VO_REFRESH_UNKNOWN);
     drm->waiting_for_flip = false;
 }
 

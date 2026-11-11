@@ -32,6 +32,7 @@ void present_sync_get_info(struct mp_present *present, struct vo_vsync_info *inf
     present->pending = false;
 
     info->vsync_duration = present->vsync_duration;
+    info->refresh_kind = present->refresh_kind;
     // A presented frame further back than the largest swapchain holds frames
     // is not the last one displayed, the feedback of the later ones got lost.
     // swapchain-depth is no bound, the driver may make more images than that
@@ -50,7 +51,7 @@ void present_sync_swap(struct mp_present *present)
 }
 
 void present_sync_update_values(struct mp_present *present, int64_t time, int64_t msc,
-                                int64_t refresh_ns, int64_t swap)
+                                int64_t refresh_ns, int64_t swap, enum vo_refresh_kind kind)
 {
     // A frame that was not swapped yet is not on the display. Such feedback
     // is of something else, on Wayland of a commit without a buffer swap.
@@ -66,4 +67,5 @@ void present_sync_update_values(struct mp_present *present, int64_t time, int64_
     present->presented = swap;
     present->time = time;
     present->msc = msc;
+    present->refresh_kind = kind;
 }

@@ -172,7 +172,7 @@ struct vo_wayland_feedback_pool {
     int64_t *swap; // the swap each feedback belongs to
     struct vo_wayland_state *wl;
     int last_zero_copy;
-    int last_refresh_type;
+    int last_refresh_kind;
     int len;
 };
 
@@ -2603,17 +2603,22 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
         fback_pool->last_zero_copy = current_zero_copy;
     }
 
+    enum vo_refresh_kind kind = VO_REFRESH_UNKNOWN;
     if (wp_presentation_feedback_get_version(fback) >= 3) {
-        int refresh_type = flags & WP_PRESENTATION_FEEDBACK_KIND_FIXED_RATE ? 1 :
-                           flags & WP_PRESENTATION_FEEDBACK_KIND_VARIABLE_RATE ? 0 :
-                           -1;
+        if (flags & WP_PRESENTATION_FEEDBACK_KIND_FIXED_RATE) {
+            kind = VO_REFRESH_FIXED;
+        } else if (flags & WP_PRESENTATION_FEEDBACK_KIND_VARIABLE_RATE) {
+            kind = VO_REFRESH_VARIABLE;
+        }
 
-        if (fback_pool->last_refresh_type != refresh_type) {
-            MP_DBG(wl, "Presentation was done with %s refresh rate.\n",
-                   refresh_type == 1 ? "fixed" :
-                   refresh_type == 0 ? "variable" :
-                   "unknown");
-            fback_pool->last_refresh_type = refresh_type;
+        if (fback_pool->last_refresh_kind != kind) {
+            static const char *const refresh_kind_names[] = {
+                [VO_REFRESH_UNKNOWN]  = "unknown",
+                [VO_REFRESH_FIXED]    = "fixed",
+                [VO_REFRESH_VARIABLE] = "variable",
+            };
+            MP_DBG(wl, "Presentation was done with %s refresh rate.\n", refresh_kind_names[kind]);
+            fback_pool->last_refresh_kind = kind;
         }
     }
 
@@ -2633,14 +2638,14 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     int64_t ust = MP_TIME_S_TO_NS(sec) + (uint64_t) tv_nsec;
     int64_t msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
     present_sync_update_values(wl->present, mp_time_ns_from_clock(CLOCK_MONOTONIC, ust), msc,
-                               refresh, swap);
+                               refresh, swap, kind);
 }
 
 static void feedback_discarded(void *data, struct wp_presentation_feedback *fback)
 {
     struct vo_wayland_feedback_pool *fback_pool = data;
     fback_pool->last_zero_copy = -1;
-    fback_pool->last_refresh_type = -1;
+    fback_pool->last_refresh_kind = -1;
     if (fback)
         remove_feedback(fback_pool, fback);
 }
@@ -4710,7 +4715,7 @@ bool vo_wayland_init(struct vo *vo)
         wl->fback_pool->wl = wl;
         wl->fback_pool->len = VO_MAX_SWAPCHAIN_DEPTH;
         wl->fback_pool->last_zero_copy = -1;
-        wl->fback_pool->last_refresh_type = -1;
+        wl->fback_pool->last_refresh_kind = -1;
         wl->fback_pool->fback = talloc_zero_array(wl->fback_pool, struct wp_presentation_feedback *,
                                                   wl->fback_pool->len);
         wl->fback_pool->swap = talloc_zero_array(wl->fback_pool, int64_t, wl->fback_pool->len);

@@ -285,6 +285,12 @@ struct vo_frame {
 
 // Presentation feedback. See get_vsync() for how backends should fill this
 // struct.
+enum vo_refresh_kind {
+    VO_REFRESH_UNKNOWN,
+    VO_REFRESH_FIXED,       // the display refreshes at its mode's rate
+    VO_REFRESH_VARIABLE,    // the display refreshes with the presents
+};
+
 struct vo_vsync_info {
     // Time between 2 vsync events in nanoseconds. The difference should be the
     // from 2 times sampled from the same reference point (it should not be the
@@ -314,6 +320,10 @@ struct vo_vsync_info {
     // The time was not measured for that frame: the backend derived it from
     // another vsync and the refresh rate, or the frame is not shown yet.
     bool displayed_estimated;
+
+    // Whether the display refreshes at its mode's rate or with the presents,
+    // when the backend knows.
+    enum vo_refresh_kind refresh_kind;
 };
 
 struct vo_driver {

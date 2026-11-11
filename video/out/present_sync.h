@@ -32,6 +32,7 @@ struct mp_present {
     int64_t time, msc;          // of the last presented frame
     int64_t vsync_duration;     // -1 until known
     bool pending;               // a frame was swapped since the last report
+    enum vo_refresh_kind refresh_kind; // of the last presented frame
 };
 
 struct mp_present *mp_present_initialize(void *talloc_ctx);
@@ -46,8 +47,9 @@ void present_sync_swap(struct mp_present *present);
 // on the mp_time_ns() clock, msc the refresh count of the display at that
 // point, 0 if the backend has none. refresh_ns is the refresh interval if the
 // backend knows it, else 0. swap is the swap the frame belongs to, counted
-// from 1 (the next swap is swaps + 1).
+// from 1 (the next swap is swaps + 1). kind is whether the display refreshes
+// at its mode's rate or with the presents, when the backend knows.
 void present_sync_update_values(struct mp_present *present, int64_t time, int64_t msc,
-                                int64_t refresh_ns, int64_t swap);
+                                int64_t refresh_ns, int64_t swap, enum vo_refresh_kind kind);
 
 #endif /* MP_PRESENT_SYNC_H */
