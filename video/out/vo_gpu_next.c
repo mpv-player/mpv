@@ -1919,9 +1919,8 @@ static bool update_auto_profile(struct priv *p, int *events)
     return false;
 }
 
-static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
+static void video_screenshot(struct priv *p, struct voctrl_screenshot *args)
 {
-    struct priv *p = vo->priv;
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
     pl_tex fbo = NULL;
@@ -1951,11 +1950,11 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     status = pl_queue_update(p->queue, &mix, &qparams);
     mp_assert(status != PL_QUEUE_EOF);
     if (status == PL_QUEUE_ERR) {
-        MP_ERR(vo, "Unknown error occurred while trying to take screenshot!\n");
+        MP_ERR(p, "Unknown error occurred while trying to take screenshot!\n");
         return;
     }
     if (!mix.num_frames) {
-        MP_ERR(vo, "No frames available to take screenshot of, is a file loaded?\n");
+        MP_ERR(p, "No frames available to take screenshot of, is a file loaded?\n");
         return;
     }
 
@@ -2026,7 +2025,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     }
 
     if (!fbo) {
-        MP_ERR(vo, "Failed creating target FBO for screenshot!\n");
+        MP_ERR(p, "Failed creating target FBO for screenshot!\n");
         return;
     }
 
@@ -2100,7 +2099,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     }
 
     if (!pl_render_image(p->rr, &image, &target, &params)) {
-        MP_ERR(vo, "Failed rendering frame!\n");
+        MP_ERR(p, "Failed rendering frame!\n");
         goto done;
     }
 
@@ -2248,7 +2247,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
 
     case VOCTRL_SCREENSHOT:
-        video_screenshot(vo, data);
+        video_screenshot(p, data);
         return true;
 
     case VOCTRL_EXTERNAL_RESIZE:
