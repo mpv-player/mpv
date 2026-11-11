@@ -1034,14 +1034,11 @@ static bool render_frame(struct vo *vo)
         vo->driver->flip_page(vo);
 
         struct vo_vsync_info vsync = {
-            .last_queue_display_time = -1,
             .skipped_vsyncs = -1,
         };
         if (vo->driver->get_vsync)
             vo->driver->get_vsync(vo, &vsync);
-        int64_t display_time = vsync.last_queue_display_time;
-        if (display_time <= 0)
-            display_time = predict_display_time(&vsync, present_time);
+        int64_t display_time = predict_display_time(&vsync, present_time);
 
         // Make up some crap if presentation feedback is missing.
         if (display_time <= 0)
