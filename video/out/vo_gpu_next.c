@@ -158,6 +158,7 @@ struct priv {
     bool paused;
     int last_ref_white;
     int last_srgb_power22;
+    int req_frames;
 
     pl_options pars;
     struct m_config_cache *opts_cache;
@@ -2187,6 +2188,13 @@ static void update_ra_ctx_options(struct vo *vo, struct ra_ctx_opts *ctx_opts)
                             border_alpha;
 }
 
+static void configure_queue(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    // pl_queue also retains past frames for the symmetric mixing window,
+    vo_set_queue_params(vo, 0, p->req_frames, 2 * p->req_frames - 1);
+}
+
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
@@ -2208,6 +2216,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         // Special case for --image-lut which requires a full reset.
         int old_type = p->next_opts->image_lut.type;
         update_options(vo);
+        configure_queue(vo);
         struct user_lut image_lut = p->next_opts->image_lut;
         p->want_reset |= image_lut.opt && ((!image_lut.path && image_lut.opt) ||
                          (image_lut.path && strcmp(image_lut.path, image_lut.opt)) ||
@@ -2580,6 +2589,7 @@ static int preinit(struct vo *vo)
 
     p->pars = pl_options_alloc(p->pllog);
     update_render_options(vo);
+    configure_queue(vo);
     return 0;
 
 err_out:
@@ -2905,8 +2915,7 @@ static void update_render_options(struct vo *vo)
                       (pars->params.skip_anti_aliasing ? 1 : 2);
     }
     req_frames = MPMIN(VO_MAX_REQ_FRAMES, req_frames);
-    // pl_queue also retains past frames for the symmetric mixing window,
-    vo_set_queue_params(vo, 0, req_frames, 2 * req_frames - 1);
+    p->req_frames = req_frames;
 
     pars->params.deband_params = opts->deband ? &pars->deband_params : NULL;
     pars->deband_params.iterations = opts->deband_opts->iterations;
