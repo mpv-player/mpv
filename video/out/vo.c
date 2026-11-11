@@ -195,6 +195,8 @@ struct vo_internal {
     int64_t last_due;               // vsync the last presented timed frame was due on, 0 if none
     double round_edge;              // phase between two vsyncs past which a frame goes on the later one
     struct timed_lateness late;
+    double shown_at_once;           // share of the recent frames the display showed right when presented
+    bool follows;                   // the display shows presents immediately, logged when it changes
 
     struct vo_frame *current_frame; // last frame queued to the VO
 
@@ -614,6 +616,7 @@ static void update_display_fps(struct vo *vo)
         in->nominal_vsync_interval =  display_fps > 0 ? 1e9 / display_fps : 0;
         in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
         in->vsync_grid = 0;
+        in->shown_at_once = 0;
         in->display_fps = display_fps;
 
         MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
@@ -1156,6 +1159,28 @@ static bool render_frame(struct vo *vo)
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? sync_target : pts - in->flip_queue_offset;
 
+    // A display with a variable refresh rate refreshes when a frame is
+    // presented, below its maximum rate, and shows it after its lag alone. A
+    // frame presented half a vsync before a vsync is then shown half a vsync
+    // early, so the frames go out at their pts there. Such a display is told
+    // by the frames placed on the vsync grid that it shows at once instead of
+    // on the vsync, its lag is around a millisecond here. Most of the recent
+    // frames have to agree, a single one proves nothing either way: DXGI times
+    // one present in ten half a vsync before its vsync on an idle desktop,
+    // and a compositor repainting for something else holds the presents of a
+    // display that follows for a moment.
+    bool follows = in->shown_at_once > 0.5;
+    if (follows != in->follows) {
+        MP_VERBOSE(vo, follows ? "Display shows presents immediately\n"
+                               : "Display shows presents on its vsyncs\n");
+        in->follows = follows;
+        // The change moves the presents by up to a vsync, and the display
+        // takes two or three frames to settle on the new cadence, below its
+        // range it repeats frames on its own. Counted, those frames undo a
+        // change made at the middle, so the average starts at the new state.
+        in->shown_at_once = follows;
+    }
+
     // When the presentation feedback gives the vsyncs of the display, a timed
     // frame is due on the vsync nearest to its pts and is presented half a
     // vsync before it, clear of the pickup a compositor does right after the
@@ -1170,7 +1195,7 @@ static bool render_frame(struct vo *vo)
     // refresh rate. Frames elsewhere between the vsyncs leave the edge alone,
     // at 24 fps on 60 Hz every second frame is half a vsync from the others.
     int64_t due = 0;
-    if (!frame->display_synced && duration >= 0 && in->vsync_grid &&
+    if (!frame->display_synced && !follows && duration >= 0 && in->vsync_grid &&
         now - in->vsync_grid < MP_TIME_S_TO_NS(1))
     {
         double slots = (pts - in->vsync_grid) / in->vsync_interval;
@@ -1318,7 +1343,11 @@ static bool render_frame(struct vo *vo)
         }
         if (shown && shown->due)
             check_timed_frame_late(vo, shown_flip, shown->due, vsync.displayed_time, duration);
-        if (have_feedback && in->vsync_interval > 1)
+        if (shown && (shown->due || in->follows)) {
+            bool at_once = vsync.displayed_time - shown->time < in->vsync_interval / 4;
+            in->shown_at_once += (at_once - in->shown_at_once) / 16;
+        }
+        if (have_feedback && in->vsync_interval > 1 && !in->follows)
             update_vsync_grid(in, display_time);
         update_vsync_timing_after_swap(vo, display_time);
     }
