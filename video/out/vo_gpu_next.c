@@ -2298,6 +2298,17 @@ static void update_ra_ctx_options(struct vo *vo, struct ra_ctx_opts *ctx_opts)
                             border_alpha;
 }
 
+static void reload_options(struct priv *p)
+{
+    // Special case for --image-lut which requires a full reset.
+    int old_type = p->next_opts->image_lut.type;
+    update_options(p);
+    struct user_lut image_lut = p->next_opts->image_lut;
+    p->want_reset |= image_lut.opt && ((!image_lut.path && image_lut.opt) ||
+                     (image_lut.path && strcmp(image_lut.path, image_lut.opt)) ||
+                     (old_type != image_lut.type));
+}
+
 static void configure_queue(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -2323,14 +2334,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
-        // Special case for --image-lut which requires a full reset.
-        int old_type = p->next_opts->image_lut.type;
-        update_options(p);
+        reload_options(p);
         configure_queue(vo);
-        struct user_lut image_lut = p->next_opts->image_lut;
-        p->want_reset |= image_lut.opt && ((!image_lut.path && image_lut.opt) ||
-                         (image_lut.path && strcmp(image_lut.path, image_lut.opt)) ||
-                         (old_type != image_lut.type));
 
         update_ra_ctx_options(vo, &p->ra_ctx->opts);
         if (p->ra_ctx->fns->update_render_opts)
