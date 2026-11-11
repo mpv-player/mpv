@@ -1169,6 +1169,8 @@ static bool render_frame(struct vo *vo)
             shown = &in->presents[shown_flip % MP_ARRAY_SIZE(in->presents)];
         if (shown && shown->pts) {
             in->presentation_delay = vsync.displayed_time - shown->pts;
+        } else if (due && have_feedback) {
+            in->presentation_delay = display_time - pts;
         } else if (frame->display_synced || !have_feedback) {
             in->presentation_delay = INT64_MIN;
         }
