@@ -1375,6 +1375,13 @@ PROTOCOLS
     detected and opened. For hybrid discs, the DVD-Audio zone is preferred over
     the DVD-Video zone.
 
+``sacd://[device]`` ``--sacd-device=PATH``
+
+    Play a Super Audio CD from a device or a disc image. Tracks are exposed as
+    chapters. The multichannel and the stereo version of a disc are exposed as
+    editions, the multichannel one is the default. (Requires FFmpeg with the
+    ``sacd`` demuxer.)
+
 ``dvb://[cardnumber@]channel`` ``--dvbin-...``
 
     Digital TV via DVB. (Linux only.)
@@ -1776,7 +1783,7 @@ OPTICAL DRIVES
 ==============
 
 Depending on the OS, mpv will choose a different disc device by default.
-This applies for all optical disc playback (CDDA, DVD, and BD).
+This applies for all optical disc playback (CDDA, SACD, DVD, and BD).
 
 ======= =============
 OS      Default Drive

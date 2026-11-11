@@ -1,0 +1,2 @@
+add `sacd://` protocol for Super Audio CD playback
+add `--sacd-device` option
