@@ -119,6 +119,12 @@ static const struct vo_driver *const video_out_drivers[] =
     &video_out_lavc,
 };
 
+// A flip, kept until the presentation feedback tells when it was displayed.
+struct present_record {
+    int64_t time;                   // when flip_page() was called, 0 for a redraw
+    int64_t pts;                    // of the frame, 0 for a display synced one
+};
+
 struct vo_internal {
     mp_thread thread;
     struct mp_dispatch_queue *dispatch;
@@ -162,6 +168,12 @@ struct vo_internal {
     int64_t delayed_count;
     int64_t drop_count;
     bool dropped_frame;             // the previous frame was dropped
+
+    // The last flips by flip count, for the presentation feedback. A backend
+    // reports a present up to the swapchain depth plus one flips back.
+    struct present_record presents[VO_MAX_SWAPCHAIN_DEPTH + 2];
+    int64_t flips;                  // flips so far
+    int64_t presentation_delay;     // display time minus pts of the last timed frame, INT64_MIN if none
 
     struct vo_frame *current_frame; // last frame queued to the VO
 
@@ -296,6 +308,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
         .req_frames = 1,
         .frame_refs = 2, // current_frame + frame_queued
         .estimated_vsync_jitter = -1,
+        .presentation_delay = INT64_MIN,
         .stats = stats_ctx_create(vo, global, "vo"),
     };
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
@@ -701,6 +714,7 @@ static void forget_frames(struct vo *vo)
     in->hasframe_rendered = false;
     in->drop_count = 0;
     in->delayed_count = 0;
+    in->presentation_delay = INT64_MIN;
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
     in->current_frame_id += VO_MAX_REQ_FRAMES + 1;
@@ -918,6 +932,11 @@ static int64_t predict_display_time(const struct vo_vsync_info *vsync, int64_t s
     return display;
 }
 
+static void record_present(struct vo_internal *in, struct present_record present)
+{
+    in->presents[in->flips++ % MP_ARRAY_SIZE(in->presents)] = present;
+}
+
 // Wait until realtime is >= ts
 static void wait_until(int64_t target)
 {
@@ -1039,9 +1058,10 @@ static bool render_frame(struct vo *vo)
         if (vo->driver->get_vsync)
             vo->driver->get_vsync(vo, &vsync);
         int64_t display_time = predict_display_time(&vsync, present_time);
+        bool have_feedback = display_time > 0;
 
         // Make up some crap if presentation feedback is missing.
-        if (display_time <= 0)
+        if (!have_feedback)
             display_time = mp_time_ns();
 
         stats_time_end(in->stats, "video-flip");
@@ -1050,6 +1070,19 @@ static bool render_frame(struct vo *vo)
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
 
+        record_present(in, (struct present_record){present_time, pts});
+        // The flip the backend reports as displayed, if it measured the time
+        // and the flip is one of the last.
+        int64_t shown_flip = in->flips - 1 - vsync.displayed_age;
+        struct present_record *shown = NULL;
+        if (vsync.displayed_time > 0 && !vsync.displayed_estimated && shown_flip >= 0 &&
+            vsync.displayed_age < MP_ARRAY_SIZE(in->presents))
+            shown = &in->presents[shown_flip % MP_ARRAY_SIZE(in->presents)];
+        if (shown && shown->pts) {
+            in->presentation_delay = vsync.displayed_time - shown->pts;
+        } else if (frame->display_synced || !have_feedback) {
+            in->presentation_delay = INT64_MIN;
+        }
         update_vsync_timing_after_swap(vo, display_time);
     }
 
@@ -1111,6 +1144,7 @@ static void do_redraw(struct vo *vo)
     frame->still = true;
     frame->pts = 0;
     frame->duration = -1;
+    record_present(in, (struct present_record){0});
     mp_mutex_unlock(&in->lock);
 
     vo->driver->draw_frame(vo, frame);
@@ -1418,6 +1452,15 @@ double vo_get_delay(struct vo *vo)
     int64_t res = get_display_synced_frame_end(vo);
     mp_mutex_unlock(&in->lock);
     return res ? MP_TIME_NS_TO_S(res - mp_time_ns()) : NAN;
+}
+
+double vo_get_presentation_delay(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    mp_mutex_lock(&in->lock);
+    int64_t res = in->presentation_delay;
+    mp_mutex_unlock(&in->lock);
+    return res == INT64_MIN ? NAN : MP_TIME_NS_TO_S(res);
 }
 
 int64_t vo_get_delayed_count(struct vo *vo)

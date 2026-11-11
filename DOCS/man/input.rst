@@ -2400,6 +2400,13 @@ Property list
     display-sync mode. Note that in general, mpv has to guess that this is
     happening, and the guess can be inaccurate.
 
+``vo-presentation-delay``
+    Time in seconds from the moment the last video frame was due per the
+    audio clock to the moment the display shows it, as reported by the
+    presentation feedback of the video output. Positive values mean the
+    picture is late. Only available outside of display-sync mode and with a
+    video output that reports presentation feedback.
+
 ``percent-pos`` (RW)
     Position in current file (0-100). The advantage over using this instead of
     calculating it out of other properties is that it properly falls back to
