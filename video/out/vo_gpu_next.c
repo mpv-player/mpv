@@ -2708,41 +2708,22 @@ static void load_hwdec_api(void *ctx, struct hwdec_imgfmt_request *params)
     vo_control(ctx, VOCTRL_LOAD_HWDEC_API, params);
 }
 
-static int preinit(struct vo *vo)
+static void video_init(struct priv *p, struct mp_log *log, struct mpv_global *global,
+                       struct gpu_ctx *ctx)
 {
-    struct priv *p = vo->priv;
-    p->opts_cache = m_config_cache_alloc(p, vo->global, &gl_video_conf);
-    p->next_opts_cache = m_config_cache_alloc(p, vo->global, &gl_next_conf);
+    p->opts_cache = m_config_cache_alloc(p, global, &gl_video_conf);
+    p->next_opts_cache = m_config_cache_alloc(p, global, &gl_next_conf);
     p->next_opts = p->next_opts_cache->opts;
-    p->video_eq = mp_csp_equalizer_create(p, vo->global);
-    p->global = vo->global;
-    p->log = vo->log;
-    p->osd = vo->osd;
-    p->stats = stats_ctx_create(p, vo->global, "vo/gpu-next");
-
-    struct gl_video_opts *gl_opts = p->opts_cache->opts;
-    struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
-    ctx_opts->want_alpha = video_opts_want_alpha(vo->global);
-    p->context = gpu_ctx_create(vo, ctx_opts);
-    talloc_free(ctx_opts);
-    if (!p->context)
-        return -1;
-    // For the time being
-    p->ra_ctx = p->context->ra_ctx;
-    p->pllog = p->context->pllog;
-    p->gpu = p->context->gpu;
-    p->sw = p->context->swapchain;
-    p->hwdec_ctx = (struct ra_hwdec_ctx) {
-        .log = p->log,
-        .global = p->global,
-        .ra_ctx = p->ra_ctx,
-    };
-
-    vo->hwdec_devs = hwdec_devices_create();
-    hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
-    ra_hwdec_ctx_init(&p->hwdec_ctx, vo->hwdec_devs, gl_opts->hwdec_interop, false);
+    p->video_eq = mp_csp_equalizer_create(p, global);
+    p->global = global;
+    p->log = log;
+    p->stats = stats_ctx_create(p, global, "vo/gpu-next");
+    p->ra_ctx = ctx->ra_ctx;
+    p->pllog = ctx->pllog;
+    p->gpu = ctx->gpu;
     mp_mutex_init(&p->dr_lock);
 
+    struct gl_video_opts *gl_opts = p->opts_cache->opts;
     if (gl_opts->shader_cache)
         cache_init(p, &p->shader_cache, 10 << 20, gl_opts->shader_cache_dir);
     if (gl_opts->icc_opts->cache)
@@ -2757,7 +2738,43 @@ static int preinit(struct vo *vo)
 
     p->pars = pl_options_alloc(p->pllog);
     update_render_options(p);
+}
+
+static void video_init_hwdecs(struct priv *p, struct mp_hwdec_devices *devs,
+                              bool load_all_by_default)
+{
+    struct gl_video_opts *gl_opts = p->opts_cache->opts;
+    p->hwdec_ctx = (struct ra_hwdec_ctx) {
+        .log = p->log,
+        .global = p->global,
+        .ra_ctx = p->ra_ctx,
+    };
+    ra_hwdec_ctx_init(&p->hwdec_ctx, devs, gl_opts->hwdec_interop, load_all_by_default);
+}
+
+static void video_set_osd_source(struct priv *p, struct osd_state *osd)
+{
+    p->osd = osd;
+}
+
+static int preinit(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
+    ctx_opts->want_alpha = video_opts_want_alpha(vo->global);
+    p->context = gpu_ctx_create(vo, ctx_opts);
+    talloc_free(ctx_opts);
+    if (!p->context)
+        return -1;
+    p->sw = p->context->swapchain;
+
+    video_init(p, vo->log, vo->global, p->context);
+    video_set_osd_source(p, vo->osd);
     configure_queue(p, vo);
+
+    vo->hwdec_devs = hwdec_devices_create();
+    hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
+    video_init_hwdecs(p, vo->hwdec_devs, false);
     return 0;
 }
 
