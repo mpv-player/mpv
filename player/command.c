@@ -827,6 +827,23 @@ static int mp_property_vo_delayed_frame_count(void *ctx, struct m_property *prop
     return m_property_int_ro(action, arg, vo_get_delayed_count(mpctx->video_out));
 }
 
+static int mp_property_vo_presentation_delay(void *ctx, struct m_property *prop,
+                                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->vo_chain)
+        return M_PROPERTY_UNAVAILABLE;
+    double delay = vo_get_presentation_delay(mpctx->video_out);
+    if (isnan(delay))
+        return M_PROPERTY_UNAVAILABLE;
+    if (action == M_PROPERTY_PRINT || action == M_PROPERTY_FIXED_LEN_PRINT) {
+        *(char **)arg = mp_format_double(NULL, delay, 5, true, false,
+                                         action != M_PROPERTY_FIXED_LEN_PRINT);
+        return M_PROPERTY_OK;
+    }
+    return m_property_double_ro(action, arg, delay);
+}
+
 /// Current position in percent (RW)
 static int mp_property_percent_pos(void *ctx, struct m_property *prop,
                                    int action, void *arg)
@@ -4715,6 +4732,7 @@ static const struct m_property mp_properties_base[] = {
     {"decoder-frame-drop-count", mp_property_frame_drop_dec},
     {"frame-drop-count", mp_property_frame_drop_vo},
     {"vo-delayed-frame-count", mp_property_vo_delayed_frame_count},
+    {"vo-presentation-delay", mp_property_vo_presentation_delay},
     {"percent-pos", mp_property_percent_pos},
     {"time-pos", mp_property_time_pos},
     {"time-remaining", mp_property_remaining},
@@ -4937,7 +4955,8 @@ static const char *const *const mp_event_property_change[] = {
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "total-avsync-change", "audio-speed-correction",
       "video-speed-correction", "vo-delayed-frame-count", "mistimed-frame-count",
-      "vsync-ratio", "estimated-display-fps", "vsync-jitter", "sub-text",
+      "vo-presentation-delay", "vsync-ratio", "estimated-display-fps",
+      "vsync-jitter", "sub-text",
       "secondary-sub-text", "audio-bitrate", "video-bitrate", "sub-bitrate",
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
