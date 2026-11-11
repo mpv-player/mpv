@@ -1924,9 +1924,8 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
         sw->fns->get_vsync(sw, info);
 }
 
-static int query_format(struct vo *vo, int format)
+static bool check_format(struct priv *p, int format)
 {
-    struct priv *p = vo->priv;
     if (ra_hwdec_get(&p->hwdec_ctx, format))
         return true;
 
@@ -1935,6 +1934,12 @@ static int query_format(struct vo *vo, int format)
         supported = format_supported(p, format, true);
 
     return supported;
+}
+
+static int query_format(struct vo *vo, int format)
+{
+    struct priv *p = vo->priv;
+    return check_format(p, format);
 }
 
 static void video_resize(struct priv *p, struct mp_rect src, struct mp_rect dst,
