@@ -1462,27 +1462,9 @@ static void begin_frame(struct priv *p, struct vo_frame *frame)
     }
 }
 
-static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+static struct pl_color_space get_target_csp(struct priv *p, bool *unknown, float *ref_luma)
 {
-    struct priv *p = vo->priv;
-    pl_options pars = p->pars;
-    pl_gpu gpu = p->gpu;
-    begin_frame(p, frame);
-
     const struct gl_video_opts *opts = p->opts_cache->opts;
-    struct frame_params fpar = get_frame_params(p, frame);
-    struct pl_render_params params = fpar.params;
-    bool can_interpolate = fpar.can_interpolate;
-    double pts_offset = fpar.pts_offset;
-
-    struct ra_swapchain *sw = p->ra_ctx->swapchain;
-
-    p->display_csp = (struct pl_color_space){0};
-    // TODO: Implement this for all backends
-    if (sw->fns->target_csp)
-        p->display_csp = sw->fns->target_csp(sw);
-    p->display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
-
     struct pl_color_space target_csp = p->display_csp;
     if (target_csp.primaries == PL_COLOR_PRIM_UNKNOWN)
         target_csp.primaries = mp_get_best_prim_container(&target_csp.hdr.prim);
@@ -1495,10 +1477,6 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // reports it as maxFALL directly, but this doesn't mean the same thing.
     target_csp.hdr.max_fall = 0;
 
-    struct pl_color_space hint = {0};
-    bool target_hint = p->next_opts->target_hint == 1 ||
-                       (p->next_opts->target_hint == -1 &&
-                        target_csp.transfer != PL_COLOR_TRC_UNKNOWN);
     // Assume HDR is supported, if target_csp() is not available
     // TODO: Remove this fallback when all backends support target_csp()
     bool target_unknown = target_csp.transfer == PL_COLOR_TRC_UNKNOWN;
@@ -1509,7 +1487,29 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     } else {
         target_ref_luma = get_ref_luma(p);
     }
-    bool external_params = false;
+
+    *unknown = target_unknown;
+    *ref_luma = target_ref_luma;
+    return target_csp;
+}
+
+enum hint_mode {
+    HINT_NONE,  // hinting is disabled
+    HINT_KEEP,  // there is no frame to derive a hint from
+    HINT_SET,   // the hint is to be set
+};
+
+static enum hint_mode get_target_hint(struct priv *p, struct vo_frame *frame,
+                                      struct pl_color_space *out_hint)
+{
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    bool target_unknown;
+    float target_ref_luma;
+    struct pl_color_space target_csp = get_target_csp(p, &target_unknown, &target_ref_luma);
+
+    struct pl_color_space hint = {0};
+    bool target_hint = p->next_opts->target_hint == 1 ||
+                       (p->next_opts->target_hint == -1 && !target_unknown);
     if (target_hint && frame->current) {
         const struct pl_color_space *source = &frame->current->params.color;
         const struct pl_color_space *target = &target_csp;
@@ -1611,12 +1611,49 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         // Update again after possible max_luma change
         if (p->icc_profile)
             hint = p->icc_profile->csp;
+        *out_hint = hint;
+        return HINT_SET;
+    }
+
+    return target_hint ? HINT_KEEP : HINT_NONE;
+}
+
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+{
+    struct priv *p = vo->priv;
+    pl_options pars = p->pars;
+    pl_gpu gpu = p->gpu;
+    begin_frame(p, frame);
+
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    struct frame_params fpar = get_frame_params(p, frame);
+    struct pl_render_params params = fpar.params;
+    bool can_interpolate = fpar.can_interpolate;
+    double pts_offset = fpar.pts_offset;
+
+    struct ra_swapchain *sw = p->ra_ctx->swapchain;
+
+    p->display_csp = (struct pl_color_space){0};
+    // TODO: Implement this for all backends
+    if (sw->fns->target_csp)
+        p->display_csp = sw->fns->target_csp(sw);
+    p->display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
+
+    struct pl_color_space hint = {0};
+    bool external_params = false;
+    enum hint_mode hint_mode = get_target_hint(p, frame, &hint);
+    if (hint_mode == HINT_SET) {
         external_params = set_colorspace_hint(p, &hint);
-    } else if (!target_hint) {
-        if (!hint.hdr.min_luma)
-            hint.hdr.min_luma = target_csp.hdr.min_luma;
+    } else if (hint_mode == HINT_NONE) {
         external_params = set_colorspace_hint(p, NULL);
     }
+
+    bool target_hint = hint_mode != HINT_NONE;
+    bool target_unknown;
+    float target_ref_luma;
+    struct pl_color_space target_csp = get_target_csp(p, &target_unknown, &target_ref_luma);
+    if (!target_hint)
+        hint.hdr.min_luma = target_csp.hdr.min_luma;
 
     struct pl_swapchain_frame swframe;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
