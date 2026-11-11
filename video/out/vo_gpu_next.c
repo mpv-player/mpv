@@ -517,12 +517,11 @@ static void add_run_overlay(struct priv *p, struct overlay_state *state,
     }
 }
 
-static void update_overlays(struct vo *vo, struct mp_osd_res res,
+static void update_overlays(struct priv *p, struct mp_osd_res res,
                             int flags, enum pl_overlay_coords coords,
                             struct overlay_state *state, struct pl_frame *frame,
                             struct mp_image *src, int stereo_mode, float ref_luma)
 {
-    struct priv *p = vo->priv;
     double pts = src ? src->pts : 0;
     int div[2];
     mp_get_3d_side_by_side(stereo_mode, div);
@@ -1660,7 +1659,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 #endif
     }
     stats_time_start(p->stats, "osd-update");
-    update_overlays(vo, p->osd_res,
+    update_overlays(p, p->osd_res,
                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current,
                     frame->current ? frame->current->params.stereo3d : 0, get_ref_luma(p));
@@ -1737,7 +1736,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                     enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
                         ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
                     stats_time_start(p->stats, "osd-blend-update");
-                    update_overlays(vo, res, OSD_DRAW_SUB_ONLY,
+                    update_overlays(p, res, OSD_DRAW_SUB_ONLY,
                                     rel, &fp->subs, image, mpi,
                                     mpi->params.stereo3d, get_ref_luma(p));
                     stats_time_end(p->stats, "osd-blend-update");
@@ -2086,12 +2085,12 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
         };
         enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
             ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
-        update_overlays(vo, res, osd_flags,
+        update_overlays(p, res, osd_flags,
                         rel, &fp->subs, &image, mpi,
                         mpi->params.stereo3d, 0);
     } else {
         // Disable overlays when blend_subs is disabled
-        update_overlays(vo, osd, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
+        update_overlays(p, osd, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
                         &p->osd_state, &target, mpi,
                         mpi->params.stereo3d, 0);
         image.num_overlays = 0;
