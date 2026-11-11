@@ -143,6 +143,7 @@ struct vo_drm_state {
     bool active;
     bool redraw;
     bool vt_switcher_active;
+    bool vrr;               // VRR is enabled, the display may refresh with the page flips
     bool waiting_for_flip;
     int64_t flip_swap;      // the swap that queued the frame of the last flip
 

@@ -362,11 +362,13 @@ bool vo_drm_acquire_crtc(struct vo_drm_state *drm)
     MP_VERBOSE(drm, "crtc is%s VRR capable\n", vrr_capable ? "" : " not");
 
     uint64_t vrr_requested = drm->opts->vrr_enabled;
+    uint64_t vrr_enabled = atomic_ctx->old_state.crtc.vrr_enabled;
     if (vrr_requested == 1 || (vrr_capable && vrr_requested == -1)) {
         if (drm_object_set_property(request, atomic_ctx->crtc, "VRR_ENABLED", 1) < 0) {
             MP_WARN(drm, "Could not enable VRR on crtc\n");
         } else {
             MP_VERBOSE(drm, "Enabled VRR on crtc\n");
+            vrr_enabled = 1;
         }
     }
 
@@ -386,6 +388,7 @@ bool vo_drm_acquire_crtc(struct vo_drm_state *drm)
         goto err;
     }
 
+    drm->vrr = vrr_capable && vrr_enabled;
     drmModeAtomicFree(request);
     return true;
 
@@ -987,7 +990,8 @@ static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
 
     int64_t ust = MP_TIME_S_TO_NS(sec) + MP_TIME_US_TO_NS(usec);
     present_sync_update_values(drm->present, mp_time_ns_from_clock(CLOCK_MONOTONIC, ust), msc, 0,
-                               drm->flip_swap, VO_REFRESH_UNKNOWN);
+                               drm->flip_swap,
+                               drm->vrr ? VO_REFRESH_UNKNOWN : VO_REFRESH_FIXED);
     drm->waiting_for_flip = false;
 }
 
