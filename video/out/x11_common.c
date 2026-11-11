@@ -1386,7 +1386,8 @@ void vo_x11_check_events(struct vo *vo)
                                                mp_time_ns_from_clock(CLOCK_MONOTONIC,
                                                                      present_event->ust * 1000),
                                                present_event->msc, 0,
-                                               ++x11->present_events);
+                                               ++x11->present_events,
+                                               VO_REFRESH_UNKNOWN);
                 }
             }
             XFreeEventData(x11->display, cookie);
