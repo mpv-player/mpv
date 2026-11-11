@@ -120,6 +120,7 @@ struct priv {
     struct mp_log *log;
     struct mpv_global *global;
     struct stats_ctx *stats;
+    struct osd_state *osd;
     struct ra_ctx *ra_ctx;
     struct gpu_ctx *context;
     struct ra_hwdec_ctx hwdec_ctx;
@@ -527,7 +528,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
     mp_get_3d_side_by_side(stereo_mode, div);
     res.w /= div[0];
     res.h /= div[1];
-    struct sub_bitmap_list *subs = osd_render(vo->osd, res, pts, flags, mp_draw_sub_formats);
+    struct sub_bitmap_list *subs = osd_render(p->osd, res, pts, flags, mp_draw_sub_formats);
 
     state->num_overlays = 0;
 
@@ -2537,6 +2538,7 @@ static int preinit(struct vo *vo)
     p->video_eq = mp_csp_equalizer_create(p, vo->global);
     p->global = vo->global;
     p->log = vo->log;
+    p->osd = vo->osd;
     p->stats = stats_ctx_create(p, vo->global, "vo/gpu-next");
 
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
