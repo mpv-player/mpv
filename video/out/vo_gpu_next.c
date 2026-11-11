@@ -181,7 +181,7 @@ struct mppl_video {
 
     struct mp_image_params image_params;
 
-    // Color space and reference white of the display, from begin_frame()
+    // Color space and reference white of the display, from mppl_video_begin_frame()
     struct pl_color_space display_csp;
     float display_ref_luma;
 
@@ -312,8 +312,8 @@ static void free_dr_buf(void *opaque, uint8_t *data)
     MP_ASSERT_UNREACHABLE();
 }
 
-static struct mp_image *video_get_image(struct mppl_video *p, int imgfmt, int w, int h,
-                                        int stride_align, int flags)
+static struct mp_image *mppl_video_get_image(struct mppl_video *p, int imgfmt, int w, int h,
+                                             int stride_align, int flags)
 {
     pl_gpu gpu = p->gpu;
     if (!gpu->limits.thread_safe || !gpu->limits.max_mapped_size)
@@ -1311,7 +1311,7 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
     }
 }
 
-static enum pl_color_levels video_get_output_levels(struct mppl_video *p)
+static enum pl_color_levels mppl_video_get_output_levels(struct mppl_video *p)
 {
     return p->output_levels ? p->output_levels : PL_COLOR_LEVELS_FULL;
 }
@@ -1324,7 +1324,7 @@ static bool set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
         .color = hint ? *hint : pl_color_space_srgb,
         .repr = {
             .sys = PL_COLOR_SYSTEM_RGB,
-            .levels = video_get_output_levels(p->renderer),
+            .levels = mppl_video_get_output_levels(p->renderer),
             .alpha = p->ra_ctx->opts.want_alpha ? PL_ALPHA_INDEPENDENT : PL_ALPHA_NONE,
         },
     };
@@ -1399,8 +1399,8 @@ static struct frame_params get_frame_params(struct mppl_video *p, struct vo_fram
 }
 
 // Take the new frames of a vo_frame into the queue.
-static void begin_frame(struct mppl_video *p, struct vo_frame *frame,
-                        struct pl_color_space display_csp, float display_ref_luma)
+static void mppl_video_begin_frame(struct mppl_video *p, struct vo_frame *frame,
+                                   struct pl_color_space display_csp, float display_ref_luma)
 {
     update_options(p);
     p->display_csp = display_csp;
@@ -1507,14 +1507,14 @@ static struct pl_color_space get_target_csp(struct mppl_video *p, bool *unknown,
     return target_csp;
 }
 
-enum hint_mode {
-    HINT_NONE,  // hinting is disabled
-    HINT_KEEP,  // there is no frame to derive a hint from
-    HINT_SET,   // the hint is to be set
+enum mppl_video_hint {
+    MPPL_VIDEO_HINT_NONE,  // hinting is disabled
+    MPPL_VIDEO_HINT_KEEP,  // there is no frame to derive a hint from
+    MPPL_VIDEO_HINT_SET,   // the hint is to be set
 };
 
-static enum hint_mode get_target_hint(struct mppl_video *p, struct vo_frame *frame,
-                                      struct pl_color_space *out_hint)
+static enum mppl_video_hint mppl_video_get_target_hint(struct mppl_video *p, struct vo_frame *frame,
+                                                       struct pl_color_space *out_hint)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
     bool target_unknown;
@@ -1626,18 +1626,18 @@ static enum hint_mode get_target_hint(struct mppl_video *p, struct vo_frame *fra
         if (p->icc_profile)
             hint = p->icc_profile->csp;
         *out_hint = hint;
-        return HINT_SET;
+        return MPPL_VIDEO_HINT_SET;
     }
 
-    return target_hint ? HINT_KEEP : HINT_NONE;
+    return target_hint ? MPPL_VIDEO_HINT_KEEP : MPPL_VIDEO_HINT_NONE;
 }
 
-static bool video_get_hdr_metadata(struct mppl_video *p, struct pl_hdr_metadata *out)
+static bool mppl_video_get_hdr_metadata(struct mppl_video *p, struct pl_hdr_metadata *out)
 {
     return pl_renderer_get_hdr_metadata(p->rr, out);
 }
 
-static void skip_frame(struct mppl_video *p, struct vo_frame *frame)
+static void mppl_video_skip_frame(struct mppl_video *p, struct vo_frame *frame)
 {
     struct frame_params fpar = get_frame_params(p, frame);
     if (frame->current) {
@@ -1654,10 +1654,10 @@ static void skip_frame(struct mppl_video *p, struct vo_frame *frame)
 
 // Render a frame to a target. hint is the color space requested for the
 // target when hinting is in use, NULL otherwise.
-static bool render_frame(struct mppl_video *p, struct vo_frame *frame,
-                         const struct pl_swapchain_frame *swframe, int fb_depth,
-                         const struct pl_color_space *hint,
-                         struct mp_image_params *target_params)
+static bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
+                                    const struct pl_swapchain_frame *swframe, int fb_depth,
+                                    const struct pl_color_space *hint,
+                                    struct mp_image_params *target_params)
 {
     p->fb_depth = fb_depth;
     pl_options pars = p->pars;
@@ -1876,21 +1876,21 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (sw->fns->target_csp)
         display_csp = sw->fns->target_csp(sw);
     float display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
-    begin_frame(p->renderer, frame, display_csp, display_ref_luma);
+    mppl_video_begin_frame(p->renderer, frame, display_csp, display_ref_luma);
 
     struct pl_color_space hint = {0};
     bool external_params = false;
-    enum hint_mode hint_mode = get_target_hint(p->renderer, frame, &hint);
-    if (hint_mode == HINT_SET) {
+    enum mppl_video_hint hint_mode = mppl_video_get_target_hint(p->renderer, frame, &hint);
+    if (hint_mode == MPPL_VIDEO_HINT_SET) {
         external_params = set_colorspace_hint(p, &hint);
-    } else if (hint_mode == HINT_NONE) {
+    } else if (hint_mode == MPPL_VIDEO_HINT_NONE) {
         external_params = set_colorspace_hint(p, NULL);
     }
 
     struct pl_swapchain_frame swframe;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
-        skip_frame(p->renderer, frame);
+        mppl_video_skip_frame(p->renderer, frame);
         return VO_FALSE;
     }
 
@@ -1899,8 +1899,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     int fb_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
 
     struct mp_image_params target_params;
-    bool ok = render_frame(p->renderer, frame, &swframe, fb_depth,
-                           hint_mode == HINT_NONE ? NULL : &hint, &target_params);
+    bool ok = mppl_video_render_frame(p->renderer, frame, &swframe, fb_depth,
+                                      hint_mode == MPPL_VIDEO_HINT_NONE ? NULL : &hint,
+                                      &target_params);
     p->frame_pending = true;
     if (!ok)
         return VO_TRUE;
@@ -1911,8 +1912,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     if (vo->params) {
         // Augment metadata with the peak detection results
-        vo->has_peak_detect_values = video_get_hdr_metadata(p->renderer,
-                                                            &vo->params->color.hdr);
+        vo->has_peak_detect_values = mppl_video_get_hdr_metadata(p->renderer,
+                                                                 &vo->params->color.hdr);
     }
     mp_mutex_unlock(&vo->params_mutex);
 
@@ -1941,7 +1942,7 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
         sw->fns->get_vsync(sw, info);
 }
 
-static bool check_format(struct mppl_video *p, int format)
+static bool mppl_video_check_format(struct mppl_video *p, int format)
 {
     if (ra_hwdec_get(&p->hwdec_ctx, format))
         return true;
@@ -1956,18 +1957,18 @@ static bool check_format(struct mppl_video *p, int format)
 static int query_format(struct vo *vo, int format)
 {
     struct priv *p = vo->priv;
-    return check_format(p->renderer, format);
+    return mppl_video_check_format(p->renderer, format);
 }
 
 static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
                                   int stride_align, int flags)
 {
     struct priv *p = vo->priv;
-    return video_get_image(p->renderer, imgfmt, w, h, stride_align, flags);
+    return mppl_video_get_image(p->renderer, imgfmt, w, h, stride_align, flags);
 }
 
-static void video_resize(struct mppl_video *p, struct mp_rect src, struct mp_rect dst,
-                         struct mp_osd_res osd)
+static void mppl_video_resize(struct mppl_video *p, struct mp_rect src, struct mp_rect dst,
+                              struct mp_osd_res osd)
 {
     if (mp_rect_equals(&p->src, &src) &&
         mp_rect_equals(&p->dst, &dst) &&
@@ -1991,10 +1992,10 @@ static void resize(struct vo *vo)
         vo->want_redraw = true;
     }
 
-    video_resize(p->renderer, src, dst, osd);
+    mppl_video_resize(p->renderer, src, dst, osd);
 }
 
-static void video_config(struct mppl_video *p, struct mp_image_params *params)
+static void mppl_video_config(struct mppl_video *p, struct mp_image_params *params)
 {
     p->image_params = *params;
 }
@@ -2006,7 +2007,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
 
     if (params)
-        video_config(p->renderer, params);
+        mppl_video_config(p->renderer, params);
     resize(vo);
     mp_mutex_lock(&vo->params_mutex);
     vo->target_params = NULL;
@@ -2015,7 +2016,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 }
 
 // Takes over ownership of `icc`. Can be used to unload profile (icc.len == 0)
-static bool update_icc(struct mppl_video *p, struct bstr icc)
+static bool mppl_video_set_icc_profile(struct mppl_video *p, struct bstr icc)
 {
     struct pl_icc_profile profile = {
         .data = icc.start,
@@ -2029,7 +2030,7 @@ static bool update_icc(struct mppl_video *p, struct bstr icc)
     return ok;
 }
 
-static bool icc_auto_enabled(struct mppl_video *p)
+static bool mppl_video_icc_auto_enabled(struct mppl_video *p)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
     return opts->icc_opts && opts->icc_opts->profile_auto && !p->icc_path;
@@ -2038,7 +2039,7 @@ static bool icc_auto_enabled(struct mppl_video *p)
 // Returns whether the ICC profile was updated (even on failure)
 static bool update_auto_profile(struct priv *p, int *events)
 {
-    if (!icc_auto_enabled(p->renderer))
+    if (!mppl_video_icc_auto_enabled(p->renderer))
         return false;
 
     MP_VERBOSE(p, "Querying ICC profile...\n");
@@ -2052,14 +2053,14 @@ static bool update_auto_profile(struct priv *p, int *events)
             MP_ERR(p, "icc-profile-auto not implemented on this platform.\n");
         }
 
-        update_icc(p->renderer, icc);
+        mppl_video_set_icc_profile(p->renderer, icc);
         return true;
     }
 
     return false;
 }
 
-static void video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
+static void mppl_video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
 {
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
@@ -2324,13 +2325,13 @@ static bool want_alpha(const struct gl_video_opts *gl_opts, const struct gl_next
             border_alpha;
 }
 
-static bool video_want_alpha(struct mppl_video *p)
+static bool mppl_video_want_alpha(struct mppl_video *p)
 {
     return want_alpha(p->opts_cache->opts, p->next_opts);
 }
 
 // For the context, which is created before the renderer and its option cache
-static bool video_opts_want_alpha(struct mpv_global *global)
+static bool mppl_video_opts_want_alpha(struct mpv_global *global)
 {
     void *tmp = talloc_new(NULL);
     bool res = want_alpha(mp_get_config_group(tmp, global, &gl_video_conf),
@@ -2339,7 +2340,7 @@ static bool video_opts_want_alpha(struct mpv_global *global)
     return res;
 }
 
-static void reload_options(struct mppl_video *p)
+static void mppl_video_reload_options(struct mppl_video *p)
 {
     // Special case for --image-lut which requires a full reset.
     int old_type = p->next_opts->image_lut.type;
@@ -2350,36 +2351,36 @@ static void reload_options(struct mppl_video *p)
                      (old_type != image_lut.type));
 }
 
-static void configure_queue(struct mppl_video *p, struct vo *vo)
+static void mppl_video_configure_queue(struct mppl_video *p, struct vo *vo)
 {
     // pl_queue also retains past frames for the symmetric mixing window,
     vo_set_queue_params(vo, 0, p->req_frames, 2 * p->req_frames - 1);
 }
 
-static void video_set_paused(struct mppl_video *p, bool paused)
+static void mppl_video_set_paused(struct mppl_video *p, bool paused)
 {
     p->paused = paused;
 }
 
-static bool video_showing_interpolated_frame(struct mppl_video *p)
+static bool mppl_video_showing_interpolated_frame(struct mppl_video *p)
 {
     return p->is_interpolated;
 }
 
-static void video_reset(struct mppl_video *p)
+static void mppl_video_reset(struct mppl_video *p)
 {
     // Defer until the first new frame (unique ID) actually arrives
     p->want_seek_reset = true;
 }
 
-static void video_perfdata(struct mppl_video *p, struct voctrl_performance_data *perf)
+static void mppl_video_perfdata(struct mppl_video *p, struct voctrl_performance_data *perf)
 {
     copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh, &p->hwdec.perf, &p->sw_upload_perf);
     copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw, NULL, NULL);
 }
 
-static void video_load_hwdecs(struct mppl_video *p, struct mp_hwdec_devices *devs,
-                              struct hwdec_imgfmt_request *params)
+static void mppl_video_load_hwdecs(struct mppl_video *p, struct mp_hwdec_devices *devs,
+                                   struct hwdec_imgfmt_request *params)
 {
     ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, devs, params);
 }
@@ -2393,19 +2394,19 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(vo);
         return VO_TRUE;
     case VOCTRL_PAUSE:
-        if (video_showing_interpolated_frame(p->renderer))
+        if (mppl_video_showing_interpolated_frame(p->renderer))
             vo->want_redraw = true;
-        video_set_paused(p->renderer, true);
+        mppl_video_set_paused(p->renderer, true);
         return VO_TRUE;
     case VOCTRL_RESUME:
-        video_set_paused(p->renderer, false);
+        mppl_video_set_paused(p->renderer, false);
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
-        reload_options(p->renderer);
-        configure_queue(p->renderer, vo);
+        mppl_video_reload_options(p->renderer);
+        mppl_video_configure_queue(p->renderer, vo);
 
-        p->ra_ctx->opts.want_alpha = video_want_alpha(p->renderer);
+        p->ra_ctx->opts.want_alpha = mppl_video_want_alpha(p->renderer);
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
         vo->want_redraw = true;
@@ -2420,15 +2421,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
 
     case VOCTRL_RESET:
-        video_reset(p->renderer);
+        mppl_video_reset(p->renderer);
         return VO_TRUE;
 
     case VOCTRL_PERFORMANCE_DATA:
-        video_perfdata(p->renderer, data);
+        mppl_video_perfdata(p->renderer, data);
         return true;
 
     case VOCTRL_SCREENSHOT:
-        video_screenshot(p->renderer, data);
+        mppl_video_screenshot(p->renderer, data);
         return true;
 
     case VOCTRL_EXTERNAL_RESIZE:
@@ -2436,7 +2437,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
 
     case VOCTRL_LOAD_HWDEC_API:
-        video_load_hwdecs(p->renderer, vo->hwdec_devs, data);
+        mppl_video_load_hwdecs(p->renderer, vo->hwdec_devs, data);
         return true;
     }
 
@@ -2661,7 +2662,7 @@ done:
     pl_cache_destroy(&cache->cache);
 }
 
-static void video_uninit(struct mppl_video *p)
+static void mppl_video_uninit(struct mppl_video *p)
 {
     // Drain any in-flight uploads.
     pl_gpu_finish(p->gpu);
@@ -2706,7 +2707,7 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    video_uninit(p->renderer);
+    mppl_video_uninit(p->renderer);
     hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
     hwdec_devices_destroy(vo->hwdec_devs);
 
@@ -2720,8 +2721,8 @@ static void load_hwdec_api(void *ctx, struct hwdec_imgfmt_request *params)
     vo_control(ctx, VOCTRL_LOAD_HWDEC_API, params);
 }
 
-static struct mppl_video *video_init(struct mp_log *log, struct mpv_global *global,
-                                     struct gpu_ctx *ctx)
+static struct mppl_video *mppl_video_init(struct mp_log *log, struct mpv_global *global,
+                                          struct gpu_ctx *ctx)
 {
     struct mppl_video *p = talloc_zero(NULL, struct mppl_video);
     p->opts_cache = m_config_cache_alloc(p, global, &gl_video_conf);
@@ -2754,8 +2755,8 @@ static struct mppl_video *video_init(struct mp_log *log, struct mpv_global *glob
     return p;
 }
 
-static void video_init_hwdecs(struct mppl_video *p, struct mp_hwdec_devices *devs,
-                              bool load_all_by_default)
+static void mppl_video_init_hwdecs(struct mppl_video *p, struct mp_hwdec_devices *devs,
+                                   bool load_all_by_default)
 {
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
     p->hwdec_ctx = (struct ra_hwdec_ctx) {
@@ -2766,7 +2767,7 @@ static void video_init_hwdecs(struct mppl_video *p, struct mp_hwdec_devices *dev
     ra_hwdec_ctx_init(&p->hwdec_ctx, devs, gl_opts->hwdec_interop, load_all_by_default);
 }
 
-static void video_set_osd_source(struct mppl_video *p, struct osd_state *osd)
+static void mppl_video_set_osd_source(struct mppl_video *p, struct osd_state *osd)
 {
     p->osd = osd;
 }
@@ -2775,7 +2776,7 @@ static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
-    ctx_opts->want_alpha = video_opts_want_alpha(vo->global);
+    ctx_opts->want_alpha = mppl_video_opts_want_alpha(vo->global);
     p->context = gpu_ctx_create(vo, ctx_opts);
     talloc_free(ctx_opts);
     if (!p->context)
@@ -2784,13 +2785,13 @@ static int preinit(struct vo *vo)
     p->ra_ctx = p->context->ra_ctx;
     p->sw = p->context->swapchain;
 
-    p->renderer = video_init(vo->log, vo->global, p->context);
-    video_set_osd_source(p->renderer, vo->osd);
-    configure_queue(p->renderer, vo);
+    p->renderer = mppl_video_init(vo->log, vo->global, p->context);
+    mppl_video_set_osd_source(p->renderer, vo->osd);
+    mppl_video_configure_queue(p->renderer, vo);
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
-    video_init_hwdecs(p->renderer, vo->hwdec_devs, false);
+    mppl_video_init_hwdecs(p->renderer, vo->hwdec_devs, false);
     return 0;
 }
 
@@ -2916,7 +2917,7 @@ static void update_icc_opts(struct mppl_video *p, const struct mp_icc_opts *opts
 
     if (!opts->profile_auto && !p->icc_path) {
         // Un-set any auto-loaded profiles if icc-profile-auto was disabled
-        update_icc(p, (bstr) {0});
+        mppl_video_set_icc_profile(p, (bstr) {0});
     }
 
     int s_r = 0, s_g = 0, s_b = 0;
@@ -2930,7 +2931,7 @@ static void update_icc_opts(struct mppl_video *p, const struct mp_icc_opts *opts
 
     if (!opts->profile || !opts->profile[0]) {
         // No profile enabled, un-load any existing profiles
-        update_icc(p, (bstr) {0});
+        mppl_video_set_icc_profile(p, (bstr) {0});
         TA_FREEP(&p->icc_path);
         return;
     }
@@ -2942,7 +2943,7 @@ static void update_icc_opts(struct mppl_video *p, const struct mp_icc_opts *opts
     MP_VERBOSE(p, "Opening ICC profile '%s'\n", fname);
     struct bstr icc = stream_read_file(fname, p, p->global, 100000000); // 100 MB
     talloc_free(fname);
-    update_icc(p, icc);
+    mppl_video_set_icc_profile(p, icc);
 
     // Update cached path
     talloc_replace(p, p->icc_path, opts->profile);
