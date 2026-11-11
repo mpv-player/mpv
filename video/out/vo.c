@@ -123,6 +123,20 @@ static const struct vo_driver *const video_out_drivers[] =
 struct present_record {
     int64_t time;                   // when flip_page() was called, 0 for a redraw
     int64_t pts;                    // of the frame, 0 for a display synced one
+    int64_t due;                    // vsync the frame was due on, 0 if none
+};
+
+// Lateness of the timed frames and what is done about it, see
+// check_timed_frame_late().
+struct timed_lateness {
+    int lead;                       // half vsyncs the frames are presented earlier by
+    int prev[2];                    // lateness of the two frames judged before, INT_MIN if none
+    int64_t judged;                 // the lateness is judged of the flips after this one
+    int64_t shown;                  // display time of the last flip looked at
+    bool drop;                      // drop the next timed frame
+    int64_t drop_flip;              // first flip after the last queue drop, 0 once it is judged
+    int drop_level;                 // lateness right before that drop
+    int held;                       // lateness a queue drop did not take out
 };
 
 struct vo_internal {
@@ -180,6 +194,7 @@ struct vo_internal {
     // Timed frames on the vsync grid, see render_frame().
     int64_t last_due;               // vsync the last presented timed frame was due on, 0 if none
     double round_edge;              // phase between two vsyncs past which a frame goes on the later one
+    struct timed_lateness late;
 
     struct vo_frame *current_frame; // last frame queued to the VO
 
@@ -734,6 +749,15 @@ void vo_control_async(struct vo *vo, int request, void *data)
     mp_dispatch_enqueue_autofree(vo->in->dispatch, run_control, d);
 }
 
+// Judge the lateness from the frames flipped from now on. The earlier ones are
+// still in flight and do not show what a change does, or they belong to the
+// time before a reset.
+static void restart_lateness(struct vo_internal *in)
+{
+    in->late.prev[0] = in->late.prev[1] = INT_MIN;
+    in->late.judged = in->flips - 1;
+}
+
 // must be called locked
 static void forget_frames(struct vo *vo)
 {
@@ -744,6 +768,10 @@ static void forget_frames(struct vo *vo)
     in->delayed_count = 0;
     in->presentation_delay = INT64_MIN;
     in->last_due = 0;
+    restart_lateness(in);
+    in->late.drop = false;
+    in->late.drop_flip = 0;
+    in->late.held = 0;
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
     in->current_frame_id += VO_MAX_REQ_FRAMES + 1;
@@ -891,6 +919,8 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
         // time.
         next_pts -= in->timing_offset;
         next_pts -= in->flip_queue_offset;
+        // The lead presents the frame that much earlier, see check_timed_frame_late().
+        next_pts -= (int64_t)(in->vsync_interval * in->late.lead / 2);
         int64_t now = mp_time_ns();
         if (next_pts > now)
             r = false;
@@ -975,6 +1005,103 @@ static bool late_frame_catches_up(struct vo_internal *in, int64_t duration)
     return frames * duration <= MP_TIME_S_TO_NS(1);
 }
 
+// Lateness of a timed frame, the vsyncs it appeared after the one it was due
+// on. A pipeline that holds every frame for a vsync shows it that late at any
+// frame rate, presenting the frames that much earlier hides it, and the queued
+// frame is the slack the swapchain is for. A frame presented late is shown a
+// vsync late, and so is every frame after it while they come once per vsync,
+// the queue behind it never gets a free vsync and is shown in order however
+// early the frames are presented. That is taken out by dropping a frame.
+static void check_timed_frame_late(struct vo *vo, int64_t flip, int64_t due, int64_t display_time,
+                                   int64_t duration)
+{
+    struct vo_internal *in = vo->in;
+    struct timed_lateness *l = &in->late;
+    // Each flip once, and none from before the last restart.
+    if (flip <= l->judged)
+        return;
+    l->judged = flip;
+    bool after_previous = display_time - l->shown < in->vsync_interval * 1.75;
+    l->shown = display_time;
+    // A time within an eighth of a vsync of the middle between two vsyncs is
+    // neither of them. DXGI times some presents half a vsync before the vsync
+    // they went out on.
+    double behind = (display_time - due) / in->vsync_interval;
+    if (fabs(behind - round(behind)) > 0.375)
+        return;
+    int late = lrint(behind);
+    // Below the refresh rate a late frame shown on the vsync right after the
+    // previous frame waited behind it. That queue drains by itself through
+    // the vsyncs without a new frame and says nothing about the pipeline.
+    if (late > 0 && after_previous && late_frame_catches_up(in, duration))
+        return;
+    // The frames flipped before a queue drop show the lateness it starts
+    // from, the last of them counts.
+    if (l->drop || flip < l->drop_flip) {
+        l->drop_level = late;
+        return;
+    }
+    if (l->prev[1] == INT_MIN) {
+        l->prev[1] = l->prev[0];
+        l->prev[0] = late;
+        return;
+    }
+    // A single frame appears a vsync early or late on its own now and then,
+    // and frames that take turns in a cadence can be off every second one.
+    // What two of the last three frames share counts, the middle of the three.
+    int low = MPMIN(late, MPMIN(l->prev[0], l->prev[1]));
+    int high = MPMAX(late, MPMAX(l->prev[0], l->prev[1]));
+    int shared = late + l->prev[0] + l->prev[1] - low - high;
+    l->prev[1] = l->prev[0];
+    l->prev[0] = late;
+    int lead = l->lead;
+    int rest = 0;
+    if (shared > 0) {
+        // Three frames late by the same vsyncs are held that long by the
+        // pipeline, and the lead takes all of it. Lateness only two share, or
+        // not the same, can be a stall that passes, or presents that just
+        // miss their vsync, which just make the one before when they come a
+        // whole vsync earlier. That gets half a vsync. The frames in flight
+        // have to fit the swapchain, those presented in the last half vsync
+        // and the lead. Frames that come once per vsync leave room for the
+        // depth less one vsyncs, slower ones for more.
+        double vsyncs = MPMAX(duration / in->vsync_interval, 1);
+        int max_lead = ceil(2 * vo->opts->swapchain_depth * vsyncs - 1) - 1;
+        int hide = MPMIN(low == high ? 2 * shared : 1, MPMAX(max_lead - l->lead, 0));
+        l->lead += hide;
+        // One change at a time, each is judged by the frames after it.
+        if (!hide)
+            rest = shared;
+    } else if (shared < 0) {
+        // Frames are early by the lead alone, it comes down by all of it.
+        l->lead = MPMAX(l->lead + 2 * shared, 0);
+    }
+    // What the lead cannot take is left to queue drops. The first frames
+    // after one tell what it did. A drop that lowered the lateness drained a
+    // queue, and the next one is tried whatever an earlier one found. One
+    // that left it as it was has met a pipeline that holds the frames that
+    // long, there is no queue to drain. More lateness than before is another
+    // stall and says nothing about the drop.
+    if (l->drop_flip) {
+        if (rest < l->drop_level)
+            l->held = 0;
+        else if (rest == l->drop_level)
+            l->held = rest;
+        l->drop_flip = 0;
+    }
+    l->held = MPMIN(l->held, rest);
+    if (rest > l->held) {
+        MP_VERBOSE(vo, "Timed frames shown %d vsyncs late, dropping one to drain the queue\n", rest);
+        l->drop = true;
+        l->drop_level = late;
+    }
+    if (l->lead != lead) {
+        MP_VERBOSE(vo, "Timed frames shown %+d vsyncs off, presenting them %d half vsyncs earlier\n",
+                   shared, l->lead);
+        restart_lateness(in);
+    }
+}
+
 static void record_present(struct vo_internal *in, struct present_record present)
 {
     in->presents[in->flips++ % MP_ARRAY_SIZE(in->presents)] = present;
@@ -1053,7 +1180,7 @@ static bool render_frame(struct vo *vo)
         in->round_edge = up ? MPMAX(MPMIN(in->round_edge, phase - 0.1), 0.4)
                             : MPMIN(MPMAX(in->round_edge, phase + 0.1), 0.6);
         due = in->vsync_grid + (int64_t)(in->vsync_interval * (below + up));
-        target = due - (int64_t)(in->vsync_interval * 0.5);
+        target = due - (int64_t)(in->vsync_interval * (1 + in->late.lead) / 2);
     }
     // The frame rate counts as matched to the refresh rate when a frame that
     // waits a vsync behind another does not catch up within a second. A
@@ -1070,10 +1197,14 @@ static bool render_frame(struct vo *vo)
         target += shift;
         due_taken = false;
     }
-
     // "normal" strict drop threshold, or the frame cannot be displayed in
     // time because of the frames before it.
-    in->dropped_frame = duration >= 0 && (end_time < now || due_taken);
+    bool lost = end_time < now || due_taken;
+    // What the swapchain cannot hide of the lateness is taken out by a frame
+    // that gives up its vsync, the queue then drains by one. That takes a
+    // frame that would be shown.
+    bool drain = in->late.drop && rate_matched && !lost;
+    in->dropped_frame = duration >= 0 && (lost || drain);
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
@@ -1102,7 +1233,18 @@ static bool render_frame(struct vo *vo)
     // Always render when paused (it's typically the last frame for a while).
     in->dropped_frame &= !in->paused;
 
-    if (!in->dropped_frame && due)
+    // The frames flipped from here on tell what the drop did.
+    bool drained = in->dropped_frame && drain;
+    if (drained) {
+        in->late.prev[0] = in->late.prev[1] = INT_MIN;
+        in->late.drop_flip = in->flips;
+    }
+    // Below the refresh rate a queue drains by itself through the vsyncs
+    // without a new frame.
+    if (drained || !rate_matched)
+        in->late.drop = false;
+    // No other frame takes the vsync a frame gave up for the queue.
+    if (due && (!in->dropped_frame || drained))
         in->last_due = due;
 
     bool use_vsync = in->current_frame->display_synced && !in->paused;
@@ -1159,7 +1301,7 @@ static bool render_frame(struct vo *vo)
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
 
-        record_present(in, (struct present_record){present_time, pts});
+        record_present(in, (struct present_record){present_time, pts, due});
         // The flip the backend reports as displayed, if it measured the time
         // and the flip is one of the last.
         int64_t shown_flip = in->flips - 1 - vsync.displayed_age;
@@ -1174,6 +1316,8 @@ static bool render_frame(struct vo *vo)
         } else if (frame->display_synced || !have_feedback) {
             in->presentation_delay = INT64_MIN;
         }
+        if (shown && shown->due)
+            check_timed_frame_late(vo, shown_flip, shown->due, vsync.displayed_time, duration);
         if (have_feedback && in->vsync_interval > 1)
             update_vsync_grid(in, display_time);
         update_vsync_timing_after_swap(vo, display_time);
@@ -1374,6 +1518,8 @@ void vo_set_paused(struct vo *vo, bool paused)
             wakeup_core(vo);
         }
         reset_vsync_timings(vo);
+        restart_lateness(in);
+        in->late.drop = false;
         wakeup_locked(vo);
     }
     mp_mutex_unlock(&in->lock);
