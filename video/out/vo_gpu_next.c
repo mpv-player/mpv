@@ -186,7 +186,7 @@ struct priv {
     struct mp_image_params target_params;
 };
 
-static void update_render_options(struct vo *vo);
+static void update_render_options(struct priv *p);
 static void update_lut(struct priv *p, struct user_lut *lut);
 
 struct gl_next_opts {
@@ -1170,14 +1170,13 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     pl_dispatch_info_move(&frame->info[info->index], info->pass);
 }
 
-static void update_options(struct vo *vo)
+static void update_options(struct priv *p)
 {
-    struct priv *p = vo->priv;
     pl_options pars = p->pars;
     bool changed = m_config_cache_update(p->opts_cache);
     changed = m_config_cache_update(p->next_opts_cache) || changed;
     if (changed)
-        update_render_options(vo);
+        update_render_options(p);
 
     update_lut(p, &p->next_opts->lut);
     pars->params.lut = p->next_opts->lut.lut;
@@ -1358,7 +1357,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     struct priv *p = vo->priv;
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
-    update_options(vo);
+    update_options(p);
 
     struct pl_render_params params = pars->params;
     const struct gl_video_opts *opts = p->opts_cache->opts;
@@ -1928,7 +1927,7 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
     pl_tex fbo = NULL;
     args->res = NULL;
 
-    update_options(vo);
+    update_options(p);
     struct pl_render_params params = pars->params;
     params.info_callback = NULL;
     params.skip_caching_single_frame = true;
@@ -2215,7 +2214,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_RENDER_OPTS: {
         // Special case for --image-lut which requires a full reset.
         int old_type = p->next_opts->image_lut.type;
-        update_options(vo);
+        update_options(p);
         configure_queue(vo);
         struct user_lut image_lut = p->next_opts->image_lut;
         p->want_reset |= image_lut.opt && ((!image_lut.path && image_lut.opt) ||
@@ -2588,7 +2587,7 @@ static int preinit(struct vo *vo)
     p->osd_sync = 1;
 
     p->pars = pl_options_alloc(p->pllog);
-    update_render_options(vo);
+    update_render_options(p);
     configure_queue(vo);
     return 0;
 
@@ -2868,9 +2867,8 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
     }
 }
 
-static void update_render_options(struct vo *vo)
+static void update_render_options(struct priv *p)
 {
-    struct priv *p = vo->priv;
     pl_options pars = p->pars;
     const struct gl_video_opts *opts = p->opts_cache->opts;
     pars->params.background_color[0] = opts->background_color.r / 255.0;
