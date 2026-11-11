@@ -144,6 +144,7 @@ struct vo_drm_state {
     bool redraw;
     bool vt_switcher_active;
     bool waiting_for_flip;
+    int64_t flip_swap;      // the swap that queued the frame of the last flip
 
     char *card_path;
     int card_no;
