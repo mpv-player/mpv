@@ -181,6 +181,7 @@ struct priv {
     struct frame_info perf_fresh;
     struct frame_info perf_redraw;
 
+    struct mp_image_params image_params;
     struct mp_image_params target_params;
 };
 
@@ -1715,7 +1716,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
             struct pl_frame *image = (struct pl_frame *) mix.frames[i];
             struct mp_image *mpi = image->user_data;
             struct frame_priv *fp = mpi->priv;
-            apply_crop(image, p->src, vo->params->w, vo->params->h);
+            apply_crop(image, p->src, p->image_params.w, p->image_params.h);
             if (opts->blend_subs) {
                 if (frame->redraw)
                     p->osd_sync++;
@@ -1728,9 +1729,9 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
                         .w = w,
                         .h = h,
                         .ml = -image->crop.x0 * rx,
-                        .mr = (image->crop.x1 - vo->params->w) * rx,
+                        .mr = (image->crop.x1 - p->image_params.w) * rx,
                         .mt = -image->crop.y0 * ry,
-                        .mb = (image->crop.y1 - vo->params->h) * ry,
+                        .mb = (image->crop.y1 - p->image_params.h) * ry,
                         .display_par = 1.0,
                     };
                     enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
@@ -1869,6 +1870,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     if (!p->ra_ctx->fns->reconfig(p->ra_ctx))
         return -1;
 
+    if (params)
+        p->image_params = *params;
     resize(vo);
     mp_mutex_lock(&vo->params_mutex);
     vo->target_params = NULL;
@@ -2078,9 +2081,9 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
             .w = w,
             .h = h,
             .ml = -image.crop.x0 * rx,
-            .mr = (image.crop.x1 - vo->params->w) * rx,
+            .mr = (image.crop.x1 - p->image_params.w) * rx,
             .mt = -image.crop.y0 * ry,
-            .mb = (image.crop.y1 - vo->params->h) * ry,
+            .mb = (image.crop.y1 - p->image_params.h) * ry,
             .display_par = 1.0,
         };
         enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
