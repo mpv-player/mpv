@@ -586,7 +586,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
 }
 
 struct frame_priv {
-    struct vo *vo;
+    struct priv *p;
     struct osd_state subs;
     uint64_t osd_sync;
     struct ra_hwdec *hwdec;
@@ -870,7 +870,7 @@ static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
-    struct priv *p = fp->vo->priv;
+    struct priv *p = fp->p;
     return slot_reconfig(p, &p->hwdec, fp->hwdec, &mpi->params) &&
            slot_acquire(p, &p->hwdec, mpi, mpi, frame);
 }
@@ -879,7 +879,7 @@ static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
-    struct priv *p = fp->vo->priv;
+    struct priv *p = fp->p;
     slot_release(&p->hwdec);
 }
 
@@ -888,7 +888,7 @@ static bool hwdec_acquire_el(pl_gpu gpu, struct pl_frame *frame)
     struct mp_image *bl_mpi = frame->user_data;
     struct mp_image *el_mpi = bl_mpi->enhancement_layer;
     struct frame_priv *fp = bl_mpi->priv;
-    struct priv *p = fp->vo->priv;
+    struct priv *p = fp->p;
     // The EL image belongs to the BL queue entry, which therefore owns the slot.
     return slot_reconfig(p, &p->el_hwdec, fp->el_hwdec, &el_mpi->params) &&
            slot_acquire(p, &p->el_hwdec, bl_mpi, el_mpi, frame);
@@ -898,7 +898,7 @@ static void hwdec_release_el(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *bl_mpi = frame->user_data;
     struct frame_priv *fp = bl_mpi->priv;
-    struct priv *p = fp->vo->priv;
+    struct priv *p = fp->p;
     slot_release(&p->el_hwdec);
 }
 
@@ -1000,8 +1000,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     struct mp_image *mpi = src->frame_data;
     struct mp_image_params par = mpi->params;
     struct frame_priv *fp = mpi->priv;
-    struct vo *vo = fp->vo;
-    struct priv *p = vo->priv;
+    struct priv *p = fp->p;
 
     fp->hwdec = ra_hwdec_get(&p->hwdec_ctx, mpi->imgfmt);
     if (fp->hwdec) {
@@ -1060,7 +1059,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
         timer_pool_stop(p->sw_upload_timer);
         stats_time_end(p->stats, "swdec-upload");
         if (!ok) {
-            MP_ERR(vo, "Failed uploading frame!\n");
+            MP_ERR(p, "Failed uploading frame!\n");
             talloc_free(mpi);
             return false;
         }
@@ -1105,7 +1104,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
             pl_frame_set_chroma_location(&fp->el_frame, el_par.chroma_location);
             frame->enhancement_layer = &fp->el_frame;
         } else {
-            MP_WARN(vo, "Failed setting up enhancement layer; "
+            MP_WARN(p, "Failed setting up enhancement layer; "
                     "rendering base layer only.\n");
         }
     }
@@ -1131,7 +1130,7 @@ static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
 {
     struct mp_image *mpi = src->frame_data;
     struct frame_priv *fp = mpi->priv;
-    struct priv *p = fp->vo->priv;
+    struct priv *p = fp->p;
     for (int i = 0; i < MP_ARRAY_SIZE(fp->subs.entries); i++) {
         pl_tex tex = fp->subs.entries[i].tex;
         if (tex)
@@ -1432,7 +1431,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         struct mp_image *mpi = mp_image_new_ref(frame->frames[n]);
         struct frame_priv *fp = talloc_zero(mpi, struct frame_priv);
         mpi->priv = fp;
-        fp->vo = vo;
+        fp->p = p;
 
         pl_queue_push(p->queue, &(struct pl_source_frame) {
             .pts = mpi->pts,
