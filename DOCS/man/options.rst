@@ -8482,8 +8482,9 @@ Miscellaneous
     .. warning:: Using realtime priority can cause system lockup.
 
 ``--media-controls=<yes|no>``
-    (Windows only)
-    Enable integration of media control interface SystemMediaTransportControls.
+    (Windows and macOS only)
+    Enable integration of media control interface SystemMediaTransportControls
+    on Windows, or the Now Playing info center and remote commands on macOS.
 
     Windows may display "Unknown app" or show a missing mpv icon in the media
     control panel. To fully support it, you need to register mpv using the
