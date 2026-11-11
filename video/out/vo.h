@@ -286,12 +286,6 @@ struct vo_frame {
 // Presentation feedback. See get_vsync() for how backends should fill this
 // struct.
 struct vo_vsync_info {
-    // mp_time_ns() timestamp at which the last queued frame will likely be
-    // displayed (this is in the future, unless the frame is instantly output).
-    // 0 or lower if unset or unsupported.
-    // This implies the latency of the output.
-    int64_t last_queue_display_time;
-
     // Time between 2 vsync events in nanoseconds. The difference should be the
     // from 2 times sampled from the same reference point (it should not be the
     // difference between e.g. the end of scanout and the start of the next one;
