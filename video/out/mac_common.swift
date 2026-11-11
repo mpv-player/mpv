@@ -106,7 +106,8 @@ class MacCommon: Common {
         let next = presentation?.next()
         info.pointee.vsync_duration = next?.duration ?? -1
         info.pointee.skipped_vsyncs = next?.skipped ?? -1
-        info.pointee.last_queue_display_time = next?.time ?? -1
+        info.pointee.displayed_time = next?.time ?? 0
+        info.pointee.displayed_estimated = true
     }
 
     @objc func isVisible() -> Bool {
