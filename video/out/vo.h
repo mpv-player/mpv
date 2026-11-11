@@ -310,6 +310,16 @@ struct vo_vsync_info {
     // swap_buffers() for every physical vsync.
     // -1 if unset or unsupported.
     int64_t skipped_vsyncs;
+
+    // mp_time_ns() timestamp at which the frame of a swap_buffers() call was
+    // displayed, and how many calls before the current one that was, 0 for the
+    // current one. The time is 0 if unknown or unsupported. The VO predicts
+    // the display time of the current call's frame from these.
+    int64_t displayed_time;
+    int displayed_age;
+    // The time was not measured for that frame: the backend derived it from
+    // another vsync and the refresh rate, or the frame is not shown yet.
+    bool displayed_estimated;
 };
 
 struct vo_driver {
