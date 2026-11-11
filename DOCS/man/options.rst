@@ -4751,6 +4751,24 @@ Input
     Use the right Alt key as Alt Gr to produce special characters. If disabled,
     count the right Alt as an Alt modifier key. Enabled by default.
 
+``--input-layout-independent=<yes|no>``
+    (Windows only)
+    Interpret keyboard input independently of the currently active keyboard
+    layout: keys are translated as if the US English layout was active, so
+    keybindings match the physical keys and keep working with non-latin
+    layouts. Disabled by default.
+
+    This only affects keyboard input received through the w32 video output
+    driver; other input sources are unaffected.
+
+    Note that keys translated this way include AltGr combinations: they
+    produce the underlying US key instead of layout-specific symbols (e.g.
+    with a German layout, AltGr+Q triggers the ``q`` binding instead of
+    typing ``@``, which sits on Shift+2 as with a US layout).
+
+    Note that characters typed via Alt+numpad or injected as unicode input
+    (e.g. with SendInput) are not affected.
+
 ``--input-vo-keyboard=<yes|no>``
     Disable all keyboard input on for VOs which can't participate in proper
     keyboard input dispatching. May not affect all VOs. Generally useful for

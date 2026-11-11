@@ -1,0 +1,1 @@
+add `--input-layout-independent` option to make key bindings work independently of the active keyboard layout (Windows only)
