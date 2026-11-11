@@ -7409,7 +7409,8 @@ them.
     This can be used for "HDR passthrough" and to set the output colorspace
     for SDR content. In ``auto`` mode, the target colorspace is only set if the
     current display parameters are known. Currently, this is supported on
-    Wayland, D3D11 and winvk contexts. The ``yes`` option will always try to set
+    Wayland, D3D11, winvk and the Android EGL contexts. The ``yes`` option will
+    always try to set
     the colorspace, you may need to adjust the ``--target-*`` options to match
     your display capabilities.
     Requires a supporting driver and ``--vo=gpu-next``. (Default: ``auto``)
