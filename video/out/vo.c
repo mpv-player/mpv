@@ -475,12 +475,10 @@ static void vsync_skip_detection(struct vo *vo)
 }
 
 // Always called locked.
-static void update_vsync_timing_after_swap(struct vo *vo,
-                                           struct vo_vsync_info *vsync)
+static void update_vsync_timing_after_swap(struct vo *vo, int64_t vsync_time)
 {
     struct vo_internal *in = vo->in;
 
-    int64_t vsync_time = vsync->last_queue_display_time;
     int64_t prev_vsync = in->prev_vsync;
     in->prev_vsync = vsync_time;
 
@@ -903,6 +901,23 @@ void vo_wait_frame(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 }
 
+// Returns the predicted display time of the frame submitted at submit_time,
+// or -1 if it cannot be determined.
+static int64_t predict_display_time(const struct vo_vsync_info *vsync, int64_t submit_time)
+{
+    int64_t known = vsync->displayed_time;
+    int age = vsync->displayed_age;
+    int64_t vd = vsync->vsync_duration;
+    if (known <= 0 || (age && vd <= 0))
+        return -1;
+    if (!age)
+        return known;
+    int64_t display = known + age * vd;
+    if (submit_time > known)
+        display = MPMAX(display, known + ((submit_time - known) / vd + 1) * vd);
+    return display;
+}
+
 // Wait until realtime is >= ts
 static void wait_until(int64_t target)
 {
@@ -1015,6 +1030,7 @@ static bool render_frame(struct vo *vo)
 
         stats_time_start(in->stats, "video-flip");
 
+        int64_t present_time = mp_time_ns();
         vo->driver->flip_page(vo);
 
         struct vo_vsync_info vsync = {
@@ -1023,10 +1039,13 @@ static bool render_frame(struct vo *vo)
         };
         if (vo->driver->get_vsync)
             vo->driver->get_vsync(vo, &vsync);
+        int64_t display_time = vsync.last_queue_display_time;
+        if (display_time <= 0)
+            display_time = predict_display_time(&vsync, present_time);
 
         // Make up some crap if presentation feedback is missing.
-        if (vsync.last_queue_display_time <= 0)
-            vsync.last_queue_display_time = mp_time_ns();
+        if (display_time <= 0)
+            display_time = mp_time_ns();
 
         stats_time_end(in->stats, "video-flip");
 
@@ -1034,7 +1053,7 @@ static bool render_frame(struct vo *vo)
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
 
-        update_vsync_timing_after_swap(vo, &vsync);
+        update_vsync_timing_after_swap(vo, display_time);
     }
 
     if (vo->driver->caps & VO_CAP_NORETAIN) {
