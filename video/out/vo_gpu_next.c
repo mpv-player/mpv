@@ -185,7 +185,7 @@ struct priv {
     struct mp_image_params image_params;
     struct mp_image_params target_params;
 
-    // What the swapchain reports about the display, read once per frame.
+    // Color space and reference white of the display, from begin_frame()
     struct pl_color_space display_csp;
     float display_ref_luma;
 
@@ -1388,9 +1388,12 @@ static struct frame_params get_frame_params(struct priv *p, struct vo_frame *fra
 }
 
 // Take the new frames of a vo_frame into the queue.
-static void begin_frame(struct priv *p, struct vo_frame *frame)
+static void begin_frame(struct priv *p, struct vo_frame *frame,
+                        struct pl_color_space display_csp, float display_ref_luma)
 {
     update_options(p);
+    p->display_csp = display_csp;
+    p->display_ref_luma = display_ref_luma;
 
     struct frame_params fpar = get_frame_params(p, frame);
     bool can_interpolate = fpar.can_interpolate;
@@ -1850,13 +1853,13 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
-    begin_frame(p, frame);
 
-    p->display_csp = (struct pl_color_space){0};
+    struct pl_color_space display_csp = {0};
     // TODO: Implement this for all backends
     if (sw->fns->target_csp)
-        p->display_csp = sw->fns->target_csp(sw);
-    p->display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
+        display_csp = sw->fns->target_csp(sw);
+    float display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
+    begin_frame(p, frame, display_csp, display_ref_luma);
 
     struct pl_color_space hint = {0};
     bool external_params = false;
