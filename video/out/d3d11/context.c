@@ -126,7 +126,6 @@ struct priv {
     unsigned last_sync_refresh_count;
     int64_t last_sync_qpc_time;
     int64_t vsync_duration_qpc;
-    int64_t last_submit_qpc;
 
     struct mp_dxgi_factory_ctx dxgi_ctx;
 };
@@ -287,10 +286,6 @@ static void d3d11_swap_buffers(struct ra_swapchain *sw)
 
     m_config_cache_update(p->opts_cache);
 
-    LARGE_INTEGER perf_count;
-    QueryPerformanceCounter(&perf_count);
-    p->last_submit_qpc = perf_count.QuadPart;
-
     HRESULT hr = IDXGISwapChain_Present(p->swapchain, p->opts->sync_interval, 0);
     if (hr == S_OK)
         return;
@@ -373,29 +368,23 @@ static void d3d11_get_vsync(struct ra_swapchain *sw, struct vo_vsync_info *info)
         info->vsync_duration = qpc_to_ns(sw, p->vsync_duration_qpc);
 
     // If the physical frame rate is known and the other members of
-    // DXGI_FRAME_STATISTICS are non-0, estimate the timing of the next frame
+    // DXGI_FRAME_STATISTICS are non-0, report the vsync of the last displayed
+    // present
     if (p->vsync_duration_qpc && stats.PresentCount &&
         stats.PresentRefreshCount && stats.SyncRefreshCount &&
         stats.SyncQPCTime.QuadPart)
     {
-        // It's not clear if PresentRefreshCount and SyncRefreshCount can refer
-        // to different frames, but in case they can, assuming mpv presents on
-        // every frame, guess the present count that relates to SyncRefreshCount.
-        unsigned expected_sync_pc = stats.PresentCount +
-            (stats.SyncRefreshCount - stats.PresentRefreshCount);
-
-        // Now guess the timestamp of the last submitted frame based on the
-        // timestamp of the frame at SyncRefreshCount and the frame rate
-        int queued_frames = submit_count - expected_sync_pc;
-        int64_t last_queue_display_time_qpc = stats.SyncQPCTime.QuadPart +
-            queued_frames * p->vsync_duration_qpc;
-
-        // Only set the estimated display time if it's after the last submission
-        // time. It could be before if mpv skips a lot of frames.
-        if (last_queue_display_time_qpc >= p->last_submit_qpc) {
-            info->last_queue_display_time = mp_time_ns() +
-                (qpc_to_ns(sw, last_queue_display_time_qpc) - qpc_ns_now(sw));
-        }
+        // The statistics time one vsync, SyncRefreshCount. When the present
+        // went out on that one, its time is exact. When they time a later
+        // one, the present went out as many vsyncs before it as the two
+        // refresh counts differ, as far as the counts go: for a window
+        // presenting below the refresh rate they skip the vsyncs DWM did not
+        // compose.
+        int vsyncs_since = stats.SyncRefreshCount - stats.PresentRefreshCount;
+        int64_t displayed_qpc = stats.SyncQPCTime.QuadPart - vsyncs_since * p->vsync_duration_qpc;
+        info->displayed_time = mp_time_ns() + (qpc_to_ns(sw, displayed_qpc) - qpc_ns_now(sw));
+        info->displayed_age = submit_count - stats.PresentCount;
+        info->displayed_estimated = vsyncs_since != 0;
     }
 }
 
