@@ -477,6 +477,8 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
                 goto init_error;
             reset_audio_state(mpctx);
             mp_output_chain_reset_harder(ao_c->filter);
+            // The ao filter still holds the request made before the fallback.
+            mp_filter_reset(ao_c->ao_filter);
             mp_wakeup_core(mpctx); // reinit with new format next time
             return 0;
         }
