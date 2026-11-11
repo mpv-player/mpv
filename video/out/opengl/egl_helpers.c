@@ -320,6 +320,25 @@ bool mpegl_create_context_cb(struct ra_ctx *ctx, EGLDisplay display,
     struct egl_opts *opts = mp_get_config_group(tmp, ctx->global, &egl_conf);
 
     bool r = false;
+#ifdef __ANDROID__
+    // Prefer a 10-bit EGL config so HDR surfaces use RGB10_A2
+    static const int android_formats[] = {
+        RGBA_FORMAT(10, 10, 10, 2), RGBA_FORMAT(10, 10, 10, 0), 0
+    };
+    if (!opts->output_format) {
+        for (int i = 0; android_formats[i]; i++) {
+            opts->output_format = android_formats[i];
+            if (!r && (mode == GLES_NO || mode == GLES_AUTO))
+                r = create_context(ctx, display, false, cb, opts, out_context, out_config);
+            if (!r && (mode == GLES_YES || mode == GLES_AUTO))
+                r = create_context(ctx, display, true, cb, opts, out_context, out_config);
+            if (r)
+                break;
+        }
+        if (!r)
+            opts->output_format = 0;
+    }
+#endif
     if (!r && (mode == GLES_NO || mode == GLES_AUTO))
         r = create_context(ctx, display, false, cb, opts, out_context, out_config);
     if (!r && (mode == GLES_YES || mode == GLES_AUTO))
