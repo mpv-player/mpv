@@ -1387,16 +1387,12 @@ static struct frame_params get_frame_params(struct priv *p, struct vo_frame *fra
     return (struct frame_params){ params, can_interpolate, pts_offset };
 }
 
-static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+// Take the new frames of a vo_frame into the queue.
+static void begin_frame(struct priv *p, struct vo_frame *frame)
 {
-    struct priv *p = vo->priv;
-    pl_options pars = p->pars;
-    pl_gpu gpu = p->gpu;
     update_options(p);
 
-    const struct gl_video_opts *opts = p->opts_cache->opts;
     struct frame_params fpar = get_frame_params(p, frame);
-    struct pl_render_params params = fpar.params;
     bool can_interpolate = fpar.can_interpolate;
     double pts_offset = fpar.pts_offset;
 
@@ -1421,7 +1417,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         if (pl_queue_peek(p->queue, 0, &vpts) &&
             frame->current->pts + MPMAX(0, pts_offset) < vpts.pts)
         {
-            MP_VERBOSE(vo, "Forcing queue refill, PTS(%f + %f | %f) < VPTS(%f)\n",
+            MP_VERBOSE(p, "Forcing queue refill, PTS(%f + %f | %f) < VPTS(%f)\n",
                        frame->current->pts, pts_offset,
                        frame->ideal_frame_vsync_duration, vpts.pts);
             p->want_reset = true;
@@ -1464,6 +1460,20 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
         p->last_id = id;
     }
+}
+
+static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+{
+    struct priv *p = vo->priv;
+    pl_options pars = p->pars;
+    pl_gpu gpu = p->gpu;
+    begin_frame(p, frame);
+
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    struct frame_params fpar = get_frame_params(p, frame);
+    struct pl_render_params params = fpar.params;
+    bool can_interpolate = fpar.can_interpolate;
+    double pts_offset = fpar.pts_offset;
 
     struct ra_swapchain *sw = p->ra_ctx->swapchain;
 
