@@ -306,10 +306,9 @@ static void free_dr_buf(void *opaque, uint8_t *data)
     MP_ASSERT_UNREACHABLE();
 }
 
-static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
-                                  int stride_align, int flags)
+static struct mp_image *video_get_image(struct priv *p, int imgfmt, int w, int h,
+                                        int stride_align, int flags)
 {
-    struct priv *p = vo->priv;
     pl_gpu gpu = p->gpu;
     if (!gpu->limits.thread_safe || !gpu->limits.max_mapped_size)
         return NULL;
@@ -1940,6 +1939,13 @@ static int query_format(struct vo *vo, int format)
 {
     struct priv *p = vo->priv;
     return check_format(p, format);
+}
+
+static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
+                                  int stride_align, int flags)
+{
+    struct priv *p = vo->priv;
+    return video_get_image(p, imgfmt, w, h, stride_align, flags);
 }
 
 static void video_resize(struct priv *p, struct mp_rect src, struct mp_rect dst,
