@@ -116,13 +116,12 @@ struct hwdec_slot {
     pl_tex tex[4];            // plane textures of the current mapping
 };
 
-struct priv {
+struct mppl_video {
     struct mp_log *log;
     struct mpv_global *global;
     struct stats_ctx *stats;
     struct osd_state *osd;
     struct ra_ctx *ra_ctx;
-    struct gpu_ctx *context;
     struct ra_hwdec_ctx hwdec_ctx;
     struct hwdec_slot hwdec;
     struct hwdec_slot el_hwdec;
@@ -138,7 +137,6 @@ struct priv {
     pl_gpu gpu;
     pl_renderer rr;
     pl_queue queue;
-    pl_swapchain sw;
     pl_fmt osd_fmt[SUBBITMAP_COUNT];
     pl_tex *sub_tex;
     int num_sub_tex;
@@ -154,7 +152,6 @@ struct priv {
     bool want_reset;
     bool want_seek_reset;
     bool flush_cache;
-    bool frame_pending;
     bool paused;
     int last_ref_white;
     int last_srgb_power22;
@@ -183,7 +180,6 @@ struct priv {
     struct frame_info perf_redraw;
 
     struct mp_image_params image_params;
-    struct mp_image_params target_params;
 
     // Color space and reference white of the display, from begin_frame()
     struct pl_color_space display_csp;
@@ -192,8 +188,18 @@ struct priv {
     int fb_depth;
 };
 
-static void update_render_options(struct priv *p);
-static void update_lut(struct priv *p, struct user_lut *lut);
+struct priv {
+    struct mp_log *log;
+    struct ra_ctx *ra_ctx;
+    struct gpu_ctx *context;
+    pl_swapchain sw;
+    struct mppl_video *renderer;
+    bool frame_pending;
+    struct mp_image_params target_params;
+};
+
+static void update_render_options(struct mppl_video *p);
+static void update_lut(struct mppl_video *p, struct user_lut *lut);
 
 struct gl_next_opts {
     struct pl_tone_map_constants tone_constants;
@@ -273,7 +279,7 @@ const struct m_sub_options gl_next_conf = {
     .change_flags = UPDATE_VIDEO,
 };
 
-static pl_buf get_dr_buf(struct priv *p, const uint8_t *ptr)
+static pl_buf get_dr_buf(struct mppl_video *p, const uint8_t *ptr)
 {
     mp_mutex_lock(&p->dr_lock);
 
@@ -291,7 +297,7 @@ static pl_buf get_dr_buf(struct priv *p, const uint8_t *ptr)
 
 static void free_dr_buf(void *opaque, uint8_t *data)
 {
-    struct priv *p = opaque;
+    struct mppl_video *p = opaque;
     mp_mutex_lock(&p->dr_lock);
 
     for (int i = 0; i < p->num_dr_buffers; i++) {
@@ -306,7 +312,7 @@ static void free_dr_buf(void *opaque, uint8_t *data)
     MP_ASSERT_UNREACHABLE();
 }
 
-static struct mp_image *video_get_image(struct priv *p, int imgfmt, int w, int h,
+static struct mp_image *video_get_image(struct mppl_video *p, int imgfmt, int w, int h,
                                         int stride_align, int flags)
 {
     pl_gpu gpu = p->gpu;
@@ -346,7 +352,7 @@ static struct mp_image *video_get_image(struct priv *p, int imgfmt, int w, int h
     return mpi;
 }
 
-static bool upload_overlay_tex(struct priv *p, struct osd_entry *entry,
+static bool upload_overlay_tex(struct mppl_video *p, struct osd_entry *entry,
                                const struct sub_bitmaps *item)
 {
     pl_fmt tex_fmt = p->osd_fmt[item->format];
@@ -396,7 +402,7 @@ static bool upload_overlay_tex(struct priv *p, struct osd_entry *entry,
 }
 
 // Duplicate overlay parts for each eye in stereo 3D modes
-static void dup_stereo_parts(struct priv *p, struct osd_entry *entry, int start,
+static void dup_stereo_parts(struct mppl_video *p, struct osd_entry *entry, int start,
                              struct mp_osd_res res, const int div[2])
 {
     int num_eye_parts = entry->num_parts - start;
@@ -418,7 +424,7 @@ static void dup_stereo_parts(struct priv *p, struct osd_entry *entry, int start,
     }
 }
 
-static struct pl_color_space bgra_overlay_color(struct priv *p,
+static struct pl_color_space bgra_overlay_color(struct mppl_video *p,
                                                 const struct sub_bitmaps *item,
                                                 const struct sub_bitmap *b,
                                                 const struct mp_image *src,
@@ -474,7 +480,7 @@ static struct pl_color_space bgra_overlay_color(struct priv *p,
     return color;
 }
 
-static struct pl_color_space libass_overlay_color(struct priv *p,
+static struct pl_color_space libass_overlay_color(struct mppl_video *p,
                                                   const struct sub_bitmaps *item,
                                                   const struct mp_image *src,
                                                   float ref_luma)
@@ -496,7 +502,7 @@ static struct pl_color_space libass_overlay_color(struct priv *p,
     return color;
 }
 
-static void add_run_overlay(struct priv *p, struct overlay_state *state,
+static void add_run_overlay(struct mppl_video *p, struct overlay_state *state,
                             const struct osd_entry *entry,
                             const struct sub_bitmaps *item,
                             const struct pl_color_space *color, int start,
@@ -524,7 +530,7 @@ static void add_run_overlay(struct priv *p, struct overlay_state *state,
     }
 }
 
-static void update_overlays(struct priv *p, struct mp_osd_res res,
+static void update_overlays(struct mppl_video *p, struct mp_osd_res res,
                             int flags, enum pl_overlay_coords coords,
                             struct overlay_state *state, struct pl_frame *frame,
                             struct mp_image *src, int stereo_mode, float ref_luma)
@@ -593,7 +599,7 @@ static void update_overlays(struct priv *p, struct mp_osd_res res,
 }
 
 struct frame_priv {
-    struct priv *p;
+    struct mppl_video *p;
     struct overlay_state subs;
     uint64_t osd_sync;
     struct ra_hwdec *hwdec;
@@ -696,7 +702,7 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
     return desc.num_planes;
 }
 
-static void slot_unmap(struct priv *p, struct hwdec_slot *s)
+static void slot_unmap(struct mppl_video *p, struct hwdec_slot *s)
 {
     mp_assert(!s->acquired);
     if (!s->mapper)
@@ -711,7 +717,7 @@ static void slot_unmap(struct priv *p, struct hwdec_slot *s)
     s->owner = NULL;
 }
 
-static bool slot_reconfig(struct priv *p, struct hwdec_slot *s,
+static bool slot_reconfig(struct mppl_video *p, struct hwdec_slot *s,
                           struct ra_hwdec *hwdec,
                           const struct mp_image_params *par)
 {
@@ -740,14 +746,14 @@ static bool slot_reconfig(struct priv *p, struct hwdec_slot *s,
 }
 
 // The queue dropped this entry. Release the mapping if the entry owns it.
-static void slot_release_owner(struct priv *p, struct hwdec_slot *s,
+static void slot_release_owner(struct mppl_video *p, struct hwdec_slot *s,
                                struct mp_image *owner)
 {
     if (s->owner == owner)
         slot_unmap(p, s);
 }
 
-static void slot_uninit(struct priv *p, struct hwdec_slot *s)
+static void slot_uninit(struct mppl_video *p, struct hwdec_slot *s)
 {
     slot_unmap(p, s);
     ra_hwdec_mapper_free(&s->mapper);
@@ -756,7 +762,7 @@ static void slot_uninit(struct priv *p, struct hwdec_slot *s)
 }
 
 // For RAs not based on ra_pl, this creates a new pl_tex wrapper.
-static pl_tex hwdec_get_tex(struct priv *p, struct ra_hwdec_mapper *mapper, int n)
+static pl_tex hwdec_get_tex(struct mppl_video *p, struct ra_hwdec_mapper *mapper, int n)
 {
     struct ra_tex *ratex = mapper->tex[n];
     struct ra *ra = mapper->ra;
@@ -821,7 +827,7 @@ static void setup_hwdec_plane_mapping(struct pl_frame *frame,
     }
 }
 
-static bool slot_acquire(struct priv *p, struct hwdec_slot *s,
+static bool slot_acquire(struct mppl_video *p, struct hwdec_slot *s,
                          struct mp_image *owner, struct mp_image *mpi,
                          struct pl_frame *frame)
 {
@@ -877,7 +883,7 @@ static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
-    struct priv *p = fp->p;
+    struct mppl_video *p = fp->p;
     return slot_reconfig(p, &p->hwdec, fp->hwdec, &mpi->params) &&
            slot_acquire(p, &p->hwdec, mpi, mpi, frame);
 }
@@ -886,7 +892,7 @@ static void hwdec_release(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *mpi = frame->user_data;
     struct frame_priv *fp = mpi->priv;
-    struct priv *p = fp->p;
+    struct mppl_video *p = fp->p;
     slot_release(&p->hwdec);
 }
 
@@ -895,7 +901,7 @@ static bool hwdec_acquire_el(pl_gpu gpu, struct pl_frame *frame)
     struct mp_image *bl_mpi = frame->user_data;
     struct mp_image *el_mpi = bl_mpi->enhancement_layer;
     struct frame_priv *fp = bl_mpi->priv;
-    struct priv *p = fp->p;
+    struct mppl_video *p = fp->p;
     // The EL image belongs to the BL queue entry, which therefore owns the slot.
     return slot_reconfig(p, &p->el_hwdec, fp->el_hwdec, &el_mpi->params) &&
            slot_acquire(p, &p->el_hwdec, bl_mpi, el_mpi, frame);
@@ -905,11 +911,11 @@ static void hwdec_release_el(pl_gpu gpu, struct pl_frame *frame)
 {
     struct mp_image *bl_mpi = frame->user_data;
     struct frame_priv *fp = bl_mpi->priv;
-    struct priv *p = fp->p;
+    struct mppl_video *p = fp->p;
     slot_release(&p->el_hwdec);
 }
 
-static bool format_supported(struct priv *p, int format, bool use_uint)
+static bool format_supported(struct mppl_video *p, int format, bool use_uint)
 {
     struct pl_bit_encoding bits;
     struct pl_plane_data data[4] = {0};
@@ -926,7 +932,7 @@ static bool format_supported(struct priv *p, int format, bool use_uint)
 }
 
 // Effective reference white luminance in nits to assume for SDR content.
-static float get_ref_luma(struct priv *p)
+static float get_ref_luma(struct mppl_video *p)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
     if (opts->hdr_reference_white)
@@ -945,7 +951,7 @@ static bool use_ref_luma(const struct pl_color_space *csp, const struct pl_color
     return false;
 }
 
-static bool upload_planes_sw(struct priv *p, pl_gpu gpu, struct mp_image *mpi,
+static bool upload_planes_sw(struct mppl_video *p, pl_gpu gpu, struct mp_image *mpi,
                              struct pl_frame *frame, pl_tex tex[4])
 {
     struct pl_plane_data data[4] = {0};
@@ -1003,7 +1009,7 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
     struct mp_image *mpi = src->frame_data;
     struct mp_image_params par = mpi->params;
     struct frame_priv *fp = mpi->priv;
-    struct priv *p = fp->p;
+    struct mppl_video *p = fp->p;
 
     fp->hwdec = ra_hwdec_get(&p->hwdec_ctx, mpi->imgfmt);
     if (fp->hwdec) {
@@ -1133,7 +1139,7 @@ static void unmap_frame(pl_gpu gpu, struct pl_frame *frame,
 {
     struct mp_image *mpi = src->frame_data;
     struct frame_priv *fp = mpi->priv;
-    struct priv *p = fp->p;
+    struct mppl_video *p = fp->p;
     for (int i = 0; i < MP_ARRAY_SIZE(fp->subs.entries); i++) {
         pl_tex tex = fp->subs.entries[i].tex;
         if (tex)
@@ -1156,7 +1162,7 @@ static void discard_frame(const struct pl_source_frame *src)
 
 static void info_callback(void *priv, const struct pl_render_info *info)
 {
-    struct priv *p = priv;
+    struct mppl_video *p = priv;
     if (info->index >= VO_PASS_PERF_MAX)
         return; // silently ignore clipped passes, whatever
 
@@ -1171,7 +1177,7 @@ static void info_callback(void *priv, const struct pl_render_info *info)
     pl_dispatch_info_move(&frame->info[info->index], info->pass);
 }
 
-static void update_options(struct priv *p)
+static void update_options(struct mppl_video *p)
 {
     pl_options pars = p->pars;
     bool changed = m_config_cache_update(p->opts_cache);
@@ -1198,7 +1204,8 @@ static void update_options(struct priv *p)
         pl_options_set_str(pars, kv[0], kv[1]);
 }
 
-static void apply_target_contrast(struct priv *p, struct pl_color_space *color, float min_luma)
+static void apply_target_contrast(struct mppl_video *p, struct pl_color_space *color,
+                                  float min_luma)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
 
@@ -1227,7 +1234,7 @@ static void apply_target_contrast(struct priv *p, struct pl_color_space *color, 
     color->hdr.min_luma = color->hdr.max_luma / opts->target_contrast;
 }
 
-static void apply_target_options(struct priv *p, struct pl_frame *target,
+static void apply_target_options(struct mppl_video *p, struct pl_frame *target,
                                  float min_luma, bool hint, float target_ref_luma,
                                  const struct pl_color_space *target_csp)
 {
@@ -1304,7 +1311,7 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
     }
 }
 
-static enum pl_color_levels video_get_output_levels(struct priv *p)
+static enum pl_color_levels video_get_output_levels(struct mppl_video *p)
 {
     return p->output_levels ? p->output_levels : PL_COLOR_LEVELS_FULL;
 }
@@ -1317,7 +1324,7 @@ static bool set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
         .color = hint ? *hint : pl_color_space_srgb,
         .repr = {
             .sys = PL_COLOR_SYSTEM_RGB,
-            .levels = video_get_output_levels(p),
+            .levels = video_get_output_levels(p->renderer),
             .alpha = p->ra_ctx->opts.want_alpha ? PL_ALPHA_INDEPENDENT : PL_ALPHA_NONE,
         },
     };
@@ -1353,7 +1360,7 @@ static void update_tm_viz(struct pl_color_map_params *params,
     params->visualize_hue = M_PI / 4.0;
 }
 
-static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
+static void update_hook_opts_dynamic(struct mppl_video *p, const struct pl_hook *hook,
                                      const struct mp_image *mpi);
 
 // Render parameters and timing of a frame
@@ -1363,7 +1370,7 @@ struct frame_params {
     double pts_offset;
 };
 
-static struct frame_params get_frame_params(struct priv *p, struct vo_frame *frame)
+static struct frame_params get_frame_params(struct mppl_video *p, struct vo_frame *frame)
 {
     pl_options pars = p->pars;
     struct pl_render_params params = pars->params;
@@ -1392,7 +1399,7 @@ static struct frame_params get_frame_params(struct priv *p, struct vo_frame *fra
 }
 
 // Take the new frames of a vo_frame into the queue.
-static void begin_frame(struct priv *p, struct vo_frame *frame,
+static void begin_frame(struct mppl_video *p, struct vo_frame *frame,
                         struct pl_color_space display_csp, float display_ref_luma)
 {
     update_options(p);
@@ -1469,7 +1476,7 @@ static void begin_frame(struct priv *p, struct vo_frame *frame,
     }
 }
 
-static struct pl_color_space get_target_csp(struct priv *p, bool *unknown, float *ref_luma)
+static struct pl_color_space get_target_csp(struct mppl_video *p, bool *unknown, float *ref_luma)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
     struct pl_color_space target_csp = p->display_csp;
@@ -1506,7 +1513,7 @@ enum hint_mode {
     HINT_SET,   // the hint is to be set
 };
 
-static enum hint_mode get_target_hint(struct priv *p, struct vo_frame *frame,
+static enum hint_mode get_target_hint(struct mppl_video *p, struct vo_frame *frame,
                                       struct pl_color_space *out_hint)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
@@ -1625,12 +1632,12 @@ static enum hint_mode get_target_hint(struct priv *p, struct vo_frame *frame,
     return target_hint ? HINT_KEEP : HINT_NONE;
 }
 
-static bool video_get_hdr_metadata(struct priv *p, struct pl_hdr_metadata *out)
+static bool video_get_hdr_metadata(struct mppl_video *p, struct pl_hdr_metadata *out)
 {
     return pl_renderer_get_hdr_metadata(p->rr, out);
 }
 
-static void skip_frame(struct priv *p, struct vo_frame *frame)
+static void skip_frame(struct mppl_video *p, struct vo_frame *frame)
 {
     struct frame_params fpar = get_frame_params(p, frame);
     if (frame->current) {
@@ -1647,7 +1654,7 @@ static void skip_frame(struct priv *p, struct vo_frame *frame)
 
 // Render a frame to a target. hint is the color space requested for the
 // target when hinting is in use, NULL otherwise.
-static bool render_frame(struct priv *p, struct vo_frame *frame,
+static bool render_frame(struct mppl_video *p, struct vo_frame *frame,
                          const struct pl_swapchain_frame *swframe, int fb_depth,
                          const struct pl_color_space *hint,
                          struct mp_image_params *target_params)
@@ -1869,11 +1876,11 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (sw->fns->target_csp)
         display_csp = sw->fns->target_csp(sw);
     float display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
-    begin_frame(p, frame, display_csp, display_ref_luma);
+    begin_frame(p->renderer, frame, display_csp, display_ref_luma);
 
     struct pl_color_space hint = {0};
     bool external_params = false;
-    enum hint_mode hint_mode = get_target_hint(p, frame, &hint);
+    enum hint_mode hint_mode = get_target_hint(p->renderer, frame, &hint);
     if (hint_mode == HINT_SET) {
         external_params = set_colorspace_hint(p, &hint);
     } else if (hint_mode == HINT_NONE) {
@@ -1883,7 +1890,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     struct pl_swapchain_frame swframe;
     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
-        skip_frame(p, frame);
+        skip_frame(p->renderer, frame);
         return VO_FALSE;
     }
 
@@ -1892,7 +1899,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     int fb_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
 
     struct mp_image_params target_params;
-    bool ok = render_frame(p, frame, &swframe, fb_depth,
+    bool ok = render_frame(p->renderer, frame, &swframe, fb_depth,
                            hint_mode == HINT_NONE ? NULL : &hint, &target_params);
     p->frame_pending = true;
     if (!ok)
@@ -1904,7 +1911,8 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     if (vo->params) {
         // Augment metadata with the peak detection results
-        vo->has_peak_detect_values = video_get_hdr_metadata(p, &vo->params->color.hdr);
+        vo->has_peak_detect_values = video_get_hdr_metadata(p->renderer,
+                                                            &vo->params->color.hdr);
     }
     mp_mutex_unlock(&vo->params_mutex);
 
@@ -1933,7 +1941,7 @@ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
         sw->fns->get_vsync(sw, info);
 }
 
-static bool check_format(struct priv *p, int format)
+static bool check_format(struct mppl_video *p, int format)
 {
     if (ra_hwdec_get(&p->hwdec_ctx, format))
         return true;
@@ -1948,17 +1956,17 @@ static bool check_format(struct priv *p, int format)
 static int query_format(struct vo *vo, int format)
 {
     struct priv *p = vo->priv;
-    return check_format(p, format);
+    return check_format(p->renderer, format);
 }
 
 static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
                                   int stride_align, int flags)
 {
     struct priv *p = vo->priv;
-    return video_get_image(p, imgfmt, w, h, stride_align, flags);
+    return video_get_image(p->renderer, imgfmt, w, h, stride_align, flags);
 }
 
-static void video_resize(struct priv *p, struct mp_rect src, struct mp_rect dst,
+static void video_resize(struct mppl_video *p, struct mp_rect src, struct mp_rect dst,
                          struct mp_osd_res osd)
 {
     if (mp_rect_equals(&p->src, &src) &&
@@ -1983,10 +1991,10 @@ static void resize(struct vo *vo)
         vo->want_redraw = true;
     }
 
-    video_resize(p, src, dst, osd);
+    video_resize(p->renderer, src, dst, osd);
 }
 
-static void video_config(struct priv *p, struct mp_image_params *params)
+static void video_config(struct mppl_video *p, struct mp_image_params *params)
 {
     p->image_params = *params;
 }
@@ -1998,7 +2006,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
 
     if (params)
-        video_config(p, params);
+        video_config(p->renderer, params);
     resize(vo);
     mp_mutex_lock(&vo->params_mutex);
     vo->target_params = NULL;
@@ -2007,7 +2015,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 }
 
 // Takes over ownership of `icc`. Can be used to unload profile (icc.len == 0)
-static bool update_icc(struct priv *p, struct bstr icc)
+static bool update_icc(struct mppl_video *p, struct bstr icc)
 {
     struct pl_icc_profile profile = {
         .data = icc.start,
@@ -2021,7 +2029,7 @@ static bool update_icc(struct priv *p, struct bstr icc)
     return ok;
 }
 
-static bool icc_auto_enabled(struct priv *p)
+static bool icc_auto_enabled(struct mppl_video *p)
 {
     const struct gl_video_opts *opts = p->opts_cache->opts;
     return opts->icc_opts && opts->icc_opts->profile_auto && !p->icc_path;
@@ -2030,7 +2038,7 @@ static bool icc_auto_enabled(struct priv *p)
 // Returns whether the ICC profile was updated (even on failure)
 static bool update_auto_profile(struct priv *p, int *events)
 {
-    if (!icc_auto_enabled(p))
+    if (!icc_auto_enabled(p->renderer))
         return false;
 
     MP_VERBOSE(p, "Querying ICC profile...\n");
@@ -2044,14 +2052,14 @@ static bool update_auto_profile(struct priv *p, int *events)
             MP_ERR(p, "icc-profile-auto not implemented on this platform.\n");
         }
 
-        update_icc(p, icc);
+        update_icc(p->renderer, icc);
         return true;
     }
 
     return false;
 }
 
-static void video_screenshot(struct priv *p, struct voctrl_screenshot *args)
+static void video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
 {
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
@@ -2316,7 +2324,7 @@ static bool want_alpha(const struct gl_video_opts *gl_opts, const struct gl_next
             border_alpha;
 }
 
-static bool video_want_alpha(struct priv *p)
+static bool video_want_alpha(struct mppl_video *p)
 {
     return want_alpha(p->opts_cache->opts, p->next_opts);
 }
@@ -2331,7 +2339,7 @@ static bool video_opts_want_alpha(struct mpv_global *global)
     return res;
 }
 
-static void reload_options(struct priv *p)
+static void reload_options(struct mppl_video *p)
 {
     // Special case for --image-lut which requires a full reset.
     int old_type = p->next_opts->image_lut.type;
@@ -2342,35 +2350,35 @@ static void reload_options(struct priv *p)
                      (old_type != image_lut.type));
 }
 
-static void configure_queue(struct priv *p, struct vo *vo)
+static void configure_queue(struct mppl_video *p, struct vo *vo)
 {
     // pl_queue also retains past frames for the symmetric mixing window,
     vo_set_queue_params(vo, 0, p->req_frames, 2 * p->req_frames - 1);
 }
 
-static void video_set_paused(struct priv *p, bool paused)
+static void video_set_paused(struct mppl_video *p, bool paused)
 {
     p->paused = paused;
 }
 
-static bool video_showing_interpolated_frame(struct priv *p)
+static bool video_showing_interpolated_frame(struct mppl_video *p)
 {
     return p->is_interpolated;
 }
 
-static void video_reset(struct priv *p)
+static void video_reset(struct mppl_video *p)
 {
     // Defer until the first new frame (unique ID) actually arrives
     p->want_seek_reset = true;
 }
 
-static void video_perfdata(struct priv *p, struct voctrl_performance_data *perf)
+static void video_perfdata(struct mppl_video *p, struct voctrl_performance_data *perf)
 {
     copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh, &p->hwdec.perf, &p->sw_upload_perf);
     copy_frame_info_to_mp(&p->perf_redraw, &perf->redraw, NULL, NULL);
 }
 
-static void video_load_hwdecs(struct priv *p, struct mp_hwdec_devices *devs,
+static void video_load_hwdecs(struct mppl_video *p, struct mp_hwdec_devices *devs,
                               struct hwdec_imgfmt_request *params)
 {
     ra_hwdec_ctx_load_fmt(&p->hwdec_ctx, devs, params);
@@ -2385,19 +2393,19 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(vo);
         return VO_TRUE;
     case VOCTRL_PAUSE:
-        if (video_showing_interpolated_frame(p))
+        if (video_showing_interpolated_frame(p->renderer))
             vo->want_redraw = true;
-        video_set_paused(p, true);
+        video_set_paused(p->renderer, true);
         return VO_TRUE;
     case VOCTRL_RESUME:
-        video_set_paused(p, false);
+        video_set_paused(p->renderer, false);
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
-        reload_options(p);
-        configure_queue(p, vo);
+        reload_options(p->renderer);
+        configure_queue(p->renderer, vo);
 
-        p->ra_ctx->opts.want_alpha = video_want_alpha(p);
+        p->ra_ctx->opts.want_alpha = video_want_alpha(p->renderer);
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
         vo->want_redraw = true;
@@ -2412,15 +2420,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
 
     case VOCTRL_RESET:
-        video_reset(p);
+        video_reset(p->renderer);
         return VO_TRUE;
 
     case VOCTRL_PERFORMANCE_DATA:
-        video_perfdata(p, data);
+        video_perfdata(p->renderer, data);
         return true;
 
     case VOCTRL_SCREENSHOT:
-        video_screenshot(p, data);
+        video_screenshot(p->renderer, data);
         return true;
 
     case VOCTRL_EXTERNAL_RESIZE:
@@ -2428,7 +2436,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
 
     case VOCTRL_LOAD_HWDEC_API:
-        video_load_hwdecs(p, vo->hwdec_devs, data);
+        video_load_hwdecs(p->renderer, vo->hwdec_devs, data);
         return true;
     }
 
@@ -2541,7 +2549,7 @@ done:
     talloc_free(ta_ctx);
 }
 
-static void cache_init(struct priv *p, struct cache *cache, size_t max_size,
+static void cache_init(struct mppl_video *p, struct cache *cache, size_t max_size,
                        const char *dir_opt)
 {
     const char *name = cache == &p->shader_cache ? "shader" : "icc";
@@ -2583,7 +2591,7 @@ static int compare_atime(const void *a, const void *b)
     return (((struct file_entry *)b)->atime - ((struct file_entry *)a)->atime);
 }
 
-static void cache_uninit(struct priv *p, struct cache *cache)
+static void cache_uninit(struct mppl_video *p, struct cache *cache)
 {
     if (!cache->cache)
         return;
@@ -2653,7 +2661,7 @@ done:
     pl_cache_destroy(&cache->cache);
 }
 
-static void video_uninit(struct priv *p)
+static void video_uninit(struct mppl_video *p)
 {
     // Drain any in-flight uploads.
     pl_gpu_finish(p->gpu);
@@ -2691,19 +2699,18 @@ static void video_uninit(struct priv *p)
     }
 
     pl_options_free(&p->pars);
+    talloc_free(p);
 }
 
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    video_uninit(p);
+    video_uninit(p->renderer);
     hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
     hwdec_devices_destroy(vo->hwdec_devs);
 
     p->ra_ctx = NULL;
-    p->pllog = NULL;
-    p->gpu = NULL;
     p->sw = NULL;
     gpu_ctx_destroy(&p->context);
 }
@@ -2713,9 +2720,10 @@ static void load_hwdec_api(void *ctx, struct hwdec_imgfmt_request *params)
     vo_control(ctx, VOCTRL_LOAD_HWDEC_API, params);
 }
 
-static void video_init(struct priv *p, struct mp_log *log, struct mpv_global *global,
-                       struct gpu_ctx *ctx)
+static struct mppl_video *video_init(struct mp_log *log, struct mpv_global *global,
+                                     struct gpu_ctx *ctx)
 {
+    struct mppl_video *p = talloc_zero(NULL, struct mppl_video);
     p->opts_cache = m_config_cache_alloc(p, global, &gl_video_conf);
     p->next_opts_cache = m_config_cache_alloc(p, global, &gl_next_conf);
     p->next_opts = p->next_opts_cache->opts;
@@ -2743,9 +2751,10 @@ static void video_init(struct priv *p, struct mp_log *log, struct mpv_global *gl
 
     p->pars = pl_options_alloc(p->pllog);
     update_render_options(p);
+    return p;
 }
 
-static void video_init_hwdecs(struct priv *p, struct mp_hwdec_devices *devs,
+static void video_init_hwdecs(struct mppl_video *p, struct mp_hwdec_devices *devs,
                               bool load_all_by_default)
 {
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
@@ -2757,7 +2766,7 @@ static void video_init_hwdecs(struct priv *p, struct mp_hwdec_devices *devs,
     ra_hwdec_ctx_init(&p->hwdec_ctx, devs, gl_opts->hwdec_interop, load_all_by_default);
 }
 
-static void video_set_osd_source(struct priv *p, struct osd_state *osd)
+static void video_set_osd_source(struct mppl_video *p, struct osd_state *osd)
 {
     p->osd = osd;
 }
@@ -2771,19 +2780,21 @@ static int preinit(struct vo *vo)
     talloc_free(ctx_opts);
     if (!p->context)
         return -1;
+    p->log = vo->log;
+    p->ra_ctx = p->context->ra_ctx;
     p->sw = p->context->swapchain;
 
-    video_init(p, vo->log, vo->global, p->context);
-    video_set_osd_source(p, vo->osd);
-    configure_queue(p, vo);
+    p->renderer = video_init(vo->log, vo->global, p->context);
+    video_set_osd_source(p->renderer, vo->osd);
+    configure_queue(p->renderer, vo);
 
     vo->hwdec_devs = hwdec_devices_create();
     hwdec_devices_set_loader(vo->hwdec_devs, load_hwdec_api, vo);
-    video_init_hwdecs(p, vo->hwdec_devs, false);
+    video_init_hwdecs(p->renderer, vo->hwdec_devs, false);
     return 0;
 }
 
-static const struct pl_filter_config *map_scaler(struct priv *p,
+static const struct pl_filter_config *map_scaler(struct mppl_video *p,
                                                  enum scaler_unit unit)
 {
     const struct pl_filter_preset fixed_scalers[] = {
@@ -2872,7 +2883,7 @@ static const struct pl_filter_config *map_scaler(struct priv *p,
     return &par->config;
 }
 
-static const struct pl_hook *load_hook(struct priv *p, const char *path)
+static const struct pl_hook *load_hook(struct mppl_video *p, const char *path)
 {
     if (!path || !path[0])
         return NULL;
@@ -2898,7 +2909,7 @@ static const struct pl_hook *load_hook(struct priv *p, const char *path)
     return hook;
 }
 
-static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
+static void update_icc_opts(struct mppl_video *p, const struct mp_icc_opts *opts)
 {
     if (!opts)
         return;
@@ -2937,7 +2948,7 @@ static void update_icc_opts(struct priv *p, const struct mp_icc_opts *opts)
     talloc_replace(p, p->icc_path, opts->profile);
 }
 
-static void update_lut(struct priv *p, struct user_lut *lut)
+static void update_lut(struct mppl_video *p, struct user_lut *lut)
 {
     if (!lut->opt || !lut->opt[0]) {
         pl_lut_free(&lut->lut);
@@ -2967,7 +2978,7 @@ static void update_lut(struct priv *p, struct user_lut *lut)
     talloc_free(lutdata.start);
 }
 
-static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
+static void update_hook_opts_dynamic(struct mppl_video *p, const struct pl_hook *hook,
                                      const struct mp_image *mpi)
 {
     for (int i = 0; i < hook->num_parameters; i++) {
@@ -2984,7 +2995,7 @@ static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
     }
 }
 
-static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath,
+static void update_hook_opts(struct mppl_video *p, char **opts, const char *shaderpath,
                              const struct pl_hook *hook)
 {
     for (int i = 0; i < hook->num_parameters; i++) {
@@ -3054,7 +3065,7 @@ static void update_hook_opts(struct priv *p, char **opts, const char *shaderpath
     }
 }
 
-static void update_render_options(struct priv *p)
+static void update_render_options(struct mppl_video *p)
 {
     pl_options pars = p->pars;
     const struct gl_video_opts *opts = p->opts_cache->opts;
