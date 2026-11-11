@@ -188,6 +188,8 @@ struct priv {
     // What the swapchain reports about the display, read once per frame.
     struct pl_color_space display_csp;
     float display_ref_luma;
+
+    int fb_depth;
 };
 
 static void update_render_options(struct priv *p);
@@ -1254,10 +1256,8 @@ static void apply_target_options(struct priv *p, struct pl_frame *target,
     if (opts->target_gamut)
         mp_parse_raw_primaries(mp_null_log, opts->target_gamut, &target->color.hdr.prim);
     int dither_depth = opts->dither_depth;
-    if (dither_depth == 0) {
-        struct ra_swapchain *sw = p->ra_ctx->swapchain;
-        dither_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
-    }
+    if (dither_depth == 0)
+        dither_depth = p->fb_depth;
     // Don't dither scRGB, assume downstream will handle quantization properly.
     if (target->color.transfer == PL_COLOR_TRC_SCRGB)
         dither_depth = -1;
@@ -1614,6 +1614,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     if (external_params)
         target.color = hint;
     bool strict_sw_params = target_hint && p->next_opts->target_hint_strict;
+    p->fb_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params,
                          target_ref_luma, &target_csp);
     bool clip_gamut = pl_primaries_valid(&target.color.hdr.prim);
