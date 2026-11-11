@@ -1639,10 +1639,11 @@ static void skip_frame(struct priv *p, struct vo_frame *frame)
 // Render a frame to a target. hint is the color space requested for the
 // target when hinting is in use, NULL otherwise.
 static bool render_frame(struct priv *p, struct vo_frame *frame,
-                         const struct pl_swapchain_frame *swframe,
+                         const struct pl_swapchain_frame *swframe, int fb_depth,
                          const struct pl_color_space *hint,
                          struct mp_image_params *target_params)
 {
+    p->fb_depth = fb_depth;
     pl_options pars = p->pars;
     pl_gpu gpu = p->gpu;
     const struct gl_video_opts *opts = p->opts_cache->opts;
@@ -1879,11 +1880,11 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
 
     if (external_params)
         swframe.color_space = hint;
-    p->fb_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
+    int fb_depth = sw->fns->color_depth ? sw->fns->color_depth(sw) : 0;
 
     struct mp_image_params target_params;
-    bool ok = render_frame(p, frame, &swframe, hint_mode == HINT_NONE ? NULL : &hint,
-                           &target_params);
+    bool ok = render_frame(p, frame, &swframe, fb_depth,
+                           hint_mode == HINT_NONE ? NULL : &hint, &target_params);
     p->frame_pending = true;
     if (!ok)
         return VO_TRUE;
