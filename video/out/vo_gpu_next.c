@@ -2653,10 +2653,8 @@ done:
     pl_cache_destroy(&cache->cache);
 }
 
-static void uninit(struct vo *vo)
+static void video_uninit(struct priv *p)
 {
-    struct priv *p = vo->priv;
-
     // Drain any in-flight uploads.
     pl_gpu_finish(p->gpu);
 
@@ -2673,8 +2671,6 @@ static void uninit(struct vo *vo)
     slot_uninit(p, &p->hwdec);
     slot_uninit(p, &p->el_hwdec);
     ra_hwdec_ctx_uninit(&p->hwdec_ctx);
-    hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
-    hwdec_devices_destroy(vo->hwdec_devs);
 
     mp_assert(p->num_dr_buffers == 0);
     mp_mutex_destroy(&p->dr_lock);
@@ -2695,6 +2691,15 @@ static void uninit(struct vo *vo)
     }
 
     pl_options_free(&p->pars);
+}
+
+static void uninit(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    video_uninit(p);
+    hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
+    hwdec_devices_destroy(vo->hwdec_devs);
 
     p->ra_ctx = NULL;
     p->pllog = NULL;
