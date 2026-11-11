@@ -70,7 +70,7 @@ struct osd_entry {
     int change_id;
 };
 
-struct osd_state {
+struct overlay_state {
     struct osd_entry entries[MAX_OSD_PARTS];
     struct pl_overlay *overlays;
     int num_overlays;
@@ -144,7 +144,7 @@ struct priv {
 
     struct mp_rect src, dst;
     struct mp_osd_res osd_res;
-    struct osd_state osd_state;
+    struct overlay_state osd_state;
 
     uint64_t last_id;
     uint64_t osd_sync;
@@ -488,7 +488,7 @@ static struct pl_color_space libass_overlay_color(struct priv *p,
     return color;
 }
 
-static void add_run_overlay(struct priv *p, struct osd_state *state,
+static void add_run_overlay(struct priv *p, struct overlay_state *state,
                             const struct osd_entry *entry,
                             const struct sub_bitmaps *item,
                             const struct pl_color_space *color, int start,
@@ -518,7 +518,7 @@ static void add_run_overlay(struct priv *p, struct osd_state *state,
 
 static void update_overlays(struct vo *vo, struct mp_osd_res res,
                             int flags, enum pl_overlay_coords coords,
-                            struct osd_state *state, struct pl_frame *frame,
+                            struct overlay_state *state, struct pl_frame *frame,
                             struct mp_image *src, int stereo_mode, float ref_luma)
 {
     struct priv *p = vo->priv;
@@ -587,7 +587,7 @@ static void update_overlays(struct vo *vo, struct mp_osd_res res,
 
 struct frame_priv {
     struct priv *p;
-    struct osd_state subs;
+    struct overlay_state subs;
     uint64_t osd_sync;
     struct ra_hwdec *hwdec;
     // Optional Dolby Vision FEL.
