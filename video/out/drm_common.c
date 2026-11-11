@@ -986,8 +986,9 @@ static void drm_pflip_cb(int fd, unsigned int msc, unsigned int sec,
     struct vo_drm_state *drm = data;
 
     int64_t ust = MP_TIME_S_TO_NS(sec) + MP_TIME_US_TO_NS(usec);
-    present_sync_update_values(drm->present, ust, msc);
     present_sync_swap(drm->present);
+    present_sync_update_values(drm->present, mp_time_ns_from_clock(CLOCK_MONOTONIC, ust), msc, 0,
+                               drm->present->swaps);
     drm->waiting_for_flip = false;
 }
 
@@ -1124,7 +1125,7 @@ bool vo_drm_init(struct vo *vo)
 
     drm->ev.version = DRM_EVENT_CONTEXT_VERSION;
     drm->ev.page_flip_handler = &drm_pflip_cb;
-    drm->present = mp_present_initialize(drm, drm->vo->opts, VO_MAX_SWAPCHAIN_DEPTH);
+    drm->present = mp_present_initialize(drm);
 
     return true;
 
