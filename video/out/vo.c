@@ -518,7 +518,8 @@ static void vsync_skip_detection(struct vo *vo)
 // it. A time near the middle between two vsyncs is neither of them and is
 // ignored. Eight of those in a row are a display on another grid, and a grid
 // not updated for a second has drifted. Both restart it.
-static void update_vsync_grid(struct vo_internal *in, int64_t vsync_time)
+// Returns whether the time is a vsync of the grid.
+static bool update_vsync_grid(struct vo_internal *in, int64_t vsync_time)
 {
     double slots = llrint((vsync_time - in->vsync_grid) / in->vsync_interval);
     int64_t vsync = in->vsync_grid + (int64_t)(slots * in->vsync_interval);
@@ -531,10 +532,12 @@ static void update_vsync_grid(struct vo_internal *in, int64_t vsync_time)
         in->vsync_grid = vsync_time;
         in->grid_misses = 0;
     }
+    return on_grid;
 }
 
 // Always called locked.
-static void update_vsync_timing_after_swap(struct vo *vo, int64_t vsync_time)
+static void update_vsync_timing_after_swap(struct vo *vo, int64_t vsync_time, bool grid,
+                                           bool on_grid)
 {
     struct vo_internal *in = vo->in;
 
@@ -567,7 +570,18 @@ static void update_vsync_timing_after_swap(struct vo *vo, int64_t vsync_time)
                         vsync_time - prev_vsync);
     in->drop_point = MPMIN(in->drop_point + 1, in->num_vsync_samples);
     in->num_total_vsync_samples += 1;
-    if (in->base_vsync) {
+    // With presentation feedback the vsync grid has the vsync of this flip,
+    // and a flip more than one vsync after the previous one was delayed. A
+    // time that is not on the grid is not a vsync, the flip is taken for one
+    // vsync after the last. Without feedback the vsyncs are counted and
+    // checked against the flip times.
+    if (on_grid) {
+        if (in->base_vsync && in->vsync_grid - in->base_vsync > in->vsync_interval * 1.5) {
+            in->delayed_count += 1;
+            MP_STATS(vo, "vo-delayed");
+        }
+        in->base_vsync = in->vsync_grid;
+    } else if (in->base_vsync) {
         in->base_vsync += in->vsync_interval;
     } else {
         in->base_vsync = vsync_time;
@@ -583,7 +597,8 @@ static void update_vsync_timing_after_swap(struct vo *vo, int64_t vsync_time)
         vsync_stddef(vo, in->vsync_interval) / in->vsync_interval;
 
     check_estimated_display_fps(vo);
-    vsync_skip_detection(vo);
+    if (!grid)
+        vsync_skip_detection(vo);
 
     MP_STATS(vo, "value %f jitter", in->estimated_vsync_jitter);
     MP_STATS(vo, "value %f vsync-diff", MP_TIME_NS_TO_S(in->vsync_samples[0]));
@@ -1357,9 +1372,9 @@ static bool render_frame(struct vo *vo)
             bool at_once = vsync.displayed_time - shown->time < in->vsync_interval / 4;
             in->shown_at_once += (at_once - in->shown_at_once) / 16;
         }
-        if (have_feedback && in->vsync_interval > 1 && !in->follows)
-            update_vsync_grid(in, display_time);
-        update_vsync_timing_after_swap(vo, display_time);
+        bool grid = have_feedback && in->vsync_interval > 1 && !in->follows;
+        bool on_grid = grid && update_vsync_grid(in, display_time);
+        update_vsync_timing_after_swap(vo, display_time, grid, on_grid);
     }
 
     if (vo->driver->caps & VO_CAP_NORETAIN) {
