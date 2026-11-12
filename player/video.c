@@ -1032,10 +1032,7 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 
     // The following code tries to compensate for rounded Matroska timestamps
     // by "unrounding" frame durations, or if not possible, approximating them.
-    // These formats usually round on 1ms. Some muxers do this incorrectly,
-    // and might go off by 1ms more, and compensate for it later by an equal
-    // rounding error into the opposite direction.
-    double tolerance = 0.001 * 3 + 0.0001;
+    double tolerance = MP_PTS_ROUNDING_TOLERANCE;
 
     double total = 0;
     int num_dur = 0;
