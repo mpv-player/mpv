@@ -29,6 +29,7 @@
 #include "config.h"
 #include "common/common.h"
 #include "options/m_config.h"
+#include "video/out/placebo/ra_pl.h"
 #include "video/out/placebo/utils.h"
 #include "video/out/gpu/video.h"
 
@@ -174,6 +175,53 @@ struct gpu_ctx *gpu_ctx_create(struct mp_log *log, struct ra_ctx *ra_ctx, bool p
         gpu_ctx_destroy(&ctx);
 
     return ctx;
+}
+
+pl_tex gpu_ctx_wrap_ra_tex(pl_gpu gpu, struct ra *ra, struct ra_tex *ratex)
+{
+    if (ra_pl_get(ra))
+        return (pl_tex) ratex->priv;
+
+#if HAVE_GL && defined(PL_HAVE_OPENGL)
+    if (ra_is_gl(ra) && pl_opengl_get(gpu)) {
+        struct pl_opengl_wrap_params par = {
+            .width = ratex->params.w,
+            .height = ratex->params.h,
+        };
+
+        ra_gl_get_format(ratex->params.format, &par.iformat,
+                         &(GLenum){0}, &(GLenum){0});
+        ra_gl_get_raw_tex(ra, ratex, &par.texture, &par.target);
+        return pl_opengl_wrap(gpu, &par);
+    }
+#endif
+
+#if HAVE_D3D11 && defined(PL_HAVE_D3D11)
+    if (ra_is_d3d11(ra)) {
+        int array_slice = 0;
+        ID3D11Resource *res = ra_d3d11_get_raw_tex(ra, ratex, &array_slice);
+        pl_tex tex = pl_d3d11_wrap(gpu, pl_d3d11_wrap_params(
+            .tex = res,
+            .array_slice = array_slice,
+            .fmt = ra_d3d11_get_format(ratex->params.format),
+            .w = ratex->params.w,
+            .h = ratex->params.h,
+        ));
+        SAFE_RELEASE(res);
+        return tex;
+    }
+#endif
+
+    return NULL;
+}
+
+void gpu_ctx_unwrap_ra_tex(pl_gpu gpu, struct ra *ra, pl_tex *tex)
+{
+    if (ra_pl_get(ra)) {
+        *tex = NULL;
+    } else {
+        pl_tex_destroy(gpu, tex);
+    }
 }
 
 bool gpu_ctx_resize(struct gpu_ctx *ctx, int w, int h)
