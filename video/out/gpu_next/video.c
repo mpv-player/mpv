@@ -296,7 +296,7 @@ struct mp_image *mppl_video_get_image(struct mppl_video *p, int imgfmt, int w, i
                                       int stride_align, int flags)
 {
     pl_gpu gpu = p->gpu;
-    if (!gpu->limits.thread_safe || !gpu->limits.max_mapped_size)
+    if (!gpu->limits.max_mapped_size)
         return NULL;
 
     if ((flags & VO_DR_FLAG_HOST_CACHED) && !gpu->limits.host_cached)

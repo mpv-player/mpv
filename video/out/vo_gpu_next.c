@@ -154,6 +154,15 @@ static struct mp_image *get_image(struct vo *vo, int imgfmt, int w, int h,
     return mppl_video_get_image(p->renderer, imgfmt, w, h, stride_align, flags);
 }
 
+static struct mp_image *get_image_ts(struct vo *vo, int imgfmt, int w, int h,
+                                     int stride_align, int flags)
+{
+    struct priv *p = vo->priv;
+    if (!p->context->gpu->limits.thread_safe)
+        return NULL;
+    return get_image(vo, imgfmt, w, h, stride_align, flags);
+}
+
 static void resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -352,7 +361,7 @@ const struct vo_driver video_out_gpu_next = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .get_image_ts = get_image,
+    .get_image_ts = get_image_ts,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
     .get_vsync = get_vsync,
