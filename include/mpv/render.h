@@ -456,7 +456,9 @@ typedef enum mpv_render_param_type {
      *   MPV_RENDER_RENDERER_GPU ("gpu"):
      *      The renderer of the gpu video output.
      *
-     * If omitted, "gpu" is used.
+     * If omitted, "gpu-next" is used if it initializes on the given backend,
+     * and "gpu" otherwise. Applications that depend on the options of one
+     * renderer should select it explicitly.
      *
      * Ignored with MPV_RENDER_API_TYPE_SW.
      */
