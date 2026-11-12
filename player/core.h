@@ -386,6 +386,9 @@ typedef struct MPContext {
     /* timestamp of video frame currently visible on screen
      * (or at least queued to be flipped by VO) */
     double video_pts;
+    // video_pts and the pts of next_frames[0] without the rounding of the
+    // file's timestamps. The frames are paced by these.
+    double video_pts_unrounded, next_pts_unrounded;
     // Last seek target.
     double last_seek_pts;
     // Frame duration field from demuxer. Only used for duration of the last

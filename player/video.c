@@ -415,6 +415,7 @@ static void handle_new_frame(struct MPContext *mpctx)
     double pts = mpctx->next_frames[0]->pts;
     bool is_sparse = mpctx->vo_chain && mpctx->vo_chain->is_sparse;
 
+    mpctx->next_pts_unrounded = pts;
     if (mpctx->video_pts != MP_NOPTS_VALUE) {
         frame_time = pts - mpctx->video_pts;
         double tolerance = mpctx->demuxer->ts_resets_possible &&
@@ -424,13 +425,26 @@ static void handle_new_frame(struct MPContext *mpctx)
             MP_WARN(mpctx, "Invalid video timestamp: %f -> %f\n",
                     mpctx->video_pts, pts);
             frame_time = 0;
+        } else {
+            // The timestamps of the file are rounded, and frames of one rate
+            // come 42, 42 and 41 ms apart. The frame is paced by the time of
+            // the frame before plus its un-rounded duration, as long as its
+            // own timestamp agrees. It moves a 64th of the way to the
+            // timestamp, which holds it there when the duration is a little
+            // off. The pts itself stays what the file says, seeks, frame
+            // steps and subtitles go by it.
+            double duration = mpctx->past_frames[0].approx_duration;
+            double unrounded = mpctx->video_pts_unrounded + duration;
+            if (duration > 0 && fabs(pts - unrounded) < MP_PTS_ROUNDING_TOLERANCE)
+                mpctx->next_pts_unrounded = unrounded + (pts - unrounded) / 64;
+            frame_time = mpctx->next_pts_unrounded - mpctx->video_pts_unrounded;
         }
     }
     mpctx->time_frame += frame_time / mpctx->video_speed;
     if (mpctx->ao_chain)
         mpctx->delay -= frame_time;
     if (mpctx->video_status >= STATUS_PLAYING)
-        adjust_sync(mpctx, pts, frame_time);
+        adjust_sync(mpctx, mpctx->next_pts_unrounded, frame_time);
     MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 }
 
@@ -704,7 +718,7 @@ static void update_av_diff(struct MPContext *mpctx, double offset)
 
     double a_pos = playing_audio_pts(mpctx);
     if (a_pos != MP_NOPTS_VALUE && mpctx->video_pts != MP_NOPTS_VALUE) {
-        mpctx->last_av_difference = a_pos - mpctx->video_pts
+        mpctx->last_av_difference = a_pos - mpctx->video_pts_unrounded
                                   + opts->audio_delay + offset;
     }
 
@@ -1322,6 +1336,7 @@ void write_video(struct MPContext *mpctx)
     }
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;
+    mpctx->video_pts_unrounded = mpctx->next_pts_unrounded;
     mpctx->last_frame_duration =
         mpctx->next_frames[0]->pkt_duration / mpctx->video_speed;
 
