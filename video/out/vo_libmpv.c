@@ -100,6 +100,8 @@ struct mpv_render_context {
     bool need_reset;
     bool need_update_external;
     struct vo *vo;
+    uint64_t frame_id_offset;       // added to the frame IDs of the VO
+    uint64_t last_frame_id;         // highest ID a frame was passed on with
 
     // --- Mostly immutable after init.
     struct mp_hwdec_devices *hwdec_devs;
@@ -493,6 +495,10 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     mp_mutex_lock(&ctx->lock);
     mp_assert(!ctx->next_frame);
     ctx->next_frame = vo_frame_ref(frame);
+    if (frame->num_frames) {
+        ctx->next_frame->frame_id += ctx->frame_id_offset;
+        ctx->last_frame_id = ctx->next_frame->frame_id + frame->num_frames - 1;
+    }
     ctx->expected_flip_count = ctx->flip_count + 1;
     ctx->redrawing = frame->redraw || !frame->current;
     mp_mutex_unlock(&ctx->lock);
@@ -698,6 +704,7 @@ static void uninit(struct vo *vo)
     ctx->need_update_external = true;
     ctx->need_reset = true;
     ctx->vo = NULL;
+    ctx->frame_id_offset = ctx->last_frame_id;
 
     // The following do not normally need ctx->lock, however, ctx itself may
     // become invalid once we release ctx->lock.
