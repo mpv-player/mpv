@@ -1960,7 +1960,7 @@ Video
     This can speed up video upload, and may help with large resolutions or
     slow hardware. This works only with the following VOs:
 
-        - ``gpu``: requires at least OpenGL 4.4 or Vulkan.
+        - ``gpu-next``, ``gpu``: requires at least OpenGL 4.4 or Vulkan.
         - ``libmpv``: The libmpv render API has optional support.
 
     The ``auto`` option will try to guess whether DR can improve performance
