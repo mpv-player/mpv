@@ -303,9 +303,9 @@ static void uninit(struct vo *vo)
     hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
     hwdec_devices_destroy(vo->hwdec_devs);
 
-    p->ra_ctx = NULL;
     p->sw = NULL;
     gpu_ctx_destroy(&p->context);
+    ra_ctx_destroy(&p->ra_ctx);
 }
 
 static void load_hwdec_api(void *ctx, struct hwdec_imgfmt_request *params)
@@ -318,12 +318,16 @@ static int preinit(struct vo *vo)
     struct priv *p = vo->priv;
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
     ctx_opts->want_alpha = mppl_video_opts_want_alpha(vo->global);
-    p->context = gpu_ctx_create(vo, ctx_opts);
+    p->ra_ctx = ra_ctx_create(vo, *ctx_opts);
     talloc_free(ctx_opts);
-    if (!p->context)
+    if (!p->ra_ctx)
         return -1;
+    p->context = gpu_ctx_create(vo, p->ra_ctx);
+    if (!p->context) {
+        ra_ctx_destroy(&p->ra_ctx);
+        return -1;
+    }
     p->log = vo->log;
-    p->ra_ctx = p->context->ra_ctx;
     p->sw = p->context->swapchain;
 
     p->renderer = mppl_video_init(vo->log, vo->global, p->context);
