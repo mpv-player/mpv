@@ -42,7 +42,7 @@
 #if HAVE_GL
 #include "video/out/opengl/context.h"
 #include "video/out/opengl/ra_gl.h"
-# if HAVE_EGL
+# if HAVE_EGL || HAVE_EGL_ANDROID
 #include <EGL/egl.h>
 # endif
 #endif
@@ -99,7 +99,7 @@ static bool create_gpu(struct gpu_ctx *ctx, bool probing)
             .get_proc_addr_ex = (void *) gl->get_fn,
             .proc_ctx = gl->fn_ctx,
         );
-# if HAVE_EGL
+# if HAVE_EGL || HAVE_EGL_ANDROID
         params.egl_display = eglGetCurrentDisplay();
         params.egl_context = eglGetCurrentContext();
 # endif
