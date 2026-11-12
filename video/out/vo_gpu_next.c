@@ -322,8 +322,9 @@ static int preinit(struct vo *vo)
     talloc_free(ctx_opts);
     if (!p->ra_ctx)
         return -1;
-    p->context = gpu_ctx_create(vo, p->ra_ctx);
-    if (!p->context) {
+    p->context = gpu_ctx_create(vo->log, p->ra_ctx, vo->probing);
+    if (!p->context || !gpu_ctx_create_swapchain(p->context, vo->opts->swapchain_depth)) {
+        gpu_ctx_destroy(&p->context);
         ra_ctx_destroy(&p->ra_ctx);
         return -1;
     }

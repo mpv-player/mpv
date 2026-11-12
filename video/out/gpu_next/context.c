@@ -121,7 +121,7 @@ static bool create_gpu(struct gpu_ctx *ctx, bool probing)
     return true;
 }
 
-static bool create_swapchain(struct gpu_ctx *ctx, int swapchain_depth)
+bool gpu_ctx_create_swapchain(struct gpu_ctx *ctx, int swapchain_depth)
 {
 #if HAVE_VULKAN
     struct mpvk_ctx *vkctx = ra_vk_ctx_get(ctx->ra_ctx);
@@ -164,23 +164,16 @@ static bool create_swapchain(struct gpu_ctx *ctx, int swapchain_depth)
     return ctx->swapchain;
 }
 
-struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx *ra_ctx)
+struct gpu_ctx *gpu_ctx_create(struct mp_log *log, struct ra_ctx *ra_ctx, bool probing)
 {
     struct gpu_ctx *ctx = talloc_zero(NULL, struct gpu_ctx);
-    ctx->log = vo->log;
+    ctx->log = log;
     ctx->ra_ctx = ra_ctx;
 
-    if (!create_gpu(ctx, vo->probing))
-        goto err_out;
-
-    if (!create_swapchain(ctx, vo->opts->swapchain_depth))
-        goto err_out;
+    if (!create_gpu(ctx, probing))
+        gpu_ctx_destroy(&ctx);
 
     return ctx;
-
-err_out:
-    gpu_ctx_destroy(&ctx);
-    return NULL;
 }
 
 bool gpu_ctx_resize(struct gpu_ctx *ctx, int w, int h)

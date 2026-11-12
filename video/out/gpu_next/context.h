@@ -21,7 +21,6 @@
 
 struct mp_log;
 struct ra_ctx;
-struct vo;
 
 struct gpu_ctx {
     struct mp_log *log;
@@ -35,6 +34,7 @@ struct gpu_ctx {
 };
 
 // The ra_ctx has to outlive the returned context.
-struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx *ra_ctx);
+struct gpu_ctx *gpu_ctx_create(struct mp_log *log, struct ra_ctx *ra_ctx, bool probing);
+bool gpu_ctx_create_swapchain(struct gpu_ctx *ctx, int swapchain_depth);
 bool gpu_ctx_resize(struct gpu_ctx *ctx, int w, int h);
 void gpu_ctx_destroy(struct gpu_ctx **ctxp);
