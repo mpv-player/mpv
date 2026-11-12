@@ -1829,11 +1829,12 @@ struct vo_frame *vo_get_current_vo_frame(struct vo *vo)
 struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
                               int stride_align, int flags)
 {
+    struct mp_image *img = NULL;
     if (vo->driver->get_image_ts)
-        return vo->driver->get_image_ts(vo, imgfmt, w, h, stride_align, flags);
-    if (vo->in->dr_helper)
-        return dr_helper_get_image(vo->in->dr_helper, imgfmt, w, h, stride_align, flags);
-    return NULL;
+        img = vo->driver->get_image_ts(vo, imgfmt, w, h, stride_align, flags);
+    if (!img && vo->in->dr_helper)
+        img = dr_helper_get_image(vo->in->dr_helper, imgfmt, w, h, stride_align, flags);
+    return img;
 }
 
 static void destroy_frame(void *p)
