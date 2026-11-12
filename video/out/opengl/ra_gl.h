@@ -14,4 +14,5 @@ void ra_gl_get_format(const struct ra_format *fmt, GLint *out_internal_format,
                       GLenum *out_format, GLenum *out_type);
 void ra_gl_get_raw_tex(struct ra *ra, struct ra_tex *tex,
                        GLuint *out_texture, GLenum *out_target);
+GLuint ra_gl_get_raw_fbo(struct ra *ra, struct ra_tex *tex);
 bool ra_is_gl(struct ra *ra);
