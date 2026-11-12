@@ -361,6 +361,7 @@ const struct vo_driver video_out_gpu_next = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
+    .get_image = get_image,
     .get_image_ts = get_image_ts,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
