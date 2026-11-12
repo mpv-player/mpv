@@ -482,6 +482,12 @@ void ra_gl_get_raw_tex(struct ra *ra, struct ra_tex *tex,
     *out_target = tex_gl->target;
 }
 
+GLuint ra_gl_get_raw_fbo(struct ra *ra, struct ra_tex *tex)
+{
+    struct ra_tex_gl *tex_gl = tex->priv;
+    return tex_gl->fbo;
+}
+
 // Return whether the ra instance was created with ra_create_gl(). This is the
 // _only_ function that can be called on a ra instance of any type.
 bool ra_is_gl(struct ra *ra)
