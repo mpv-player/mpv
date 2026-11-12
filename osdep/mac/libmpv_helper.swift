@@ -36,12 +36,14 @@ class LibmpvHelper {
     func initRender() {
         let advanced: CInt = 1
         let api = UnsafeMutableRawPointer(mutating: (MPV_RENDER_API_TYPE_OPENGL as NSString).utf8String)
+        let renderer = UnsafeMutableRawPointer(mutating: (MPV_RENDER_RENDERER_GPU as NSString).utf8String)
         let pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
                                               get_proc_address_ctx: nil)
 
         TypeHelper.withUnsafeMutableRawPointers([pAddress, advanced]) { (pointers: [UnsafeMutableRawPointer?]) in
             var params: [mpv_render_param] = [
                 mpv_render_param(type: MPV_RENDER_PARAM_API_TYPE, data: api),
+                mpv_render_param(type: MPV_RENDER_PARAM_RENDERER, data: renderer),
                 mpv_render_param(type: MPV_RENDER_PARAM_OPENGL_INIT_PARAMS, data: pointers[0]),
                 mpv_render_param(type: MPV_RENDER_PARAM_ADVANCED_CONTROL, data: pointers[1]),
                 mpv_render_param()

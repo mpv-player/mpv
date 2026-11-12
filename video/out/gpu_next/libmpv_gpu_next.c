@@ -42,9 +42,10 @@ static int init(struct render_backend *ctx, mpv_render_param *params)
     if (err < 0)
         return err;
 
-    p->gpu_ctx = gpu_ctx_create(ctx->log, p->context->ra_ctx, false);
+    bool probing = !get_mpv_render_param(params, MPV_RENDER_PARAM_RENDERER, NULL);
+    p->gpu_ctx = gpu_ctx_create(ctx->log, p->context->ra_ctx, probing);
     if (!p->gpu_ctx)
-        return MPV_ERROR_UNSUPPORTED;
+        return probing ? MPV_ERROR_NOT_IMPLEMENTED : MPV_ERROR_UNSUPPORTED;
 
     p->renderer = mppl_video_init(ctx->log, ctx->global, p->gpu_ctx);
 
