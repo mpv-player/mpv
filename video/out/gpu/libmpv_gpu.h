@@ -37,5 +37,12 @@ struct libmpv_gpu_context_fns {
     void (*destroy)(struct libmpv_gpu_context *ctx);
 };
 
+// Create the context for the MPV_RENDER_PARAM_API_TYPE API.
+// Returns a libmpv error code.
+int libmpv_gpu_context_create(struct mpv_global *global, struct mp_log *log,
+                              mpv_render_param *params,
+                              struct libmpv_gpu_context **out);
+void libmpv_gpu_context_destroy(struct libmpv_gpu_context **pctx);
+
 extern const struct libmpv_gpu_context_fns libmpv_gpu_context_gl;
 extern const struct libmpv_gpu_context_fns libmpv_gpu_context_d3d11;
