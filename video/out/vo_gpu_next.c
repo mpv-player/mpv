@@ -2207,11 +2207,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
 
     case VOCTRL_UPDATE_RENDER_OPTS: {
-        update_ra_ctx_options(vo, &p->ra_ctx->opts);
-        if (p->ra_ctx->fns->update_render_opts)
-            p->ra_ctx->fns->update_render_opts(p->ra_ctx);
-        vo->want_redraw = true;
-
         // Special case for --image-lut which requires a full reset.
         int old_type = p->next_opts->image_lut.type;
         update_options(vo);
@@ -2219,6 +2214,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->want_reset |= image_lut.opt && ((!image_lut.path && image_lut.opt) ||
                          (image_lut.path && strcmp(image_lut.path, image_lut.opt)) ||
                          (old_type != image_lut.type));
+
+        update_ra_ctx_options(vo, &p->ra_ctx->opts);
+        if (p->ra_ctx->fns->update_render_opts)
+            p->ra_ctx->fns->update_render_opts(p->ra_ctx);
+        vo->want_redraw = true;
 
         // Also re-query the auto profile, in case `update_render_options`
         // unloaded a manually specified icc profile in favor of
