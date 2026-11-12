@@ -39,6 +39,9 @@ struct render_backend {
 // generic as the VO API.) Like with VOs, one backend can support multiple
 // underlying GPU APIs.
 struct render_backend_fns {
+    // The value of MPV_RENDER_PARAM_RENDERER that selects the backend. NULL
+    // if the backend does not depend on that parameter.
+    const char *renderer;
     // Returns libmpv error code. In particular, this function has to check for
     // MPV_RENDER_PARAM_API_TYPE, and silently return MPV_ERROR_NOT_IMPLEMENTED
     // if the API is not included in this backend.

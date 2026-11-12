@@ -226,6 +226,7 @@ static void destroy(struct render_backend *ctx)
 }
 
 const struct render_backend_fns render_backend_gpu_next = {
+    .renderer = MPV_RENDER_RENDERER_GPU_NEXT,
     .init = init,
     .check_format = check_format,
     .set_parameter = set_parameter,
