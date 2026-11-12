@@ -515,6 +515,11 @@ static void update_overlays(struct mppl_video *p, struct mp_osd_res res,
                             struct overlay_state *state, struct pl_frame *frame,
                             struct mp_image *src, int stereo_mode, float ref_luma)
 {
+    if (!p->osd) {
+        frame->num_overlays = 0;
+        return;
+    }
+
     double pts = src ? src->pts : 0;
     int div[2];
     mp_get_3d_side_by_side(stereo_mode, div);
