@@ -2668,14 +2668,6 @@ static void frame_callback(void *data, struct wl_callback *callback, uint32_t ti
     wl->frame_callback = wl_surface_frame(wl->callback_surface);
     wl_callback_add_listener(wl->frame_callback, &frame_listener, wl);
 
-    wl->use_present = wl->present_clock && wl->opts->wl_present;
-    if (wl->use_present) {
-        struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->callback_surface);
-        // The feedback belongs to the next commit.
-        add_feedback(wl->fback_pool, fback, wl->present->swaps + 1);
-        wp_presentation_feedback_add_listener(fback, &feedback_listener, wl->fback_pool);
-    }
-
     wl->frame_wait = false;
     wl->hidden = false;
 }
@@ -4285,6 +4277,12 @@ bool vo_wayland_check_visible(struct vo *vo)
     struct vo_wayland_state *wl = vo->wl;
     bool render = !wl->hidden || wl->opts->force_render;
     wl->frame_wait = true;
+    wl->use_present = wl->present_clock && wl->opts->wl_present;
+    if (render && wl->use_present) {
+        struct wp_presentation_feedback *fback = wp_presentation_feedback(wl->presentation, wl->callback_surface);
+        add_feedback(wl->fback_pool, fback, wl->present->swaps + 1);
+        wp_presentation_feedback_add_listener(fback, &feedback_listener, wl->fback_pool);
+    }
     return render;
 }
 
@@ -4713,7 +4711,7 @@ bool vo_wayland_init(struct vo *vo)
     if (wl->presentation) {
         wl->fback_pool = talloc_zero(wl, struct vo_wayland_feedback_pool);
         wl->fback_pool->wl = wl;
-        wl->fback_pool->len = VO_MAX_SWAPCHAIN_DEPTH;
+        wl->fback_pool->len = VO_MAX_SWAPCHAIN_DEPTH + 2;
         wl->fback_pool->last_zero_copy = -1;
         wl->fback_pool->last_refresh_kind = -1;
         wl->fback_pool->fback = talloc_zero_array(wl->fback_pool, struct wp_presentation_feedback *,
