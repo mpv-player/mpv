@@ -399,9 +399,11 @@ struct vo_driver {
                                   int stride_align, int flags);
 
     /*
-     * Thread-safe variant of get_image. Set at most one of these callbacks.
-     * This excludes _all_ synchronization magic. The only guarantee is that
-     * vo_driver.uninit is not called before this function returns.
+     * Thread-safe variant of get_image. This excludes _all_ synchronization
+     * magic. The only guarantee is that vo_driver.uninit is not called before
+     * this function returns.
+     *
+     * If both callbacks are set, get_image is used when this one returns NULL.
      */
     struct mp_image *(*get_image_ts)(struct vo *vo, int imgfmt, int w, int h,
                                      int stride_align, int flags);
