@@ -192,6 +192,7 @@ pl_tex gpu_ctx_wrap_ra_tex(pl_gpu gpu, struct ra *ra, struct ra_tex *ratex)
         ra_gl_get_format(ratex->params.format, &par.iformat,
                          &(GLenum){0}, &(GLenum){0});
         ra_gl_get_raw_tex(ra, ratex, &par.texture, &par.target);
+        par.framebuffer = ra_gl_get_raw_fbo(ra, ratex);
         return pl_opengl_wrap(gpu, &par);
     }
 #endif
