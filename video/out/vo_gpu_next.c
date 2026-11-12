@@ -2321,6 +2321,16 @@ static bool video_want_alpha(struct priv *p)
     return want_alpha(p->opts_cache->opts, p->next_opts);
 }
 
+// For the context, which is created before the renderer and its option cache
+static bool video_opts_want_alpha(struct mpv_global *global)
+{
+    void *tmp = talloc_new(NULL);
+    bool res = want_alpha(mp_get_config_group(tmp, global, &gl_video_conf),
+                          mp_get_config_group(tmp, global, &gl_next_conf));
+    talloc_free(tmp);
+    return res;
+}
+
 static void reload_options(struct priv *p)
 {
     // Special case for --image-lut which requires a full reset.
@@ -2712,7 +2722,7 @@ static int preinit(struct vo *vo)
 
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
-    ctx_opts->want_alpha = video_want_alpha(p);
+    ctx_opts->want_alpha = video_opts_want_alpha(vo->global);
     p->context = gpu_ctx_create(vo, ctx_opts);
     talloc_free(ctx_opts);
     if (!p->context)
