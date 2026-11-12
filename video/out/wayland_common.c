@@ -2574,8 +2574,10 @@ static void presentation_set_clockid(void *data, struct wp_presentation *present
 {
     struct vo_wayland_state *wl = data;
 
-    if (clockid == CLOCK_MONOTONIC || clockid == CLOCK_MONOTONIC_RAW)
+    if (clockid == CLOCK_MONOTONIC || clockid == CLOCK_MONOTONIC_RAW) {
         wl->present_clock = true;
+        wl->present_clock_id = clockid;
+    }
 }
 
 static const struct wp_presentation_listener presentation_listener = {
@@ -2637,7 +2639,7 @@ static void feedback_presented(void *data, struct wp_presentation_feedback *fbac
     int64_t sec = (uint64_t) tv_sec_lo + ((uint64_t) tv_sec_hi << 32);
     int64_t ust = MP_TIME_S_TO_NS(sec) + (uint64_t) tv_nsec;
     int64_t msc = (uint64_t) seq_lo + ((uint64_t) seq_hi << 32);
-    present_sync_update_values(wl->present, mp_time_ns_from_clock(CLOCK_MONOTONIC, ust), msc,
+    present_sync_update_values(wl->present, mp_time_ns_from_clock(wl->present_clock_id, ust), msc,
                                refresh, swap, kind);
 }
 
