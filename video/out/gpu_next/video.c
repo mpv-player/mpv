@@ -2146,6 +2146,14 @@ void mppl_video_reset(struct mppl_video *p)
     p->want_seek_reset = true;
 }
 
+// Drop the queued frames and what was mapped for them.
+void mppl_video_flush(struct mppl_video *p)
+{
+    reset_queue(p);
+    slot_uninit(p, &p->hwdec);
+    slot_uninit(p, &p->el_hwdec);
+}
+
 void mppl_video_perfdata(struct mppl_video *p, struct voctrl_performance_data *perf)
 {
     copy_frame_info_to_mp(&p->perf_fresh, &perf->fresh, &p->hwdec.perf, &p->sw_upload_perf);
