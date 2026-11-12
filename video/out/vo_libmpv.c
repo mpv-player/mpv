@@ -99,6 +99,7 @@ struct mpv_render_context {
     bool need_resize;
     bool need_reset;
     bool need_update_external;
+    bool paused;
     struct vo *vo;
     uint64_t frame_id_offset;       // added to the frame IDs of the VO
     uint64_t last_frame_id;         // highest ID a frame was passed on with
@@ -374,6 +375,9 @@ int mpv_render_context_render(mpv_render_context *ctx, mpv_render_param *params)
         ctx->renderer->fns->reconfig(ctx->renderer, &ctx->img_params);
     ctx->need_reconfig = false;
 
+    if (ctx->renderer->fns->set_paused)
+        ctx->renderer->fns->set_paused(ctx->renderer, ctx->paused);
+
     if (ctx->need_update_external)
         ctx->renderer->fns->update_external(ctx->renderer, ctx->vo);
     ctx->need_update_external = false;
@@ -617,7 +621,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
         vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_PAUSE:
+        mp_mutex_lock(&ctx->lock);
+        ctx->paused = true;
+        mp_mutex_unlock(&ctx->lock);
         vo->want_redraw = true;
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        mp_mutex_lock(&ctx->lock);
+        ctx->paused = false;
+        mp_mutex_unlock(&ctx->lock);
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         mp_mutex_lock(&ctx->lock);
@@ -703,6 +715,7 @@ static void uninit(struct vo *vo)
     ctx->need_resize = true;
     ctx->need_update_external = true;
     ctx->need_reset = true;
+    ctx->paused = false;
     ctx->vo = NULL;
     ctx->frame_id_offset = ctx->last_frame_id;
 
