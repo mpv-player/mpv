@@ -52,6 +52,8 @@ struct render_backend_fns {
     void (*reconfig)(struct render_backend *ctx, struct mp_image_params *params);
     // Like VOCTRL_RESET.
     void (*reset)(struct render_backend *ctx);
+    // Like VOCTRL_PAUSE and VOCTRL_RESUME. Optional.
+    void (*set_paused)(struct render_backend *ctx, bool paused);
     void (*screenshot)(struct render_backend *ctx, struct vo_frame *frame,
                        struct voctrl_screenshot *args);
     void (*perfdata)(struct render_backend *ctx,
