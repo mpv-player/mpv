@@ -43,7 +43,6 @@
 #include "sub/draw_bmp.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
-#include "video/out/placebo/ra_pl.h"
 #include "video/out/placebo/utils.h"
 #include "video/out/gpu/context.h"
 #include "video/out/gpu/hwdec.h"
@@ -51,17 +50,6 @@
 #include "video/out/gpu/video.h"
 #include "video/out/gpu/video_shaders.h"
 #include "sub/osd.h"
-
-#if HAVE_GL && defined(PL_HAVE_OPENGL)
-#include <libplacebo/opengl.h>
-#include "video/out/opengl/ra_gl.h"
-#endif
-
-#if HAVE_D3D11 && defined(PL_HAVE_D3D11)
-#include <libplacebo/d3d11.h>
-#include "video/out/d3d11/ra_d3d11.h"
-#include "osdep/windows_utils.h"
-#endif
 
 
 struct osd_entry {
@@ -699,12 +687,8 @@ static void slot_unmap(struct mppl_video *p, struct hwdec_slot *s)
     mp_assert(!s->acquired);
     if (!s->mapper)
         return;
-    // For RAs not based on ra_pl the plane textures are wrappers we created.
-    if (!ra_pl_get(s->mapper->ra)) {
-        for (int n = 0; n < MP_ARRAY_SIZE(s->tex); n++)
-            pl_tex_destroy(p->gpu, &s->tex[n]);
-    }
-    memset(s->tex, 0, sizeof(s->tex));
+    for (int n = 0; n < MP_ARRAY_SIZE(s->tex); n++)
+        gpu_ctx_unwrap_ra_tex(p->gpu, s->mapper->ra, &s->tex[n]);
     ra_hwdec_mapper_unmap(s->mapper);
     s->owner = NULL;
 }
@@ -751,48 +735,6 @@ static void slot_uninit(struct mppl_video *p, struct hwdec_slot *s)
     ra_hwdec_mapper_free(&s->mapper);
     timer_pool_destroy(s->timer);
     s->timer = NULL;
-}
-
-// For RAs not based on ra_pl, this creates a new pl_tex wrapper.
-static pl_tex hwdec_get_tex(struct mppl_video *p, struct ra_hwdec_mapper *mapper, int n)
-{
-    struct ra_tex *ratex = mapper->tex[n];
-    struct ra *ra = mapper->ra;
-    if (ra_pl_get(ra))
-        return (pl_tex) ratex->priv;
-
-#if HAVE_GL && defined(PL_HAVE_OPENGL)
-    if (ra_is_gl(ra) && pl_opengl_get(p->gpu)) {
-        struct pl_opengl_wrap_params par = {
-            .width = ratex->params.w,
-            .height = ratex->params.h,
-        };
-
-        ra_gl_get_format(ratex->params.format, &par.iformat,
-                         &(GLenum){0}, &(GLenum){0});
-        ra_gl_get_raw_tex(ra, ratex, &par.texture, &par.target);
-        return pl_opengl_wrap(p->gpu, &par);
-    }
-#endif
-
-#if HAVE_D3D11 && defined(PL_HAVE_D3D11)
-    if (ra_is_d3d11(ra)) {
-        int array_slice = 0;
-        ID3D11Resource *res = ra_d3d11_get_raw_tex(ra, ratex, &array_slice);
-        pl_tex tex = pl_d3d11_wrap(p->gpu, pl_d3d11_wrap_params(
-            .tex = res,
-            .array_slice = array_slice,
-            .fmt = ra_d3d11_get_format(ratex->params.format),
-            .w = ratex->params.w,
-            .h = ratex->params.h,
-        ));
-        SAFE_RELEASE(res);
-        return tex;
-    }
-#endif
-
-    MP_ERR(p, "Failed mapping hwdec frame? Open a bug!\n");
-    return NULL;
 }
 
 // Fill `frame->num_planes` and per-plane component_mapping from an
@@ -854,9 +796,11 @@ static bool slot_acquire(struct mppl_video *p, struct hwdec_slot *s,
 
     for (int n = 0; n < frame->num_planes; n++) {
         if (!s->tex[n])
-            s->tex[n] = hwdec_get_tex(p, s->mapper, n);
-        if (!s->tex[n])
+            s->tex[n] = gpu_ctx_wrap_ra_tex(p->gpu, s->mapper->ra, s->mapper->tex[n]);
+        if (!s->tex[n]) {
+            MP_ERR(p, "Failed mapping hwdec frame? Open a bug!\n");
             return false;
+        }
         frame->planes[n].texture = s->tex[n];
     }
 
