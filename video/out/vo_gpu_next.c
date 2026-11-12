@@ -2305,17 +2305,20 @@ static inline void copy_frame_info_to_mp(struct frame_info *pl,
     mp->count = perf - mp->perf;
 }
 
-static void update_ra_ctx_options(struct vo *vo, struct ra_ctx_opts *ctx_opts)
+static bool want_alpha(const struct gl_video_opts *gl_opts, const struct gl_next_opts *next_opts)
 {
-    struct priv *p = vo->priv;
-    struct gl_video_opts *gl_opts = p->opts_cache->opts;
-    bool border_alpha = (p->next_opts->border_background == BACKGROUND_COLOR &&
+    bool border_alpha = (next_opts->border_background == BACKGROUND_COLOR &&
                          gl_opts->background_color.a != 255) ||
-                         p->next_opts->border_background == BACKGROUND_NONE;
-    ctx_opts->want_alpha = (gl_opts->background == BACKGROUND_COLOR &&
-                            gl_opts->background_color.a != 255) ||
-                            gl_opts->background == BACKGROUND_NONE ||
-                            border_alpha;
+                         next_opts->border_background == BACKGROUND_NONE;
+    return (gl_opts->background == BACKGROUND_COLOR &&
+            gl_opts->background_color.a != 255) ||
+            gl_opts->background == BACKGROUND_NONE ||
+            border_alpha;
+}
+
+static bool video_want_alpha(struct priv *p)
+{
+    return want_alpha(p->opts_cache->opts, p->next_opts);
 }
 
 static void reload_options(struct priv *p)
@@ -2384,7 +2387,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         reload_options(p);
         configure_queue(p, vo);
 
-        update_ra_ctx_options(vo, &p->ra_ctx->opts);
+        p->ra_ctx->opts.want_alpha = video_want_alpha(p);
         if (p->ra_ctx->fns->update_render_opts)
             p->ra_ctx->fns->update_render_opts(p->ra_ctx);
         vo->want_redraw = true;
@@ -2709,7 +2712,7 @@ static int preinit(struct vo *vo)
 
     struct gl_video_opts *gl_opts = p->opts_cache->opts;
     struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);
-    update_ra_ctx_options(vo, ctx_opts);
+    ctx_opts->want_alpha = video_want_alpha(p);
     p->context = gpu_ctx_create(vo, ctx_opts);
     talloc_free(ctx_opts);
     if (!p->context)
