@@ -51,8 +51,7 @@
 #endif
 
 #if HAVE_D3D11
-static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx,
-                          struct ra_ctx_opts *ctx_opts)
+static bool d3d11_pl_init(struct vo *vo, struct gpu_ctx *ctx)
 {
 #if !defined(PL_HAVE_D3D11)
     MP_MSG(ctx, vo->probing ? MSGL_V : MSGL_ERR,
@@ -132,7 +131,7 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts)
 
 #if HAVE_D3D11
     if (ra_is_d3d11(ctx->ra_ctx->ra)) {
-        if (!d3d11_pl_init(vo, ctx, ctx_opts))
+        if (!d3d11_pl_init(vo, ctx))
             goto err_out;
 
         return ctx;
@@ -143,8 +142,8 @@ struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts)
     if (ra_is_gl(ctx->ra_ctx->ra)) {
         struct GL *gl = ra_gl_get(ctx->ra_ctx->ra);
         struct pl_opengl_params params = *pl_opengl_params(
-            .debug = ctx_opts->debug,
-            .allow_software = ctx_opts->allow_sw,
+            .debug = ctx->ra_ctx->opts.debug,
+            .allow_software = ctx->ra_ctx->opts.allow_sw,
             .get_proc_addr_ex = (void *) gl->get_fn,
             .proc_ctx = gl->fn_ctx,
         );
