@@ -18,6 +18,7 @@
 #ifndef MPLAYER_WAYLAND_COMMON_H
 #define MPLAYER_WAYLAND_COMMON_H
 
+#include <time.h>
 #include <wayland-client.h>
 
 #include "input/event.h"
@@ -177,6 +178,7 @@ struct vo_wayland_state {
     struct mp_present *present;
     int64_t refresh_interval;
     bool present_clock;
+    clockid_t present_clock_id;
     bool use_present;
 
     /* single-pixel-buffer */
