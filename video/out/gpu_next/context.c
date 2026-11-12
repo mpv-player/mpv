@@ -164,13 +164,11 @@ static bool create_swapchain(struct gpu_ctx *ctx, int swapchain_depth)
     return ctx->swapchain;
 }
 
-struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts)
+struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx *ra_ctx)
 {
     struct gpu_ctx *ctx = talloc_zero(NULL, struct gpu_ctx);
     ctx->log = vo->log;
-    ctx->ra_ctx = ra_ctx_create(vo, *ctx_opts);
-    if (!ctx->ra_ctx)
-        goto err_out;
+    ctx->ra_ctx = ra_ctx;
 
     if (!create_gpu(ctx, vo->probing))
         goto err_out;
@@ -201,8 +199,6 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
     struct gpu_ctx *ctx = *ctxp;
     if (!ctx)
         return;
-    if (!ctx->ra_ctx)
-        goto skip_common_pl_cleanup;
 
 #if HAVE_VULKAN
     if (ra_vk_ctx_get(ctx->ra_ctx))
@@ -233,8 +229,9 @@ void gpu_ctx_destroy(struct gpu_ctx **ctxp)
     if (ctx->pllog)
         pl_log_destroy(&ctx->pllog);
 
+#if HAVE_VULKAN
 skip_common_pl_cleanup:
-    ra_ctx_destroy(&ctx->ra_ctx);
+#endif
 
     talloc_free(ctx);
     *ctxp = NULL;
