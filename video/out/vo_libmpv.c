@@ -188,8 +188,14 @@ int mpv_render_context_create(mpv_render_context **res, mpv_handle *mpv,
     if (GET_MPV_RENDER_PARAM(params, MPV_RENDER_PARAM_ADVANCED_CONTROL, int, 0))
         ctx->advanced_control = true;
 
+    char *renderer = get_mpv_render_param(params, MPV_RENDER_PARAM_RENDERER,
+                                          MPV_RENDER_RENDERER_GPU);
+
     int err = MPV_ERROR_NOT_IMPLEMENTED;
     for (int n = 0; render_backends[n]; n++) {
+        const char *name = render_backends[n]->renderer;
+        if (name && strcmp(name, renderer) != 0)
+            continue;
         ctx->renderer = talloc_zero(NULL, struct render_backend);
         *ctx->renderer = (struct render_backend){
             .global = ctx->global,
