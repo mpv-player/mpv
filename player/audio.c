@@ -868,6 +868,7 @@ void audio_start_ao(struct MPContext *mpctx)
                        apts, pts, (apts - pts) / speed);
             ao_c->delaying_audio_start = true;
             ao_c->delayed_start_gap = apts - pts;
+            mpctx->delay += apts - pts;
             ao_c->delayed_start_speed = 0;
         }
         if (ao_c->delaying_audio_start) {
