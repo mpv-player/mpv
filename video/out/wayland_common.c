@@ -3779,7 +3779,7 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
             // black, similar to PQ transfer. Configure it in the same way as PQ.
             if (use_metadata) {
                 wp_image_description_creator_params_v1_set_luminances(image_creator_params,
-                    0 * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                    0 * WAYLAND_MIN_LUM_FACTOR, lrintf(hdr.max_luma), PL_COLOR_SDR_WHITE);
                 MP_VERBOSE(wl, "Setting linear luminance range: min=0, max=%.5f, ref=%.2f\n",
                     hdr.max_luma, PL_COLOR_SDR_WHITE);
                 if (wl->supports_display_primaries) {
@@ -3797,7 +3797,8 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
             // Set SDR luminance range for all relative transfers
             if (use_metadata) {
                 wp_image_description_creator_params_v1_set_luminances(image_creator_params,
-                    hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                    lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma),
+                    PL_COLOR_SDR_WHITE);
                 MP_VERBOSE(wl, "Setting relative luminance range: min=%.5f, max=%.2f, ref=%.2f\n",
                     hdr.min_luma, hdr.max_luma, PL_COLOR_SDR_WHITE);
             }
