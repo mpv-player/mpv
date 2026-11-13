@@ -429,6 +429,11 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     return image;
 }
 
+struct mp_image *capture_screenshot(struct MPContext *mpctx, int mode)
+{
+    return screenshot_get(mpctx, mode, false);
+}
+
 struct mp_image *convert_image(struct mp_image *image, int destfmt,
                                struct mpv_global *global, struct mp_log *log)
 {
