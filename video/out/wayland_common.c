@@ -2296,6 +2296,7 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
             wd->csp.hdr.max_fall = MPMIN(wd->csp.hdr.max_fall, wd->csp.hdr.max_luma);
     }
     wl->preferred_csp = wd->csp;
+    wl->pending_vo_events |= VO_EVENT_EXPOSE;
     talloc_free(wd);
 }
 
