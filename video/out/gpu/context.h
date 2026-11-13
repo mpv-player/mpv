@@ -83,6 +83,9 @@ struct ra_ctx_params {
     // See ra_swapchain_fns.set_color. Optional.
     bool (*set_color)(struct ra_ctx *ctx, struct mp_image_params *params);
 
+    // See ra_swapchain_fns.recreate_surface. Optional.
+    bool (*recreate_surface)(struct ra_ctx *ctx, const int32_t *attribs);
+
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
 
@@ -125,6 +128,11 @@ struct ra_swapchain_fns {
     // Call into backends so they can use the appropriate platform-specific
     // functions to configure color spaces. Returns true if request was handled.
     bool (*set_color)(struct ra_swapchain *sw, struct mp_image_params *params);
+
+    // Recreate the surface with the given EGL surface attributes, terminated
+    // by EGL_NONE, or NULL for the default. Returns true if the attributes
+    // were applied. Optional.
+    bool (*recreate_surface)(struct ra_swapchain *sw, const int32_t *attribs);
 
     // Called when rendering starts. Returns NULL on failure. This must be
     // followed by submit_frame, to submit the rendered frame. This function

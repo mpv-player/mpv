@@ -323,6 +323,15 @@ static bool ra_gl_ctx_set_color(struct ra_swapchain *sw, struct mp_image_params 
     return false;
 }
 
+static bool ra_gl_ctx_recreate_surface(struct ra_swapchain *sw,
+                                       const int32_t *attribs)
+{
+    struct priv *p = sw->priv;
+    if (p->params.recreate_surface)
+        return p->params.recreate_surface(sw->ctx, attribs);
+    return false;
+}
+
 static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw)
 {
     struct priv *p = sw->priv;
@@ -334,6 +343,7 @@ static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw)
 static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
     .color_depth   = ra_gl_ctx_color_depth,
     .set_color     = ra_gl_ctx_set_color,
+    .recreate_surface = ra_gl_ctx_recreate_surface,
     .target_csp    = ra_gl_ctx_target_csp,
     .start_frame   = ra_gl_ctx_start_frame,
     .submit_frame  = ra_gl_ctx_submit_frame,
