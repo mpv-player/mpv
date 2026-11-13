@@ -1410,7 +1410,9 @@ static struct pl_color_space get_target_csp(struct mppl_video *p, bool *unknown,
         target_csp.primaries = mp_get_best_prim_container(&target_csp.hdr.prim);
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
         // limit min_luma to 1000:1 contrast ratio in SDR mode
-        if (target_csp.hdr.min_luma > PL_COLOR_SDR_WHITE / PL_COLOR_SDR_CONTRAST)
+        float ref = get_ref_luma(p);
+        float white = ref ? ref : PL_COLOR_SDR_WHITE;
+        if (target_csp.hdr.min_luma > white / PL_COLOR_SDR_CONTRAST)
             target_csp.hdr.min_luma = 0;
     }
     // maxFALL in display metadata is in fact MaxFullFrameLuminance. Wayland
