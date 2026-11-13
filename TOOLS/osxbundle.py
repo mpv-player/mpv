@@ -60,6 +60,7 @@ def bundle_version(build_path):
     return version
 
 def main():
+    print("DEPRECATED, use macos-bundle.swift instead.")
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
     parser.add_option("-s", "--skip-deps", action="store_false", dest="deps",
