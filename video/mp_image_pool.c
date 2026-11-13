@@ -411,6 +411,9 @@ bool mp_update_av_hw_frames_pool(struct AVBufferRef **hw_frames_ctx,
         if (format == AV_PIX_FMT_D3D11) {
             AVD3D11VAFramesContext *d3d11va_frames_ctx = hw_frames->hwctx;
             d3d11va_frames_ctx->BindFlags |= D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+            // Shareable textures are cheap and allow libavutil to transfer
+            // frames directly to another device, e.g. d3d11 -> vulkan.
+            d3d11va_frames_ctx->MiscFlags |= D3D11_RESOURCE_MISC_SHARED;
         }
 #endif
 
