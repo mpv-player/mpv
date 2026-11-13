@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
@@ -23,11 +24,14 @@
 #include "common/common.h"
 #include "context.h"
 
+static_assert(sizeof(EGLint) == sizeof(int32_t), "");
+
 struct priv {
     struct GL gl;
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
+    EGLConfig egl_config;
 };
 
 static void android_swap_buffers(struct ra_ctx *ctx)
@@ -52,6 +56,43 @@ static void android_uninit(struct ra_ctx *ctx)
     vo_android_uninit(ctx->vo);
 }
 
+static bool android_recreate_surface(struct ra_ctx *ctx, const int32_t *attribs)
+{
+    struct priv *p = ctx->priv;
+    ANativeWindow *win = vo_android_native_window(ctx->vo);
+    if (!win)
+        return false;
+
+    eglMakeCurrent(p->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                   EGL_NO_CONTEXT);
+    if (p->egl_surface != EGL_NO_SURFACE)
+        eglDestroySurface(p->egl_display, p->egl_surface);
+
+    bool applied = true;
+    EGLSurface surf = eglCreateWindowSurface(p->egl_display, p->egl_config,
+                                             (EGLNativeWindowType)win,
+                                             (const EGLint *)attribs);
+    if (surf == EGL_NO_SURFACE && attribs) {
+        MP_WARN(ctx, "Could not apply EGL surface attributes, trying defaults.\n");
+        surf = eglCreateWindowSurface(p->egl_display, p->egl_config,
+                                      (EGLNativeWindowType)win, NULL);
+        applied = false;
+    }
+
+    p->egl_surface = surf;
+    if (surf == EGL_NO_SURFACE) {
+        MP_ERR(ctx, "Could not recreate the EGL surface.\n");
+        return false;
+    }
+
+    if (!eglMakeCurrent(p->egl_display, surf, surf, p->egl_context)) {
+        MP_ERR(ctx, "Failed to make the EGL surface current.\n");
+        return false;
+    }
+
+    return applied;
+}
+
 static bool android_init(struct ra_ctx *ctx)
 {
     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
@@ -69,29 +110,21 @@ static bool android_init(struct ra_ctx *ctx)
     if (!mpegl_create_context(ctx, p->egl_display, &p->egl_context, &config))
         goto fail;
 
+    p->egl_config = config;
+
     ANativeWindow *native_window = vo_android_native_window(ctx->vo);
     EGLint format;
     eglGetConfigAttrib(p->egl_display, config, EGL_NATIVE_VISUAL_ID, &format);
     ANativeWindow_setBuffersGeometry(native_window, 0, 0, format);
 
-    p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
-                                    (EGLNativeWindowType)native_window, NULL);
-
-    if (p->egl_surface == EGL_NO_SURFACE) {
-        MP_FATAL(ctx, "Could not create EGL surface!\n");
+    if (!android_recreate_surface(ctx, NULL))
         goto fail;
-    }
-
-    if (!eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface,
-                        p->egl_context)) {
-        MP_FATAL(ctx, "Failed to set context!\n");
-        goto fail;
-    }
 
     mpegl_load_functions(&p->gl, ctx->log);
 
     struct ra_ctx_params params = {
-        .swap_buffers = android_swap_buffers,
+        .swap_buffers      = android_swap_buffers,
+        .recreate_surface  = android_recreate_surface,
     };
 
     if (!ra_gl_ctx_init(ctx, &p->gl, params))
