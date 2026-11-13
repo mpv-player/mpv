@@ -3830,8 +3830,10 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
                 lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
         }
         MP_VERBOSE(wl, "max_cll: %f, max_fall: %f\n", hdr.max_cll, hdr.max_fall);
-        wp_image_description_creator_params_v1_set_max_cll(image_creator_params, lrintf(hdr.max_cll));
-        wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
+        if (hdr.max_cll)
+            wp_image_description_creator_params_v1_set_max_cll(image_creator_params, lrintf(hdr.max_cll));
+        if (hdr.max_fall)
+            wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
     }
     image_description = wp_image_description_creator_params_v1_create(image_creator_params);
     cm_dispatch_color_queue(wl, image_description);
