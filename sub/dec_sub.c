@@ -82,6 +82,7 @@ struct dec_sub {
 
     struct demux_packet *new_segment;
     struct demux_packet **cached_pkts;
+    int first_cached_pkt;
     int cached_pkt_pos;
     int num_cached_pkts;
 };
@@ -140,6 +141,7 @@ static void destroy_cached_pkts(struct dec_sub *sub)
         sub->cached_pkts[index] = NULL;
         ++index;
     }
+    sub->first_cached_pkt = 0;
     sub->cached_pkt_pos = 0;
     sub->num_cached_pkts = 0;
 }
@@ -307,6 +309,21 @@ static bool is_packet_visible(struct demux_packet *p, double video_pts)
            p->sub_duration < 0);
 }
 
+// Free the packets before the current one which are no longer visible. The
+// visible ones are kept so that they can be redecoded.
+static void free_expired_pkts(struct dec_sub *sub, double pts)
+{
+    for (int n = sub->first_cached_pkt; n < sub->cached_pkt_pos; n++) {
+        struct demux_packet *pkt = sub->cached_pkts[n];
+        // Packets with unknown duration are replaced by the next packet.
+        if (pkt && (pkt->sub_duration < 0 || pkt->pts + pkt->sub_duration < pts))
+            TA_FREEP(&sub->cached_pkts[n]);
+    }
+    while (sub->first_cached_pkt < sub->cached_pkt_pos &&
+           !sub->cached_pkts[sub->first_cached_pkt])
+        sub->first_cached_pkt++;
+}
+
 static bool update_pkt_cache(struct dec_sub *sub, double video_pts)
 {
     if (!sub->cached_pkts[sub->cached_pkt_pos])
@@ -322,15 +339,18 @@ static bool update_pkt_cache(struct dec_sub *sub, double video_pts)
     double next_pts = next_pkt ? next_pkt->pts : INT_MAX;
     double end_pts = pkt->sub_duration >= 0 ? pkt->pts + pkt->sub_duration : INT_MAX;
 
-    if (next_pts < pts || end_pts < pts) {
+    bool next_started = next_pts < pts;
+    if (next_started || end_pts < pts) {
         if (sub->cached_pkt_pos + 1 < sub->num_cached_pkts) {
-            TA_FREEP(&sub->cached_pkts[sub->cached_pkt_pos]);
             pkt = NULL;
             sub->cached_pkt_pos++;
         }
-        if (next_pts < pts)
-            return true;
     }
+
+    free_expired_pkts(sub, pts);
+
+    if (next_started)
+        return true;
 
     if (pkt && pkt->animated == 1)
         return true;
@@ -410,10 +430,9 @@ void sub_read_packets(struct dec_sub *sub, double video_pts, bool force,
 void sub_redecode_cached_packets(struct dec_sub *sub)
 {
     mp_mutex_lock(&sub->lock);
-    int index = sub->cached_pkt_pos;
-    while (index < sub->num_cached_pkts) {
-        sub->sd->driver->decode(sub->sd, sub->cached_pkts[index]);
-        ++index;
+    for (int n = sub->first_cached_pkt; n < sub->num_cached_pkts; n++) {
+        if (sub->cached_pkts[n])
+            sub->sd->driver->decode(sub->sd, sub->cached_pkts[n]);
     }
     mp_mutex_unlock(&sub->lock);
 }
