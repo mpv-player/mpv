@@ -433,7 +433,8 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
     };
 
     while (wl_display_prepare_read(wl->display) != 0)
-        wl_display_dispatch_pending(wl->display);
+        if (wl_display_dispatch_pending(wl->display) < 0)
+            goto error;
     wl_display_flush(wl->display);
 
     mp_poll(fds, MP_ARRAY_SIZE(fds), timeout_ns);
@@ -444,11 +445,8 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
         wl_display_cancel_read(wl->display);
     }
 
-    if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-        MP_FATAL(wl, "Error occurred on the display fd\n");
-        wl->display_fd = -1;
-        return false;
-    }
+    if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))
+        goto error;
 
     struct clipboard_wayland_seat *seat;
     if (fds[1].revents & POLLIN) {
@@ -488,6 +486,11 @@ static bool clipboard_wayland_dispatch_events(struct clipboard_wayland_priv *wl,
 
     wl_display_dispatch_pending(wl->display);
     return true;
+
+error:
+    MP_FATAL(wl, "Error occurred on the display fd\n");
+    wl->display_fd = -1;
+    return false;
 }
 
 static void clipboard_wayland_run(struct clipboard_wayland_priv *wl)
