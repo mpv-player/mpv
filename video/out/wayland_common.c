@@ -3782,10 +3782,12 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
                     0 * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
                 MP_VERBOSE(wl, "Setting linear luminance range: min=0, max=%.5f, ref=%.2f\n",
                     hdr.max_luma, PL_COLOR_SDR_WHITE);
-                wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
-                    lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
-                MP_VERBOSE(wl, "Setting linear luminance mastering range: min=%.5f, max=%.2f\n",
-                    hdr.min_luma, hdr.max_luma);
+                if (wl->supports_display_primaries) {
+                    wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
+                        lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
+                    MP_VERBOSE(wl, "Setting linear luminance mastering range: min=%.5f, max=%.2f\n",
+                        hdr.min_luma, hdr.max_luma);
+                }
             }
             break;
         case PL_COLOR_TRC_HLG:
