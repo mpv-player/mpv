@@ -1228,7 +1228,7 @@ void vo_set_paused(struct vo *vo, bool paused)
     mp_mutex_lock(&in->lock);
     if (in->paused != paused) {
         in->paused = paused;
-        if (in->paused && in->dropped_frame) {
+        if (in->paused) {
             in->request_redraw = true;
             wakeup_core(vo);
         }
