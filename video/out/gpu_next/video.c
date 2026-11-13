@@ -142,7 +142,7 @@ struct mppl_video {
     bool want_seek_reset;
     bool flush_cache;
     bool paused;
-    int last_ref_white;
+    float last_ref_luma;
     int last_srgb_power22;
     int req_frames;
 
@@ -1335,6 +1335,11 @@ void mppl_video_begin_frame(struct mppl_video *p, struct vo_frame *frame,
     struct frame_params fpar = get_frame_params(p, frame);
     bool can_interpolate = fpar.can_interpolate;
     double pts_offset = fpar.pts_offset;
+
+    // Reset the queue to map the frame again with new value.
+    float ref_luma = get_ref_luma(p);
+    p->want_reset = p->want_reset || p->last_ref_luma != ref_luma;
+    p->last_ref_luma = ref_luma;
 
     // Frames up to last_id were pushed before the seek. Redraws of them keep
     // the queue as it is, the reset happens with the first new frame.
@@ -2866,10 +2871,8 @@ static void update_render_options(struct mppl_video *p)
     MP_DBG(p, "Render options updated, flushing renderer cache.\n");
     p->flush_cache = p->paused || !p->next_opts->inter_preserve;
 
-    // These options are baked into mapped frames. Reset the queue to map the
+    // This option is baked into mapped frames. Reset the queue to map the
     // queued frames again.
-    p->want_reset = p->want_reset || p->last_ref_white != opts->hdr_reference_white;
     p->want_reset = p->want_reset || ((p->last_srgb_power22 ^ opts->treat_srgb_as_power22) & 1);
-    p->last_ref_white = opts->hdr_reference_white;
     p->last_srgb_power22 = opts->treat_srgb_as_power22;
 }
