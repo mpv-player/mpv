@@ -7728,7 +7728,8 @@ them.
 
         This option overrides the ``--target-peak`` if is set and the target
         transfer function is SDR. This way you can control SDR output separately
-        from HDR output.
+        from HDR output. A Wayland HDR output keeps a peak above 203 cd/m² for
+        an SDR transfer function, with SDR content at the reference white.
 
 ``--sdr-adjust-gamma=<auto|yes|no>``
     SDR transfer functions are often ambiguous or mismatched. Even if files are

@@ -179,7 +179,7 @@ static int render(struct render_backend *ctx, mpv_render_param *params,
     };
 
     // There is no display to take a color space from and none to hint one to.
-    mppl_video_begin_frame(p->renderer, frame, (struct pl_color_space){0}, 0);
+    mppl_video_begin_frame(p->renderer, frame, (struct pl_color_space){0}, 0, false);
     struct mp_image_params target_params;
     mppl_video_render_frame(p->renderer, frame, &target, depth, NULL, &target_params);
 
