@@ -226,8 +226,8 @@ Available audio output drivers are:
         By default the channel volumes are used.
 
 ``sdl``
-    SDL 2.0+ audio output driver. Should work on any platform supported by SDL
-    2.0, but may require the ``SDL_AUDIODRIVER`` environment variable to be set
+    SDL3 audio output driver. Should work on any platform supported by SDL3,
+    but may require the ``SDL_AUDIO_DRIVER`` environment variable to be set
     appropriately for your system.
 
     .. note:: This driver is for compatibility with extremely foreign
@@ -239,7 +239,7 @@ Available audio output drivers are:
     ``--sdl-buflen=<length>``
         Sets the audio buffer length in seconds. Is used only as a hint by the
         sound system. Playing a file with ``-v`` will show the requested and
-        obtained exact buffer size. A value of 0 selects the sound system
+        obtained formats and buffer size. A value of 0 selects the sound system
         default.
 
 ``null``

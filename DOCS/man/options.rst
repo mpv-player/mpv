@@ -4710,7 +4710,7 @@ Input
         whitespace). This is not a bug.
 
 ``--input-gamepad=<yes|no>``
-    Enable/disable SDL2 Gamepad support. Disabled by default.
+    Enable/disable SDL3 gamepad support. Disabled by default.
 
 ``--input-cursor=<yes|no>``
     Permit mpv to receive pointer events reported by the video output

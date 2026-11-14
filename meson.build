@@ -784,16 +784,16 @@ if features['rubberband']
     sources += files('audio/filter/af_rubberband.c')
 endif
 
-sdl2 = dependency('sdl2', required: false)
+sdl3 = dependency('sdl3', version: '>= 3.2.0', required: false)
 
-sdl2_gamepad = get_option('sdl2-gamepad').require(
-    sdl2.found(),
-    error_message: 'sdl2 was not found!',
+sdl_gamepad = get_option('sdl-gamepad').require(
+    sdl3.found(),
+    error_message: 'sdl3 (>= 3.2.0) was not found!',
 )
-features += {'sdl2-gamepad': sdl2_gamepad.allowed()}
-if features['sdl2-gamepad']
+features += {'sdl-gamepad': sdl_gamepad.allowed()}
+if features['sdl-gamepad']
     sources += files('input/sdl_gamepad.c')
-    dependencies += sdl2
+    dependencies += sdl3
 endif
 
 uchardet_opt = get_option('uchardet').require(
@@ -948,14 +948,14 @@ if features['pulse']
     sources += files('audio/out/ao_pulse.c')
 endif
 
-sdl2_audio = get_option('sdl2-audio').require(
-    sdl2.found(),
-    error_message: 'sdl2 was not found!',
+sdl_audio = get_option('sdl-audio').require(
+    sdl3.found(),
+    error_message: 'sdl3 (>= 3.2.0) was not found!',
 )
-features += {'sdl2-audio': sdl2_audio.allowed()}
-if features['sdl2-audio']
+features += {'sdl-audio': sdl_audio.allowed()}
+if features['sdl-audio']
     sources += files('audio/out/ao_sdl.c')
-    dependencies += sdl2
+    dependencies += sdl3
 endif
 
 sndio = dependency('sndio', required: get_option('sndio'))
@@ -1029,14 +1029,14 @@ if features['jpeg']
     dependencies += jpeg
 endif
 
-sdl2_video = get_option('sdl2-video').require(
-    sdl2.found(),
-    error_message: 'sdl2 was not found!',
+sdl_video = get_option('sdl-video').require(
+    sdl3.found(),
+    error_message: 'sdl3 (>= 3.2.0) was not found!',
 )
-features += {'sdl2-video': sdl2_video.allowed()}
-if features['sdl2-video']
+features += {'sdl-video': sdl_video.allowed()}
+if features['sdl-video']
     sources += files('video/out/vo_sdl.c')
-    dependencies += sdl2
+    dependencies += sdl3
 endif
 
 shaderc = dependency('shaderc', required:
@@ -1946,8 +1946,8 @@ if get_option('fuzzers')
     subdir('fuzzers')
 endif
 
-if features['sdl2-audio'] or features['sdl2-gamepad'] or features['sdl2-video']
-    warning('You are building with optional SDL2 support. If you encounter build issues, try disabling it.')
+if features['sdl-audio'] or features['sdl-gamepad'] or features['sdl-video']
+    warning('You are building with optional SDL3 support. If you encounter build issues, try disabling it.')
 endif
 
 summary({'cocoa': features['cocoa'] and features['swift'],

@@ -1,5 +1,5 @@
 /*
- * audio output driver for SDL 1.2+
+ * audio output driver for SDL3
  * Copyright (C) 2012 Rudolf Polzer <divVerent@xonotic.org>
  *
  * This file is part of mpv.
@@ -18,6 +18,10 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+
+#include <SDL3/SDL.h>
+
 #include "audio/format.h"
 #include "mpv_talloc.h"
 #include "ao.h"
@@ -27,41 +31,50 @@
 #include "options/m_option.h"
 #include "osdep/timer.h"
 
-#include <SDL.h>
-
 struct priv
 {
     bool paused;
 
     float buflen;
+
+    SDL_AudioStream *stream;
+    uint8_t *callback_buf;
+    size_t callback_buf_size;
 };
 
 static const int fmtmap[][2] = {
-    {AF_FORMAT_U8,      AUDIO_U8},
-    {AF_FORMAT_S16,     AUDIO_S16SYS},
-#ifdef AUDIO_S32SYS
-    {AF_FORMAT_S32,     AUDIO_S32SYS},
-#endif
-#ifdef AUDIO_F32SYS
-    {AF_FORMAT_FLOAT,   AUDIO_F32SYS},
-#endif
+    {AF_FORMAT_U8,      SDL_AUDIO_U8},
+    {AF_FORMAT_S16,     SDL_AUDIO_S16},
+    {AF_FORMAT_S32,     SDL_AUDIO_S32},
+    {AF_FORMAT_FLOAT,   SDL_AUDIO_F32},
     {0}
 };
 
-static void audio_callback(void *userdata, Uint8 *stream, int len)
+static void audio_callback(void *userdata, SDL_AudioStream *stream,
+                           int additional_amount, int total_amount)
 {
     struct ao *ao = userdata;
+    struct priv *priv = ao->priv;
 
-    void *data[1] = {stream};
+    if (additional_amount <= 0)
+        return;
 
-    if (len % ao->sstride)
-        MP_ERR(ao, "SDL audio callback not sample aligned");
+    // SDL can ask for more than callback_buf holds after an underrun
+    for (int done = 0; done < additional_amount; ) {
+        int n = MPMIN(additional_amount - done, (int)priv->callback_buf_size);
+        n -= n % ao->sstride;
+        if (n <= 0)
+            break;
+        done += n;
 
-    // Time this buffer will take, plus assume 1 period (1 callback invocation)
-    // fixed latency.
-    double delay = 2 * len / (double)ao->bps;
+        // 1 period of fixed latency, plus the time this chunk takes
+        int64_t out_time = mp_time_ns() + MP_TIME_S_TO_NS(
+            (double)(additional_amount + done) / ao->bps);
 
-    ao_read_data(ao, data, len / ao->sstride, mp_time_ns() + MP_TIME_S_TO_NS(delay), NULL, true, true);
+        void *data[1] = {priv->callback_buf};
+        ao_read_data(ao, data, n / ao->sstride, out_time, NULL, true, true);
+        SDL_PutAudioStreamData(stream, priv->callback_buf, n);
+    }
 }
 
 static void uninit(struct ao *ao)
@@ -70,13 +83,17 @@ static void uninit(struct ao *ao)
     if (!priv)
         return;
 
-    if (SDL_WasInit(SDL_INIT_AUDIO)) {
-        // make sure the callback exits
-        SDL_LockAudio();
-
-        // close audio device
-        SDL_QuitSubSystem(SDL_INIT_AUDIO);
+    if (priv->stream) {
+        // also closes the device opened by SDL_OpenAudioDeviceStream
+        SDL_DestroyAudioStream(priv->stream);
+        priv->stream = NULL;
     }
+
+    talloc_free(priv->callback_buf);
+    priv->callback_buf = NULL;
+
+    if (SDL_WasInit(SDL_INIT_AUDIO))
+        SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 static unsigned int ceil_power_of_two(unsigned int x)
@@ -96,83 +113,94 @@ static int init(struct ao *ao)
 
     struct priv *priv = ao->priv;
 
-    if (SDL_InitSubSystem(SDL_INIT_AUDIO)) {
+    if (!SDL_InitSubSystem(SDL_INIT_AUDIO)) {
         if (!ao->probing)
-            MP_ERR(ao, "SDL_Init failed\n");
+            MP_ERR(ao, "SDL_Init failed: %s\n", SDL_GetError());
         uninit(ao);
         return -1;
     }
+
+    SDL_AudioSpec device_spec = {0};
+    bool have_device = SDL_GetAudioDeviceFormat(
+        SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &device_spec, NULL);
 
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext_def(&sel);
-    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels)) {
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels) ||
+        (have_device && device_spec.channels &&
+         !ao_chmap_sel_get_def(ao, &sel, &ao->channels,
+                               device_spec.channels)))
+    {
         uninit(ao);
         return -1;
     }
 
-    ao->format = af_fmt_from_planar(ao->format);
+    int af = af_fmt_from_planar(ao->format);
 
     SDL_AudioSpec desired = {0};
-    desired.format = AUDIO_S16SYS;
+    desired.format = SDL_AUDIO_S16;
+    ao->format = AF_FORMAT_S16;
     for (int n = 0; fmtmap[n][0]; n++) {
-        if (ao->format == fmtmap[n][0]) {
+        if (af == fmtmap[n][0]) {
             desired.format = fmtmap[n][1];
+            ao->format = fmtmap[n][0];
             break;
         }
     }
     desired.freq = ao->samplerate;
     desired.channels = ao->channels.num;
+
     if (priv->buflen) {
-        desired.samples = MPMIN(32768, ceil_power_of_two(ao->samplerate *
-                                                         priv->buflen));
+        char buf[32];
+        snprintf(buf, sizeof(buf), "%u",
+                 MPMIN(32768, ceil_power_of_two(ao->samplerate *
+                                                priv->buflen)));
+        SDL_SetHintWithPriority(SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES, buf,
+                                SDL_HINT_OVERRIDE);
+    } else {
+        SDL_ResetHint(SDL_HINT_AUDIO_DEVICE_SAMPLE_FRAMES);
     }
-    desired.callback = audio_callback;
-    desired.userdata = ao;
 
-    MP_VERBOSE(ao, "requested format: %d Hz, %d channels, %x, "
-               "buffer size: %d samples\n",
+    MP_VERBOSE(ao, "requested format: %d Hz, %d channels, %x\n",
                (int) desired.freq, (int) desired.channels,
-               (int) desired.format, (int) desired.samples);
+               (int) desired.format);
 
-    SDL_AudioSpec obtained = desired;
-    if (SDL_OpenAudio(&desired, &obtained)) {
+    // opens paused; the callback can't run before ao->sstride is set
+    priv->stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
+                                             &desired, audio_callback, ao);
+    if (!priv->stream) {
         if (!ao->probing)
             MP_ERR(ao, "could not open audio: %s\n", SDL_GetError());
         uninit(ao);
         return -1;
     }
 
-    MP_VERBOSE(ao, "obtained format: %d Hz, %d channels, %x, "
-               "buffer size: %d samples\n",
-               (int) obtained.freq, (int) obtained.channels,
-               (int) obtained.format, (int) obtained.samples);
-
-    // The sample count is usually the number of samples the callback requests,
-    // which we assume is the period size. Normally, ao.c will allocate a large
-    // enough buffer. But in case the period size should be pathologically
-    // large, this will help.
-    ao->device_buffer = 3 * obtained.samples;
-
-    ao->format = 0;
-    for (int n = 0; fmtmap[n][0]; n++) {
-        if (obtained.format == fmtmap[n][1]) {
-            ao->format = fmtmap[n][0];
-            break;
-        }
-    }
-    if (!ao->format) {
-        if (!ao->probing)
-            MP_ERR(ao, "could not find matching format\n");
-        uninit(ao);
-        return -1;
+    // the period is only final once the device is open
+    SDL_AudioSpec got = {0};
+    int device_frames = 0;
+    if (SDL_GetAudioDeviceFormat(SDL_GetAudioStreamDevice(priv->stream), &got,
+                                 &device_frames))
+    {
+        MP_VERBOSE(ao, "device format: %d Hz, %d channels, %x, "
+                   "%d samples per period\n", (int) got.freq,
+                   (int) got.channels, (int) got.format, device_frames);
     }
 
-    if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, obtained.channels)) {
-        uninit(ao);
-        return -1;
+    if (device_frames <= 0 || got.freq <= 0) {
+        device_frames = 1024;
+    } else {
+        // device_buffer is in samples at ao->samplerate
+        device_frames = (int64_t)device_frames * ao->samplerate / got.freq;
     }
 
-    ao->samplerate = obtained.freq;
+    ao->device_buffer = 3 * device_frames;
+
+    int sstride = af_fmt_to_bytes(ao->format) * ao->channels.num;
+    size_t buf_size = (size_t)ao->device_buffer * sstride;
+    buf_size = MPCLAMP(buf_size, 4096, 1 << 20);
+    buf_size -= buf_size % sstride;
+    priv->callback_buf = talloc_size(ao, buf_size);
+    priv->callback_buf_size = buf_size;
 
     priv->paused = 1;
 
@@ -182,16 +210,16 @@ static int init(struct ao *ao)
 static void reset(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    if (!priv->paused)
-        SDL_PauseAudio(SDL_TRUE);
+    if (priv->stream && !priv->paused)
+        SDL_PauseAudioStreamDevice(priv->stream);
     priv->paused = 1;
 }
 
 static void start(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    if (priv->paused)
-        SDL_PauseAudio(SDL_FALSE);
+    if (priv->stream && priv->paused)
+        SDL_ResumeAudioStreamDevice(priv->stream);
     priv->paused = 0;
 }
 
