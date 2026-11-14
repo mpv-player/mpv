@@ -30,7 +30,7 @@ class View: NSView, CALayerDelegate {
 
     override var isOpaque: Bool {
         if let metalLayer = layer as? CAMetalLayer {
-            return !metalLayer.isOpaque
+            return metalLayer.isOpaque
         }
 
         return true
