@@ -3958,6 +3958,11 @@ Disc Devices
     Specify the CD device for CDDA playback. The default device path depends on
     the OS. See the `OPTICAL DRIVES`_ section.
 
+``--sacd-device=<path>``
+    Specify the Super Audio CD device or .iso filename for ``sacd://``
+    playback. The default device path depends on the OS. See the
+    `OPTICAL DRIVES`_ section.
+
 ``--dvd-device=<path>``
     Specify the DVD device or .iso filename. You can
     also specify a directory that contains files previously copied directly
