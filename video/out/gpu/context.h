@@ -80,6 +80,9 @@ struct ra_ctx_params {
     // See ra_swapchain_fns.target_ref_luma. Optional.
     float (*preferred_ref_luma)(struct ra_ctx *ctx);
 
+    // See ra_swapchain_fns.sdr_above_ref_luma. Optional.
+    bool (*sdr_above_ref_luma)(struct ra_ctx *ctx);
+
     // See ra_swapchain_fns.set_color. Optional.
     bool (*set_color)(struct ra_ctx *ctx, struct mp_image_params *params, bool target);
 
@@ -121,6 +124,11 @@ struct ra_swapchain_fns {
     // Target device reference luminance in nits, i.e. the luminance at which
     // the system displays diffuse (SDR) white. Returns 0 if unknown. Optional.
     float (*target_ref_luma)(struct ra_swapchain *sw);
+
+    // Whether the system shows an SDR signal set with set_color above the
+    // reference white. If not, it shows the peak of such a signal as the
+    // reference white. Optional.
+    bool (*sdr_above_ref_luma)(struct ra_swapchain *sw);
 
     // Call into backends so they can use the appropriate platform-specific
     // functions to configure color spaces. Returns true if request was handled.
