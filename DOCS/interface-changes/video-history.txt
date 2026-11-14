@@ -1,0 +1,2 @@
+add `--video-history` and `--video-history-max-bytes` options
+add `video-history-state` property

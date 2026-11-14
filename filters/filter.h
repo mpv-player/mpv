@@ -409,6 +409,7 @@ struct mp_stream_info {
     bool rotate90;
     bool force_swdec;
     struct vo *dr_vo; // for calling vo_get_image()
+    bool disable_dr;
 };
 
 // Search for a parent filter (including f) that has this set, and return it.

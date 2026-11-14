@@ -336,6 +336,7 @@ typedef struct MPContext {
     struct ao_chain *ao_chain;
 
     struct vo_chain *vo_chain;
+    struct playback_history *history;
 
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
@@ -510,6 +511,7 @@ struct mp_abort_entry {
 
 // audio.c
 void reset_audio_state(struct MPContext *mpctx);
+void reset_audio_output_state(struct MPContext *mpctx);
 void reinit_audio_chain(struct MPContext *mpctx);
 int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void uninit_audio_decoder(struct MPContext *mpctx);
@@ -691,6 +693,7 @@ bool disc_nav_mouse_pos_to_src(struct MPContext *mpctx, int src_w, int src_h,
 
 // video.c
 void reset_video_state(struct MPContext *mpctx);
+void reset_video_output_state(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
 void uninit_video_decoder(struct MPContext *mpctx);
 void reinit_video_decoder(struct MPContext *mpctx);

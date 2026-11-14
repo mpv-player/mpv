@@ -236,6 +236,7 @@ typedef struct lavc_ctx {
 
     // From VO
     struct vo *vo;
+    bool disable_dr;
     struct mp_hwdec_devices *hwdec_devs;
     bool force_swdec;
 
@@ -818,7 +819,7 @@ static void init_avctx(struct mp_filter *vd)
 
     mp_set_avcodec_threads(vd->log, avctx, threads);
 
-    if (!ctx->use_hwdec && ctx->vo && lavc_param->dr) {
+    if (!ctx->use_hwdec && ctx->vo && !ctx->disable_dr && lavc_param->dr) {
         avctx->opaque = vd;
         avctx->get_buffer2 = get_buffer2_direct;
     }
@@ -1531,6 +1532,7 @@ static struct mp_decoder *create(struct mp_filter *parent,
     if (info) {
         ctx->hwdec_devs = info->hwdec_devs;
         ctx->vo = info->dr_vo;
+        ctx->disable_dr = info->disable_dr;
         ctx->force_swdec = info->force_swdec;
     }
 

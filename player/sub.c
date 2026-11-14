@@ -33,6 +33,7 @@
 #include "video/mp_image.h"
 
 #include "core.h"
+#include "history.h"
 
 // 0: primary sub, 1: secondary sub, -1: not selected
 static int get_order(struct MPContext *mpctx, struct track *track)
@@ -167,7 +168,8 @@ bool update_subtitles(struct MPContext *mpctx, double video_pts)
     bool ok = true;
     for (int n = 0; n < num_ptracks[STREAM_SUB]; n++)
         ok &= update_subtitle(mpctx, video_pts, mpctx->current_track[n][STREAM_SUB]);
-    return ok;
+    // pretend ready during video-history to avoid latency
+    return ok || history_active(mpctx);
 }
 
 static struct attachment_list *get_all_attachments(struct MPContext *mpctx)

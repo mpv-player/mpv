@@ -24,6 +24,7 @@
 #include "client.h"
 #include "command.h"
 #include "core.h"
+#include "history.h"
 #include "mpv_talloc.h"
 #include "screenshot.h"
 
@@ -238,13 +239,22 @@ void step_frame_mute(struct MPContext *mpctx, bool mute)
     ao_set_gain(mpctx->ao_chain->ao, gain);
 }
 
+static void reset_playback_timing(struct MPContext *mpctx);
+static void reset_playback_state_keep_history(struct MPContext *mpctx);
+
 // Clear some playback-related fields on file loading or after seeks.
 void reset_playback_state(struct MPContext *mpctx)
 {
+    history_reset(mpctx);
+    reset_playback_state_keep_history(mpctx);
+}
+
+static void reset_playback_state_keep_history(struct MPContext *mpctx)
+{
     mp_filter_reset(mpctx->filter_root);
 
-    reset_video_state(mpctx);
-    reset_audio_state(mpctx);
+    reset_video_output_state(mpctx);
+    reset_audio_output_state(mpctx);
     reset_subtitle_state(mpctx);
 
     if (mpctx->demuxer)
@@ -252,13 +262,17 @@ void reset_playback_state(struct MPContext *mpctx)
 
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *t = mpctx->tracks[n];
-        // (Often, but not always, this is redundant and also done elsewhere.)
         if (t->dec)
             mp_decoder_wrapper_set_play_dir(t->dec, mpctx->play_dir);
         if (t->d_sub)
             sub_set_play_dir(t->d_sub, mpctx->play_dir);
     }
 
+    reset_playback_timing(mpctx);
+}
+
+static void reset_playback_timing(struct MPContext *mpctx)
+{
     // May need unpause first
     if (mpctx->paused_for_cache)
         update_internal_pause_state(mpctx);
@@ -340,6 +354,38 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
          (opts->hr_seek >= 0 && seek.type == MPSEEK_ABSOLUTE) ||
          (opts->hr_seek == 2 && (!mpctx->vo_chain || mpctx->vo_chain->is_sparse)));
 
+    // Frame steps go by the current frame instead of the guessed seek_pts.
+    bool framestep = seek.type == MPSEEK_FRAMESTEP;
+    double history_pts = framestep ? current_time : seek_pts;
+    double resume_pts = MP_NOPTS_VALUE;
+    bool history_hit = hr_seek &&
+        history_seek(mpctx, &history_pts, framestep ? (int)seek.amount : 0,
+                     &resume_pts);
+    if (history_hit)
+        seek_pts = history_pts;
+    if (history_hit && resume_pts == MP_NOPTS_VALUE) {
+        // Restart the outputs only. The demuxer, decoders and filters keep
+        // their position.
+        if (!(seek.flags & MPSEEK_FLAG_NOFLUSH))
+            clear_audio_output_buffers(mpctx);
+        reset_video_output_state(mpctx);
+        reset_audio_output_state(mpctx);
+        reset_subtitle_state(mpctx);
+        reset_playback_timing(mpctx);
+        if (mpctx->ao_chain) {
+            if (mpctx->ao_chain->queue_filter)
+                mp_filter_reset(mpctx->ao_chain->queue_filter);
+            mp_filter_wakeup(mpctx->ao_chain->ao_filter);
+        }
+        goto seek_done;
+    }
+    if (history_hit) {
+        // Decoding continues after the kept frames.
+        demux_pts = resume_pts;
+    } else {
+        history_end_range(mpctx);
+    }
+
     // Under certain circumstances, prefer SEEK_FACTOR.
     if (seek.type == MPSEEK_FACTOR && !hr_seek &&
         (mpctx->demuxer->ts_resets_possible || seek_pts == MP_NOPTS_VALUE))
@@ -384,6 +430,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
             MP_ERR(mpctx, "Cannot seek in this stream.\n");
             MP_ERR(mpctx, "You can force it with '--force-seekable=yes'.\n");
         }
+        if (history_hit)
+            history_reset(mpctx);
         return;
     }
 
@@ -406,7 +454,9 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (!(seek.flags & MPSEEK_FLAG_NOFLUSH))
         clear_audio_output_buffers(mpctx);
 
-    reset_playback_state(mpctx);
+    reset_playback_state_keep_history(mpctx);
+    if (history_hit && mpctx->ao_chain)
+        mp_filter_wakeup(mpctx->ao_chain->ao_filter);
 
     demux_block_reading(mpctx->demuxer, false);
     for (int t = 0; t < mpctx->num_tracks; t++) {
@@ -415,11 +465,12 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
             demux_block_reading(track->demuxer, false);
     }
 
+seek_done:
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
     mpctx->last_seek_pts = seek_pts;
 
-    if (hr_seek) {
+    if (hr_seek && !history_hit) {
         mpctx->hrseek_active = true;
         mpctx->hrseek_backstep = seek.type == MPSEEK_FRAMESTEP && seek.amount == -1;
         mpctx->hrseek_pts = seek_pts * mpctx->play_dir;
@@ -436,6 +487,16 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
             struct mp_decoder_wrapper *dec = track->dec;
             if (dec && hrseek_framedrop)
                 mp_decoder_wrapper_set_start_pts(dec, mpctx->hrseek_pts);
+        }
+    }
+
+    // Let the decoders drop most of the frames that are kept already.
+    // history_skip() drops the rest.
+    if (history_hit && resume_pts != MP_NOPTS_VALUE && opts->hr_seek_framedrop) {
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct mp_decoder_wrapper *dec = mpctx->tracks[n]->dec;
+            if (dec)
+                mp_decoder_wrapper_set_start_pts(dec, resume_pts);
         }
     }
 
