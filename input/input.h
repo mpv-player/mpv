@@ -144,6 +144,7 @@ bool mp_input_vo_keyboard_enabled(struct input_ctx *ictx);
 struct mp_rect;
 void mp_input_set_mouse_transform(struct input_ctx *ictx, struct mp_rect *dst,
                                   struct mp_rect *src);
+void mp_input_get_mouse_transform(struct input_ctx *ictx, struct mp_rect *dst);
 
 // Add a command to the command queue.
 int mp_input_queue_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
@@ -254,6 +255,7 @@ void mp_input_set_repeat_info(struct input_ctx *ictx, int rate, int delay);
 struct mpv_node mp_input_get_bindings(struct input_ctx *ictx);
 
 void mp_input_sdl_gamepad_add(struct input_ctx *ictx);
+void mp_input_libinput_add(struct input_ctx *ictx);
 
 struct mp_ipc_ctx;
 struct mp_client_api;
