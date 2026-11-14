@@ -350,6 +350,8 @@ jobs:
             homebrew: "956fbd2598f7b0bc3c7ef72edaa622e19415f6c9"
           - os: "macos-26"
             target-os: "macos-26-arm"
+          - os: "macos-26-intel"
+            target-os: "macos-26-intel"
           - os: "macos-26"
             target-os: "test"
             swift: "-target arm64-apple-macosx10.15"
