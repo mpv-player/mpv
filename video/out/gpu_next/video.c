@@ -887,7 +887,7 @@ static bool use_ref_luma(const struct pl_color_space *csp, const struct pl_color
 {
     if (!pl_color_transfer_is_hdr(csp->transfer))
         return true;
-    if (csp->transfer == PL_COLOR_TRC_SCRGB && target_csp && !pl_color_transfer_is_hdr(target_csp->transfer))
+    if (csp->transfer == PL_COLOR_TRC_SCRGB && target_csp && !pl_color_space_is_hdr(target_csp))
         return true;
     return false;
 }
@@ -1499,7 +1499,7 @@ enum mppl_video_hint mppl_video_get_target_hint(struct mppl_video *p, struct vo_
         bool min_luma_known = hint.hdr.min_luma > 0;
         pl_color_space_infer_map(&source_csp, &hint);
         // Always prefer target luminance and transfer for inverse tone mapping
-        if (pl_color_transfer_is_hdr(target->transfer) && opts->tone_map.inverse) {
+        if (pl_color_space_is_hdr(target) && opts->tone_map.inverse) {
             hint.transfer     = target->transfer;
             hint.hdr.max_luma = target->hdr.max_luma;
             hint.hdr.min_luma = target->hdr.min_luma;
