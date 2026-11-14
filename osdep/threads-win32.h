@@ -179,4 +179,10 @@ static inline void mp_thread_set_name(const char *name)
     talloc_free(wname);
 }
 
+static inline void mp_thread_set_min_timer_slack(void)
+{
+    // This is similar to mp_set_idle_power_mode(), but on Windows it's global
+    // state, rather than per-thread. So do nothing here.
+}
+
 int64_t mp_thread_cpu_time_ns(mp_thread_id thread_id);

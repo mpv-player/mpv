@@ -50,6 +50,7 @@
 struct gbm_frame {
     struct gbm_bo *bo;
     struct pl_color_space color;
+    int64_t swap;           // the swap that queued the frame
 };
 
 struct gbm {
@@ -324,6 +325,7 @@ static void queue_flip(struct ra_ctx *ctx, struct gbm_frame *frame)
     struct priv *p = ctx->priv;
 
     update_framebuffer_from_bo(ctx, frame->bo);
+    drm->flip_swap = frame->swap;
 
     struct drm_atomic_context *atomic_ctx = drm->atomic_context;
     int flags = DRM_MODE_ATOMIC_NONBLOCK | DRM_MODE_PAGE_FLIP_EVENT;
@@ -357,6 +359,7 @@ static void enqueue_bo(struct ra_ctx *ctx, struct gbm_bo *bo, struct pl_color_sp
     struct gbm_frame *new_frame = talloc_zero(p, struct gbm_frame);
     new_frame->bo = bo;
     new_frame->color = color;
+    new_frame->swap = ctx->vo->drm->present->swaps + 1;
     MP_TARRAY_APPEND(p, p->gbm.bo_queue, p->gbm.num_bos, new_frame);
 }
 
@@ -401,6 +404,7 @@ static void drm_egl_swap_buffers(struct ra_ctx *ctx)
         return;
     }
     enqueue_bo(ctx, new_bo, drm->colorspace);
+    present_sync_swap(drm->present);
 
     while (drm->redraw || p->gbm.num_bos > ctx->vo->opts->swapchain_depth ||
            !gbm_surface_has_free_buffers(p->gbm.surface)) {

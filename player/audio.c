@@ -237,7 +237,6 @@ void reset_audio_state(struct MPContext *mpctx)
     }
     mpctx->audio_status = mpctx->ao_chain ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
-    mpctx->logged_async_diff = -1;
 }
 
 void uninit_audio_out(struct MPContext *mpctx)
@@ -860,19 +859,34 @@ void audio_start_ao(struct MPContext *mpctx)
     if (!get_sync_pts(mpctx, &pts))
         return;
     double apts = playing_audio_pts(mpctx);
-    if (pts != MP_NOPTS_VALUE && apts != MP_NOPTS_VALUE && pts < apts &&
-        mpctx->video_status != STATUS_EOF)
-    {
-        double diff = (apts - pts) / mpctx->opts->playback_speed;
-        if (!get_internal_paused(mpctx))
-            mp_set_timeout(mpctx, diff);
-        if (mpctx->logged_async_diff != diff) {
+    if (mpctx->video_status != STATUS_EOF) {
+        double speed = mpctx->opts->playback_speed;
+        if (!ao_c->delaying_audio_start && pts != MP_NOPTS_VALUE &&
+            apts != MP_NOPTS_VALUE && pts < apts)
+        {
             MP_VERBOSE(mpctx, "delaying audio start %f vs. %f, diff=%f\n",
-                       apts, pts, diff);
-            mpctx->logged_async_diff = diff;
+                       apts, pts, (apts - pts) / speed);
             ao_c->delaying_audio_start = true;
+            ao_c->delayed_start_gap = apts - pts;
+            mpctx->delay += apts - pts;
+            ao_c->delayed_start_speed = 0;
         }
-        return;
+        if (ao_c->delaying_audio_start) {
+            // Start audio once the video has played the gap to it. The video
+            // pts moves in frame steps and ahead of the display, so the gap
+            // is counted down in playback time from the first check on, every
+            // interval at the speed it was played with.
+            int64_t now = mp_time_ns();
+            double passed = MP_TIME_NS_TO_S(now - ao_c->delayed_start_last);
+            ao_c->delayed_start_gap -= passed * ao_c->delayed_start_speed;
+            ao_c->delayed_start_last = now;
+            ao_c->delayed_start_speed = get_internal_paused(mpctx) ? 0 : speed;
+            if (ao_c->delayed_start_gap > 0) {
+                if (ao_c->delayed_start_speed > 0)
+                    mp_set_timeout(mpctx, ao_c->delayed_start_gap / speed);
+                return;
+            }
+        }
     }
 
     MP_VERBOSE(mpctx, "starting audio playback\n");
@@ -884,7 +898,6 @@ void audio_start_ao(struct MPContext *mpctx)
         MP_VERBOSE(mpctx, "audio draining\n");
     }
     ao_c->underrun = false;
-    mpctx->logged_async_diff = -1;
     mp_wakeup_core(mpctx);
 }
 

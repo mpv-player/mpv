@@ -43,8 +43,6 @@ enum {
     VO_EVENT_WIN_STATE                  = 1 << 3,
     // The ambient light conditions changed and need to be reloaded
     VO_EVENT_AMBIENT_LIGHTING_CHANGED   = 1 << 4,
-    // Special mechanism for making resizing with Cocoa react faster
-    VO_EVENT_LIVE_RESIZING              = 1 << 5,
     // For VOCTRL_GET_HIDPI_SCALE changes.
     VO_EVENT_DPI                        = 1 << 6,
     VO_EVENT_FOCUS                      = 1 << 7,
@@ -287,13 +285,13 @@ struct vo_frame {
 
 // Presentation feedback. See get_vsync() for how backends should fill this
 // struct.
-struct vo_vsync_info {
-    // mp_time_ns() timestamp at which the last queued frame will likely be
-    // displayed (this is in the future, unless the frame is instantly output).
-    // 0 or lower if unset or unsupported.
-    // This implies the latency of the output.
-    int64_t last_queue_display_time;
+enum vo_refresh_kind {
+    VO_REFRESH_UNKNOWN,
+    VO_REFRESH_FIXED,       // the display refreshes at its mode's rate
+    VO_REFRESH_VARIABLE,    // the display refreshes with the presents
+};
 
+struct vo_vsync_info {
     // Time between 2 vsync events in nanoseconds. The difference should be the
     // from 2 times sampled from the same reference point (it should not be the
     // difference between e.g. the end of scanout and the start of the next one;
@@ -312,6 +310,20 @@ struct vo_vsync_info {
     // swap_buffers() for every physical vsync.
     // -1 if unset or unsupported.
     int64_t skipped_vsyncs;
+
+    // mp_time_ns() timestamp at which the frame of a swap_buffers() call was
+    // displayed, and how many calls before the current one that was, 0 for the
+    // current one. The time is 0 if unknown or unsupported. The VO predicts
+    // the display time of the current call's frame from these.
+    int64_t displayed_time;
+    int displayed_age;
+    // The time was not measured for that frame: the backend derived it from
+    // another vsync and the refresh rate, or the frame is not shown yet.
+    bool displayed_estimated;
+
+    // Whether the display refreshes at its mode's rate or with the presents,
+    // when the backend knows.
+    enum vo_refresh_kind refresh_kind;
 };
 
 struct vo_driver {
@@ -545,6 +557,7 @@ void vo_set_paused(struct vo *vo, bool paused);
 int64_t vo_get_drop_count(struct vo *vo);
 void vo_increment_drop_count(struct vo *vo, int64_t n);
 int64_t vo_get_delayed_count(struct vo *vo);
+double vo_get_presentation_delay(struct vo *vo);
 void vo_query_formats(struct vo *vo, uint8_t *list);
 void vo_event(struct vo *vo, int event);
 int vo_query_and_reset_events(struct vo *vo, int events);
@@ -559,7 +572,6 @@ double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
 void * vo_get_display_swapchain(struct vo *vo);
 double vo_get_delay(struct vo *vo);
-void vo_discard_timing_info(struct vo *vo);
 struct vo_frame *vo_get_current_vo_frame(struct vo *vo);
 struct mp_image *vo_get_image(struct vo *vo, int imgfmt, int w, int h,
                               int stride_align, int flags);
