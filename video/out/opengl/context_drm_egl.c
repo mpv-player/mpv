@@ -567,7 +567,7 @@ static pl_color_space_t drm_egl_preferred_csp(struct ra_ctx *ctx)
     return pl_color_space_srgb;
 }
 
-static bool drm_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+static bool drm_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params, bool target)
 {
     struct pl_color_space sdr = pl_color_space_srgb;
     vo_drm_set_color(ctx->vo, params ? &params->color : &sdr);

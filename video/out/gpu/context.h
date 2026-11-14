@@ -81,7 +81,7 @@ struct ra_ctx_params {
     float (*preferred_ref_luma)(struct ra_ctx *ctx);
 
     // See ra_swapchain_fns.set_color. Optional.
-    bool (*set_color)(struct ra_ctx *ctx, struct mp_image_params *params);
+    bool (*set_color)(struct ra_ctx *ctx, struct mp_image_params *params, bool target);
 
     // See ra_swapchain_fns.get_vsync.
     void (*get_vsync)(struct ra_ctx *ctx, struct vo_vsync_info *info);
@@ -124,7 +124,9 @@ struct ra_swapchain_fns {
 
     // Call into backends so they can use the appropriate platform-specific
     // functions to configure color spaces. Returns true if request was handled.
-    bool (*set_color)(struct ra_swapchain *sw, struct mp_image_params *params);
+    // target is set if params are made for the target device, and unset if
+    // they are those of the source.
+    bool (*set_color)(struct ra_swapchain *sw, struct mp_image_params *params, bool target);
 
     // Called when rendering starts. Returns NULL on failure. This must be
     // followed by submit_frame, to submit the rendered frame. This function

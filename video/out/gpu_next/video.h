@@ -76,6 +76,7 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
                              struct mp_image_params *target_params);
 bool mppl_video_get_hdr_metadata(struct mppl_video *p, struct pl_hdr_metadata *out);
 enum pl_color_levels mppl_video_get_output_levels(struct mppl_video *p);
+bool mppl_video_hint_is_target(struct mppl_video *p);
 void mppl_video_set_paused(struct mppl_video *p, bool paused);
 bool mppl_video_showing_interpolated_frame(struct mppl_video *p);
 void mppl_video_reset(struct mppl_video *p);

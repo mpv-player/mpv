@@ -1257,6 +1257,11 @@ enum pl_color_levels mppl_video_get_output_levels(struct mppl_video *p)
     return p->output_levels ? p->output_levels : PL_COLOR_LEVELS_FULL;
 }
 
+bool mppl_video_hint_is_target(struct mppl_video *p)
+{
+    return p->next_opts->target_hint_mode == 0;
+}
+
 static void update_tm_viz(struct pl_color_map_params *params,
                           const struct pl_frame *target)
 {

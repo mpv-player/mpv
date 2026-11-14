@@ -55,7 +55,8 @@ static bool set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
         },
     };
 
-    if (sw->fns->set_color && sw->fns->set_color(sw, hint ? &params : NULL)) {
+    bool target = mppl_video_hint_is_target(p->renderer);
+    if (sw->fns->set_color && sw->fns->set_color(sw, hint ? &params : NULL, target)) {
         if (hint) {
             *hint = params.color;
             return true;

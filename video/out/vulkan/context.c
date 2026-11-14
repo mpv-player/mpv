@@ -627,7 +627,7 @@ static void get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
-static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params)
+static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params, bool target)
 {
     struct priv *p = sw->priv;
 
@@ -642,7 +642,7 @@ static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params)
           pl_swapchain_colorspace_hint(p->vk->swapchain,
                                        &(struct pl_color_space){0});
         }
-        bool ret = p->params.set_color(sw->ctx, params);
+        bool ret = p->params.set_color(sw->ctx, params, target);
         // To avoid ping-pong between VK_COLOR_SPACE_PASS_THROUGH_EXT and others,
         // we assume that internal Wayland set_color always work, and update
         // params to fallback values if needed.
