@@ -152,6 +152,10 @@ struct vo_w32_state {
     // UTF-16 decoding state for WM_CHAR and VK_PACKET
     int high_surrogate;
 
+    // HKL of the US English layout for layout-independent key translation
+    HKL layout_indep_hkl;
+    bool layout_indep_hkl_failed;
+
     bool win_force_pos;
 
     ITaskbarList2 *taskbar_list;
@@ -394,7 +398,7 @@ static void clear_keyboard_buffer(void)
     } while (ret < 0);
 }
 
-static int to_unicode(UINT vkey, UINT scancode, const BYTE keys[256])
+static int to_unicode(UINT vkey, UINT scancode, const BYTE keys[256], HKL hkl)
 {
     // This wraps ToUnicode to be stateless and to return only one character
 
@@ -405,7 +409,13 @@ static int to_unicode(UINT vkey, UINT scancode, const BYTE keys[256])
     // Dead keys aren't useful for key shortcuts, so clear the keyboard state
     clear_keyboard_buffer();
 
-    int len = ToUnicode(vkey, scancode, keys, buf, MP_ARRAY_SIZE(buf), 0);
+    int len;
+    if (hkl) {
+        len = ToUnicodeEx(vkey, scancode, keys, buf, MP_ARRAY_SIZE(buf), 0,
+                          hkl);
+    } else {
+        len = ToUnicode(vkey, scancode, keys, buf, MP_ARRAY_SIZE(buf), 0);
+    }
 
     // Return the last complete UTF-16 code point. A negative return value
     // indicates a dead key, however there should still be a non-combining
@@ -418,6 +428,23 @@ static int to_unicode(UINT vkey, UINT scancode, const BYTE keys[256])
         return buf[len - 1];
 
     return 0;
+}
+
+// Get the HKL of the US English layout, so that keys can be translated
+// independently of the currently active keyboard layout. Returns NULL if the
+// layout could not be loaded, in which case the active layout is used.
+static HKL get_layout_indep_hkl(struct vo_w32_state *w32)
+{
+    if (!w32->layout_indep_hkl && !w32->layout_indep_hkl_failed) {
+        w32->layout_indep_hkl = LoadKeyboardLayoutW(L"00000409", 0);
+        if (!w32->layout_indep_hkl) {
+            w32->layout_indep_hkl_failed = true;
+            MP_WARN(w32, "Could not load the US English keyboard layout, "
+                         "--input-layout-independent has no effect. Falling "
+                         "back to the active layout.\n");
+        }
+    }
+    return w32->layout_indep_hkl;
 }
 
 static int decode_key(struct vo_w32_state *w32, UINT vkey, UINT scancode)
@@ -436,18 +463,24 @@ static int decode_key(struct vo_w32_state *w32, UINT vkey, UINT scancode)
         keys[VK_CONTROL] = keys[VK_RCONTROL];
     }
 
-    int c = to_unicode(vkey, scancode, keys);
+    // If layout-independent input is enabled, translate the virtual key as if
+    // the US English layout was active, so bindings match the physical keys
+    // instead of the characters produced by the active layout.
+    HKL hkl = mp_input_layout_independent(w32->input_ctx) ?
+        get_layout_indep_hkl(w32) : NULL;
+
+    int c = to_unicode(vkey, scancode, keys, hkl);
 
     // Some shift states prevent ToUnicode from working or cause it to produce
     // control characters. If this is detected, remove modifiers until it
     // starts producing normal characters.
     if (c < 0x20 && (keys[VK_MENU] & 0x80)) {
         keys[VK_LMENU] = keys[VK_RMENU] = keys[VK_MENU] = 0;
-        c = to_unicode(vkey, scancode, keys);
+        c = to_unicode(vkey, scancode, keys, hkl);
     }
     if (c < 0x20 && (keys[VK_CONTROL] & 0x80)) {
         keys[VK_LCONTROL] = keys[VK_RCONTROL] = keys[VK_CONTROL] = 0;
-        c = to_unicode(vkey, scancode, keys);
+        c = to_unicode(vkey, scancode, keys, hkl);
     }
     if (c < 0x20)
         return 0;

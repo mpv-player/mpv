@@ -205,6 +205,7 @@ struct input_opts {
     int ar_rate;
     int dragging_deadzone;
     bool use_alt_gr;
+    bool layout_independent;
     bool use_gamepad;
     bool use_media_keys;
     bool default_bindings;
@@ -233,6 +234,7 @@ const struct m_sub_options input_config = {
         {"input-doubleclick-time", OPT_INT(doubleclick_time),
          M_RANGE(0, 1000)},
         {"input-right-alt-gr", OPT_BOOL(use_alt_gr)},
+        {"input-layout-independent", OPT_BOOL(layout_independent)},
         {"input-key-fifo-size", OPT_INT(key_fifo_size), M_RANGE(2, 65000)},
         {"input-cursor", OPT_BOOL(enable_mouse_movements)},
         {"input-vo-keyboard", OPT_BOOL(vo_key_input)},
@@ -1842,6 +1844,14 @@ bool mp_input_use_alt_gr(struct input_ctx *ictx)
 {
     input_lock(ictx);
     bool r = ictx->opts->use_alt_gr;
+    input_unlock(ictx);
+    return r;
+}
+
+bool mp_input_layout_independent(struct input_ctx *ictx)
+{
+    input_lock(ictx);
+    bool r = ictx->opts->layout_independent;
     input_unlock(ictx);
     return r;
 }
