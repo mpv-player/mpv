@@ -2292,13 +2292,6 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         MP_VERBOSE(wl, "Setting best primary container from raw primaries: %s\n",
                    m_opt_choice_str(pl_csp_prim_names, wd->csp.primaries));
     }
-    // We don't support extended ranges output where luminance exceeds
-    // maximum nominal luminance range (1.0), so switch to PQ.
-    if (fabsf(wd->csp.hdr.max_luma / wd->ref_luma - 1.0f) > 1e-4f &&
-        !pl_color_transfer_is_hdr(wd->csp.transfer)) {
-        MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
-        wd->csp.transfer = PL_COLOR_TRC_PQ;
-    }
     // The luminances are in the scale of PL_COLOR_SDR_WHITE, unless those of
     // the output are used as they are, with its reference white.
     bool absolute = wl->opts->wl_respect_pq_scale;
