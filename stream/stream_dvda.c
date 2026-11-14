@@ -878,19 +878,19 @@ const stream_info_t stream_info_dvda = {
     .stream_origin = STREAM_ORIGIN_UNSAFE,
 };
 
-// Check if this is likely to be AUDIO_TS.IFO.
+// Check if this is likely to be an IFO file of a DVD-Audio disc.
 static bool check_ifo(const char *path)
 {
-    if (strcasecmp(mp_basename(path), "audio_ts.ifo"))
+    if (!bstr_case_endswith(bstr0(path), bstr0(".ifo")))
         return false;
 
     FILE *temp = fopen(path, "rb");
     if (!temp)
         return false;
 
-    char data[12];
+    char data[8];
     bool r = fread(data, sizeof(data), 1, temp) == 1 &&
-             memcmp(data, "DVDAUDIO-AMG", 12) == 0;
+             memcmp(data, "DVDAUDIO", 8) == 0;
 
     fclose(temp);
     return r;
@@ -929,7 +929,7 @@ static int ifo_dvda_stream_open(stream_t *stream)
     }
 
     // We allow the path to point to a directory containing AUDIO_TS/, a
-    // directory containing AUDIO_TS.IFO, or that file itself.
+    // directory containing AUDIO_TS.IFO, or any IFO file in it.
     if (!check_ifo(path)) {
         // On UNIX, just assume the filename is always uppercase.
         char *npath = mp_path_join(priv, path, "AUDIO_TS.IFO");
