@@ -658,7 +658,11 @@ static void fix_image_params(struct priv *p,
         m.p_w = m.p_h = 1;
     }
 
-    if (use_container && c->par_w > 0 && c->par_h) {
+    if (use_container && c->dar_w > 0 && c->dar_h > 0) {
+        if (!quiet)
+            MP_VERBOSE(p, "Using container display aspect ratio.\n");
+        mp_image_params_set_dsize(&m, c->dar_w, c->dar_h);
+    } else if (use_container && c->par_w > 0 && c->par_h) {
         if (!quiet)
             MP_VERBOSE(p, "Using container aspect ratio.\n");
         m.p_w = c->par_w;
