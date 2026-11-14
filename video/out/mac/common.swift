@@ -45,6 +45,8 @@ class Common: NSObject {
     var cursorVisibilityWanted: Bool = true
     var needsInitialDraw: Bool = true
 
+    var menu = NSMenu()
+
     var title: String = "mpv" {
         didSet { if let window = window { window.title = title } }
     }
@@ -656,8 +658,41 @@ class Common: NSObject {
         case VOCTRL_BEGIN_DRAGGING:
             self.window?.startDragging()
             return VO_TRUE
+        case VOCTRL_SHOW_MENU:
+            showContextMenu()
+            return VO_TRUE
+        case VOCTRL_UPDATE_MENU:
+            guard let data = data, let node = TypeHelper.toNode(data) else { return VO_FALSE }
+            updateContextMenu(node)
+            return VO_TRUE
         default:
             return VO_NOTIMPL
+        }
+    }
+
+    func updateContextMenu(_ node: mpv_node) {
+        let menuItems = ContextMenu.buildNodeItems(node)
+        DispatchQueue.main.async {
+            self.menu = ContextMenu.buildMenu(
+                menuItems, target: self, action: #selector(self.contextMenuAction(_:)))
+        }
+    }
+
+    @objc func contextMenuAction(_ sender: NSMenuItem) {
+        guard let cmd = sender.representedObject as? String, !cmd.isEmpty else { return }
+        self.input?.command(cmd)
+    }
+
+    func showContextMenu() {
+        self.input?.put(key: Int32(MP_INPUT_RELEASE_ALL))
+        DispatchQueue.main.async {
+            if self.menu.items.isEmpty {
+                return
+            }
+
+            guard let view = self.view, let window = self.window else { return }
+            let pt = view.convert(window.mouseLocationOutsideOfEventStream, from: nil)
+            self.menu.popUp(positioning: nil, at: pt, in: view)
         }
     }
 

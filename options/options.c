@@ -1036,7 +1036,7 @@ static const struct MPOpts mp_default_opts = {
     .lua_load_select = true,
     .lua_load_positioning = true,
     .lua_load_commands = true,
-#ifndef _WIN32
+#if !defined(_WIN32) && !(HAVE_COCOA && HAVE_SWIFT)
     .lua_load_context_menu = true,
 #endif
 #endif
