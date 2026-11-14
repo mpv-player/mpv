@@ -57,6 +57,8 @@ enum {
     AO_INIT_EXCLUSIVE = 1 << 3,
     // Initialize with music role.
     AO_INIT_MEDIA_ROLE_MUSIC = 1 << 4,
+    // With spdif formats, fill silence with IEC 61937 pause bursts.
+    AO_INIT_SPDIF_PAUSE_BURSTS = 1 << 5,
 };
 
 struct ao_device_desc {
