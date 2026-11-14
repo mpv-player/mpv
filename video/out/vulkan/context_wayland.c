@@ -57,6 +57,11 @@ static float wayland_vk_preferred_ref_luma(struct ra_ctx *ctx)
     return vo_wayland_preferred_ref_luma(ctx->vo);
 }
 
+static bool wayland_vk_sdr_above_ref_luma(struct ra_ctx *ctx)
+{
+    return vo_wayland_sdr_above_ref_luma(ctx->vo);
+}
+
 static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
@@ -108,6 +113,7 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
         .check_visible = wayland_vk_check_visible,
         .preferred_csp = wayland_vk_preferred_csp,
         .preferred_ref_luma = wayland_vk_preferred_ref_luma,
+        .sdr_above_ref_luma = wayland_vk_sdr_above_ref_luma,
         .set_color    = wayland_vk_set_color,
         .swap_buffers = wayland_vk_swap_buffers,
         .get_vsync = wayland_vk_get_vsync,

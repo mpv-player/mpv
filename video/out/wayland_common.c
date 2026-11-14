@@ -3745,10 +3745,11 @@ static float image_ref_luma(struct vo_wayland_state *wl, const struct pl_color_s
     if (pl_color_transfer_is_hdr(color->transfer))
         return ref_luma;
     // The renderer matches an SDR or linear signal at the reference white of
-    // the output, so that is the peak. In the scale of PL_COLOR_SDR_WHITE the
-    // white of such a signal is at most its peak.
+    // the output, so that is the peak, unless the output shows such a signal
+    // above its reference white. In the scale of PL_COLOR_SDR_WHITE the white
+    // of such a signal is at most its peak.
     float white = color->hdr.max_luma;
-    return output_ref ? white : MPMIN(ref_luma, white);
+    return output_ref && !vo_wayland_sdr_above_ref_luma(wl->vo) ? white : MPMIN(ref_luma, white);
 }
 
 static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color,
@@ -4350,6 +4351,12 @@ struct pl_color_space vo_wayland_preferred_csp(struct vo *vo)
 float vo_wayland_preferred_ref_luma(struct vo *vo)
 {
     return vo->wl->preferred_ref_luma;
+}
+
+bool vo_wayland_sdr_above_ref_luma(struct vo *vo)
+{
+    struct vo_wayland_state *wl = vo->wl;
+    return wl->preferred_csp.hdr.max_luma > wl->preferred_ref_luma && wl->supports_set_luminances;
 }
 
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
