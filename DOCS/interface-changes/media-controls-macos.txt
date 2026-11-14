@@ -1,0 +1,1 @@
+change `--media-controls` to also apply to macOS Now Playing integration
