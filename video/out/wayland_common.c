@@ -4192,6 +4192,13 @@ static int update_window_title(struct vo_wayland_state *wl, const char *title)
     return VO_TRUE;
 }
 
+static void display_error(struct vo_wayland_state *wl)
+{
+    MP_FATAL(wl, "Error occurred on the display fd\n");
+    wl->display_fd = -1;
+    mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
+}
+
 static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int64_t timeout_ns)
 {
     if (wl->display_fd == -1)
@@ -4202,8 +4209,12 @@ static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int64
         {.fd = wl->wakeup_pipe[0], .events = POLLIN },
     };
 
-    while (wl_display_prepare_read(wl->display) != 0)
-        wl_display_dispatch_pending(wl->display);
+    while (wl_display_prepare_read(wl->display) != 0) {
+        if (wl_display_dispatch_pending(wl->display) < 0) {
+            display_error(wl);
+            return;
+        }
+    }
     wl_display_flush(wl->display);
 
     mp_poll(fds, nfds, timeout_ns);
@@ -4214,11 +4225,8 @@ static void wayland_dispatch_events(struct vo_wayland_state *wl, int nfds, int64
         wl_display_cancel_read(wl->display);
     }
 
-    if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-        MP_FATAL(wl, "Error occurred on the display fd\n");
-        wl->display_fd = -1;
-        mp_input_put_key(wl->vo->input_ctx, MP_KEY_CLOSE_WIN);
-    }
+    if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))
+        display_error(wl);
 
     if (fds[1].revents & POLLIN)
         mp_flush_wakeup_pipe(wl->wakeup_pipe[0]);
