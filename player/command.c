@@ -4933,7 +4933,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_TRACKS_CHANGED, "track-list", "current-tracks"),
     E(MP_EVENT_TRACK_SWITCHED, "track-list", "current-tracks"),
     E(MPV_EVENT_IDLE, "*"),
-    E(MPV_EVENT_TICK, "time-pos", "audio-pts", "stream-pos", "avsync",
+    E(MPV_EVENT_TICK, "time-pos", "estimated-frame-number", "audio-pts", "stream-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "total-avsync-change", "audio-speed-correction",
       "video-speed-correction", "vo-delayed-frame-count", "mistimed-frame-count",
