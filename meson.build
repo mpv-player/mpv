@@ -1642,6 +1642,7 @@ if features['cocoa'] and features['swift']
                            'osdep/mac/event_helper.swift',
                            'osdep/mac/input_helper.swift',
                            'osdep/mac/log_helper.swift',
+                           'osdep/mac/menu.swift',
                            'osdep/mac/menu_bar.swift',
                            'osdep/mac/option_helper.swift',
                            'osdep/mac/precise_timer.swift',
