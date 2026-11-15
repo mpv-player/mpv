@@ -73,6 +73,7 @@ extension MenuBar {
 class MenuBar: NSObject, EventSubscriber {
     unowned let appHub: AppHub
     var option: OptionHelper? { return appHub.option }
+    var input: InputHelper { return appHub.input }
     var event: EventHelper? { return appHub.event }
     let mainMenu = NSMenu(title: "Main")
     let servicesMenu = NSMenu(title: "Services")
@@ -339,22 +340,22 @@ class MenuBar: NSObject, EventSubscriber {
 
     @objc func openFiles() {
         guard let files = dialog.openFiles(path: currentDir) else { return }
-        appHub.input.open(files: files)
+        input.open(files: files)
     }
 
     @objc func openPlaylist() {
         guard let file = dialog.openPlaylist(path: currentDir) else { return }
-        appHub.input.command("loadlist \"\(file)\"")
+        input.command("loadlist \"\(file)\"")
     }
 
     @objc func openUrl() {
         guard let file = dialog.openUrl() else { return }
-        appHub.input.open(files: [file])
+        input.open(files: [file])
     }
 
     @objc func command(_ menuItem: MenuItem) {
         guard let menuConfig = menuItem.config else { return }
-        appHub.input.command(menuConfig.command)
+        input.command(menuConfig.command)
     }
 
     @objc func url(_ menuItem: MenuItem) {
