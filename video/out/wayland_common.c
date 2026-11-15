@@ -4504,8 +4504,11 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
         return;
     }
     wl->last_hint_params = *params;
-    if (color_space_changed)
+    if (color_space_changed) {
         set_color_management(wl, &params->color);
+    } else {
+        params->color = wl->current_params.color;
+    }
 #if HAVE_WAYLAND_PROTOCOLS_1_44
     if (color_repr_changed)
         set_color_representation(wl, params);
