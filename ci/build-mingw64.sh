@@ -147,7 +147,7 @@ function build_if_missing {
 ## mpv's dependencies
 
 _iconv () {
-    local ver=1.19
+    local ver=1.19.1
     gettar "https://ftpmirror.gnu.org/gnu/libiconv/libiconv-${ver}.tar.gz" || \
         gettar "https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ver}.tar.gz"
     builddir libiconv-${ver}
@@ -190,7 +190,7 @@ _lcms2 () {
 _lcms2_mark=lib/liblcms2.dll.a
 
 _amf_headers () {
-    local ver=1.5.2
+    local ver=1.5.3
     gettar "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/releases/download/v${ver}/AMF-headers-v${ver}.tar.gz" amf-headers-v${ver}
     pushd amf-headers-v${ver}
     mkdir -p "$prefix_dir/include"
@@ -276,7 +276,7 @@ _libplacebo () {
 _libplacebo_mark=lib/libplacebo.dll.a
 
 _freetype () {
-    local ver=2.14.3
+    local ver=2.15.0
     gettar "https://download.savannah.gnu.org/releases/freetype/freetype-${ver}.tar.xz" || \
         gettar "https://sourceforge.net/projects/freetype/files/freetype-${ver}.tar.xz"
     builddir freetype-${ver}
@@ -287,7 +287,7 @@ _freetype () {
 _freetype_mark=lib/libfreetype.dll.a
 
 _fribidi () {
-    local ver=1.0.16
+    local ver=1.0.18
     gettar "https://github.com/fribidi/fribidi/releases/download/v${ver}/fribidi-${ver}.tar.xz"
     builddir fribidi-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile" \
@@ -298,7 +298,7 @@ _fribidi () {
 _fribidi_mark=lib/libfribidi.dll.a
 
 _harfbuzz () {
-    local ver=14.2.0
+    local ver=15.1.0
     gettar "https://github.com/harfbuzz/harfbuzz/releases/download/${ver}/harfbuzz-${ver}.tar.xz"
     builddir harfbuzz-${ver}
     meson setup .. --cross-file "$prefix_dir/crossfile" \
@@ -340,7 +340,7 @@ _subrandr () {
 _subrandr_mark=lib/libsubrandr.dll.a
 
 _curl () {
-    local ver=8.20.0
+    local ver=8.23.0
     gettar "https://curl.se/download/curl-${ver}.tar.xz"
     builddir curl-${ver}
     cmake .. "${cmake_args[@]}" \
