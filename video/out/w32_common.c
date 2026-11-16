@@ -1075,7 +1075,7 @@ static void update_corners_pref(const struct vo_w32_state *w32);
 static void update_restore_rect(struct vo_w32_state *w32)
 {
     RECT rc = w32->windowed_rect;
-    add_window_borders(w32, w32->window, &rc, IsMaximized(w32->window));
+    add_window_borders(w32, w32->window, &rc, false);
 
     WINDOWPLACEMENT wp = { .length = sizeof(wp) };
     GetWindowPlacement(w32->window, &wp);
