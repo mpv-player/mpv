@@ -197,9 +197,9 @@ static inline int get_system_metrics(struct vo_w32_state *w32, int metric)
     return GetSystemMetricsForDpi(metric, w32->dpi);
 }
 
-static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
+static void adjust_window_rect(struct vo_w32_state *w32, HWND hwnd, RECT *rc, bool maximized)
 {
-    if (!w32->opts->border && !IsMaximized(w32->window))
+    if (!w32->opts->border && !maximized)
         return;
 
     AdjustWindowRectExForDpi(rc, GetWindowLongPtrW(hwnd, GWL_STYLE), 0,
@@ -226,9 +226,9 @@ static bool check_windows10_build(DWORD build)
 }
 
 // Get adjusted title bar height, only relevant for --title-bar=no
-static int get_title_bar_height(struct vo_w32_state *w32)
+static int get_title_bar_height(struct vo_w32_state *w32, bool maximized)
 {
-    mp_assert(w32->opts->border ? !w32->opts->title_bar : IsMaximized(w32->window));
+    mp_assert(w32->opts->border ? !w32->opts->title_bar : maximized);
     UINT visible_border = 0;
     // Only available on Windows 11, check in case it's backported and breaks
     // WM_NCCALCSIZE exception for Windows 10.
@@ -236,17 +236,17 @@ static int get_title_bar_height(struct vo_w32_state *w32)
         DwmGetWindowAttribute(w32->window, DWMWA_VISIBLE_FRAME_BORDER_THICKNESS,
                               &visible_border, sizeof(visible_border));
     }
-    int top_bar = IsMaximized(w32->window)
+    int top_bar = maximized
                       ? get_system_metrics(w32, SM_CYFRAME) +
                         get_system_metrics(w32, SM_CXPADDEDBORDER)
                       : visible_border;
     return top_bar;
 }
 
-static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
+static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc, bool maximized)
 {
     RECT win = *rc;
-    adjust_window_rect(w32, hwnd, rc);
+    adjust_window_rect(w32, hwnd, rc, maximized);
     // Adjust for title bar height that will be hidden in WM_NCCALCSIZE
     // Keep the frame border. On Windows 10 the top border is not retained.
     // It appears that DWM draws the title bar with its full height, extending
@@ -263,17 +263,17 @@ static void add_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
     if (w32->opts->border && !w32->opts->title_bar && !w32->current_fs &&
        (GetWindowLongPtrW(w32->window, GWL_STYLE) & WS_CAPTION))
     {
-        if (!check_windows10_build(22000) && !IsMaximized(w32->window))
+        if (!check_windows10_build(22000) && !maximized)
             *rc = win;
-        rc->top = win.top - get_title_bar_height(w32);
+        rc->top = win.top - get_title_bar_height(w32, maximized);
     }
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
-static void subtract_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc)
+static void subtract_window_borders(struct vo_w32_state *w32, HWND hwnd, RECT *rc, bool maximized)
 {
     RECT b = { 0, 0, 0, 0 };
-    add_window_borders(w32, hwnd, &b);
+    add_window_borders(w32, hwnd, &b, maximized);
     rc->left -= b.left;
     rc->top -= b.top;
     rc->right -= b.right;
@@ -1009,7 +1009,7 @@ static void fit_rect_on_screen(struct vo_w32_state *w32, RECT *rc)
 {
     RECT screen = get_working_area(w32);
     if (w32->opts->border)
-        subtract_window_borders(w32, w32->window, &screen);
+        subtract_window_borders(w32, w32->window, &screen, IsMaximized(w32->window));
 
     RECT window_rect;
     if (GetWindowRect(w32->window, &window_rect))
@@ -1109,7 +1109,7 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
             // restore size.
             SetWindowPlacement(w32->window, &wp);
             wp.rcNormalPosition = w32->windowed_rect;
-            add_window_borders(w32, w32->window, &wp.rcNormalPosition);
+            add_window_borders(w32, w32->window, &wp.rcNormalPosition, IsMaximized(w32->window));
             SetWindowPlacement(w32->window, &wp);
 
             // This is required after updating the window style. And also for us to
@@ -1275,7 +1275,7 @@ static void handle_sizing(struct vo_w32_state *w32, int edge, RECT *rc)
         return;
 
     RECT wb = {0};
-    add_window_borders(w32, w32->window, &wb);
+    add_window_borders(w32, w32->window, &wb, IsMaximized(w32->window));
     // WM_GETMINMAXINFO should be always sent before any WM_SIZING.
     mp_assert(w32->max_track_size.x && w32->max_track_size.y);
     LONG max_w = w32->max_track_size.x - rect_w(wb);
@@ -1479,7 +1479,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 
         RECT *rc = (RECT*)lParam;
         w32->current_rect = *rc;
-        subtract_window_borders(w32, w32->window, &w32->current_rect);
+        subtract_window_borders(w32, w32->window, &w32->current_rect, IsMaximized(w32->window));
         window_resize(w32);
         break;
     case WM_CLOSE:
@@ -1693,9 +1693,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             if (!check_windows10_build(22000) && !IsMaximized(w32->window))
                 return 0;
             RECT r = {0};
-            adjust_window_rect(w32, w32->window, &r);
+            adjust_window_rect(w32, w32->window, &r, IsMaximized(w32->window));
             NCCALCSIZE_PARAMS *p = (LPNCCALCSIZE_PARAMS)lParam;
-            p->rgrc[0].top += r.top + get_title_bar_height(w32);
+            p->rgrc[0].top += r.top + get_title_bar_height(w32, IsMaximized(w32->window));
         }
         break;
     case WM_IME_STARTCOMPOSITION: {
@@ -1898,7 +1898,7 @@ static void window_set_pos(struct vo_w32_state *w32, RECT client_rect)
     if (w32->parent)
         return;
 
-    add_window_borders(w32, w32->window, &client_rect);
+    add_window_borders(w32, w32->window, &client_rect, IsMaximized(w32->window));
     SetWindowPos(w32->window, w32->opts->ontop ? HWND_TOPMOST : HWND_NOTOPMOST,
         client_rect.left, client_rect.top, rect_w(client_rect), rect_h(client_rect),
         SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
@@ -1912,7 +1912,7 @@ static void window_resize(struct vo_w32_state *w32)
 
     RECT r = get_working_area(w32);
     if (!w32->current_fs && !IsMaximized(w32->window) && w32->opts->border)
-        subtract_window_borders(w32, w32->window, &r);
+        subtract_window_borders(w32, w32->window, &r, false);
 
     RECT window_rect;
     if (GetWindowRect(w32->window, &window_rect))
@@ -2438,7 +2438,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             // We need to restore the window first, to get the correct border size.
             SetWindowPlacement(w32->window, &wp);
             wp.rcNormalPosition = w32->windowed_rect;
-            add_window_borders(w32, w32->window, &wp.rcNormalPosition);
+            add_window_borders(w32, w32->window, &wp.rcNormalPosition, IsMaximized(w32->window));
             SetWindowPlacement(w32->window, &wp);
             return VO_TRUE;
         }
