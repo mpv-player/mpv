@@ -1072,6 +1072,17 @@ static void window_resize(struct vo_w32_state *w32);
 static void window_set_pos(struct vo_w32_state *w32, RECT client_rect);
 static void update_corners_pref(const struct vo_w32_state *w32);
 
+static void update_restore_rect(struct vo_w32_state *w32)
+{
+    RECT rc = w32->windowed_rect;
+    add_window_borders(w32, w32->window, &rc, IsMaximized(w32->window));
+
+    WINDOWPLACEMENT wp = { .length = sizeof(wp) };
+    GetWindowPlacement(w32->window, &wp);
+    wp.rcNormalPosition = rc;
+    SetWindowPlacement(w32->window, &wp);
+}
+
 static void update_fullscreen_state(struct vo_w32_state *w32)
 {
     if (w32->parent)
@@ -1108,9 +1119,7 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
             // to maximized, we first enter the maximized state and then set the
             // restore size.
             SetWindowPlacement(w32->window, &wp);
-            wp.rcNormalPosition = w32->windowed_rect;
-            add_window_borders(w32, w32->window, &wp.rcNormalPosition, IsMaximized(w32->window));
-            SetWindowPlacement(w32->window, &wp);
+            update_restore_rect(w32);
 
             // This is required after updating the window style. And also for us to
             // signal new window size to the VO.
