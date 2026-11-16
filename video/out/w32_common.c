@@ -1076,6 +1076,12 @@ static void update_restore_rect(struct vo_w32_state *w32)
 {
     RECT rc = w32->windowed_rect;
     add_window_borders(w32, w32->window, &rc, false);
+    // WINDOWPLACEMENT is relative to the work area, except for tool windows.
+    if (!(GetWindowLongPtrW(w32->window, GWL_EXSTYLE) & WS_EX_TOOLWINDOW)) {
+        MONITORINFO mi = { .cbSize = sizeof(mi) };
+        GetMonitorInfoW(MonitorFromRect(&rc, MONITOR_DEFAULTTOPRIMARY), &mi);
+        OffsetRect(&rc, mi.rcMonitor.left - mi.rcWork.left, mi.rcMonitor.top - mi.rcWork.top);
+    }
 
     WINDOWPLACEMENT wp = { .length = sizeof(wp) };
     GetWindowPlacement(w32->window, &wp);
