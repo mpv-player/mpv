@@ -1070,7 +1070,7 @@ static void update_corners_pref(const struct vo_w32_state *w32);
 
 static void update_restore_rect(struct vo_w32_state *w32)
 {
-    RECT rc = w32->windowed_rect;
+    RECT rc = w32->current_fs ? get_screen_area(w32) : w32->windowed_rect;
     add_window_borders(w32, w32->window, &rc, false);
     // WINDOWPLACEMENT is relative to the work area, except for tool windows.
     if (!(GetWindowLongPtrW(w32->window, GWL_EXSTYLE) & WS_EX_TOOLWINDOW)) {
@@ -1108,36 +1108,32 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
     update_window_style(w32);
     update_corners_pref(w32);
 
-    WINDOWPLACEMENT wp = { .length = sizeof(wp) };
-    GetWindowPlacement(w32->window, &wp);
-    if (!w32->current_fs) {
-        wp.showCmd = maximize ? SW_SHOWMAXIMIZED : SW_SHOWNORMAL;
-
-        if (maximize || IsMaximized(w32->window)) {
-            // We have to do this in two steps because Windows adds transition
-            // animations when maximizing, which start from rcNormalPosition
-            // to the maximized rectangle. To get a valid transition from fullscreen
-            // to maximized, we first enter the maximized state and then set the
-            // restore size.
-            SetWindowPlacement(w32->window, &wp);
-            update_restore_rect(w32);
-
-            // This is required after updating the window style. And also for us to
-            // signal new window size to the VO.
-            SetWindowPos(w32->window, 0, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-            goto done;
-
-        }
-    } else if (IsMaximized(w32->window)) {
-        wp.showCmd = SW_SHOWNORMAL;
+    if (maximize) {
+        // We have to do this in two steps because Windows adds transition
+        // animations when maximizing, which start from rcNormalPosition
+        // to the maximized rectangle. To get a valid transition from fullscreen
+        // to maximized, we first enter the maximized state and then set the
+        // restore size.
+        WINDOWPLACEMENT wp = { .length = sizeof(wp) };
+        GetWindowPlacement(w32->window, &wp);
+        wp.showCmd = SW_SHOWMAXIMIZED;
         SetWindowPlacement(w32->window, &wp);
+        update_restore_rect(w32);
+
+        // This is required after updating the window style. And also for us to
+        // signal new window size to the VO.
+        SetWindowPos(w32->window, 0, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+    } else {
+        if (IsMaximized(w32->window)) {
+            // Restore directly into the new position, skipping the old restore position.
+            update_restore_rect(w32);
+            ShowWindow(w32->window, SW_SHOWNORMAL);
+        }
+        RECT r = w32->current_fs ? get_screen_area(w32) : w32->windowed_rect;
+        window_set_pos(w32, r);
     }
 
-    RECT r = w32->current_fs ? get_screen_area(w32) : w32->windowed_rect;
-    window_set_pos(w32, r);
-
-done:
     signal_events(w32, VO_EVENT_RESIZE);
 }
 
