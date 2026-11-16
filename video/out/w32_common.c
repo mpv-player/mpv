@@ -1469,7 +1469,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         RECT window_rect;
         if (GetWindowRect(w32->window, &window_rect))
             adjust_working_area_for_extended_frame(&r, &window_rect, w32->window);
-        mmi->ptMaxTrackSize = w32->max_track_size = (POINT){rect_w(r), rect_h(r)};
+        mmi->ptMaxTrackSize = w32->max_track_size = (POINT){MPMAX(rect_w(r), mmi->ptMaxSize.x),
+                                                            MPMAX(rect_h(r), mmi->ptMaxSize.y)};
         break;
     }
     case WM_SIZING:
