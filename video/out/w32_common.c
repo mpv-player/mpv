@@ -2107,7 +2107,7 @@ static MP_THREAD_VOID gui_thread(void *ptr)
         if (w32->window)
             install_parent_hook(w32);
     } else {
-        CreateWindowExW(0, (LPWSTR)MAKEINTATOM(cls), MPV_WINDOW_CLASS_NAME,
+        CreateWindowExW(update_exstyle(w32, 0), (LPWSTR)MAKEINTATOM(cls), MPV_WINDOW_CLASS_NAME,
                         update_style(w32, 0), CW_USEDEFAULT, SW_HIDE, 100, 100,
                         0, 0, HINST_THISCOMPONENT, w32);
     }
