@@ -2352,6 +2352,11 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                        changed_option == &vo_opts->title_bar)
             {
                 update_window_style(w32);
+                if (IsMaximized(w32->window) || IsMinimized(w32->window)) {
+                    update_restore_rect(w32);
+                    SetWindowPos(w32->window, 0, 0, 0, 0, 0,
+                                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+                }
                 w32->window_state_changed = true;
                 window_resize(w32);
             } else if (changed_option == &vo_opts->show_in_taskbar) {
