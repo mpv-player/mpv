@@ -2441,14 +2441,11 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
             return VO_TRUE;
 
         if (IsMaximized(w32->window) || IsMinimized(w32->window)) {
-            WINDOWPLACEMENT wp = { .length = sizeof(wp) };
-            GetWindowPlacement(w32->window, &wp);
-            wp.showCmd = SW_RESTORE;
-            // We need to restore the window first, to get the correct border size.
-            SetWindowPlacement(w32->window, &wp);
-            wp.rcNormalPosition = w32->windowed_rect;
-            add_window_borders(w32, w32->window, &wp.rcNormalPosition, IsMaximized(w32->window));
-            SetWindowPlacement(w32->window, &wp);
+            update_restore_rect(w32);
+            // WM_SIZE does not come for a minimized window, so write it here.
+            w32->opts->window_maximized = false;
+            m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_maximized);
+            update_maximized_state(w32);
             return VO_TRUE;
         }
 
