@@ -121,7 +121,6 @@ struct vo_w32_state {
     bool pending_resize;
     bool pending_reset_size;
     bool window_state_changed;
-    bool pending_maximize;
 
     RECT current_rect; // client rect of the window
     RECT windowed_rect; // client rect of the window, when windowed.
@@ -1056,14 +1055,11 @@ static void update_maximized_state(struct vo_w32_state *w32)
             wp.flags &= ~WPF_RESTORETOMAXIMIZED;
         }
         SetWindowPlacement(w32->window, &wp);
-        w32->pending_maximize = w32->opts->window_maximized && w32->current_fs;
         return;
     }
 
-    if (w32->current_fs) {
-        w32->pending_maximize = w32->opts->window_maximized;
+    if (w32->current_fs)
         return;
-    }
 
     ShowWindow(w32->window, w32->opts->window_maximized ? SW_MAXIMIZE : SW_RESTORE);
 }
@@ -1108,17 +1104,16 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
         return;
 
     w32->current_fs = w32->opts->fullscreen;
+    bool maximize = !w32->current_fs && w32->opts->window_maximized;
     update_window_style(w32);
     update_corners_pref(w32);
 
     WINDOWPLACEMENT wp = { .length = sizeof(wp) };
     GetWindowPlacement(w32->window, &wp);
     if (!w32->current_fs) {
-        wp.showCmd = w32->pending_maximize ? SW_SHOWMAXIMIZED : SW_SHOWNORMAL;
+        wp.showCmd = maximize ? SW_SHOWMAXIMIZED : SW_SHOWNORMAL;
 
-        if (w32->pending_maximize || IsMaximized(w32->window)) {
-            w32->pending_maximize = false;
-
+        if (maximize || IsMaximized(w32->window)) {
             // We have to do this in two steps because Windows adds transition
             // animations when maximizing, which start from rcNormalPosition
             // to the maximized rectangle. To get a valid transition from fullscreen
@@ -1137,11 +1132,6 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
     } else if (IsMaximized(w32->window)) {
         wp.showCmd = SW_SHOWNORMAL;
         SetWindowPlacement(w32->window, &wp);
-        w32->pending_maximize = true;
-    } else if (w32->opts->window_maximized) {
-        // If the window was initialized directly in fullscreen mode, restore
-        // it to maximized state later.
-        w32->pending_maximize = true;
     }
 
     RECT r = w32->current_fs ? get_screen_area(w32) : w32->windowed_rect;
@@ -1442,7 +1432,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                 SetWindowPlacement(w32->window, &wp);
                 break;
             case SIZE_RESTORED:
-                w32->opts->window_maximized = w32->pending_maximize && w32->current_fs;
+                // In fullscreen the option tells what to return to.
+                if (!w32->current_fs)
+                    w32->opts->window_maximized = false;
                 w32->opts->window_minimized = false;
                 break;
             }
@@ -2399,7 +2391,6 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                 }
 
                 w32->pending_resize = true;
-                w32->pending_maximize = false;
 
                 if (IsMaximized(w32->window)) {
                     ShowWindow(w32->window, SW_RESTORE);
