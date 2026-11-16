@@ -1095,11 +1095,6 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
         return;
     }
 
-    if (IsMinimized(w32->window)) {
-        w32->pending_resize = true;
-        return;
-    }
-
     if (w32->current_fs == w32->opts->fullscreen)
         return;
 
@@ -1107,6 +1102,12 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
     bool maximize = !w32->current_fs && w32->opts->window_maximized;
     update_window_style(w32);
     update_corners_pref(w32);
+
+    if (IsMinimized(w32->window)) {
+        update_maximized_state(w32);
+        update_restore_rect(w32);
+        return;
+    }
 
     if (maximize) {
         // We have to do this in two steps because Windows adds transition
