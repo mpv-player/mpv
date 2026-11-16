@@ -1092,6 +1092,7 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
 
     w32->current_fs = w32->opts->fullscreen;
     update_window_style(w32);
+    update_corners_pref(w32);
 
     WINDOWPLACEMENT wp = { .length = sizeof(wp) };
     GetWindowPlacement(w32->window, &wp);
@@ -1129,7 +1130,6 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
     }
 
     RECT r = w32->current_fs ? get_screen_area(w32) : w32->windowed_rect;
-    update_corners_pref(w32);
     window_set_pos(w32, r);
 
 done:
