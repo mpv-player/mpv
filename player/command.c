@@ -4613,11 +4613,38 @@ static int set_clipboard(struct MPContext *mpctx, void *arg,
         data.type = CLIPBOARD_DATA_TEXT;
         data.u.text = *(char **)arg;
         break;
+    case CLIPBOARD_DATA_IMAGE: {
+        bstr token = bstr0(*(char **)arg);
+        if (!bstr_eatstart0(&token, "@screenshot") ||
+            (token.len && token.start[0] != ' '))
+            return M_PROPERTY_ERROR;
+        token = bstr_strip(token);
+
+        int mode = SCREENSHOT_SUBTITLES;
+        const struct m_option flags = {
+            .type = &m_option_type_flags,
+            .priv = (void *)screenshot_flags,
+        };
+        if (token.len &&
+            m_option_parse(mpctx->log, &flags, bstr0("screenshot"), token, &mode) < 0)
+            return M_PROPERTY_ERROR;
+        // each-frame is only supported by the screenshot command.
+        if (mode & SCREENSHOT_EACH_FRAME)
+            return M_PROPERTY_ERROR;
+
+        data.type = CLIPBOARD_DATA_IMAGE;
+        data.u.image = screenshot_get_image(mpctx, mode);
+        if (!data.u.image)
+            return M_PROPERTY_UNAVAILABLE;
+        break;
+    }
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
     int ret = mp_clipboard_set_data(mpctx->clipboard, params, &data);
+    if (data.type == CLIPBOARD_DATA_IMAGE)
+        talloc_free(data.u.image);
     if (ret == CLIPBOARD_SUCCESS)
         return M_PROPERTY_OK;
     return ret == CLIPBOARD_UNAVAILABLE ? M_PROPERTY_UNAVAILABLE : M_PROPERTY_ERROR;
@@ -4662,6 +4689,8 @@ static int mp_property_clipboard(void *ctx, struct m_property *prop,
 
         if (!strcmp(key, "text-primary"))
             params.target = CLIPBOARD_TARGET_PRIMARY_SELECTION;
+        else if (!strcmp(key, "image"))
+            params.type = CLIPBOARD_DATA_IMAGE;
         else if (strcmp(key, "text"))
             return M_PROPERTY_UNKNOWN;
 
@@ -4673,12 +4702,43 @@ static int mp_property_clipboard(void *ctx, struct m_property *prop,
                     .type = CONF_TYPE_STRING,
                 };
                 return M_PROPERTY_OK;
+            case CLIPBOARD_DATA_IMAGE:
+                *(struct m_option *)act->arg = (struct m_option){
+                    .type = CONF_TYPE_NODE,
+                };
+                return M_PROPERTY_OK;
             default:
                 return M_PROPERTY_UNKNOWN;
             }
+        case M_PROPERTY_PRINT: {
+            if (params.type != CLIPBOARD_DATA_IMAGE)
+                return M_PROPERTY_NOT_IMPLEMENTED;
+            void *tmp = talloc_new(NULL);
+            struct clipboard_data data = {0};
+            int ret = mp_clipboard_get_data(mpctx->clipboard, &params, &data, tmp);
+            if (ret == CLIPBOARD_SUCCESS && data.type != CLIPBOARD_DATA_IMAGE)
+                ret = CLIPBOARD_FAILED;
+            if (ret == CLIPBOARD_SUCCESS)
+                *(char **)act->arg = talloc_strdup(NULL, data.u.image ? "(image)" : "(none)");
+            talloc_free(tmp);
+            if (ret == CLIPBOARD_SUCCESS)
+                return M_PROPERTY_OK;
+            return ret == CLIPBOARD_UNAVAILABLE ? M_PROPERTY_UNAVAILABLE : M_PROPERTY_ERROR;
+        }
         case M_PROPERTY_GET:
+            if (params.type == CLIPBOARD_DATA_IMAGE)
+                return M_PROPERTY_NOT_IMPLEMENTED;
             return get_clipboard(mpctx, act->arg, &params);
+        case M_PROPERTY_SET_NODE:
         case M_PROPERTY_SET:
+            if (params.type == CLIPBOARD_DATA_IMAGE) {
+                struct mpv_node *node = act->arg;
+                if (node->format != MPV_FORMAT_STRING)
+                    return M_PROPERTY_INVALID_FORMAT;
+                return set_clipboard(mpctx, &node->u.string, &params);
+            }
+            if (act->action == M_PROPERTY_SET_NODE)
+                return M_PROPERTY_NOT_IMPLEMENTED;
             return set_clipboard(mpctx, act->arg, &params);
         default:
             return M_PROPERTY_NOT_IMPLEMENTED;

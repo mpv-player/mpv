@@ -4447,6 +4447,15 @@ Property list
     ``clipboard/text-primary`` (RW)
         The text content in the primary selection (X11 and Wayland only).
 
+    ``clipboard/image`` (W)
+        Write ``@screenshot [<flags>]`` to copy a screenshot to the system
+        clipboard. See `Screenshot Commands`_ for the supported flags and their
+        meaning. The ``each-frame`` flag is not supported.
+        For example: ``set clipboard/image "@screenshot window"``.
+
+        Only screenshot tokens are accepted.
+        Currently, writing images is supported on macOS only.
+
     .. note::
 
         On Wayland with the ``vo`` clipboard backend, the clipboard content is
