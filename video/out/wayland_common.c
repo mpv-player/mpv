@@ -4341,9 +4341,10 @@ struct pl_color_space vo_wayland_preferred_csp(struct vo *vo)
     return wl->preferred_csp;
 }
 
-float vo_wayland_preferred_ref_luma(struct vo *vo)
+float vo_wayland_preferred_ref_luma(struct vo *vo, bool target)
 {
-    return vo->wl->preferred_ref_luma;
+    // The compositor anchors a signal of the source at its own reference white.
+    return target ? vo->wl->preferred_ref_luma : 0;
 }
 
 bool vo_wayland_sdr_above_ref_luma(struct vo *vo)
