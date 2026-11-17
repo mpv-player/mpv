@@ -27,6 +27,7 @@ class Common: NSObject {
     @objc var window: Window?
     var view: View?
     var titleBar: TitleBar?
+    lazy var menuContext = MenuContext(common: self)
 
     var link: CVDisplayLink?
 
@@ -655,6 +656,12 @@ class Common: NSObject {
             return VO_TRUE
         case VOCTRL_BEGIN_DRAGGING:
             self.window?.startDragging()
+            return VO_TRUE
+        case VOCTRL_SHOW_MENU:
+            menuContext.show()
+            return VO_TRUE
+        case VOCTRL_UPDATE_MENU:
+            menuContext.update(TypeHelper.nodeToArray(TypeHelper.toNode(data!)))
             return VO_TRUE
         default:
             return VO_NOTIMPL

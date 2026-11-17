@@ -73,6 +73,7 @@ extension Menu {
 class Menu: NSObject {
     let input: InputHelper
     let option: OptionHelper?
+    var shortcutsEnabled: Bool { return option?.mac.macos_menu_shortcuts ?? true }
     var dynamicMenuItems: [Type: [MenuItem]] = [:]
 
     init(input: InputHelper, option: OptionHelper?) {
@@ -99,7 +100,7 @@ class Menu: NSObject {
 
     func createMenuItem(parentMenu: NSMenu, config: Config) -> MenuItem {
         var item = MenuItem(title: config.name, action: config.action,
-              keyEquivalent: (option?.mac.macos_menu_shortcuts ?? true) ? config.key : "")
+                            keyEquivalent: shortcutsEnabled ? config.key : "")
         item.config = config
         item.target = config.target
         item.keyEquivalentModifierMask = config.modifiers
