@@ -1651,6 +1651,7 @@ if features['cocoa'] and features['swift']
                            'osdep/mac/swift_extensions.swift',
                            'osdep/mac/type_helper.swift',
                            'video/out/mac/common.swift',
+                           'video/out/mac/menu_context.swift',
                            'video/out/mac/title_bar.swift',
                            'video/out/mac/view.swift',
                            'video/out/mac/window.swift')
