@@ -1364,7 +1364,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         signal_events(w32, VO_EVENT_EXPOSE);
         break;
     case WM_MOVE: {
-        w32->moving = false;
         const int x = GET_X_LPARAM(lParam), y = GET_Y_LPARAM(lParam);
         OffsetRect(&w32->current_rect, x - w32->current_rect.left,
                                        y - w32->current_rect.top);
@@ -1379,7 +1378,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
     case WM_MOVING: {
-        w32->moving = true;
         RECT *rc = (RECT*)lParam;
         // Prevent the window from being moved if the window dragging hack
         // is active, and the window is currently in fullscreen.
