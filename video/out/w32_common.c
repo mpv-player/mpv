@@ -527,6 +527,9 @@ static void begin_dragging(struct vo_w32_state *w32)
     w32->dragging = true;
     SendMessage(w32->window, WM_NCLBUTTONDOWN, HTCAPTION, 0);
     w32->dragging = false;
+    // The move loop does not pass on the WM_QUIT.
+    if (w32->destroyed)
+        PostQuitMessage(0);
     SystemParametersInfoW(SPI_SETWINARRANGING, w32->win_arranging, 0, 0);
 
     mp_input_put_key(w32->input_ctx, MP_INPUT_RELEASE_ALL);
