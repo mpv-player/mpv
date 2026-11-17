@@ -1996,20 +1996,22 @@ static void window_resize(struct vo_w32_state *w32)
     if (w32->pending_resize)
         goto set_pos_done;
 
+    bool reset_size = w32->pending_reset_size;
+    w32->pending_reset_size = false;
+    w32->force_pos = false;
+
     if (IsMaximized(w32->window)) {
         // The shell can take the window out of this state to a place of its
         // own (snap, drag), so nothing can wait for that.
-        if (w32->pending_reset_size) {
+        if (reset_size) {
             w32->windowed_rect = client_rect;
             update_restore_rect(w32);
         }
     } else {
-        if (w32->window_bounds_initialized && !w32->pending_reset_size)
+        if (w32->window_bounds_initialized && !reset_size)
             client_rect = w32->current_rect;
         window_set_pos(w32, client_rect);
     }
-    w32->pending_reset_size = false;
-    w32->force_pos = false;
 
 set_pos_done:
     w32->window_bounds_initialized = true;
