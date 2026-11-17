@@ -1924,7 +1924,7 @@ static void window_resize(struct vo_w32_state *w32)
     update_invisible_borders(w32);
 
     RECT r = get_working_area(w32);
-    if (!w32->current_fs && !IsMaximized(w32->window) && w32->opts->border)
+    if (!w32->current_fs && w32->opts->border)
         subtract_window_borders(w32, w32->window, &r, false);
     adjust_working_area_for_extended_frame(w32, &r);
 
@@ -1984,15 +1984,22 @@ static void window_resize(struct vo_w32_state *w32)
             fit_rect_on_screen(w32, &client_rect);
     }
 
-    w32->pending_resize = w32->opts->window_minimized ||
-                          w32->opts->window_maximized || w32->current_fs;
+    w32->pending_resize = w32->opts->window_minimized || w32->current_fs;
     if (w32->pending_resize && w32->window_bounds_initialized)
         goto set_pos_done;
 
-    if (w32->window_bounds_initialized && !w32->pending_reset_size)
-        client_rect = w32->current_rect;
-
-    window_set_pos(w32, client_rect);
+    if (IsMaximized(w32->window)) {
+        // The shell can take the window out of this state to a place of its
+        // own (snap, drag), so nothing can wait for that.
+        if (w32->pending_reset_size) {
+            w32->windowed_rect = client_rect;
+            update_restore_rect(w32);
+        }
+    } else {
+        if (w32->window_bounds_initialized && !w32->pending_reset_size)
+            client_rect = w32->current_rect;
+        window_set_pos(w32, client_rect);
+    }
     w32->pending_reset_size = false;
     w32->force_pos = false;
 
