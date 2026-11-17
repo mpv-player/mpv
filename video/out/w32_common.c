@@ -124,6 +124,7 @@ struct vo_w32_state {
 
     RECT current_rect; // client rect of the window
     RECT windowed_rect; // client rect of the window, when windowed.
+    RECT invisible_borders; // of the window, when windowed.
 
     POINT max_track_size;
 
@@ -824,18 +825,28 @@ static RECT get_working_area(struct vo_w32_state *w32)
                              get_monitor_info(w32).rcWork;
 }
 
-// Adjust working area boundaries to compensate for invisible borders.
-static void adjust_working_area_for_extended_frame(RECT *wa_rect, RECT *wnd_rect, HWND wnd)
+static void update_invisible_borders(struct vo_w32_state *w32)
 {
-    RECT frame = {0};
+    if (w32->current_fs || IsMaximized(w32->window) || IsMinimized(w32->window))
+        return;
 
-    if (DwmGetWindowAttribute(wnd, DWMWA_EXTENDED_FRAME_BOUNDS,
-                              &frame, sizeof(RECT)) == S_OK) {
-        wa_rect->left -= frame.left - wnd_rect->left;
-        wa_rect->top -= frame.top - wnd_rect->top;
-        wa_rect->right += wnd_rect->right - frame.right;
-        wa_rect->bottom += wnd_rect->bottom - frame.bottom;
+    RECT wnd, frame;
+    if (GetWindowRect(w32->window, &wnd) &&
+        DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
+                              &frame, sizeof(frame)) == S_OK)
+    {
+        SetRect(&w32->invisible_borders, frame.left - wnd.left, frame.top - wnd.top,
+                wnd.right - frame.right, wnd.bottom - frame.bottom);
     }
+}
+
+// Adjust working area boundaries to compensate for invisible borders.
+static void adjust_working_area_for_extended_frame(struct vo_w32_state *w32, RECT *wa_rect)
+{
+    wa_rect->left -= w32->invisible_borders.left;
+    wa_rect->top -= w32->invisible_borders.top;
+    wa_rect->right += w32->invisible_borders.right;
+    wa_rect->bottom += w32->invisible_borders.bottom;
 }
 
 static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
@@ -868,7 +879,7 @@ static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
     // Get the work area to let the window snap to taskbar
     wr = get_working_area(w32);
 
-    adjust_working_area_for_extended_frame(&wr, &rect, w32->window);
+    adjust_working_area_for_extended_frame(w32, &wr);
 
     // Let the window to unsnap by changing its position,
     // otherwise it will stick to the screen edges forever
@@ -1008,10 +1019,7 @@ static void fit_rect_on_screen(struct vo_w32_state *w32, RECT *rc)
     RECT screen = get_working_area(w32);
     if (w32->opts->border)
         subtract_window_borders(w32, w32->window, &screen, IsMaximized(w32->window));
-
-    RECT window_rect;
-    if (GetWindowRect(w32->window, &window_rect))
-        adjust_working_area_for_extended_frame(&screen, &window_rect, w32->window);
+    adjust_working_area_for_extended_frame(w32, &screen);
 
     bool adjusted = fit_rect_size(w32, rc, rect_w(screen), rect_h(screen));
 
@@ -1444,9 +1452,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         bool updated = m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_maximized);
         updated |= m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_minimized);
         if (updated || w32->pending_resize) {
-            // We call window resize here, only to recalculate possible window
-            // size after changing the style, but we want to preserve the client
-            // size.
+            // Measures the invisible borders once the window is normal and
+            // applies a resize that waited for this state, the client size
+            // is preserved otherwise.
             w32->window_state_changed = true;
             window_resize(w32);
             events |= VO_EVENT_WIN_STATE;
@@ -1466,9 +1474,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         MINMAXINFO* mmi = (MINMAXINFO *)lParam;
         RECT r = {0, 0, get_system_metrics(w32, SM_CXVIRTUALSCREEN),
                         get_system_metrics(w32, SM_CYVIRTUALSCREEN)};
-        RECT window_rect;
-        if (GetWindowRect(w32->window, &window_rect))
-            adjust_working_area_for_extended_frame(&r, &window_rect, w32->window);
+        adjust_working_area_for_extended_frame(w32, &r);
         mmi->ptMaxTrackSize = w32->max_track_size = (POINT){MPMAX(rect_w(r), mmi->ptMaxSize.x),
                                                             MPMAX(rect_h(r), mmi->ptMaxSize.y)};
         break;
@@ -1908,19 +1914,19 @@ static void window_set_pos(struct vo_w32_state *w32, RECT client_rect)
         SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
     MP_VERBOSE(w32, "Window size changed to: %ld:%ld:%ld:%ld\n",
            client_rect.left, client_rect.top, rect_w(client_rect), rect_h(client_rect));
+    update_invisible_borders(w32);
 }
 
 static void window_resize(struct vo_w32_state *w32)
 {
     struct vo *vo = w32->vo;
 
+    update_invisible_borders(w32);
+
     RECT r = get_working_area(w32);
     if (!w32->current_fs && !IsMaximized(w32->window) && w32->opts->border)
         subtract_window_borders(w32, w32->window, &r, false);
-
-    RECT window_rect;
-    if (GetWindowRect(w32->window, &window_rect))
-        adjust_working_area_for_extended_frame(&r, &window_rect, w32->window);
+    adjust_working_area_for_extended_frame(w32, &r);
 
     struct mp_rect screen = { r.left, r.top, r.right, r.bottom };
     struct vo_win_geometry geo;
