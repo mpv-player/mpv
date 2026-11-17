@@ -97,6 +97,9 @@ jobs:
         id: build
         run: |
           ./ci/build-mingw64.sh meson pack
+          cat artifact/build-details.md >> "$GITHUB_STEP_SUMMARY"
+        env:
+          CONTAINER_ID: ${{ job.container.id }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
