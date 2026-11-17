@@ -1116,6 +1116,10 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
         return;
     }
 
+    // Workaround for DWM, which needs a composition pass to render the frame again.
+    if (!w32->current_fs && w32->opts->border)
+        DwmFlush();
+
     if (maximize) {
         // We have to do this in two steps because Windows adds transition
         // animations when maximizing, which start from rcNormalPosition
