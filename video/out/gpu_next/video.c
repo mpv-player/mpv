@@ -1261,7 +1261,8 @@ enum pl_color_levels mppl_video_get_output_levels(struct mppl_video *p)
 
 bool mppl_video_hint_is_target(struct mppl_video *p)
 {
-    return p->next_opts->target_hint_mode == 0;
+    // Without a hint the frame is rendered for the target in every mode.
+    return !p->next_opts->target_hint || p->next_opts->target_hint_mode == 0;
 }
 
 static void update_tm_viz(struct pl_color_map_params *params,
