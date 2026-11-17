@@ -509,6 +509,12 @@ void cmd_screenshot_to_file(void *p)
     talloc_free(path);
 }
 
+struct mp_image *screenshot_get_image(struct MPContext *mpctx, int mode)
+{
+    bool high_depth = image_writer_high_depth(mpctx->opts->screenshot_image_opts);
+    return screenshot_get(mpctx, mode, high_depth);
+}
+
 void cmd_screenshot(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
