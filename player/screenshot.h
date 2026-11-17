@@ -25,6 +25,15 @@ struct mp_image;
 struct mp_log;
 struct mpv_global;
 
+enum screenshot_flags {
+    SCREENSHOT_VIDEO = 0,
+    SCREENSHOT_SCALED = 1 << 0,
+    SCREENSHOT_SUBTITLES = 1 << 1,
+    SCREENSHOT_OSD = 1 << 2,
+    SCREENSHOT_EACH_FRAME = 1 << 3,
+    SCREENSHOT_WINDOW = SCREENSHOT_SCALED | SCREENSHOT_SUBTITLES | SCREENSHOT_OSD,
+};
+
 // One time initialization at program start.
 void screenshot_init(struct MPContext *mpctx);
 
