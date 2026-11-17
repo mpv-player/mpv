@@ -1410,6 +1410,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_EXITSIZEMOVE:
         w32->moving = false;
+        if (w32->pending_resize)
+            window_resize(w32);
         break;
     case WM_SIZE: {
         const int w = LOWORD(lParam), h = HIWORD(lParam);
@@ -2043,7 +2045,13 @@ finish:
 
 static void gui_thread_reconfig(void *ptr)
 {
-    window_resize(ptr);
+    struct vo_w32_state *w32 = ptr;
+    // Hold any resizes until the window is dropped.
+    if (w32->moving) {
+        w32->pending_resize = true;
+        return;
+    }
+    window_resize(w32);
 }
 
 // Resize the window. On the first call, it's also made visible.
