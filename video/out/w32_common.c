@@ -1422,7 +1422,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (w > 0 && h > 0) {
             w32->current_rect.right = w32->current_rect.left + w;
             w32->current_rect.bottom = w32->current_rect.top + h;
-            if (!w32->current_fs && !IsMaximized(w32->window) && !IsMinimized(w32->window))
+            if (!w32->current_fs && !IsMaximized(w32->window))
                 w32->windowed_rect = w32->current_rect;
             events |= VO_EVENT_RESIZE;
             MP_TRACE(w32, "resize window: %d:%d\n", w, h);
@@ -1699,6 +1699,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         window_resize(w32);
         break;
     case WM_NCCALCSIZE:
+        if (IsMinimized(w32->window))
+            break;
         if (!w32->opts->border && !IsMaximized(w32->window))
             return 0;
 
