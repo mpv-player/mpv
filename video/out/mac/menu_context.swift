@@ -27,6 +27,7 @@ class MenuContext: Menu {
     init(common com: Common) {
         common = com
         super.init(input: com.input ?? InputHelper(), option: com.option)
+        menu.autoenablesItems = false
     }
 
     func update(_ menuArray: [Any?]) {
@@ -74,6 +75,7 @@ class MenuContext: Menu {
                 target: self,
                 command: cmd,
                 checked: state.contains("checked"),
+                disabled: state.contains("disabled") || (cmd.isEmpty && submenu.isEmpty),
                 configs: submenu
             ))
         }
