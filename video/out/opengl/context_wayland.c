@@ -67,7 +67,7 @@ static pl_color_space_t wayland_egl_preferred_csp(struct ra_ctx *ctx)
     return vo_wayland_preferred_csp(ctx->vo);
 }
 
-static float wayland_egl_preferred_ref_luma(struct ra_ctx *ctx)
+static float wayland_egl_preferred_ref_luma(struct ra_ctx *ctx, bool target)
 {
     return vo_wayland_preferred_ref_luma(ctx->vo);
 }

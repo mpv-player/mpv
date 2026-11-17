@@ -662,11 +662,11 @@ static pl_color_space_t target_csp(struct ra_swapchain *sw)
     return (pl_color_space_t){0};
 }
 
-static float target_ref_luma(struct ra_swapchain *sw)
+static float target_ref_luma(struct ra_swapchain *sw, bool target)
 {
     struct priv *p = sw->priv;
     if (p->params.preferred_ref_luma)
-        return p->params.preferred_ref_luma(sw->ctx);
+        return p->params.preferred_ref_luma(sw->ctx, target);
     return 0;
 }
 
