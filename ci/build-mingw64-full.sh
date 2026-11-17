@@ -165,5 +165,19 @@ cp -p include/mpv/*.h artifact-libmpv/include/mpv/
 cp -p "$FFBUILD_PREFIX"/share/java/libbluray-*.jar artifact/
 cp -p "$FFBUILD_PREFIX"/share/java/libbluray-*.jar artifact-libmpv/
 "${FFBUILD_CROSS_PREFIX}strip" artifact/mpv.{exe,com} artifact-libmpv/libmpv*.dll
+# The image has no sources of its libraries. List the ones that meson links,
+# and the ones that have only headers, by pkg-config version.
+prefix_libs() {
+    local deps=$(< build/meson-info/intro-dependencies.json)
+    for lib in $(pkg-config --list-all | cut -d' ' -f1 | sort); do
+        set -- $(pkg-config --libs-only-l "$lib")
+        # -lfoo is libfoo.a there, -l:foo.a is the file foo.a.
+        if [[ $# == 0 || $deps == *"/lib${1#-l}."* || $deps == *"/${1#-l:}\""* ]]; then
+            echo "$lib $(pkg-config --modversion "$lib")"
+        fi
+    done
+}
+build_details build prefix_libs > artifact/build-details.md
+cp -p artifact/build-details.md artifact-libmpv/
 ls -l artifact artifact-libmpv
 endgroup
