@@ -11,3 +11,13 @@ build_subrandr() {
     cargo xtask install --prefix "$@"
     popd
 }
+
+build_details() {
+    ./ci/build-details.py "$1"
+    shift
+    echo "### Packages"
+    echo
+    echo '```'
+    "$@"
+    echo '```'
+}
