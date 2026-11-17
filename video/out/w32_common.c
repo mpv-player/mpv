@@ -1018,7 +1018,7 @@ static void fit_rect_on_screen(struct vo_w32_state *w32, RECT *rc)
 {
     RECT screen = get_working_area(w32);
     if (w32->opts->border)
-        subtract_window_borders(w32, w32->window, &screen, IsMaximized(w32->window));
+        subtract_window_borders(w32, w32->window, &screen, false);
     adjust_working_area_for_extended_frame(w32, &screen);
 
     bool adjusted = fit_rect_size(w32, rc, rect_w(screen), rect_h(screen));
