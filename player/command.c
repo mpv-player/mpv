@@ -4592,6 +4592,17 @@ static int get_clipboard(struct MPContext *mpctx, void *arg,
     }
 }
 
+static const struct m_opt_choice_alternatives screenshot_flags[] = {
+    {"video", SCREENSHOT_VIDEO},
+    {"scaled", SCREENSHOT_SCALED},
+    {"subtitles", SCREENSHOT_SUBTITLES},
+    {"osd", SCREENSHOT_OSD},
+    {"each-frame", SCREENSHOT_EACH_FRAME},
+    {"-", SCREENSHOT_VIDEO},
+    {"window", SCREENSHOT_WINDOW},
+    {0}
+};
+
 static int set_clipboard(struct MPContext *mpctx, void *arg,
                          struct clipboard_access_params *params)
 {
@@ -7855,14 +7866,8 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "screenshot", cmd_screenshot,
         {
-            {"flags", OPT_FLAGS(v.i,
-                {"video", SCREENSHOT_VIDEO},
-                {"scaled", SCREENSHOT_SCALED},
-                {"subtitles", SCREENSHOT_SUBTITLES},
-                {"osd", SCREENSHOT_OSD},
-                {"each-frame", SCREENSHOT_EACH_FRAME},
-                {"-", 0},
-                {"window", SCREENSHOT_WINDOW}),
+            {"flags", OPT_TYPED_FIELD(m_option_type_flags, int, v.i),
+                .priv = (void *)screenshot_flags,
                 OPTDEF_INT(SCREENSHOT_SUBTITLES)},
             // backwards compatibility
             {"legacy", OPT_CHOICE(v.i,
