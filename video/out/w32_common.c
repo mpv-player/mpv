@@ -1984,8 +1984,9 @@ static void window_resize(struct vo_w32_state *w32)
             fit_rect_on_screen(w32, &client_rect);
     }
 
-    w32->pending_resize = w32->opts->window_minimized || w32->current_fs;
-    if (w32->pending_resize && w32->window_bounds_initialized)
+    w32->pending_resize = w32->window_bounds_initialized &&
+                          (w32->opts->window_minimized || w32->current_fs);
+    if (w32->pending_resize)
         goto set_pos_done;
 
     if (IsMaximized(w32->window)) {
