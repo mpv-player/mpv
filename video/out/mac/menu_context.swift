@@ -73,6 +73,7 @@ class MenuContext: Menu {
                 action: type == "submenu" || cmd.isEmpty ? nil : #selector(command(_:)),
                 target: self,
                 command: cmd,
+                checked: state.contains("checked"),
                 configs: submenu
             ))
         }

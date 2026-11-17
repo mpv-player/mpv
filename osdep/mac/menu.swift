@@ -44,6 +44,7 @@ extension Menu {
         let target: AnyObject?
         let command: String
         let url: String
+        let checked: Bool
         var configs: [Config]
 
         init(
@@ -55,6 +56,7 @@ extension Menu {
             target: AnyObject? = nil,
             command: String = "",
             url: String = "",
+            checked: Bool = false,
             configs: [Config] = []
         ) {
             self.name = name
@@ -65,6 +67,7 @@ extension Menu {
             self.target = target
             self.command = command
             self.url = url
+            self.checked = checked
             self.configs = configs
         }
     }
@@ -104,6 +107,7 @@ class Menu: NSObject {
         item.config = config
         item.target = config.target
         item.keyEquivalentModifierMask = config.modifiers
+        item.state = config.checked ? .on : .off
 
         if config.type == .separator {
             item = MenuItem.separator() as? MenuItem ?? item
