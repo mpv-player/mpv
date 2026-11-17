@@ -48,7 +48,7 @@ struct clipboard_data {
     enum clipboard_data_type type;
     union {
         char *text;
-        struct mp_image *image;
+        struct mp_image *image; // NULL if no image is present on a successful read.
     } u;
 };
 

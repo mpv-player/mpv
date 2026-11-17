@@ -33,6 +33,7 @@ class Clipboard: NSObject {
                    tallocCtx: UnsafeMutableRawPointer) -> clipboard_result {
         switch params.pointee.type {
         case CLIPBOARD_DATA_TEXT: return fillWithString(out, tallocCtx)
+        case CLIPBOARD_DATA_IMAGE: return fillWithImage(out, tallocCtx)
         default: break
         }
 
@@ -66,6 +67,45 @@ class Clipboard: NSObject {
             out.pointee.u.text = ta_xstrdup(tallocCtx, $0)
         }
 
+        return CLIPBOARD_SUCCESS
+    }
+
+    func fillWithImage(_ out: UnsafeMutablePointer<clipboard_data>,
+                       _ tallocCtx: UnsafeMutableRawPointer) -> clipboard_result {
+        out.pointee.type = CLIPBOARD_DATA_IMAGE
+        out.pointee.u.image = nil
+        guard let image = NSImage(pasteboard: pasteboard) else {
+            return CLIPBOARD_SUCCESS
+        }
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let width = Int32(exactly: cgImage.width),
+              let height = Int32(exactly: cgImage.height),
+              let bitmap = mp_image_alloc(Int32(IMGFMT_RGBA.rawValue), width, height) else {
+            return CLIPBOARD_FAILED
+        }
+        ta_set_parent(bitmap, tallocCtx)
+
+        // Normalize clipboard images to 8-bit, premultiplied sRGB RGBA.
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(data: bitmap.pointee.planes.0,
+                  width: cgImage.width, height: cgImage.height,
+                  bitsPerComponent: 8, bytesPerRow: Int(bitmap.pointee.stride.0),
+                  space: colorSpace,
+                  bitmapInfo: CGBitmapInfo.byteOrder32Big.rawValue |
+                      CGImageAlphaInfo.premultipliedLast.rawValue) else {
+            ta_free(bitmap)
+            return CLIPBOARD_FAILED
+        }
+        context.setBlendMode(.copy)
+        context.draw(cgImage, in: CGRect(x: 0, y: 0,
+            width: cgImage.width, height: cgImage.height))
+        bitmap.pointee.params.color.primaries = PL_COLOR_PRIM_BT_709
+        bitmap.pointee.params.color.transfer = PL_COLOR_TRC_SRGB
+        bitmap.pointee.params.repr.sys = PL_COLOR_SYSTEM_RGB
+        bitmap.pointee.params.repr.levels = PL_COLOR_LEVELS_FULL
+        bitmap.pointee.params.repr.alpha = PL_ALPHA_PREMULTIPLIED
+        mp_image_params_guess_csp(&bitmap.pointee.params)
+        out.pointee.u.image = bitmap
         return CLIPBOARD_SUCCESS
     }
 
