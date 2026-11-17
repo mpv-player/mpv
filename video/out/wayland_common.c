@@ -3752,7 +3752,7 @@ static float image_ref_luma(struct vo_wayland_state *wl, const struct pl_color_s
 }
 
 static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color,
-                                 float ref_luma)
+                                 float ref_luma, bool target)
 {
     if (!wl->color_surface || !wl->color_queue || !wl->supports_parametric)
         goto nosupport;
@@ -3821,7 +3821,14 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
             }
             break;
         case PL_COLOR_TRC_HLG:
-            // Leave default for HLG, we wouldn't output it directly, except for pass-through
+            // HLG that is made for the output is encoded for its black and
+            // peak. HLG of the source keeps the defaults.
+            if (target && use_metadata) {
+                wp_image_description_creator_params_v1_set_luminances(image_creator_params,
+                    lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma), ref_luma);
+                MP_VERBOSE(wl, "Setting HLG luminance range: min=%.5f, max=%.2f, ref=%.2f\n",
+                    hdr.min_luma, hdr.max_luma, ref_luma);
+            }
             break;
         default:
             // Set SDR luminance range for all relative transfers
@@ -4574,7 +4581,7 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
     wl->last_hint_params = *params;
     wl->last_hint_ref_luma = ref_luma;
     if (color_space_changed) {
-        set_color_management(wl, &params->color, ref_luma);
+        set_color_management(wl, &params->color, ref_luma, target);
     } else {
         params->color = wl->current_params.color;
     }
