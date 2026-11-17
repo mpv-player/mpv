@@ -1441,8 +1441,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
         }
 
-        bool updated = (m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_maximized) ||
-                        m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_minimized));
+        bool updated = m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_maximized);
+        updated |= m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_minimized);
         if (updated || w32->pending_resize) {
             // We call window resize here, only to recalculate possible window
             // size after changing the style, but we want to preserve the client
