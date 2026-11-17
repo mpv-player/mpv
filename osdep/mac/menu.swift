@@ -45,6 +45,7 @@ extension Menu {
         let command: String
         let url: String
         let checked: Bool
+        let disabled: Bool
         var configs: [Config]
 
         init(
@@ -57,6 +58,7 @@ extension Menu {
             command: String = "",
             url: String = "",
             checked: Bool = false,
+            disabled: Bool = false,
             configs: [Config] = []
         ) {
             self.name = name
@@ -68,6 +70,7 @@ extension Menu {
             self.command = command
             self.url = url
             self.checked = checked
+            self.disabled = disabled
             self.configs = configs
         }
     }
@@ -91,6 +94,7 @@ class Menu: NSObject {
 
             if config.type <= .menuServices {
                 let menu = createSubmenu(for: config)
+                menu.autoenablesItems = parentMenu.autoenablesItems
                 item.submenu = menu
                 createMenu(parentMenu: menu, configs: config.configs)
             }
@@ -108,6 +112,7 @@ class Menu: NSObject {
         item.target = config.target
         item.keyEquivalentModifierMask = config.modifiers
         item.state = config.checked ? .on : .off
+        item.isEnabled = !config.disabled
 
         if config.type == .separator {
             item = MenuItem.separator() as? MenuItem ?? item
