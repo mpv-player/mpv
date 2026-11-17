@@ -1107,6 +1107,9 @@ static void update_fullscreen_state(struct vo_w32_state *w32)
 
     w32->current_fs = w32->opts->fullscreen;
     bool maximize = !w32->current_fs && w32->opts->window_maximized;
+    // Start right after a DWM composition pass, or the frame removal can show before the move.
+    if (w32->current_fs && !IsMinimized(w32->window))
+        DwmFlush();
     update_window_style(w32);
     update_corners_pref(w32);
 
