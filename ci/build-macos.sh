@@ -27,3 +27,13 @@ meson setup build $common_args \
 meson compile -C build -j4
 meson install -C build
 ./build/mpv -v --no-config
+
+bundled_packages() {
+    {
+        TOOLS/osxbundle.py --list-libs build/mpv |
+            sed -E 's|.*/Cellar/([^/]+)/([^/]+)/.*|\1 \2|'
+        # Nothing links to MoltenVK, the bundle has it for the Vulkan loader.
+        brew list --versions molten-vk
+    } | sort -u
+}
+build_details build bundled_packages > build-details.md

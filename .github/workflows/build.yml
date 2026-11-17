@@ -425,6 +425,7 @@ jobs:
         id: build
         run: |
           ./ci/build-macos.sh
+          cat build-details.md >> "$GITHUB_STEP_SUMMARY"
         env:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
           SWIFT_FLAGS: "${{ matrix.swift }}"
@@ -464,7 +465,9 @@ jobs:
         if: ${{ matrix.target-os != 'test' }}
         with:
           name: ${{ steps.artifact.outputs.name }}
-          path: mpv.tar.gz
+          path: |
+            mpv.tar.gz
+            build-details.md
 
       - name: Save Cache
         uses: actions/cache/save@v6
