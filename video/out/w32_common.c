@@ -2390,6 +2390,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
                     w32->opts->window_maximized = false;
                     m_config_cache_write_opt(w32->opts_cache, &w32->opts->window_maximized);
                     signal_events(w32, VO_EVENT_WIN_STATE);
+                    if (IsMinimized(w32->window))
+                        update_maximized_state(w32);
                 }
 
                 w32->pending_resize = true;
