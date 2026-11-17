@@ -283,6 +283,7 @@ jobs:
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
           ./ci/build-win32.ps1
+          Get-Content build/build-details.md >> $env:GITHUB_STEP_SUMMARY
 
       - name: Print build log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -321,6 +322,7 @@ jobs:
             build/mpv.???
             build/mpv-*.bat
             build/vulkan-*.dll
+            build/build-details.md
             !build/mpv.lib
             !build/mpv.pdb
 

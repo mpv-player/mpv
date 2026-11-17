@@ -364,4 +364,5 @@ meson setup build `
 ninja -C build mpv.exe mpv.com
 cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
 cp ./etc/mpv-*.bat ./build
+python ci/build-details.py build | Out-File -Encoding ascii build/build-details.md
 ./build/mpv.com -v --no-config
