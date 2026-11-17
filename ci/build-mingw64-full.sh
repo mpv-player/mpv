@@ -103,7 +103,9 @@ group "Building cppwinrt"
 # Windows metadata that windows-rs carries.
 cppwinrt_ver=2.0.250303.1
 windows_rs_ver=73
-wget -q "https://github.com/microsoft/cppwinrt/archive/${cppwinrt_ver}.tar.gz" -O - | tar -xz
+wget -q "https://github.com/microsoft/cppwinrt/archive/${cppwinrt_ver}.tar.gz" \
+     -O "cppwinrt-$cppwinrt_ver.tar.gz"
+tar -xzf "cppwinrt-$cppwinrt_ver.tar.gz"
 git clone --depth=1 --filter=blob:none --sparse -b "$windows_rs_ver" \
     https://github.com/microsoft/windows-rs.git
 git -C windows-rs sparse-checkout set crates/libs/bindgen/default
