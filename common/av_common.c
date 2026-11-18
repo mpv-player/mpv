@@ -27,6 +27,7 @@
 #include <libavutil/cpu.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libplacebo/utils/libav.h>
 
 #include "config.h"
 
@@ -90,6 +91,14 @@ AVCodecParameters *mp_codec_params_to_av(const struct mp_codec_params *c)
     // Video only
     avp->width = c->disp_w;
     avp->height = c->disp_h;
+    if (c->type == STREAM_VIDEO) {
+        // Container color metadata. Most decoders ignore this, but some (e.g. MediaCodec)
+        // need it as a hint when the bitstream itself doesn't signal it.
+        avp->color_primaries = pl_primaries_to_av(c->color.primaries);
+        avp->color_trc = pl_transfer_to_av(c->color.transfer);
+        avp->color_space = pl_system_to_av(c->repr.sys);
+        avp->color_range = pl_levels_to_av(c->repr.levels);
+    }
 
     // Audio only
     avp->sample_rate = c->samplerate;
