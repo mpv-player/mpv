@@ -2141,6 +2141,9 @@ static MP_THREAD_VOID gui_thread(void *ptr)
     w32->menu_ctx = mp_win32_menu_init(w32->window);
     update_dark_mode(w32);
     update_corners_pref(w32);
+    // Workaround for DWM, which stops rendering the frame in fullscreen and resumes it late.
+    DwmSetWindowAttribute(w32->window, DWMWA_NCRENDERING_POLICY,
+                          &(int){DWMNCRP_ENABLED}, sizeof(int));
     if (w32->opts->window_affinity)
         update_affinity(w32);
     if (w32->opts->backdrop_type)
