@@ -248,6 +248,7 @@ typedef struct MPOpts {
     bool untimed;
     char *stream_dump;
     bool stop_playback_on_init_failure;
+    int gpu_loss_recovery_attempts;
     int loop_times;
     int loop_file;
     bool shuffle;
