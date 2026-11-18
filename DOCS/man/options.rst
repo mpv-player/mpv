@@ -6025,7 +6025,7 @@ them.
         A slightly sharpened version of ``ewa_lanczos``. This is the default
         when using the ``high-quality`` profile. Blur value determined by method
         originally developed by Nicolas Robidoux for Image Magick, see:
-        https://www.imagemagick.org/discourse-server/viewtopic.php?p=89068#p89068
+        https://web.archive.org/web/20200809113547/https://www.imagemagick.org/discourse-server/viewtopic.php?p=89068#p89068
 
     ``ewa_lanczos4sharpest``
         Very sharp scaler, but also slightly slower than ``ewa_lanczossharp``.
@@ -6034,7 +6034,7 @@ them.
         built-in anti-ringing, so no extra action needs to be taken.
 
         For more details, see:
-        https://www.imagemagick.org/discourse-server/viewtopic.php?p=128587#p128587
+        https://web.archive.org/web/20191017150407/http://www.imagemagick.org/discourse-server/viewtopic.php?p=128587#p128587
 
     ``mitchell``
         Mitchell-Netravali. Piecewise cubic filter with a support of radius 2.0.
@@ -6224,7 +6224,7 @@ them.
     linearization, so the ``LINEAR`` rendering step fires in both cases)
 
     For more information about sigmoidization, see:
-    https://imagemagick.org/Usage/resize/#resize_sigmoidal
+    https://usage.imagemagick.org/resize/#resize_sigmoidal
 
 ``--sigmoid-center``
     The center of the sigmoid curve used for ``--sigmoid-upscaling``, must be a
