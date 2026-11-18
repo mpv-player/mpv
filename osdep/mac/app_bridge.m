@@ -88,6 +88,9 @@ const struct m_sub_options macos_conf = {
             {"srgb-linear", MAC_CSP_SRGB_LINEAR},
             {"rgb-linear", MAC_CSP_RGB_LINEAR},
             {"adobe", MAC_CSP_ADOBE})},
+        {"cocoa-cb-renderer", OPT_CHOICE(cocoa_cb_renderer,
+            {"gpu", MAC_RENDERER_GPU},
+            {"gpu-next", MAC_RENDERER_GPU_NEXT})},
         {0}
     },
     .size = sizeof(struct macos_opts),
@@ -103,6 +106,7 @@ const struct m_sub_options macos_conf = {
         .cocoa_cb_sw_renderer = -1,
         .cocoa_cb_10bit_context = true,
         .cocoa_cb_output_csp = MAC_CSP_AUTO,
+        .cocoa_cb_renderer = MAC_RENDERER_GPU_NEXT,
     },
 };
 

@@ -24,19 +24,22 @@ let glDummy: @convention(c) () -> Void = {}
 class LibmpvHelper {
     var log: LogHelper
     var mpv: OpaquePointer?
+    var option: OptionHelper
     var mpvRenderContext: OpaquePointer?
     var fbo: GLint = 1
     let uninitLock = NSLock()
 
-    init(_ mpv: OpaquePointer, _ log: LogHelper) {
+    init(_ mpv: OpaquePointer, _ option: OptionHelper, _ log: LogHelper) {
         self.mpv = mpv
+        self.option = option
         self.log = log
     }
 
     func initRender() {
         let advanced: CInt = 1
         let api = UnsafeMutableRawPointer(mutating: (MPV_RENDER_API_TYPE_OPENGL as NSString).utf8String)
-        let renderer = UnsafeMutableRawPointer(mutating: (MPV_RENDER_RENDERER_GPU as NSString).utf8String)
+        let renderer = UnsafeMutableRawPointer(mutating: ((option.mac.cocoa_cb_renderer == MAC_RENDERER_GPU ?
+            MPV_RENDER_RENDERER_GPU : MPV_RENDER_RENDERER_GPU_NEXT) as NSString).utf8String)
         let pAddress = mpv_opengl_init_params(get_proc_address: getProcAddress,
                                               get_proc_address_ctx: nil)
 

@@ -7141,6 +7141,16 @@ them.
 
     macOS and cocoa-cb only.
 
+``--cocoa-cb-renderer=<renderer>``
+    This sets the renderer used by libmpv when using cocoa-cb.
+
+    ``<renderer>`` can be one of the following:
+
+    :gpu:       The renderer of the gpu video output.
+    :gpu-next:  The renderer of the gpu-next video output (default).
+
+    macOS and cocoa-cb only.
+
 ``--macos-title-bar-appearance=<appearance>``
     Sets the appearance of the title bar (default: auto). Not all combinations
     of appearances and ``--macos-title-bar-material`` materials make sense or
