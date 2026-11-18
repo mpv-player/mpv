@@ -1474,6 +1474,25 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         update_display_info(w32);
         break;
     }
+    case WM_WINDOWPOSCHANGING: {
+        // Workaround for Windows 10 1809, which shrinks a snapped window by its
+        // invisible borders after its frame was removed, also in fullscreen.
+        WINDOWPOS *wp = (WINDOWPOS *)lParam;
+        if (!w32->current_fs || (wp->flags & SWP_NOSIZE) || check_windows10_build(18362))
+            break;
+        RECT fs = get_screen_area(w32);
+        RECT rc = {wp->x, wp->y, wp->x + wp->cx, wp->y + wp->cy};
+        RECT inside;
+        if (!EqualRect(&rc, &fs) && IntersectRect(&inside, &rc, &fs) && EqualRect(&inside, &rc)) {
+            MP_VERBOSE(w32, "Keeping the fullscreen size, ignoring: %d:%d:%d:%d flags 0x%x\n",
+                       wp->x, wp->y, wp->cx, wp->cy, wp->flags);
+            wp->x = fs.left;
+            wp->y = fs.top;
+            wp->cx = rect_w(fs);
+            wp->cy = rect_h(fs);
+        }
+        break;
+    }
     case WM_GETMINMAXINFO: {
         if (w32->parent)
             break;
