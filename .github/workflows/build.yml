@@ -353,15 +353,15 @@ jobs:
           - os: "macos-26-intel"
             target-os: "macos-26-intel"
             homebrew: "d2c61af67cd857f003d0293cf1d26b59351a85f7"
-          - os: "macos-26"
-            target-os: "test"
-            swift: "-target arm64-apple-macosx10.15"
-            target: "10.15"
           - os: "xcode-27"
             target-os: "macos-27-arm"
             xcode: "Xcode_27.2"
             swift: "-target arm64-apple-macosx27.2"
             target: "27.2"
+          - os: "xcode-27"
+            target-os: "test"
+            swift: "-target arm64-apple-macosx10.15"
+            target: "10.15"
     steps:
       - uses: actions/checkout@v7
 
