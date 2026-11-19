@@ -288,6 +288,8 @@ Shows the A/V difference and the presentation delay.
 When toggled, each value is shown as its mean over the last ``sync_window``
 seconds, followed by the standard deviation. Marks on the upper edge of a graph
 show the frames that were dropped (red), delayed (orange) or mistimed (yellow).
+The bars at its right end show the share of that time the value spent at each
+height.
 
 This page is always shown as with ``persistent_overlay=yes``.
 
