@@ -955,7 +955,9 @@ local function add_video_out(s)
                     no_prefix_markup=true, nl="", indent=" "}, nil, true)
     append(s, mp.get_property_native("current-gpu-context"),
            {prefix="Context:", nl="", indent=o.prefix_sep .. o.prefix_sep})
-    append_sync(s, "avsync", {prefix="A-V:"})
+    local av = append_sync(s, "avsync", {prefix="A-V:"})
+    append_sync(s, "vo-presentation-delay", {prefix="Presentation:", nl=av and "" or o.nl,
+                                             indent=av and o.prefix_sep .. o.prefix_sep})
     append_fps(s, "display-fps", "estimated-display-fps")
     if append_property(s, "decoder-frame-drop-count",
                        {prefix="Dropped Frames:", suffix=" (decoder)"}) then
