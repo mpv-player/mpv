@@ -168,6 +168,11 @@ Configurable Options
     Show the mean of each value on the sync page as a line in its graph, with a
     band of one standard deviation around it.
 
+``plot_sync_every_frame``
+    Default: no
+
+    Also redraw the sync page with every video frame. This takes more CPU time.
+
 ``flush_graph_data``
     Default: yes
 
