@@ -46,6 +46,7 @@ local o = {
     plot_vsync_jitter = false,
     plot_cache = true,
     plot_tonemapping_lut = false,
+    plot_sync_dashes = false,
     skip_frames = 5,
     global_max = true,
     flush_graph_data = true,         -- clear data buffers when toggling
@@ -536,6 +537,14 @@ local function sync_graph(events, prop, title, x, y, width, last)
         draw(sync_colors.trace, "B0", outline(top, 0, bottom, 0))
         draw(sync_colors.trace, "00",
              outline(top, 0, top, line) .. outline(bottom, -line, bottom, 0))
+    elseif o.plot_sync_dashes then
+        local dashes = {}
+        sync_values(prop, function(value, from, to)
+            local vy = pos_y(value)
+            dashes[#dashes+1] = rect(pos_x(from), vy - line * 0.625,
+                                     max(pos_x(to) - hair, pos_x(from) + line), vy + line * 0.625)
+        end)
+        draw(sync_colors.trace, "00", table.concat(dashes))
     else
         draw(sync_colors.trace, "00", outline(top, 0, bottom, 0))
     end

@@ -157,6 +157,11 @@ Configurable Options
 
     Enable tone-mapping LUT visualization automatically. Only when toggled.
 
+``plot_sync_dashes``
+    Default: no
+
+    Draw one dash per value in the graphs of the sync page instead of a line.
+
 ``flush_graph_data``
     Default: yes
 
