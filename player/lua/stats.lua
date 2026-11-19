@@ -1238,7 +1238,6 @@ end
 -- Returns an ASS string with "normal" stats
 local function default_stats()
     local stats = {}
-    eval_ass_formatting()
     add_header(stats)
     add_file(stats, true, false)
     add_video_out(stats)
@@ -1250,7 +1249,6 @@ end
 -- Returns an ASS string with extended VO stats
 local function vo_stats()
     local header, content = {}, {}
-    eval_ass_formatting()
     add_header(header)
     append_perfdata(header, content, true)
     header = {table.concat(header)}
@@ -1261,7 +1259,6 @@ local kbinfo_lines = nil
 local function keybinding_info(after_scroll, bindlist)
     local header = {}
     local page = pages[o.key_page_4]
-    eval_ass_formatting()
     add_header(header)
     local prefix = bindlist and page.desc or page.desc .. ":" .. scroll_hint(true)
     append(header, "", {prefix=prefix, nl="", indent=""})
@@ -1384,7 +1381,6 @@ end
 
 local function track_info()
     local h, c = {}, {}
-    eval_ass_formatting()
     add_header(h)
     local desc = pages[o.key_page_5].desc
     append(h, "", {prefix=format("%s:%s", desc, scroll_hint()), nl="", indent=""})
@@ -1401,7 +1397,6 @@ end
 
 local function perf_stats()
     local header, content = {}, {}
-    eval_ass_formatting()
     add_header(header)
     local page = pages[o.key_page_0]
     append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint()), nl="", indent=""})
@@ -1421,7 +1416,6 @@ end
 local function cache_stats()
     local stats = {}
 
-    eval_ass_formatting()
     add_header(stats)
     append(stats, "", {prefix="Cache Info:", nl="", indent=""})
 
@@ -1590,6 +1584,7 @@ end
 
 -- Call the function for `page` and print it to OSD
 local function print_page(page, after_scroll)
+    eval_ass_formatting()
     -- the page functions assume we start in ass-enabled mode.
     -- that's true for mp.set_osd_ass, but not for mp.osd_message.
     local ass_content = pages[page].f(after_scroll)
@@ -1886,6 +1881,7 @@ if o.bindlist ~= "no" then
         end
         o.ass_formatting = false
         o.no_ass_indent = " "
+        eval_ass_formatting()
         mp.osd_message(keybinding_info(false, true))
         -- wait for next tick to print status line and flush it without clearing
         mp.add_timeout(0, function()
