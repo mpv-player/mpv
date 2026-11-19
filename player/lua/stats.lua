@@ -359,17 +359,22 @@ local function sync_mean_dev(prop)
     return mean, math.sqrt(squares / time)
 end
 
+local sync_units = {
+    ["avsync"] = {offset = 0, scale = 1e3, digits = 2, suffix = " ms"},
+    ["vo-presentation-delay"] = {offset = 0, scale = 1e3, digits = 2, suffix = " ms"},
+}
+
 local function append_sync(s, prop, attr)
-    local value = mp.get_property_number(prop)
+    local value, unit = mp.get_property_number(prop), sync_units[prop]
     if not value then
         return false
     end
     local mean, dev = sync_mean_dev(prop)
-    local text = format("%+.2f", (mean or value) * 1e3)
+    local text = format("%+." .. unit.digits .. "f", ((mean or value) - unit.offset) * unit.scale)
     if dev then
-        text = text .. format(" ±%.2f", dev * 1e3)
+        text = text .. format(" ±%." .. unit.digits .. "f", dev * unit.scale)
     end
-    attr.suffix = " ms"
+    attr.suffix = unit.suffix
     return append(s, text, attr)
 end
 
