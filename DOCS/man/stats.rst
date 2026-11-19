@@ -162,6 +162,12 @@ Configurable Options
 
     Draw one dash per value in the graphs of the sync page instead of a line.
 
+``plot_sync_band``
+    Default: no
+
+    Show the mean of each value on the sync page as a line in its graph, with a
+    band of one standard deviation around it.
+
 ``flush_graph_data``
     Default: yes
 

@@ -1,3 +1,4 @@
 add `stats-sync_window` script-opt
 add a page 6 to stats.lua with sync graphs
 add `stats-plot_sync_dashes` script-opt
+add `stats-plot_sync_band` script-opt
