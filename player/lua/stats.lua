@@ -136,6 +136,7 @@ local function init_buffers()
 end
 local cache_ahead_buf, cache_speed_buf
 local sync_props = {"avsync", "vo-presentation-delay",
+                    "video-speed-correction", "audio-speed-correction",
                     "frame-drop-count", "decoder-frame-drop-count",
                     "vo-delayed-frame-count", "mistimed-frame-count"}
 local sync
@@ -366,6 +367,8 @@ end
 local sync_units = {
     ["avsync"] = {offset = 0, scale = 1e3, digits = 2, suffix = " ms"},
     ["vo-presentation-delay"] = {offset = 0, scale = 1e3, digits = 2, suffix = " ms"},
+    ["video-speed-correction"] = {offset = 1, scale = 100, digits = 4, suffix = "%"},
+    ["audio-speed-correction"] = {offset = 1, scale = 100, digits = 4, suffix = "%"},
 }
 
 local function append_sync(s, prop, attr)
@@ -1738,7 +1741,8 @@ local function sync_stats()
                         indent=o.indent .. mark(1)}) then
         append_property(stats, "frame-drop-count", {suffix=" (output)", nl="", indent=""})
     end
-    if mp.get_property_bool("display-sync-active", false) then
+    local display_sync = mp.get_property_bool("display-sync-active", false)
+    if display_sync then
         append_property(stats, "vo-delayed-frame-count",
                         {prefix="Delayed:", nl="", indent=o.prefix_sep .. o.prefix_sep .. mark(2)})
         append_property(stats, "mistimed-frame-count",
@@ -1746,6 +1750,10 @@ local function sync_stats()
     end
 
     local values = {{"avsync", "A-V:"}, {"vo-presentation-delay", "Presentation:"}}
+    if display_sync then
+        values[#values+1] = {"video-speed-correction", "Video Speed:"}
+        values[#values+1] = {"audio-speed-correction", "Audio Speed:"}
+    end
     if not graphs then
         for _, value in ipairs(values) do
             append_sync(stats, value[1], {prefix=value[2]})
