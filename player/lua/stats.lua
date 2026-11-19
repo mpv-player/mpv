@@ -121,6 +121,7 @@ local pages = {}
 local scroll_bound = false
 local searched_text
 local tm_viz_prev = nil
+local overlay = false
 -- Save these sequences locally as we'll need them a lot
 local ass_start = mp.get_property_osd("osd-ass-cc/0")
 local ass_stop = mp.get_property_osd("osd-ass-cc/1")
@@ -163,7 +164,7 @@ end
 local function no_ASS(t)
     if not o.use_ass then
         return t
-    elseif not o.persistent_overlay then
+    elseif not overlay then
         -- mp.osd_message supports ass-escape using osd-ass-cc/{0|1}
         return ass_stop .. t .. ass_start
     else
@@ -1582,13 +1583,22 @@ local function record_sync(name, value)
     end
 end
 
+local function clear_screen()
+    if overlay then mp.set_osd_ass(0, 0, "") else mp.osd_message("", 0) end
+end
+
 -- Call the function for `page` and print it to OSD
 local function print_page(page, after_scroll)
     eval_ass_formatting()
+    local to_overlay = o.persistent_overlay or pages[page].overlay and o.use_ass or false
+    if to_overlay ~= overlay then
+        clear_screen()
+        overlay = to_overlay
+    end
     -- the page functions assume we start in ass-enabled mode.
     -- that's true for mp.set_osd_ass, but not for mp.osd_message.
     local ass_content = pages[page].f(after_scroll)
-    if o.persistent_overlay then
+    if overlay then
         mp.set_osd_ass(0, 0, ass_content)
     else
         mp.osd_message((o.use_ass and ass_start or "") .. ass_content,
@@ -1619,10 +1629,6 @@ update_scale = function ()
     if display_timer:is_enabled() then
         print_page(curr_page)
     end
-end
-
-local function clear_screen()
-    if o.persistent_overlay then mp.set_osd_ass(0, 0, "") else mp.osd_message("", 0) end
 end
 
 local function scroll_delta(d)
