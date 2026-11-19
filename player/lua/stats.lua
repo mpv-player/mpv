@@ -434,7 +434,8 @@ local function sync_graph(events, prop, title, x, y, width, last)
 
     local fs = font_size
     local strip, labels_w, h, line, hair = fs * 1.3, fs * 3.2, fs * 4.1, fs / 10, fs / 20
-    local plot_w = width - labels_w
+    local hist_w = fs * 4.8
+    local plot_w = width - labels_w - hist_w
     -- The drawings are relative to the upper left corner of the plot.
     local px, py = x + labels_w, y + fs * 0.4 + strip
     local start = sync.now - o.sync_window
@@ -461,7 +462,7 @@ local function sync_graph(events, prop, title, x, y, width, last)
                                    tags, str)
     end
 
-    draw(sync_colors.surface, "18", rect(0, -strip, plot_w, h))
+    draw(sync_colors.surface, "18", rect(0, -strip, plot_w + hist_w, h))
     local grid = {}
     for i = 1, 3 do
         grid[#grid+1] = rect(0, h * i / 4 - hair / 2, plot_w, h * i / 4 + hair / 2)
@@ -537,6 +538,24 @@ local function sync_graph(events, prop, title, x, y, width, last)
     end
     draw(sync_colors.surface, "00", dot(fs * 0.3))
     draw(sync_colors.trace, "00", dot(fs * 0.2))
+
+    -- The share of the time at each value, as bars to the right of the plot.
+    draw(sync_colors.grid, "00", rect(plot_w - hair / 2, 0, plot_w + hair / 2, h))
+    local bins, share, peak = 20, {}, 0
+    sync_values(prop, function(value, from, to)
+        local bin = min(math.floor(pos_y(value) / h * bins), bins - 1)
+        share[bin] = (share[bin] or 0) + to - from
+        peak = max(peak, share[bin])
+    end)
+    local bars = {}
+    for bin = 0, bins - 1 do
+        if share[bin] then
+            local bx, length = plot_w + hair * 7, share[bin] / peak * (hist_w - hair * 14)
+            bars[#bars+1] = rect(bx, h * bin / bins + hair, bx + max(length, line),
+                                 h * (bin + 1) / bins - hair)
+        end
+    end
+    draw(sync_colors.trace, "40", table.concat(bars))
 
     for _, mark in ipairs(sync_marks) do
         local ticks = {}
