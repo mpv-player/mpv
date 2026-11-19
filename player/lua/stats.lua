@@ -42,14 +42,11 @@ local o = {
 
     -- Graph options and style
     plot_perfdata = false,
-    plot_vsync_ratio = false,
-    plot_vsync_jitter = false,
     plot_cache = true,
     plot_tonemapping_lut = false,
     plot_sync_dashes = false,
     plot_sync_band = false,
     plot_sync_every_frame = false,
-    skip_frames = 5,
     global_max = true,
     flush_graph_data = true,         -- clear data buffers when toggling
     plot_bg_border_color = "0000FF",
@@ -113,8 +110,6 @@ local border_size = o.border_size
 local shadow_x_offset = o.shadow_x_offset
 local shadow_y_offset = o.shadow_y_offset
 local plot_bg_border_width = o.plot_bg_border_width
--- Function used to record performance data
-local recorder = nil
 -- Timer used for redrawing (toggling) and clearing the screen (oneshot)
 local display_timer = nil
 -- Timer used to update cache stats.
@@ -132,11 +127,6 @@ local ass_stop = mp.get_property_osd("osd-ass-cc/1")
 -- Ring buffers for the values used to construct a graph.
 -- .pos denotes the current position, .len the buffer length
 -- .max is the max value in the corresponding buffer
-local vsratio_buf, vsjitter_buf
-local function init_buffers()
-    vsratio_buf = {0, pos = 1, len = 50, max = 0}
-    vsjitter_buf = {0, pos = 1, len = 50, max = 0}
-end
 local cache_ahead_buf, cache_speed_buf
 local sync_props = {"avsync", "vo-presentation-delay",
                     "video-speed-correction", "audio-speed-correction",
@@ -904,29 +894,10 @@ local function append_display_sync(s)
     append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl="",
                                                   indent=o.prefix_sep .. o.prefix_sep})
 
-    -- As we need to plot some graphs we print jitter and ratio on their own lines
-    if not display_timer.oneshot and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.use_ass then
-        local ratio_graph = ""
-        local jitter_graph = ""
-        if o.plot_vsync_ratio then
-            ratio_graph = generate_graph(vsratio_buf, vsratio_buf.pos,
-                                         vsratio_buf.len, vsratio_buf.max, nil, 0.8, 1)
-        end
-        if o.plot_vsync_jitter then
-            jitter_graph = generate_graph(vsjitter_buf, vsjitter_buf.pos,
-                                          vsjitter_buf.len, vsjitter_buf.max, nil, 0.8, 1)
-        end
-        append_property(s, "vsync-ratio", {prefix="VSync Ratio:",
-                                           suffix=o.prefix_sep .. ratio_graph})
-        append_property(s, "vsync-jitter", {prefix="VSync Jitter:",
-                                            suffix=o.prefix_sep .. jitter_graph})
-    else
-        -- Since no graph is needed we can print ratio/jitter on the same line and save some space
-        local vr = append_property(s, "vsync-ratio", {prefix="VSync Ratio:"})
-        append_property(s, "vsync-jitter", {prefix="VSync Jitter:",
-                            nl=vr and "" or o.nl,
-                            indent=vr and o.prefix_sep .. o.prefix_sep})
-    end
+    local vr = append_property(s, "vsync-ratio", {prefix="VSync Ratio:"})
+    append_property(s, "vsync-jitter", {prefix="VSync Jitter:",
+                        nl=vr and "" or o.nl,
+                        indent=vr and o.prefix_sep .. o.prefix_sep})
 end
 
 
@@ -1829,7 +1800,6 @@ local function sync_stats()
 end
 
 -- Record 1 sample of cache statistics.
--- (Unlike record_data(), this does not return a function, but runs directly.)
 local function record_cache_stats()
     local info = mp.get_property_native("demuxer-cache-state")
     if info == nil then
@@ -1860,39 +1830,6 @@ pages = {
     [o.key_page_0] = { idx = 0, f = perf_stats, desc = "Internal Performance Info", scroll = true },
 }
 
-
--- Returns a function to record vsratio/jitter with the specified `skip` value
-local function record_data(skip)
-    init_buffers()
-    skip = max(skip, 0)
-    local i = skip
-    return function()
-        if i < skip then
-            i = i + 1
-            return
-        else
-            i = 0
-        end
-
-        if o.plot_vsync_jitter then
-            local r = mp.get_property_number("vsync-jitter")
-            if r then
-                vsjitter_buf.pos = (vsjitter_buf.pos % vsjitter_buf.len) + 1
-                vsjitter_buf[vsjitter_buf.pos] = r
-                vsjitter_buf.max = max(vsjitter_buf.max, r)
-            end
-        end
-
-        if o.plot_vsync_ratio then
-            local r = mp.get_property_number("vsync-ratio")
-            if r then
-                vsratio_buf.pos = (vsratio_buf.pos % vsratio_buf.len) + 1
-                vsratio_buf[vsratio_buf.pos] = r
-                vsratio_buf.max = max(vsratio_buf.max, r)
-            end
-        end
-    end
-end
 
 local function record_sync(name, value)
     local samples = sync[name]
@@ -2119,21 +2056,9 @@ process_key_binding = function(oneshot)
             end
             clear_screen()
             remove_page_bindings()
-            if recorder then
-                mp.unobserve_property(recorder)
-                recorder = nil
-            end
         end
     -- No stats are being displayed yet
     else
-        if not oneshot and (o.plot_vsync_jitter or o.plot_vsync_ratio) then
-            recorder = record_data(o.skip_frames)
-            -- Rely on the fact that "vsync-ratio" is updated at the same time.
-            -- Using "none" to get a sample any time, even if it does not change.
-            -- Will stop working if "vsync-jitter" property change notification
-            -- changes, but it's fine for an internal script.
-            mp.observe_property("vsync-jitter", "none", recorder)
-        end
         if not oneshot and o.plot_tonemapping_lut then
             tm_viz_prev = mp.get_property_native("tone-mapping-visualize")
             mp.set_property_native("tone-mapping-visualize", true)
