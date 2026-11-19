@@ -137,6 +137,7 @@ end
 local cache_ahead_buf, cache_speed_buf
 local sync_props = {"avsync", "vo-presentation-delay",
                     "video-speed-correction", "audio-speed-correction",
+                    "vsync-ratio", "vsync-jitter",
                     "frame-drop-count", "decoder-frame-drop-count",
                     "vo-delayed-frame-count", "mistimed-frame-count"}
 local sync
@@ -369,6 +370,8 @@ local sync_units = {
     ["vo-presentation-delay"] = {offset = 0, scale = 1e3, digits = 2, suffix = " ms"},
     ["video-speed-correction"] = {offset = 1, scale = 100, digits = 4, suffix = "%"},
     ["audio-speed-correction"] = {offset = 1, scale = 100, digits = 4, suffix = "%"},
+    ["vsync-ratio"] = {offset = 0, scale = 1, digits = 3, suffix = "", unsigned = true},
+    ["vsync-jitter"] = {offset = 0, scale = 1, digits = 4, suffix = "", unsigned = true},
 }
 
 local function append_sync(s, prop, attr)
@@ -377,7 +380,8 @@ local function append_sync(s, prop, attr)
         return false
     end
     local mean, dev = sync_mean_dev(prop)
-    local text = format("%+." .. unit.digits .. "f", ((mean or value) - unit.offset) * unit.scale)
+    local text = format("%" .. (unit.unsigned and "" or "+") .. "." .. unit.digits .. "f",
+                        ((mean or value) - unit.offset) * unit.scale)
     if dev then
         text = text .. format(" ±%." .. unit.digits .. "f", dev * unit.scale)
     end
@@ -386,13 +390,16 @@ local function append_sync(s, prop, attr)
 end
 
 -- Cover lo to hi with four divisions of a round size. Returns the index of the first and the size.
-local function graph_range(lo, hi, min_div)
+local function graph_range(lo, hi, min_div, unsigned)
     -- A division of half the extent of the values holds them and none below
     -- a quarter of it does, so one of the five from that quarter on fits.
     local pow = 10 ^ math.floor(math.log(max((hi - lo) / 4, min_div)) / math.log(10))
     for _, mantissa in ipairs({1, 2, 5, 10, 20}) do
         local div = mantissa * pow
         local first = math.floor((lo + hi) / 2 / div + 0.5) - 2
+        if unsigned then
+            first = max(first, 0)
+        end
         if div >= min_div and first * div <= lo and hi <= (first + 4) * div then
             return first, div
         end
@@ -432,7 +439,8 @@ local function sync_graph(events, prop, title, x, y, width, last)
     end
     -- A division is 20 times the last shown digit or more.
     local base, div = graph_range((lo - unit.offset) * unit.scale,
-                                  (hi - unit.offset) * unit.scale, 2 * 10 ^ (1 - unit.digits))
+                                  (hi - unit.offset) * unit.scale, 2 * 10 ^ (1 - unit.digits),
+                                  unit.unsigned)
     lo, hi = base * div, (base + 4) * div
 
     local fs = font_size
@@ -581,7 +589,8 @@ local function sync_graph(events, prop, title, x, y, width, last)
     local small = format("\\fs%.2f\\1c&H%s&", fs * 0.7, sync_colors.label)
     for i = 0, 4 do
         local value = (base + 4 - i) * div
-        text(6, px - fs * 0.35, py + h * i / 4, small, format(value == 0 and "%g" or "%+g", value))
+        text(6, px - fs * 0.35, py + h * i / 4, small,
+             format("%" .. ((value == 0 or unit.unsigned) and "" or "+") .. "g", value))
     end
     if not last then
         return py + h
@@ -1753,6 +1762,8 @@ local function sync_stats()
     if display_sync then
         values[#values+1] = {"video-speed-correction", "Video Speed:"}
         values[#values+1] = {"audio-speed-correction", "Audio Speed:"}
+        values[#values+1] = {"vsync-ratio", "VSync Ratio:"}
+        values[#values+1] = {"vsync-jitter", "VSync Jitter:"}
     end
     if not graphs then
         for _, value in ipairs(values) do
