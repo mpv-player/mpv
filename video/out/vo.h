@@ -43,13 +43,16 @@ enum {
     VO_EVENT_WIN_STATE                  = 1 << 3,
     // The ambient light conditions changed and need to be reloaded
     VO_EVENT_AMBIENT_LIGHTING_CHANGED   = 1 << 4,
+    // The presentation delay changed
+    VO_EVENT_PRESENTATION_DELAY         = 1 << 5,
     // For VOCTRL_GET_HIDPI_SCALE changes.
     VO_EVENT_DPI                        = 1 << 6,
     VO_EVENT_FOCUS                      = 1 << 7,
 
     // Set of events the player core may be interested in.
     VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE | VO_EVENT_DPI |
-                     VO_EVENT_FOCUS | VO_EVENT_AMBIENT_LIGHTING_CHANGED,
+                     VO_EVENT_FOCUS | VO_EVENT_AMBIENT_LIGHTING_CHANGED |
+                     VO_EVENT_PRESENTATION_DELAY,
 };
 
 enum mp_voctrl {
