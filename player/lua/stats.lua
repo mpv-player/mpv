@@ -18,6 +18,7 @@ local o = {
     key_page_3 = "3",
     key_page_4 = "4",
     key_page_5 = "5",
+    key_page_6 = "6",
     key_page_0 = "0",
     -- For pages which support scrolling
     key_scroll_up = "UP",
@@ -134,7 +135,9 @@ local function init_buffers()
     vsjitter_buf = {0, pos = 1, len = 50, max = 0}
 end
 local cache_ahead_buf, cache_speed_buf
-local sync_props = {"avsync", "vo-presentation-delay"}
+local sync_props = {"avsync", "vo-presentation-delay",
+                    "frame-drop-count", "decoder-frame-drop-count",
+                    "vo-delayed-frame-count", "mistimed-frame-count"}
 local sync
 local function init_sync()
     sync = {now = 0}
@@ -377,6 +380,195 @@ local function append_sync(s, prop, attr)
     end
     attr.suffix = unit.suffix
     return append(s, text, attr)
+end
+
+-- Cover lo to hi with four divisions of a round size. Returns the index of the first and the size.
+local function graph_range(lo, hi, min_div)
+    -- A division of half the extent of the values holds them and none below
+    -- a quarter of it does, so one of the five from that quarter on fits.
+    local pow = 10 ^ math.floor(math.log(max((hi - lo) / 4, min_div)) / math.log(10))
+    for _, mantissa in ipairs({1, 2, 5, 10, 20}) do
+        local div = mantissa * pow
+        local first = math.floor((lo + hi) / 2 / div + 0.5) - 2
+        if div >= min_div and first * div <= lo and hi <= (first + 4) * div then
+            return first, div
+        end
+    end
+end
+
+local sync_colors = {surface = "19191A", grid = "353838", zero = "818789", label = "B7C2C3",
+                     trace = "E58739"}
+
+local sync_marks = {
+    {color = "3B3BD0", props = {"frame-drop-count", "decoder-frame-drop-count"}},
+    {color = "5A83EC", props = {"vo-delayed-frame-count"}},
+    {color = "19B2FA", props = {"mistimed-frame-count"}},
+}
+
+-- The time between grid lines, 1, 2 or 5 times a power of ten with six of them at most.
+local function graph_time_step(window)
+    local pow = 10 ^ math.floor(math.log(window / 6) / math.log(10))
+    for _, mantissa in ipairs({1, 2, 5, 10}) do
+        if window <= 6 * mantissa * pow then
+            return mantissa * pow
+        end
+    end
+end
+
+-- Returns the y below the graph, or nil if there is no value to show.
+local function sync_graph(events, prop, title, x, y, width, last)
+    local unit, lo, hi, count, newest = sync_units[prop], math.huge, -math.huge, 0
+    sync_values(prop, function(value)
+        lo = min(lo, value)
+        hi = max(hi, value)
+        count = count + 1
+        newest = value
+    end)
+    if count == 0 then
+        return
+    end
+    -- A division is 20 times the last shown digit or more.
+    local base, div = graph_range((lo - unit.offset) * unit.scale,
+                                  (hi - unit.offset) * unit.scale, 2 * 10 ^ (1 - unit.digits))
+    lo, hi = base * div, (base + 4) * div
+
+    local fs = font_size
+    local strip, labels_w, h, line, hair = fs * 1.3, fs * 3.2, fs * 4.1, fs / 10, fs / 20
+    local plot_w = width - labels_w
+    -- The drawings are relative to the upper left corner of the plot.
+    local px, py = x + labels_w, y + fs * 0.4 + strip
+    local start = sync.now - o.sync_window
+    local function pos_x(time)
+        return (time - start) / o.sync_window * plot_w
+    end
+    local function pos_y(value)
+        return h * (hi - (value - unit.offset) * unit.scale) / (hi - lo)
+    end
+    -- The Default style is not affected by the OSD options of the user.
+    local function draw(color, alpha, shapes)
+        events[#events+1] = format("{\\rDefault\\an7\\pos(%.2f,%.2f)\\bord0\\shad0\\1c&H%s&" ..
+                                   "\\1a&H%s&\\p1}", px, py, color, alpha) .. shapes .. "{\\p0}"
+    end
+    local function point(dx, dy)
+        return format("%.2f %.2f ", dx, dy)
+    end
+    local function rect(x0, y0, x1, y1)
+        return "m " .. point(x0, y0) .. "l " .. point(x1, y0) .. point(x1, y1) .. point(x0, y1)
+    end
+    -- The first alignment and position of an event count.
+    local function text(align, tx, ty, tags, str)
+        events[#events+1] = format("{\\an%d\\pos(%.2f,%.2f)}%s{%s}%s", align, tx, ty, text_style(),
+                                   tags, str)
+    end
+
+    draw(sync_colors.surface, "18", rect(0, -strip, plot_w, h))
+    local grid = {}
+    for i = 1, 3 do
+        grid[#grid+1] = rect(0, h * i / 4 - hair / 2, plot_w, h * i / 4 + hair / 2)
+    end
+    local step = graph_time_step(o.sync_window)
+    for i = 1, math.ceil(o.sync_window / step) - 1 do
+        local gx = plot_w * (1 - i * step / o.sync_window)
+        grid[#grid+1] = rect(gx - hair / 2, 0, gx + hair / 2, h)
+    end
+    draw(sync_colors.grid, "00", table.concat(grid))
+    if lo < 0 and hi > 0 then
+        local zero = h * hi / (hi - lo)
+        draw(sync_colors.zero, "00", rect(0, zero - hair / 2, plot_w, zero + hair / 2))
+    end
+
+    -- The columns are fixed in time, so that a trace keeps its shape when it moves on.
+    local cols = 400
+    local col_time = o.sync_window / cols
+    local top, bottom = {}, {}
+    local function column(time)
+        return math.floor(time / col_time)
+    end
+    sync_values(prop, function(value, from, to)
+        local vy = pos_y(value)
+        for col = column(from), column(to) do
+            top[col] = min(top[col] or vy, vy - line / 2)
+            bottom[col] = max(bottom[col] or vy, vy + line / 2)
+        end
+    end)
+    local function col_x(col)
+        return min(max(pos_x(col * col_time), 0), plot_w)
+    end
+    local function outline(upper, upper_offset, lower, lower_offset)
+        local path = {}
+        local col = column(start)
+        while col <= column(sync.now) do
+            if top[col] then
+                local first = col
+                while top[col + 1] do
+                    col = col + 1
+                end
+                path[#path+1] = "m " .. point(col_x(first), upper[first] + upper_offset) .. "l "
+                for i = first, col do
+                    path[#path+1] = point(col_x(i + 0.5), upper[i] + upper_offset)
+                end
+                path[#path+1] = point(col_x(col + 1), upper[col] + upper_offset)
+                path[#path+1] = point(col_x(col + 1), lower[col] + lower_offset)
+                for i = col, first, -1 do
+                    path[#path+1] = point(col_x(i + 0.5), lower[i] + lower_offset)
+                end
+                path[#path+1] = point(col_x(first), lower[first] + lower_offset)
+            end
+            col = col + 1
+        end
+        return table.concat(path)
+    end
+    if count > cols then
+        -- More values than columns fill their extent. Both edges of it and a
+        -- wash between them keep it from becoming a block.
+        draw(sync_colors.trace, "B0", outline(top, 0, bottom, 0))
+        draw(sync_colors.trace, "00",
+             outline(top, 0, top, line) .. outline(bottom, -line, bottom, 0))
+    else
+        draw(sync_colors.trace, "00", outline(top, 0, bottom, 0))
+    end
+    local function dot(r)
+        local cx, cy, k = plot_w - fs * 0.3, pos_y(newest), r * 0.5523
+        return "m " .. point(cx - r, cy) ..
+               "b " .. point(cx - r, cy - k) .. point(cx - k, cy - r) .. point(cx, cy - r) ..
+               "b " .. point(cx + k, cy - r) .. point(cx + r, cy - k) .. point(cx + r, cy) ..
+               "b " .. point(cx + r, cy + k) .. point(cx + k, cy + r) .. point(cx, cy + r) ..
+               "b " .. point(cx - k, cy + r) .. point(cx - r, cy + k) .. point(cx - r, cy)
+    end
+    draw(sync_colors.surface, "00", dot(fs * 0.3))
+    draw(sync_colors.trace, "00", dot(fs * 0.2))
+
+    for _, mark in ipairs(sync_marks) do
+        local ticks = {}
+        for _, counter in ipairs(mark.props) do
+            local samples = sync[counter]
+            for i = samples.head + 1, samples.tail do
+                local value, prev = samples.value[i], samples.value[i - 1]
+                if value and prev and value > prev and samples.time[i] >= start then
+                    local tx = pos_x(samples.time[i])
+                    ticks[#ticks+1] = rect(tx - hair * 1.5, 0, tx + hair * 1.5, fs * 0.45)
+                end
+            end
+        end
+        if #ticks > 0 then
+            draw(mark.color, "00", table.concat(ticks))
+        end
+    end
+
+    text(7, px + fs * 0.4, py - strip + fs * 0.15, "", title)
+    local small = format("\\fs%.2f\\1c&H%s&", fs * 0.7, sync_colors.label)
+    for i = 0, 4 do
+        local value = (base + 4 - i) * div
+        text(6, px - fs * 0.35, py + h * i / 4, small, format(value == 0 and "%g" or "%+g", value))
+    end
+    if not last then
+        return py + h
+    end
+    for i = -math.floor(o.sync_window / step), 0 do
+        text(8, px + plot_w * (1 + i * step / o.sync_window), py + h + fs * 0.1, small,
+             format("%g s", i * step))
+    end
+    return py + h + fs * 1.1
 end
 
 local function sorted_keys(t, comp_fn)
@@ -1504,6 +1696,82 @@ local function cache_stats()
     return finalize_page({}, stats, false)
 end
 
+-- With graphs the page is a list of overlay events, as their labels need fixed positions.
+local function sync_stats()
+    local stats = {}
+    add_header(stats)
+    append(stats, "", {prefix="Sync Info:", nl="", indent=""})
+    append_property(stats, "video-sync", {prefix="Video Sync:"})
+    append_fps(stats, "display-fps", "estimated-display-fps")
+    append_fps(stats, "container-fps", "estimated-vf-fps")
+
+    local graphs = not display_timer.oneshot and o.use_ass
+    local function mark(i)
+        if not graphs then
+            return ""
+        end
+        local size = font_size * 0.6
+        return format("{\\rDefault\\bord0\\shad0\\1c&H%s&\\p1}m 0 0 l %f 0 %f %f 0 %f{\\p0}%s%s",
+                      sync_marks[i].color, size, size, size, size, text_style(), o.prefix_sep)
+    end
+    if append_property(stats, "decoder-frame-drop-count",
+                       {prefix="Dropped Frames:", suffix=" (decoder)",
+                        indent=o.indent .. mark(1)}) then
+        append_property(stats, "frame-drop-count", {suffix=" (output)", nl="", indent=""})
+    end
+    if mp.get_property_bool("display-sync-active", false) then
+        append_property(stats, "vo-delayed-frame-count",
+                        {prefix="Delayed:", nl="", indent=o.prefix_sep .. o.prefix_sep .. mark(2)})
+        append_property(stats, "mistimed-frame-count",
+                        {prefix="Mistimed:", nl="", indent=o.prefix_sep .. o.prefix_sep .. mark(3)})
+    end
+
+    local values = {{"avsync", "A-V:"}, {"vo-presentation-delay", "Presentation:"}}
+    if not graphs then
+        for _, value in ipairs(values) do
+            append_sync(stats, value[1], {prefix=value[2]})
+        end
+        return finalize_page({}, stats, false)
+    end
+
+    local events = {}
+    local x, y = font_size * 0.75, font_size * 0.75
+    local top, width = y, font_size * 47.2
+    local function line(str)
+        events[#events+1] = format("{\\pos(%.2f,%.2f)}%s%s", x, y, text_style(), str)
+        y = y + font_size
+    end
+    for i, str in ipairs(stats) do
+        line(i == 1 and str or str:sub(#o.nl + 1))
+    end
+    local shown = {}
+    for _, value in ipairs(values) do
+        local title = {}
+        if append_sync(title, value[1], {prefix=value[2], indent=""}) then
+            shown[#shown+1] = {value[1], title[1]:sub(#o.nl + 1)}
+        end
+    end
+    for i, value in ipairs(shown) do
+        local below = sync_graph(events, value[1], value[2], x, y, width, i == #shown)
+        if below then
+            y = below
+        else
+            line(o.indent .. value[2])
+        end
+    end
+    -- With the box style every event gets a box that covers the events before
+    -- it. Hide them and add an empty drawing below with the one box of the page.
+    if mp.get_property("osd-border-style") == "background-box" then
+        for i, event in ipairs(events) do
+            events[i] = event .. "{\\4a&HFF&}"
+        end
+        table.insert(events, 1, format("{\\pos(%.2f,%.2f)\\bord0\\1a&HFF&\\p1}" ..
+                                       "m 0 0 l %.2f 0 %.2f %.2f 0 %.2f{\\p0}",
+                                       x, top, width, width, y - top, y - top))
+    end
+    return table.concat(events, "\n")
+end
+
 -- Record 1 sample of cache statistics.
 -- (Unlike record_data(), this does not return a function, but runs directly.)
 local function record_cache_stats()
@@ -1532,6 +1800,7 @@ pages = {
     [o.key_page_3] = { idx = 3, f = cache_stats, desc = "Cache Statistics" },
     [o.key_page_4] = { idx = 4, f = keybinding_info, desc = "Active Key Bindings", scroll = true },
     [o.key_page_5] = { idx = 5, f = track_info, desc = "Tracks Info", scroll = true },
+    [o.key_page_6] = { idx = 6, f = sync_stats, desc = "Sync Statistics", overlay = true },
     [o.key_page_0] = { idx = 0, f = perf_stats, desc = "Internal Performance Info", scroll = true },
 }
 
