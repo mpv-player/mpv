@@ -28,6 +28,7 @@ local o = {
 
     duration = 4,
     redraw_delay = 1,                -- acts as duration in the toggling case
+    sync_window = 5,                 -- seconds the sync values are averaged over
     ass_formatting = true,
     persistent_overlay = false,      -- whether the stats can be overwritten by other output
     filter_params_max_length = 100,  -- show one filter per line if list exceeds this length
@@ -93,8 +94,10 @@ local o = {
 
 local update_scale
 require "mp.options".read_options(o, nil, function ()
+    o.sync_window = math.max(o.sync_window, 1)
     update_scale()
 end)
+o.sync_window = math.max(o.sync_window, 1)
 
 local format = string.format
 local max = math.max
@@ -130,6 +133,15 @@ local function init_buffers()
     vsjitter_buf = {0, pos = 1, len = 50, max = 0}
 end
 local cache_ahead_buf, cache_speed_buf
+local sync_props = {"avsync", "vo-presentation-delay"}
+local sync
+local function init_sync()
+    sync = {now = 0}
+    for _, prop in ipairs(sync_props) do
+        sync[prop] = {head = 1, tail = 0, time = {}, value = {}}
+    end
+end
+init_sync()
 local perf_buffers = {}
 local process_key_binding
 
@@ -317,10 +329,48 @@ local function append_property(s, prop, attr, excluded, cached)
     return append(s, ret, attr)
 end
 
+-- Call fn with every value a sync property had in the last o.sync_window
+-- seconds, and the time it held from and to.
+local function sync_values(prop, fn)
+    local samples, start = sync[prop], sync.now - o.sync_window
+    for i = samples.head, samples.tail do
+        local from, to = max(samples.time[i], start), samples.time[i + 1] or sync.now
+        if samples.value[i] and from < to then
+            fn(samples.value[i], from, to)
+        end
+    end
+end
+
+-- Return the mean and the standard deviation of a sync property over the
+-- last o.sync_window seconds.
+local function sync_mean_dev(prop)
+    local time, sum = 0, 0
+    sync_values(prop, function(value, from, to)
+        time = time + to - from
+        sum = sum + value * (to - from)
+    end)
+    if time == 0 then
+        return
+    end
+    local mean, squares = sum / time, 0
+    sync_values(prop, function(value, from, to)
+        squares = squares + (value - mean) ^ 2 * (to - from)
+    end)
+    return mean, math.sqrt(squares / time)
+end
+
 local function append_sync(s, prop, attr)
     local value = mp.get_property_number(prop)
+    if not value then
+        return false
+    end
+    local mean, dev = sync_mean_dev(prop)
+    local text = format("%+.2f", (mean or value) * 1e3)
+    if dev then
+        text = text .. format(" ±%.2f", dev * 1e3)
+    end
     attr.suffix = " ms"
-    return append(s, value and format("%+.2f", value * 1e3), attr)
+    return append(s, text, attr)
 end
 
 local function sorted_keys(t, comp_fn)
@@ -1519,6 +1569,20 @@ local function record_data(skip)
     end
 end
 
+local function record_sync(name, value)
+    local samples = sync[name]
+    sync.now = mp.get_time()
+    samples.tail = samples.tail + 1
+    samples.time[samples.tail] = sync.now
+    samples.value[samples.tail] = value
+    while samples.head < samples.tail and
+          samples.time[samples.head + 1] <= sync.now - o.sync_window do
+        samples.time[samples.head] = nil
+        samples.value[samples.head] = nil
+        samples.head = samples.head + 1
+    end
+end
+
 -- Call the function for `page` and print it to OSD
 local function print_page(page, after_scroll)
     -- the page functions assume we start in ass-enabled mode.
@@ -1709,6 +1773,8 @@ process_key_binding = function(oneshot)
         elseif not display_timer.oneshot and not oneshot then
             display_timer:kill()
             cache_recorder_timer:stop()
+            mp.unobserve_property(record_sync)
+            init_sync()
             if tm_viz_prev ~= nil then
                 mp.set_property_native("tone-mapping-visualize", tm_viz_prev)
                 tm_viz_prev = nil
@@ -1738,6 +1804,9 @@ process_key_binding = function(oneshot)
             cache_ahead_buf = {0, pos = 1, len = 50, max = 0}
             cache_speed_buf = {0, pos = 1, len = 50, max = 0}
             cache_recorder_timer:resume()
+            for _, prop in ipairs(sync_props) do
+                mp.observe_property(prop, "number", record_sync)
+            end
         end
         display_timer:kill()
         display_timer.oneshot = oneshot
