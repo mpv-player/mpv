@@ -48,6 +48,7 @@ local o = {
     plot_tonemapping_lut = false,
     plot_sync_dashes = false,
     plot_sync_band = false,
+    plot_sync_every_frame = false,
     skip_frames = 5,
     global_max = true,
     flush_graph_data = true,         -- clear data buffers when toggling
@@ -1930,6 +1931,12 @@ local function print_page(page, after_scroll)
     end
 end
 
+local function redraw_sync()
+    if curr_page == o.key_page_6 then
+        print_page(curr_page)
+    end
+end
+
 update_scale = function ()
     local scale_with_video
     if o.vidscale == "auto" then
@@ -2104,6 +2111,7 @@ process_key_binding = function(oneshot)
             display_timer:kill()
             cache_recorder_timer:stop()
             mp.unobserve_property(record_sync)
+            mp.unobserve_property(redraw_sync)
             init_sync()
             if tm_viz_prev ~= nil then
                 mp.set_property_native("tone-mapping-visualize", tm_viz_prev)
@@ -2136,6 +2144,11 @@ process_key_binding = function(oneshot)
             cache_recorder_timer:resume()
             for _, prop in ipairs(sync_props) do
                 mp.observe_property(prop, "number", record_sync)
+            end
+            if o.plot_sync_every_frame then
+                -- time-pos changes with every frame. Observed after the sync
+                -- properties, it comes when their values are recorded.
+                mp.observe_property("time-pos", "number", redraw_sync)
             end
         end
         display_timer:kill()
