@@ -47,6 +47,7 @@ local o = {
     plot_cache = true,
     plot_tonemapping_lut = false,
     plot_sync_dashes = false,
+    plot_sync_band = false,
     skip_frames = 5,
     global_max = true,
     flush_graph_data = true,         -- clear data buffers when toggling
@@ -485,6 +486,13 @@ local function sync_graph(events, prop, title, x, y, width, last)
         grid[#grid+1] = rect(gx - hair / 2, 0, gx + hair / 2, h)
     end
     draw(sync_colors.grid, "00", table.concat(grid))
+    if o.plot_sync_band then
+        local mean, dev = sync_mean_dev(prop)
+        local my = pos_y(mean)
+        draw(sync_colors.trace, "D0", rect(0, max(pos_y(mean + dev), 0), plot_w,
+                                           min(pos_y(mean - dev), h)))
+        draw(sync_colors.label, "60", rect(0, my - hair / 2, plot_w, my + hair / 2))
+    end
     if lo < 0 and hi > 0 then
         local zero = h * hi / (hi - lo)
         draw(sync_colors.zero, "00", rect(0, zero - hair / 2, plot_w, zero + hair / 2))
