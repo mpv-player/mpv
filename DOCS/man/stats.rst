@@ -139,14 +139,6 @@ Configurable Options
 
     Show graphs for performance data (page 2).
 
-``plot_vsync_ratio``
-    Default: no
-
-``plot_vsync_jitter``
-    Default: no
-
-    Show graphs for vsync and jitter values (page 1). Only when toggled.
-
 ``plot_cache``
     Default: yes
 
