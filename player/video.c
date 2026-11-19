@@ -803,7 +803,7 @@ static bool using_spdif_passthrough(struct MPContext *mpctx)
 // From d(av_diff)/dt = other * (comp - 1) with other = playback_speed *
 // speed_factor_v, the comp that makes av_diff_lp decay with time
 // constant AVD_RECOVERY_TIME is (1 - av_diff_lp / (τ · other)).
-static void adjust_audio_drift_compensation(struct MPContext *mpctx, double vsync)
+static void adjust_audio_drift_compensation(struct MPContext *mpctx, double duration)
 {
     struct MPOpts *opts = mpctx->opts;
     int mode = mpctx->video_out->opts->video_sync;
@@ -834,7 +834,7 @@ static void adjust_audio_drift_compensation(struct MPContext *mpctx, double vsyn
     double other = opts->playback_speed * mpctx->speed_factor_v;
     double comp = 1.0 + mpctx->audio_drift_compensation;
 
-    double alpha = vsync / (AVD_FILTER_TIME + vsync);
+    double alpha = duration / (AVD_FILTER_TIME + duration);
     mpctx->avd_filtered += alpha * (mpctx->last_av_difference -
                                     mpctx->avd_filtered);
     double avd_lp = mpctx->avd_filtered;
@@ -970,7 +970,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     mpctx->past_frames[0].num_vsyncs = num_vsyncs;
 
     if (resample || mode == VS_DISP_ADROP || mode == VS_DISP_TEMPO) {
-        adjust_audio_drift_compensation(mpctx, vsync);
+        adjust_audio_drift_compensation(mpctx, num_vsyncs * vsync);
     } else {
         mpctx->speed_factor_a = 1.0;
     }
