@@ -779,6 +779,17 @@ static void restart_lateness(struct vo_internal *in)
 }
 
 // must be called locked
+static void set_presentation_delay(struct vo *vo, int64_t delay)
+{
+    struct vo_internal *in = vo->in;
+    if (in->presentation_delay == delay)
+        return;
+    in->presentation_delay = delay;
+    in->queued_events |= VO_EVENT_PRESENTATION_DELAY;
+    wakeup_core(vo);
+}
+
+// must be called locked
 static void forget_frames(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
@@ -786,7 +797,7 @@ static void forget_frames(struct vo *vo)
     in->hasframe_rendered = false;
     in->drop_count = 0;
     in->delayed_count = 0;
-    in->presentation_delay = INT64_MIN;
+    set_presentation_delay(vo, INT64_MIN);
     in->last_due = 0;
     restart_lateness(in);
     in->late.drop = false;
@@ -1362,11 +1373,11 @@ static bool render_frame(struct vo *vo)
             vsync.displayed_age < MP_ARRAY_SIZE(in->presents))
             shown = &in->presents[shown_flip % MP_ARRAY_SIZE(in->presents)];
         if (shown && shown->pts) {
-            in->presentation_delay = vsync.displayed_time - shown->pts;
+            set_presentation_delay(vo, vsync.displayed_time - shown->pts);
         } else if (due && have_feedback) {
-            in->presentation_delay = display_time - pts;
+            set_presentation_delay(vo, display_time - pts);
         } else if (display_synced || !have_feedback) {
-            in->presentation_delay = INT64_MIN;
+            set_presentation_delay(vo, INT64_MIN);
         }
         if (shown && shown->due)
             check_timed_frame_late(vo, shown_flip, shown->due, vsync.displayed_time, duration);
