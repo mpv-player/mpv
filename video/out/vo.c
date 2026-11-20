@@ -1308,6 +1308,8 @@ static bool render_frame(struct vo *vo)
         in->rendering = true;
         in->hasframe_rendered = true;
         int64_t prev_drop_count = vo->in->drop_count;
+        // Read it before unlocking, in case the frame gets freed by the VO (VO_CAP_FRAMEOWNER).
+        bool display_synced = frame->display_synced;
         // Can the core queue new video now? Non-display-sync uses a separate
         // timer instead, but possibly benefits from preparing a frame early.
         bool can_queue = !in->frame_queued &&
@@ -1363,7 +1365,7 @@ static bool render_frame(struct vo *vo)
             in->presentation_delay = vsync.displayed_time - shown->pts;
         } else if (due && have_feedback) {
             in->presentation_delay = display_time - pts;
-        } else if (frame->display_synced || !have_feedback) {
+        } else if (display_synced || !have_feedback) {
             in->presentation_delay = INT64_MIN;
         }
         if (shown && shown->due)
