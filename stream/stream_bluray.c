@@ -410,21 +410,22 @@ static void bd_overlay_draw_rle(struct bd_overlay_plane *p, const BD_OVERLAY *ov
     uint32_t pal[256];
     bd_palette_to_bgra(ov->palette, pal, csp);
 
+    // libbluray only checks that the runs add up to w * h, so one can cross
+    // line ends, and that total is the only bound of the array.
     const BD_PG_RLE_ELEM *rle = ov->img;
+    int len = rle->len;
     for (int y = 0; y < ov->h; y++) {
         int dst_y = ov->y + y;
         bool in_plane = dst_y >= 0 && dst_y < p->h;
         uint32_t *dst_row = in_plane ? p->work + (size_t)dst_y * p->w : NULL;
         int x = 0;
-        int cols = ov->w;
-        while (x < ov->w && cols-- >= 0) {
-            int len = rle->len;
-            int color = rle->color;
-            rle++;
-            if (len == 0)
-                continue; // stray EOL, skip
+        while (x < ov->w) {
+            while (!len)
+                len = (++rle)->len;
             int dst_x = ov->x + x;
-            int run = len;
+            int run = MPMIN(len, ov->w - x);
+            x += run;
+            len -= run;
             if (dst_x < 0) {
                 int skip = MPMIN(-dst_x, run);
                 run -= skip;
@@ -433,14 +434,11 @@ static void bd_overlay_draw_rle(struct bd_overlay_plane *p, const BD_OVERLAY *ov
             if (dst_x + run > p->w)
                 run = p->w - dst_x;
             if (dst_row && run > 0) {
-                uint32_t c = pal[color & 0xFF];
+                uint32_t c = pal[rle->color & 0xFF];
                 for (int i = 0; i < run; i++)
                     dst_row[dst_x + i] = c;
             }
-            x += len;
         }
-        if (rle->len == 0)
-            rle++;
     }
 }
 
