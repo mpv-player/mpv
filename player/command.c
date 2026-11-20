@@ -8683,7 +8683,9 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
 
     if (opt_ptr == &opts->audio_delay) {
         if (mpctx->ao_chain) {
-            mpctx->delay += mpctx->opts->audio_delay - mpctx->ao_chain->delay;
+            double change = mpctx->opts->audio_delay - mpctx->ao_chain->delay;
+            mpctx->delay += change;
+            mpctx->ao_chain->delayed_start_gap += change;
             mpctx->ao_chain->delay = mpctx->opts->audio_delay;
         }
         mp_wakeup_core(mpctx);
