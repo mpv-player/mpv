@@ -994,20 +994,25 @@ void vo_wait_frame(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 }
 
-// Returns the predicted display time of the frame submitted at submit_time,
-// or -1 if it cannot be determined.
-static int64_t predict_display_time(const struct vo_vsync_info *vsync, int64_t submit_time)
+// Returns the predicted display time of the last flip, or -1 if it cannot be
+// determined. The flips after the one the backend reports are displayed in
+// order, a vsync apart, and none before the vsync after its flip_page() call.
+static int64_t predict_display_time(struct vo_internal *in, const struct vo_vsync_info *vsync)
 {
     int64_t known = vsync->displayed_time;
     int age = vsync->displayed_age;
     int64_t vd = vsync->vsync_duration;
     if (known <= 0 || (age && vd <= 0))
         return -1;
-    if (!age)
-        return known;
-    int64_t display = known + age * vd;
-    if (submit_time > known)
-        display = MPMAX(display, known + ((submit_time - known) / vd + 1) * vd);
+    int64_t display = known;
+    for (int64_t flip = in->flips - age; flip < in->flips; flip++) {
+        display += vd;
+        // A flip that is not kept any more was called long before.
+        bool kept = flip >= 0 && in->flips - flip <= MP_ARRAY_SIZE(in->presents);
+        int64_t time = kept ? in->presents[flip % MP_ARRAY_SIZE(in->presents)].time : 0;
+        if (time > known)
+            display = MPMAX(display, known + ((time - known) / vd + 1) * vd);
+    }
     return display;
 }
 
@@ -1337,12 +1342,7 @@ static bool render_frame(struct vo *vo)
         };
         if (vo->driver->get_vsync)
             vo->driver->get_vsync(vo, &vsync);
-        int64_t display_time = predict_display_time(&vsync, present_time);
-        bool have_feedback = display_time > 0;
-
-        // Make up some crap if presentation feedback is missing.
-        if (!have_feedback)
-            display_time = mp_time_ns();
+        int64_t flipped = mp_time_ns();
 
         stats_time_end(in->stats, "video-flip");
 
@@ -1350,8 +1350,13 @@ static bool render_frame(struct vo *vo)
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
 
-        in->refresh_kind = have_feedback ? vsync.refresh_kind : VO_REFRESH_UNKNOWN;
         record_present(in, (struct present_record){present_time, pts, due});
+        int64_t display_time = predict_display_time(in, &vsync);
+        bool have_feedback = display_time > 0;
+        // Make up some crap if presentation feedback is missing.
+        if (!have_feedback)
+            display_time = flipped;
+        in->refresh_kind = have_feedback ? vsync.refresh_kind : VO_REFRESH_UNKNOWN;
         // The flip the backend reports as displayed, if it measured the time
         // and the flip is one of the last.
         int64_t shown_flip = in->flips - 1 - vsync.displayed_age;
