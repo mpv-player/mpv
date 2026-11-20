@@ -944,12 +944,51 @@ static struct curl_slist *build_header_list(struct priv *p)
             return false;                                                   \
     } while (0)
 
+
+static bool set_url(struct priv *p) {
+    CURLUcode rc;
+
+    bool ret = true;
+    char *escaped_url = NULL;
+    CURLU *url = curl_url();
+
+    if (!url) {
+        ret = false;
+        goto end;
+    }
+
+    rc = curl_url_set(url, CURLUPART_URL, p->url, CURLU_URLENCODE);
+    if(rc) {
+        ret = false;
+        goto end;
+    }
+
+    rc = curl_url_get(url, CURLUPART_URL, &escaped_url, 0);
+    if (rc) {
+        ret = false;
+        goto end;
+    }
+
+    CURLcode r = curl_easy_setopt(p->curl, CURLOPT_URL, escaped_url);
+    if (r) {
+        ret = false;
+        goto end;
+    }
+
+end:
+    if (url) curl_url_cleanup(url);
+    if (escaped_url) curl_free(escaped_url);
+
+    return ret;
+}
+
 static bool setup_curl(struct priv *p)
 {
     curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
     CURL *c = p->curl;
 
-    SETOPT(CURLOPT_URL, p->url);
+    if (!set_url(p)) return false;
+
     SETOPT(CURLOPT_NOSIGNAL, 1L);
     SETOPT(CURLOPT_PRIVATE, p);
 
