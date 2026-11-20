@@ -71,7 +71,6 @@ class GLLayer: CAOpenGLLayer {
     unowned var cocoaCB: CocoaCB
     var libmpv: LibmpvHelper { return cocoaCB.libmpv }
 
-    let displayLock = NSLock()
     let cglContext: CGLContextObj
     let cglPixelFormat: CGLPixelFormatObj
     var needsFlip: Bool = false
@@ -220,7 +219,6 @@ class GLLayer: CAOpenGLLayer {
     }
 
     override func display() {
-        displayLock.lock()
         let isUpdate = needsFlip
         super.display()
         CATransaction.flush()
@@ -232,7 +230,6 @@ class GLLayer: CAOpenGLLayer {
             }
             unlockCglContext()
         }
-        displayLock.unlock()
     }
 
     func update(force: Bool = false) {
