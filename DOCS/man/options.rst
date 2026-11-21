@@ -5909,6 +5909,9 @@ TLS/connection diagnostics), set ``--msg-level=curl=trace``.
     re-attempted after a recoverable error (timeout, connection drop,
     HTTP/2 stream reset, ...) before the stream gives up (default: 5).
     Non-seekable transfers cannot be retried and ignore this option.
+    A request whose connection drops before any response headers
+    arrive is retried too, seekable or not; a failure to connect is
+    not retried.
 
 ``--curl-connect-timeout=<seconds>``
     TCP/TLS connect timeout in seconds (default: 30, range 0-600). 0 lets
