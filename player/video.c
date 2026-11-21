@@ -778,16 +778,28 @@ static double find_best_speed(struct MPContext *mpctx, double vsync)
     return num > 0 ? total / num : 1;
 }
 
-static bool using_spdif_passthrough(struct MPContext *mpctx)
+static int get_ao_format(struct MPContext *mpctx)
 {
     if (mpctx->ao_chain && mpctx->ao_chain->ao) {
         int samplerate;
         int format;
         struct mp_chmap channels;
         ao_get_format(mpctx->ao_chain->ao, &samplerate, &format, &channels);
-        return !af_fmt_is_pcm(format);
+        return format;
     }
-    return false;
+    return 0;
+}
+
+static bool using_spdif_passthrough(struct MPContext *mpctx)
+{
+    int format = get_ao_format(mpctx);
+    return format && !af_fmt_is_pcm(format);
+}
+
+static bool using_hbr_passthrough(struct MPContext *mpctx)
+{
+    int format = get_ao_format(mpctx);
+    return format == AF_FORMAT_S_TRUEHD || format == AF_FORMAT_S_DTSHD;
 }
 
 // Audio drift compensation for display-sync. Tunes the audio-speed scale
@@ -888,7 +900,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
                 mode == VS_DISP_TEMPO;
     drop &= frame->can_drop;
 
-    if (resample && using_spdif_passthrough(mpctx))
+    if ((resample || mode == VS_DISP_TEMPO) && using_spdif_passthrough(mpctx))
+        return;
+
+    if (mode == VS_DISP_ADROP && using_hbr_passthrough(mpctx))
         return;
 
     double vsync = vo_get_vsync_interval(vo) / 1e9;
