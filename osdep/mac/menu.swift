@@ -114,6 +114,10 @@ class Menu: NSObject {
         item.state = config.checked ? .on : .off
         item.isEnabled = !config.disabled
 
+        if #available(macOS 12.0, *) {
+            item.allowsAutomaticKeyEquivalentLocalization = false
+        }
+
         if config.type == .separator {
             item = MenuItem.separator() as? MenuItem ?? item
         }
