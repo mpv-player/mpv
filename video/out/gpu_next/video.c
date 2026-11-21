@@ -1995,6 +1995,7 @@ void mppl_video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
         update_overlays(p, res, osd_flags,
                         rel, &fp->subs, &image, mpi,
                         mpi->params.stereo3d, 0);
+        fp->osd_sync = 0;
     } else {
         // Disable overlays when blend_subs is disabled
         update_overlays(p, osd, osd_flags, PL_OVERLAY_COORDS_DST_FRAME,
