@@ -897,7 +897,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     double approx_duration = MPMAX(0, mpctx->past_frames[0].approx_duration);
     double adjusted_duration = approx_duration / opts->playback_speed;
-    if (adjusted_duration > 0.5)
+    // Duplicate timestamps can result in a zero duration. Fall back to normal
+    // timing rather than dividing by zero when computing virtual vsyncs below,
+    // which would pass NaN timestamps to the VO.
+    if (adjusted_duration <= 0 || adjusted_duration > 0.5)
         return;
 
     mpctx->speed_factor_v = 1.0;
