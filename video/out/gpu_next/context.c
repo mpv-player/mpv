@@ -42,13 +42,21 @@
 #if HAVE_GL
 #include "video/out/opengl/context.h"
 #include "video/out/opengl/ra_gl.h"
-# if HAVE_EGL
+# if HAVE_EGL || HAVE_EGL_ANDROID
 #include <EGL/egl.h>
 # endif
 #endif
 
 #if HAVE_VULKAN
 #include "video/out/vulkan/context.h"
+#endif
+
+#if HAVE_GL && defined(PL_HAVE_OPENGL) && PL_API_VER >= 399
+static bool gpu_ctx_recreate_surface(void *priv, const int32_t *attribs)
+{
+    struct ra_swapchain *sw = priv;
+    return sw->fns->recreate_surface && sw->fns->recreate_surface(sw, attribs);
+}
 #endif
 
 static bool create_gpu(struct gpu_ctx *ctx, bool probing)
@@ -99,7 +107,7 @@ static bool create_gpu(struct gpu_ctx *ctx, bool probing)
             .get_proc_addr_ex = (void *) gl->get_fn,
             .proc_ctx = gl->fn_ctx,
         );
-# if HAVE_EGL
+# if HAVE_EGL || HAVE_EGL_ANDROID
         params.egl_display = eglGetCurrentDisplay();
         params.egl_context = eglGetCurrentContext();
 # endif
@@ -158,6 +166,10 @@ bool gpu_ctx_create_swapchain(struct gpu_ctx *ctx, int swapchain_depth)
         ctx->swapchain = pl_opengl_create_swapchain(opengl, pl_opengl_swapchain_params(
             .max_swapchain_depth = swapchain_depth,
             .framebuffer.flipped = gl->flipped,
+#if PL_API_VER >= 399
+            .recreate_surface = gpu_ctx_recreate_surface,
+            .priv = ctx->ra_ctx->swapchain,
+#endif
         ));
     }
 #endif
