@@ -71,6 +71,7 @@ struct priv {
     char *filename;                     // path
     int64_t duration;                   // in 90 kHz PTS ticks
     int title;
+    int cell_title;                     // title of the last cell change
     bool had_initial_vts;
 
     int dvd_speed;
@@ -81,6 +82,7 @@ struct priv {
     mp_mutex lock;                      // guards the nav/menu state below
 
     bool still_active;                  // fill_buffer() is holding a still
+    int still_length;                   // its seconds, 0 until user input
     uint32_t spu_clut[16];              // the PGC's CLUT, as 0xRRGGBB
     bool spu_clut_valid;
     bool in_menu;
@@ -527,6 +529,12 @@ static bool do_nav_cmd(stream_t *stream, struct stream_nav_cmd *cmd)
         return vm_moved(priv, st);
     case STREAM_NAV_PREV_MENU:
         return vm_moved(priv, dvdnav_menu_call(priv->dvdnav, DVD_MENU_Escape));
+    case STREAM_NAV_SKIP_STILL:
+        if (!priv->still_active)
+            return false;
+        dvdnav_still_skip(priv->dvdnav);
+        priv->still_active = false;
+        return true;
     default:
         break;
     }
@@ -900,22 +908,14 @@ static int process_event(stream_t *s, int event, void *buf, int len)
     }
     case DVDNAV_STILL_FRAME: {
         dvdnav_still_event_t *still = buf;
-        // We only honor indefinite (0xff) stills. Finite stills (studio
-        // logos / warnings shown for a few seconds before the menu) are
-        // not hold on screen. This avoids complexities with correctly
-        // timing the still frames, and there is little use-case for holding
-        // 10+ seconds on single still frame.
-        if (still->length != 0xFF) {
-            MP_VERBOSE(s, "skipping finite still (%d s)\n",
-                       still->length);
-            dvdnav_still_skip(dvdnav);
-            break;
-        }
-        // Indefinite still: report EOF to the demuxer so the video decoder
-        // is drained and the last frame is actually pushed to screen.
+        // Report EOF to the demuxer so the video decoder is drained and the
+        // last frame is actually pushed to screen. 0xff holds it until user
+        // input, the player ends any other still after its length.
         if (!priv->still_active)
-            MP_VERBOSE(s, "indefinite still -> EOF, hold last frame\n");
+            MP_VERBOSE(s, "still (length %d) -> EOF, hold last frame\n",
+                       still->length);
         priv->still_active = true;
+        priv->still_length = still->length == 0xFF ? 0 : still->length;
         return 0;
     }
     case DVDNAV_WAIT:
@@ -961,6 +961,13 @@ static int process_event(stream_t *s, int event, void *buf, int len)
         if (ev->pgc_length)
             priv->duration = ev->pgc_length;
         priv->cell_start = true;
+
+        int tit = 0, part = 0;
+        if (dvdnav_current_title_info(dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
+            if (priv->cell_title >= 0 && tit != priv->cell_title)
+                bump_discontinuity(priv, false);
+            priv->cell_title = tit;
+        }
 
         MP_VERBOSE(s, "cell change: cell=%d pg=%d pgc_len=%.3f "
                    "cur_time=%.3f domain=%s\n",
@@ -1149,7 +1156,9 @@ static int control(stream_t *stream, int cmd, void *arg)
     }
     case STREAM_CTRL_GET_ASPECT_RATIO: {
         uint8_t ar = dvdnav_get_video_aspect(dvdnav);
-        *(double *)arg = !ar ? 4.0 / 3.0 : 16.0 / 9.0;
+        int *dar = arg;
+        dar[0] = !ar ? 4 : 16;
+        dar[1] = !ar ? 3 : 9;
         return STREAM_OK;
     }
     case STREAM_CTRL_GET_CURRENT_TIME: {
@@ -1411,6 +1420,7 @@ static int control(stream_t *stream, int cmd, void *arg)
             .no_audio = no_audio,
             .menu_active = priv->in_menu,
             .still_active = priv->still_active,
+            .still_length = priv->still_length,
             .src_w = priv->src_w,
             .src_h = priv->src_h,
             .hl = priv->hl,
@@ -1550,6 +1560,7 @@ static int open_s_internal(stream_t *stream)
     priv->sub_physical = -1;
     priv->sub_visible = false;
     priv->tl_anchor = true;
+    priv->cell_title = -1;
 
     p->opts = mp_get_config_group(stream, stream->global, &dvd_conf);
 
