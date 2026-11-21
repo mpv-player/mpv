@@ -37,6 +37,7 @@ extension Menu {
 
     struct Config {
         let name: String
+        let subtitle: String?
         let key: String
         let modifiers: NSEvent.ModifierFlags
         let type: Type
@@ -50,6 +51,7 @@ extension Menu {
 
         init(
             name: String = "",
+            subtitle: String? = nil,
             key: String = "",
             modifiers: NSEvent.ModifierFlags = .command,
             type: Type? = nil,
@@ -62,6 +64,7 @@ extension Menu {
             configs: [Config] = []
         ) {
             self.name = name
+            self.subtitle = subtitle
             self.key = key
             self.modifiers = modifiers
             self.type = type ?? (configs.isEmpty ? .item : .menu)
@@ -116,6 +119,10 @@ class Menu: NSObject {
 
         if #available(macOS 12.0, *) {
             item.allowsAutomaticKeyEquivalentLocalization = false
+        }
+
+        if #available(macOS 14.4, *) {
+            item.subtitle = config.subtitle
         }
 
         if config.type == .separator {
