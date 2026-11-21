@@ -368,9 +368,62 @@ static void test_truehd_44k_family(void)
     talloc_free(ctx);
 }
 
+static void test_spdif_pause_silence(void)
+{
+    static const uint8_t expected_pause[16] = {
+        0x72, 0xF8, 0x1F, 0x4E, 0x03, 0x00, 0x20, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    const int hbr_fmts[] = { AF_FORMAT_S_TRUEHD, AF_FORMAT_S_DTSHD };
+    const int twoch_fmts[] = { AF_FORMAT_S_AC3, AF_FORMAT_S_EAC3 };
+
+    size_t test_size = (512 * 16) + 7;
+    uint8_t *buf = malloc(test_size);
+    assert_true(buf);
+
+    for (size_t i = 0; i < MP_ARRAY_SIZE(hbr_fmts); i++) {
+        memset(buf, 0xaa, test_size);
+        af_fill_silence(buf, test_size, hbr_fmts[i]);
+        for (int k = 0; k < 512; k++)
+            assert_int_equal(memcmp(buf + k * 16, expected_pause, 16), 0);
+        for (size_t rem = 512 * 16; rem < test_size; rem++)
+            assert_int_equal(buf[rem], 0x00);
+    }
+
+    for (size_t i = 0; i < MP_ARRAY_SIZE(twoch_fmts); i++) {
+        memset(buf, 0xaa, test_size);
+        af_fill_silence(buf, test_size, twoch_fmts[i]);
+        for (int k = 0; k < 64; k++) {
+            assert_int_equal(memcmp(buf + k * 128, expected_pause, 16), 0);
+            for (int z = 16; z < 128; z++)
+                assert_int_equal(buf[k * 128 + z], 0x00);
+        }
+        for (size_t rem = 64 * 128; rem < test_size; rem++)
+            assert_int_equal(buf[rem], 0x00);
+    }
+
+    memset(buf, 0xaa, test_size);
+    af_fill_silence(buf, test_size, AF_FORMAT_S16);
+    for (size_t j = 0; j < test_size; j++)
+        assert_int_equal(buf[j], 0x00);
+
+    memset(buf, 0xaa, test_size);
+    af_fill_silence(buf, test_size, AF_FORMAT_U8);
+    for (size_t j = 0; j < test_size; j++)
+        assert_int_equal(buf[j], 0x80);
+
+    memset(buf, 0xaa, test_size);
+    af_fill_silence(buf, test_size, AF_FORMAT_DSD);
+    for (size_t j = 0; j < test_size; j++)
+        assert_int_equal(buf[j], 0x69);
+
+    free(buf);
+}
+
 int main(void)
 {
     test_truehd_pts_pacing();
     test_truehd_44k_family();
+    test_spdif_pause_silence();
     return 0;
 }
