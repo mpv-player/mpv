@@ -577,6 +577,7 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track,
                            bool refresh_only);
 void prepare_playlist(struct MPContext *mpctx, struct playlist *pl, bool overwrite_current);
 void autoload_external_files(struct MPContext *mpctx, struct mp_cancel *cancel);
+void mp_reload_chapters(struct MPContext *mpctx);
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type);
 void prefetch_next(struct MPContext *mpctx);
