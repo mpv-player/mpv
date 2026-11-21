@@ -4609,6 +4609,17 @@ static int get_clipboard(struct MPContext *mpctx, void *arg,
     }
 }
 
+static const struct m_opt_choice_alternatives screenshot_flags[] = {
+    {"video", SCREENSHOT_VIDEO},
+    {"scaled", SCREENSHOT_SCALED},
+    {"subtitles", SCREENSHOT_SUBTITLES},
+    {"osd", SCREENSHOT_OSD},
+    {"each-frame", SCREENSHOT_EACH_FRAME},
+    {"-", SCREENSHOT_VIDEO},
+    {"window", SCREENSHOT_WINDOW},
+    {0}
+};
+
 static int set_clipboard(struct MPContext *mpctx, void *arg,
                          struct clipboard_access_params *params)
 {
@@ -4619,11 +4630,38 @@ static int set_clipboard(struct MPContext *mpctx, void *arg,
         data.type = CLIPBOARD_DATA_TEXT;
         data.u.text = *(char **)arg;
         break;
+    case CLIPBOARD_DATA_IMAGE: {
+        bstr token = bstr0(*(char **)arg);
+        if (!bstr_eatstart0(&token, "@screenshot") ||
+            (token.len && token.start[0] != ' '))
+            return M_PROPERTY_ERROR;
+        token = bstr_strip(token);
+
+        int mode = SCREENSHOT_SUBTITLES;
+        const struct m_option flags = {
+            .type = &m_option_type_flags,
+            .priv = (void *)screenshot_flags,
+        };
+        if (token.len &&
+            m_option_parse(mpctx->log, &flags, bstr0("screenshot"), token, &mode) < 0)
+            return M_PROPERTY_ERROR;
+        // each-frame is only supported by the screenshot command.
+        if (mode & SCREENSHOT_EACH_FRAME)
+            return M_PROPERTY_ERROR;
+
+        data.type = CLIPBOARD_DATA_IMAGE;
+        data.u.image = screenshot_get_image(mpctx, mode);
+        if (!data.u.image)
+            return M_PROPERTY_UNAVAILABLE;
+        break;
+    }
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
     int ret = mp_clipboard_set_data(mpctx->clipboard, params, &data);
+    if (data.type == CLIPBOARD_DATA_IMAGE)
+        talloc_free(data.u.image);
     if (ret == CLIPBOARD_SUCCESS)
         return M_PROPERTY_OK;
     return ret == CLIPBOARD_UNAVAILABLE ? M_PROPERTY_UNAVAILABLE : M_PROPERTY_ERROR;
@@ -4668,6 +4706,8 @@ static int mp_property_clipboard(void *ctx, struct m_property *prop,
 
         if (!strcmp(key, "text-primary"))
             params.target = CLIPBOARD_TARGET_PRIMARY_SELECTION;
+        else if (!strcmp(key, "image"))
+            params.type = CLIPBOARD_DATA_IMAGE;
         else if (strcmp(key, "text"))
             return M_PROPERTY_UNKNOWN;
 
@@ -4679,12 +4719,43 @@ static int mp_property_clipboard(void *ctx, struct m_property *prop,
                     .type = CONF_TYPE_STRING,
                 };
                 return M_PROPERTY_OK;
+            case CLIPBOARD_DATA_IMAGE:
+                *(struct m_option *)act->arg = (struct m_option){
+                    .type = CONF_TYPE_NODE,
+                };
+                return M_PROPERTY_OK;
             default:
                 return M_PROPERTY_UNKNOWN;
             }
+        case M_PROPERTY_PRINT: {
+            if (params.type != CLIPBOARD_DATA_IMAGE)
+                return M_PROPERTY_NOT_IMPLEMENTED;
+            void *tmp = talloc_new(NULL);
+            struct clipboard_data data = {0};
+            int ret = mp_clipboard_get_data(mpctx->clipboard, &params, &data, tmp);
+            if (ret == CLIPBOARD_SUCCESS && data.type != CLIPBOARD_DATA_IMAGE)
+                ret = CLIPBOARD_FAILED;
+            if (ret == CLIPBOARD_SUCCESS)
+                *(char **)act->arg = talloc_strdup(NULL, data.u.image ? "(image)" : "(none)");
+            talloc_free(tmp);
+            if (ret == CLIPBOARD_SUCCESS)
+                return M_PROPERTY_OK;
+            return ret == CLIPBOARD_UNAVAILABLE ? M_PROPERTY_UNAVAILABLE : M_PROPERTY_ERROR;
+        }
         case M_PROPERTY_GET:
+            if (params.type == CLIPBOARD_DATA_IMAGE)
+                return M_PROPERTY_NOT_IMPLEMENTED;
             return get_clipboard(mpctx, act->arg, &params);
+        case M_PROPERTY_SET_NODE:
         case M_PROPERTY_SET:
+            if (params.type == CLIPBOARD_DATA_IMAGE) {
+                struct mpv_node *node = act->arg;
+                if (node->format != MPV_FORMAT_STRING)
+                    return M_PROPERTY_INVALID_FORMAT;
+                return set_clipboard(mpctx, &node->u.string, &params);
+            }
+            if (act->action == M_PROPERTY_SET_NODE)
+                return M_PROPERTY_NOT_IMPLEMENTED;
             return set_clipboard(mpctx, act->arg, &params);
         default:
             return M_PROPERTY_NOT_IMPLEMENTED;
@@ -7875,19 +7946,13 @@ const struct mp_cmd_def mp_cmds[] = {
 
     { "screenshot", cmd_screenshot,
         {
-            {"flags", OPT_FLAGS(v.i,
-                {"video", 0},
-                {"scaled", 1},
-                {"subtitles", 2},
-                {"osd", 4},
-                {"each-frame", 8},
-                {"-", 0},
-                {"window", 1|2|4}),
-                OPTDEF_INT(2)},
+            {"flags", OPT_TYPED_FIELD(m_option_type_flags, int, v.i),
+                .priv = (void *)screenshot_flags,
+                OPTDEF_INT(SCREENSHOT_SUBTITLES)},
             // backwards compatibility
             {"legacy", OPT_CHOICE(v.i,
                 {"unused", 0}, {"single", 0},
-                {"each-frame", 8}),
+                {"each-frame", SCREENSHOT_EACH_FRAME}),
                 .flags = MP_CMD_OPT_ARG},
         },
         .spawn_thread = true,
@@ -7896,24 +7961,24 @@ const struct mp_cmd_def mp_cmds[] = {
         {
             {"filename", OPT_STRING(v.s)},
             {"flags", OPT_CHOICE(v.i,
-                {"video", 0},
-                {"scaled", 1},
-                {"subtitles", 2},
-                {"osd", 4},
-                {"window", 1|2|4}),
-                OPTDEF_INT(2)},
+                {"video", SCREENSHOT_VIDEO},
+                {"scaled", SCREENSHOT_SCALED},
+                {"subtitles", SCREENSHOT_SUBTITLES},
+                {"osd", SCREENSHOT_OSD},
+                {"window", SCREENSHOT_WINDOW}),
+                OPTDEF_INT(SCREENSHOT_SUBTITLES)},
         },
         .spawn_thread = true,
     },
     { "screenshot-raw", cmd_screenshot_raw,
         {
             {"flags", OPT_CHOICE(v.i,
-                {"video", 0},
-                {"scaled", 1},
-                {"subtitles", 2},
-                {"osd", 4},
-                {"window", 1|2|4}),
-                OPTDEF_INT(2)},
+                {"video", SCREENSHOT_VIDEO},
+                {"scaled", SCREENSHOT_SCALED},
+                {"subtitles", SCREENSHOT_SUBTITLES},
+                {"osd", SCREENSHOT_OSD},
+                {"window", SCREENSHOT_WINDOW}),
+                OPTDEF_INT(SCREENSHOT_SUBTITLES)},
              {"format", OPT_CHOICE(v.i,
                 {"bgr0", 0},
                 {"bgra", 1},

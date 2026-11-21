@@ -218,6 +218,7 @@ void clipboard_init(struct MPContext *mpctx)
     struct clipboard_ctx *cl = talloc_zero_ptrtype(mpctx, cl);
     talloc_set_destructor(cl, clipboard_destructor);
     cl->log = mp_log_new(cl, mpctx->global->log, "clipboard");
+    cl->global = mpctx->global;
     mp_mutex_init(&cl->lock);
     mpctx->clipboard = cl;
 }
