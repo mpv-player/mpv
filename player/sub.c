@@ -170,6 +170,22 @@ bool update_subtitles(struct MPContext *mpctx, double video_pts)
     return ok;
 }
 
+bool sub_pause_check(struct MPContext *mpctx, double cur_pts, double next_pts)
+{
+    if (!mpctx->opts->sub_pause || mpctx->play_dir < 0)
+        return false;
+
+    struct track *track = mpctx->current_track[0][STREAM_SUB];
+    struct dec_sub *sub = track ? track->d_sub : NULL;
+    if (!sub || !mpctx->opts->subs_shared->sub_visibility[0] ||
+        cur_pts == MP_NOPTS_VALUE || next_pts == MP_NOPTS_VALUE)
+    {
+        return false;
+    }
+
+    return sub_ends_between(sub, cur_pts, next_pts);
+}
+
 static struct attachment_list *get_all_attachments(struct MPContext *mpctx)
 {
     struct attachment_list *list = talloc_zero(NULL, struct attachment_list);
