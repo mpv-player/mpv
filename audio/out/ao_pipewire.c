@@ -558,11 +558,6 @@ static int pipewire_init_boilerplate(struct ao *ao)
     if (pw_thread_loop_start(p->loop) < 0)
         goto error;
 
-    if (!session_has_sinks(ao)) {
-        MP_VERBOSE(ao, "PipeWire does not have any audio sinks, skipping\n");
-        return -1;
-    }
-
     return 0;
 
 error:
@@ -614,6 +609,11 @@ static int init(struct ao *ao)
 
     if (pipewire_init_boilerplate(ao) < 0)
         goto error_props;
+
+    if (!session_has_sinks(ao)) {
+        MP_VERBOSE(ao, "PipeWire does not have any audio sinks, skipping\n");
+        goto error_props;
+    }
 
     if (p->options.buffer_msec) {
         ao->device_buffer = p->options.buffer_msec * ao->samplerate / 1000;
