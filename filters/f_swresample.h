@@ -28,7 +28,7 @@ struct mp_resample_opts {
 };
 
 #define MP_RESAMPLE_OPTS_DEF {  \
-    .filter_size = 16,          \
+    .filter_size = 32,          \
     .cutoff      = 0.0,         \
     .phase_shift = 10,          \
     .normalize   = 0,           \
