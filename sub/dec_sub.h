@@ -42,7 +42,7 @@ struct attachment_list {
 };
 
 struct sub_line {
-    char *text;
+    char *text; // NULL for image subtitles
     double start;
     double end;
 };
