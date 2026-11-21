@@ -239,6 +239,10 @@ void mp_input_wakeup(struct input_ctx *ictx);
 // characters. If false, count Right Alt as the modifier Alt key.
 bool mp_input_use_alt_gr(struct input_ctx *ictx);
 
+// If this returns true, keyboard input should be interpreted independently of
+// the currently active keyboard layout (Windows only, used by the w32 VO).
+bool mp_input_layout_independent(struct input_ctx *ictx);
+
 // Return true if mpv should intercept keyboard media keys
 bool mp_input_use_media_keys(struct input_ctx *ictx);
 
