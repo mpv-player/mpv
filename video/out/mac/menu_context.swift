@@ -67,10 +67,13 @@ class MenuContext: Menu {
                 .map { $0.replacingOccurrences(of: "&", with: "") }
                 .joined(separator: "&") ?? ""
             let cmd = item["cmd"] as? String ?? ""
+            let shortcut = map(shortcut: item["shortcut"] as? String)
             let submenu = (item["submenu"] as? [Any?]).map { map(menu: $0) } ?? []
 
             configs.append(Config(
                 name: title,
+                key: shortcut?.key ?? "",
+                modifiers: shortcut?.modifiers ?? [],
                 action: type == "submenu" || cmd.isEmpty ? nil : #selector(command(_:)),
                 target: self,
                 command: cmd,
@@ -81,5 +84,15 @@ class MenuContext: Menu {
         }
 
         return configs
+    }
+
+    func map(shortcut: String?) -> (key: String, modifiers: NSEvent.ModifierFlags)? {
+        guard let shortcut = shortcut else { return nil }
+
+        for name in shortcut.split(separator: ",") {
+            if let shortcut = input.map(shortcut: String(name)) { return shortcut }
+        }
+
+        return nil
     }
 }
