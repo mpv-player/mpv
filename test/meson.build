@@ -99,6 +99,23 @@ swresample = executable('swresample', 'swresample.c', include_directories: incdi
                         objects: swresample_objects, link_with: [img_utils, test_utils])
 test('swresample', swresample)
 
+spdif_truehd_files = [
+    'audio/aframe.c',
+    'audio/chmap_avchannel.c',
+    'audio/decode/ad_spdif.c',
+    'audio/fmt-conversion.c',
+    'common/codecs.c',
+    'demux/packet.c',
+    'demux/packet_pool.c',
+    'filters/filter.c',
+    'filters/frame.c',
+]
+spdif_truehd_objects = libmpv.extract_objects(spdif_truehd_files)
+spdif_truehd = executable('spdif-truehd', 'spdif_truehd.c', include_directories: incdir,
+                          dependencies: [libavformat, libavcodec, libavutil, libplacebo],
+                          objects: spdif_truehd_objects, link_with: [img_utils, test_utils])
+test('spdif-truehd', spdif_truehd)
+
 gl_video_objects = libmpv.extract_objects('video/out/gpu/ra.c',
                                           'video/out/gpu/utils.c')
 gl_video = executable('gl-video', 'gl_video.c', objects: gl_video_objects,
