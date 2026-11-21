@@ -2495,12 +2495,11 @@ Audio
         handling. Enabling this option is strongly discouraged.
 
 ``--audio-wait-open=<secs>``
-    This makes sense for use with ``--audio-stream-silence=yes``. If this option
-    is given, the player will wait for the given amount of seconds after opening
-    the audio device before sending actual audio data to it. Useful if your
-    expensive hardware discards the first 1 or 2 seconds of audio data sent to
-    it. If ``--audio-stream-silence=yes`` is not set, this option will likely
-    just waste time.
+    Stream silence for the given number of seconds after opening a timed audio
+    device before starting playback. Useful if hardware (such as an HDMI
+    receiver) discards the start of audio while locking onto the stream. Does
+    not require ``--audio-stream-silence=yes``. Ignored on untimed outputs
+    (such as ``--ao=pcm`` or encoding mode).
 
 Subtitles
 ---------
