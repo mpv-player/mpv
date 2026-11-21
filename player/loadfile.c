@@ -59,6 +59,7 @@
 #include "video/out/vo.h"
 
 #include "core.h"
+#include "history.h"
 #include "command.h"
 
 // Called from the demuxer thread if a new packet is available, or other changes.
@@ -833,6 +834,8 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         MP_ERR(mpctx, "Track %d is already selected.\n", track->user_tid);
         goto error;
     }
+
+    history_invalidate(mpctx);
 
     if (order == 0) {
         if (type == STREAM_VIDEO) {

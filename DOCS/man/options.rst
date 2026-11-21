@@ -392,6 +392,28 @@ Playback Control
     chapter instead. A negative value means always go back to the previous
     chapter.
 
+``--video-history=<seconds>``
+    Cache the last ``<seconds>`` of played video and audio in memory after
+    decoding and filtering (default: 0, disabled). Exact seeks and frame steps
+    to cached positions are instant. Fixes short backward seeks being slow in
+    files with large keyframe interval.
+
+    Needs a lot of memory for uncompressed video frames. 10 seconds of
+    1920x1080 8-bit 4:2:0 video at 60 FPS take about 2 GB.
+    See ``--video-history-max-bytes``.
+
+    Does not work with hardware decoding (except copy-back modes), reverse
+    playback, ``--lavfi-complex``, encoding, audio passthrough. See property
+    ``video-history-state``.
+
+    Disables direct rendering (``--vd-lavc-dr``) and makes decoder not drop
+    frames (``--framedrop=decoder``).
+
+``--video-history-max-bytes=<bytesize>``
+    Maximum amount of memory for ``--video-history`` (default: 2GiB).
+
+    Same suffixes as ``--demuxer-max-bytes``.
+
 ``--hr-seek=<no|absolute|yes|default>``
     Select when to use precise seeks that are not limited to keyframes. Such
     seeks require decoding video from the previous keyframe up to the target
