@@ -498,7 +498,7 @@ class Window: NSWindow, NSWindowDelegate {
             // If the window height is smaller than the visible frame, but it was
             // bigger previously recenter the smaller window vertically. This is
             // needed to counter the 'snap to top' behaviour.
-            nf.origin.y = (vf.height - nf.height) / 2
+            nf.origin.y = vf.minY + (vf.height - nf.height) / 2
         }
         return nf
     }
