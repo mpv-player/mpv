@@ -221,10 +221,16 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
     uint8_t buffer[1024];
     struct spa_pod_builder b = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
 
-    /* We want to know when our node is linked.
-     * As there is no proper callback for this we use the Latency param for this
-     */
-    if (id == SPA_PARAM_Latency) {
+    // Ignore local params emitted during connect before a peer sink is linked.
+    // Once paused, peer Latency or Tag indicates the session manager linked us.
+    if (param != NULL && p->init_state == INIT_STATE_NONE &&
+        pw_stream_get_state(p->stream, NULL) >= PW_STREAM_STATE_PAUSED &&
+        (id == SPA_PARAM_Latency
+#if PW_CHECK_VERSION(0, 3, 79)
+         || id == SPA_PARAM_Tag
+#endif
+         ))
+    {
         p->init_state = INIT_STATE_SUCCESS;
         pw_thread_loop_signal(p->loop, false);
     }
@@ -242,12 +248,25 @@ static void on_param_changed(void *userdata, uint32_t id, const struct spa_pod *
                     SPA_PARAM_BUFFERS_stride,     SPA_POD_Int(ao->sstride));
     if (!params[0]) {
         MP_ERR(ao, "Could not build parameter pod\n");
+        if (p->init_state == INIT_STATE_NONE) {
+            p->init_state = INIT_STATE_ERROR;
+            pw_thread_loop_signal(p->loop, false);
+        }
         return;
     }
 
     if (pw_stream_update_params(p->stream, params, 1) < 0) {
         MP_ERR(ao, "Could not update stream parameters\n");
+        if (p->init_state == INIT_STATE_NONE) {
+            p->init_state = INIT_STATE_ERROR;
+            pw_thread_loop_signal(p->loop, false);
+        }
         return;
+    }
+
+    if (p->init_state == INIT_STATE_NONE) {
+        p->init_state = INIT_STATE_SUCCESS;
+        pw_thread_loop_signal(p->loop, false);
     }
 }
 
@@ -259,15 +278,23 @@ static void on_state_changed(void *userdata, enum pw_stream_state old, enum pw_s
            pw_stream_state_as_string(old), pw_stream_state_as_string(state), error);
 
     if (state == PW_STREAM_STATE_ERROR) {
-        MP_WARN(ao, "Stream in error state, trying to reload...\n");
-        p->init_state = INIT_STATE_ERROR;
-        pw_thread_loop_signal(p->loop, false);
-        ao_request_reload(ao);
+        if (p->init_state == INIT_STATE_NONE) {
+            p->init_state = INIT_STATE_ERROR;
+            pw_thread_loop_signal(p->loop, false);
+        } else if (p->init_state == INIT_STATE_SUCCESS) {
+            MP_WARN(ao, "Stream in error state, trying to reload...\n");
+            ao_request_reload(ao);
+        }
     }
 
     if (state == PW_STREAM_STATE_UNCONNECTED && old != PW_STREAM_STATE_UNCONNECTED) {
-        MP_WARN(ao, "Stream disconnected, trying to reload...\n");
-        ao_request_reload(ao);
+        if (p->init_state == INIT_STATE_NONE) {
+            p->init_state = INIT_STATE_ERROR;
+            pw_thread_loop_signal(p->loop, false);
+        } else if (p->init_state == INIT_STATE_SUCCESS) {
+            MP_WARN(ao, "Stream disconnected, trying to reload...\n");
+            ao_request_reload(ao);
+        }
     }
 }
 
@@ -548,7 +575,7 @@ static void wait_for_init_done(struct ao *ao)
     struct timespec abstime;
     int r;
 
-    r = pw_thread_loop_get_time(p->loop, &abstime, 50 * SPA_NSEC_PER_MSEC);
+    r = pw_thread_loop_get_time(p->loop, &abstime, 500 * SPA_NSEC_PER_MSEC);
     if (r < 0) {
         MP_WARN(ao, "Could not get timeout for initialization: %s\n", spa_strerror(r));
         return;
@@ -668,10 +695,13 @@ static int init(struct ao *ao)
     }
 
     wait_for_init_done(ao);
+    if (p->init_state == INIT_STATE_NONE)
+        p->init_state = INIT_STATE_ERROR;
+    enum init_state init_state = p->init_state;
 
     pw_thread_loop_unlock(p->loop);
 
-    if (p->init_state != INIT_STATE_SUCCESS)
+    if (init_state != INIT_STATE_SUCCESS)
         goto error;
 
     return 0;
