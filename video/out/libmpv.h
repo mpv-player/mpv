@@ -39,6 +39,9 @@ struct render_backend {
 // generic as the VO API.) Like with VOs, one backend can support multiple
 // underlying GPU APIs.
 struct render_backend_fns {
+    // The value of MPV_RENDER_PARAM_RENDERER that selects the backend. NULL
+    // if the backend does not depend on that parameter.
+    const char *renderer;
     // Returns libmpv error code. In particular, this function has to check for
     // MPV_RENDER_PARAM_API_TYPE, and silently return MPV_ERROR_NOT_IMPLEMENTED
     // if the API is not included in this backend.
@@ -52,6 +55,8 @@ struct render_backend_fns {
     void (*reconfig)(struct render_backend *ctx, struct mp_image_params *params);
     // Like VOCTRL_RESET.
     void (*reset)(struct render_backend *ctx);
+    // Like VOCTRL_PAUSE and VOCTRL_RESUME. Optional.
+    void (*set_paused)(struct render_backend *ctx, bool paused);
     void (*screenshot)(struct render_backend *ctx, struct vo_frame *frame,
                        struct voctrl_screenshot *args);
     void (*perfdata)(struct render_backend *ctx,
@@ -80,4 +85,5 @@ struct render_backend_fns {
 };
 
 extern const struct render_backend_fns render_backend_gpu;
+extern const struct render_backend_fns render_backend_gpu_next;
 extern const struct render_backend_fns render_backend_sw;

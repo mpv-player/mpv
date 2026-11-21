@@ -1,0 +1,2 @@
+add `--cocoa-cb-renderer` option
+make gpu-next renderer the default for cocoa-cb

@@ -515,6 +515,11 @@ static void update_overlays(struct mppl_video *p, struct mp_osd_res res,
                             struct overlay_state *state, struct pl_frame *frame,
                             struct mp_image *src, int stereo_mode, float ref_luma)
 {
+    if (!p->osd) {
+        frame->num_overlays = 0;
+        return;
+    }
+
     double pts = src ? src->pts : 0;
     int div[2];
     mp_get_3d_side_by_side(stereo_mode, div);
@@ -1311,6 +1316,15 @@ static struct frame_params get_frame_params(struct mppl_video *p, struct vo_fram
     return (struct frame_params){ params, can_interpolate, pts_offset };
 }
 
+static void reset_queue(struct mppl_video *p)
+{
+    pl_queue_reset(p->queue);
+    p->last_pts = 0.0;
+    p->last_id = 0;
+    p->want_reset = false;
+    p->flush_cache = true;
+}
+
 void mppl_video_begin_frame(struct mppl_video *p, struct vo_frame *frame,
                             struct pl_color_space display_csp, float display_ref_luma)
 {
@@ -1354,13 +1368,8 @@ void mppl_video_begin_frame(struct mppl_video *p, struct vo_frame *frame,
     for (int n = 0; n < frame->num_frames; n++) {
         int id = frame->frame_id + n;
 
-        if (p->want_reset) {
-            pl_queue_reset(p->queue);
-            p->last_pts = 0.0;
-            p->last_id = 0;
-            p->want_reset = false;
-            p->flush_cache = true;
-        }
+        if (p->want_reset)
+            reset_queue(p);
 
         if (p->flush_cache) {
             pl_renderer_flush_cache(p->rr);
@@ -2135,6 +2144,14 @@ void mppl_video_reset(struct mppl_video *p)
 {
     // Defer until the first new frame (unique ID) actually arrives
     p->want_seek_reset = true;
+}
+
+// Drop the queued frames and what was mapped for them.
+void mppl_video_flush(struct mppl_video *p)
+{
+    reset_queue(p);
+    slot_uninit(p, &p->hwdec);
+    slot_uninit(p, &p->el_hwdec);
 }
 
 void mppl_video_perfdata(struct mppl_video *p, struct voctrl_performance_data *perf)
