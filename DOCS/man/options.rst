@@ -5912,8 +5912,8 @@ TLS/connection diagnostics), set ``--msg-level=curl=trace``.
 
 ``--curl-connect-timeout=<seconds>``
     TCP/TLS connect timeout in seconds (default: 30, range 0-600). 0 lets
-    libcurl use its built-in default. The overall transfer timeout is
-    controlled by ``--network-timeout``.
+    libcurl use its built-in default. A transfer that receives no data for
+    ``--network-timeout`` seconds is aborted and retried.
 
 ``--curl-buffer-size=<bytes>``
     Size of the per-stream producer-side ring buffer that decouples the
