@@ -104,9 +104,11 @@ spdif_truehd_files = [
     'audio/chmap_avchannel.c',
     'audio/decode/ad_spdif.c',
     'audio/fmt-conversion.c',
+    'audio/out/buffer.c',
     'common/codecs.c',
     'demux/packet.c',
     'demux/packet_pool.c',
+    'filters/f_async_queue.c',
     'filters/filter.c',
     'filters/frame.c',
 ]

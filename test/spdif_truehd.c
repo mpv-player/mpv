@@ -27,16 +27,55 @@
 #include "audio/aframe.h"
 #include "audio/chmap.h"
 #include "audio/format.h"
+#include "audio/out/ao.h"
+#include "audio/out/internal.h"
 #include "common/av_common.h"
 #include "common/common.h"
 #include "common/global.h"
 #include "demux/packet.h"
 #include "demux/stheader.h"
+#include "filters/f_async_queue.h"
 #include "filters/f_decoder_wrapper.h"
 #include "filters/filter.h"
 #include "filters/frame.h"
+#include "osdep/threads.h"
 #include "video/hwdec.h"
 #include "test_utils.h"
+
+static const uint8_t mat_start_code[20] = {
+    0x07, 0x9E, 0x00, 0x03, 0x84, 0x01, 0x01, 0x01,
+    0x80, 0x00, 0x56, 0xA5, 0x3B, 0xF4, 0x81, 0x83,
+    0x49, 0x80, 0x77, 0xE0,
+};
+
+static const uint8_t mat_middle_code[12] = {
+    0xC3, 0xC1, 0x42, 0x49, 0x3B, 0xFA, 0x82, 0x83,
+    0x49, 0x80, 0x77, 0xE0,
+};
+
+static const uint8_t mat_end_code[16] = {
+    0xC3, 0xC2, 0xC0, 0xC4, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x97, 0x11,
+};
+
+static const uint8_t expected_pause_burst[16] = {
+    0x72, 0xF8, 0x1F, 0x4E, 0x03, 0x00, 0x20, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+void ao_post_process_data(struct ao *ao, void **data, int num_samples)
+{
+}
+
+bool ao_need_conversion(struct ao_convert_fmt *fmt)
+{
+    return false;
+}
+
+void ao_convert_inplace(struct ao_convert_fmt *fmt, void **data, int num_samples)
+{
+    abort();
+}
 
 int64_t mp_pts_to_av(double mp_pts, AVRational *tb)
 {
@@ -370,10 +409,6 @@ static void test_truehd_44k_family(void)
 
 static void test_spdif_pause_silence(void)
 {
-    static const uint8_t expected_pause[16] = {
-        0x72, 0xF8, 0x1F, 0x4E, 0x03, 0x00, 0x20, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    };
     const int hbr_fmts[] = { AF_FORMAT_S_TRUEHD, AF_FORMAT_S_DTSHD };
     const int twoch_fmts[] = { AF_FORMAT_S_AC3, AF_FORMAT_S_EAC3 };
 
@@ -385,7 +420,7 @@ static void test_spdif_pause_silence(void)
         memset(buf, 0xaa, test_size);
         af_fill_silence(buf, test_size, hbr_fmts[i]);
         for (int k = 0; k < 512; k++)
-            assert_int_equal(memcmp(buf + k * 16, expected_pause, 16), 0);
+            assert_int_equal(memcmp(buf + k * 16, expected_pause_burst, 16), 0);
         for (size_t rem = 512 * 16; rem < test_size; rem++)
             assert_int_equal(buf[rem], 0x00);
     }
@@ -394,7 +429,7 @@ static void test_spdif_pause_silence(void)
         memset(buf, 0xaa, test_size);
         af_fill_silence(buf, test_size, twoch_fmts[i]);
         for (int k = 0; k < 64; k++) {
-            assert_int_equal(memcmp(buf + k * 128, expected_pause, 16), 0);
+            assert_int_equal(memcmp(buf + k * 128, expected_pause_burst, 16), 0);
             for (int z = 16; z < 128; z++)
                 assert_int_equal(buf[k * 128 + z], 0x00);
         }
@@ -420,10 +455,507 @@ static void test_spdif_pause_silence(void)
     free(buf);
 }
 
+struct wire_capture {
+    uint8_t *buf;
+    size_t len;
+    size_t cap;
+};
+
+static void wire_append(struct wire_capture *cap, const void *src, size_t bytes)
+{
+    if (cap->len + bytes > cap->cap) {
+        cap->cap = MPMAX(cap->cap * 2, cap->len + bytes + 65536);
+        cap->buf = realloc(cap->buf, cap->cap);
+        assert_true(cap->buf);
+    }
+    memcpy(cap->buf + cap->len, src, bytes);
+    cap->len += bytes;
+}
+
+struct mock_ao_priv {
+    int starts;
+    int resets;
+    int wakeups;
+};
+
+static void mock_ao_wakeup(void *ctx)
+{
+    struct mock_ao_priv *mp = ctx;
+    mp->wakeups++;
+}
+
+static void mock_ao_start(struct ao *ao)
+{
+    struct mock_ao_priv *mp = ao->priv;
+    mp->starts++;
+}
+
+static void mock_ao_reset(struct ao *ao)
+{
+    struct mock_ao_priv *mp = ao->priv;
+    mp->resets++;
+}
+
+static void mock_ao_uninit(struct ao *ao)
+{
+}
+
+static const struct ao_driver mock_pull_ao_driver = {
+    .name = "mock_pull",
+    .start = mock_ao_start,
+    .reset = mock_ao_reset,
+    .uninit = mock_ao_uninit,
+};
+
+static struct ao *create_mock_ao(struct mpv_global *global,
+                                 const struct ao_driver *driver, void *priv,
+                                 void (*wakeup_cb)(void *), int format,
+                                 int rate, int channels, bool stream_silence)
+{
+    struct ao *ao = talloc_zero(NULL, struct ao);
+    assert_true(ao);
+    ao->global = global;
+    ao->log = mp_null_log;
+    ao->driver = driver;
+    ao->driver_initialized = true;
+    ao->priv = priv;
+    ao->wakeup_cb = wakeup_cb;
+    ao->wakeup_ctx = priv;
+    ao->format = format;
+    ao->samplerate = rate;
+    mp_chmap_from_channels(&ao->channels, channels);
+    ao->num_planes = 1;
+    ao->sstride = af_fmt_to_bytes(format) * channels;
+    ao->bps = (int64_t)rate * ao->sstride;
+    ao->buffer = rate;
+    ao->device_buffer = 4096;
+    ao->stream_silence = stream_silence;
+    if (stream_silence)
+        ao->init_flags |= AO_INIT_STREAM_SILENCE;
+
+    init_buffer_pre(ao);
+    assert_true(init_buffer_post(ao));
+    return ao;
+}
+
+static struct mp_aframe *make_mat_burst_aframe(uint32_t seq_id)
+{
+    struct mp_aframe *f = mp_aframe_create();
+    assert_true(f);
+    struct mp_chmap chmap;
+    mp_chmap_from_channels(&chmap, 8);
+    assert_true(mp_aframe_set_format(f, AF_FORMAT_S_TRUEHD));
+    assert_true(mp_aframe_set_rate(f, 192000));
+    assert_true(mp_aframe_set_chmap(f, &chmap));
+    assert_true(mp_aframe_alloc_data(f, 3840));
+
+    uint8_t *hd = calloc(1, 61424);
+    assert_true(hd);
+    memcpy(hd + 0, mat_start_code, sizeof(mat_start_code));
+    memcpy(hd + 30708, mat_middle_code, sizeof(mat_middle_code));
+    memcpy(hd + 61408, mat_end_code, sizeof(mat_end_code));
+    AV_WB32(hd + 20, seq_id);
+    AV_WB32(hd + 61404, seq_id);
+
+    uint8_t **data = mp_aframe_get_data_rw(f);
+    assert_true(data && data[0]);
+    uint8_t *out = data[0];
+    AV_WL16(out + 0, 0xF872);
+    AV_WL16(out + 2, 0x4E1F);
+    AV_WL16(out + 4, 0x0016);
+    AV_WL16(out + 6, 61424);
+    for (int i = 0; i < 61424; i += 2) {
+        out[8 + i]     = hd[i + 1];
+        out[8 + i + 1] = hd[i];
+    }
+    memset(out + 61432, 0, 8);
+    free(hd);
+    return f;
+}
+
+static struct mp_aframe *make_dtshd_burst_aframe(uint32_t seq_id)
+{
+    struct mp_aframe *f = mp_aframe_create();
+    assert_true(f);
+    struct mp_chmap chmap;
+    mp_chmap_from_channels(&chmap, 8);
+    assert_true(mp_aframe_set_format(f, AF_FORMAT_S_DTSHD));
+    assert_true(mp_aframe_set_rate(f, 192000));
+    assert_true(mp_aframe_set_chmap(f, &chmap));
+    assert_true(mp_aframe_alloc_data(f, 2048));
+
+    uint8_t **data = mp_aframe_get_data_rw(f);
+    assert_true(data && data[0]);
+    uint8_t *out = data[0];
+    memset(out, 0, 2048 * 16);
+    AV_WL16(out + 0, 0xF872);
+    AV_WL16(out + 2, 0x4E1F);
+    AV_WL16(out + 4, 0x0011);
+    AV_WL16(out + 6, 32752);
+    AV_WL32(out + 8, seq_id);
+    AV_WL32(out + 32756, seq_id);
+    return f;
+}
+
+static void wire_pull(struct ao *ao, struct wire_capture *cap, int frames)
+{
+    size_t bytes = (size_t)frames * ao->sstride;
+    if (cap->len + bytes > cap->cap) {
+        cap->cap = MPMAX(cap->cap * 2, cap->len + bytes + 65536);
+        cap->buf = realloc(cap->buf, cap->cap);
+        assert_true(cap->buf);
+    }
+    void *planes[1] = { cap->buf + cap->len };
+    ao_read_data(ao, planes, frames, 0, NULL, true, true);
+    cap->len += bytes;
+}
+
+static void push_bursts(struct mp_filter *wroot, struct mp_filter *writer,
+                        uint32_t *seq_id, int count, bool dtshd)
+{
+    for (int i = 0; i < count; i++) {
+        mp_filter_graph_run(wroot);
+        assert_true(mp_pin_in_needs_data(writer->pins[0]));
+        struct mp_aframe *f = dtshd ? make_dtshd_burst_aframe((*seq_id)++)
+                                    : make_mat_burst_aframe((*seq_id)++);
+        assert_true(mp_pin_in_write(writer->pins[0], MAKE_FRAME(MP_FRAME_AUDIO, f)));
+        mp_filter_graph_run(wroot);
+    }
+}
+
+static void verify_iec61937_wire_stream(const uint8_t *buf, size_t len,
+                                        int *out_data_bursts,
+                                        int *out_pause_bursts)
+{
+    uint8_t *hd = malloc(61424);
+    assert_true(hd);
+
+    size_t pos = 0;
+    int data_count = 0;
+    int pause_count = 0;
+
+    while (pos < len) {
+        assert_true(pos + 16 <= len);
+        uint16_t pa = AV_RL16(buf + pos + 0);
+        uint16_t pb = AV_RL16(buf + pos + 2);
+        uint16_t pc = AV_RL16(buf + pos + 4);
+        assert_int_equal(pa, 0xF872);
+        assert_int_equal(pb, 0x4E1F);
+
+        if (pc == 0x0003) {
+            assert_int_equal(memcmp(buf + pos, expected_pause_burst, 16), 0);
+            pos += 16;
+            pause_count++;
+        } else if (pc == 0x0016) {
+            assert_true(pos + 61440 <= len);
+            assert_int_equal(AV_RL16(buf + pos + 6), 61424);
+            for (int i = 61432; i < 61440; i++)
+                assert_int_equal(buf[pos + i], 0);
+            for (int i = 0; i < 61424; i += 2) {
+                hd[i]     = buf[pos + 8 + i + 1];
+                hd[i + 1] = buf[pos + 8 + i];
+            }
+            assert_int_equal(memcmp(hd + 0, mat_start_code, sizeof(mat_start_code)), 0);
+            assert_int_equal(memcmp(hd + 30708, mat_middle_code, sizeof(mat_middle_code)), 0);
+            assert_int_equal(memcmp(hd + 61408, mat_end_code, sizeof(mat_end_code)), 0);
+            assert_int_equal(AV_RB32(hd + 20), AV_RB32(hd + 61404));
+            pos += 61440;
+            data_count++;
+        } else if (pc == 0x0011) {
+            assert_true(pos + 32768 <= len);
+            assert_int_equal(AV_RL16(buf + pos + 6), 32752);
+            assert_int_equal(AV_RL32(buf + pos + 8), AV_RL32(buf + pos + 32756));
+            pos += 32768;
+            data_count++;
+        } else {
+            assert_true(false);
+        }
+    }
+
+    free(hd);
+    assert_int_equal(pos, len);
+    *out_data_bursts = data_count;
+    *out_pause_bursts = pause_count;
+}
+
+static void test_partial_spdif_burst_drain(void)
+{
+    struct mpv_global global = {0};
+    struct mock_ao_priv priv = {0};
+    struct ao *ao = create_mock_ao(&global, &mock_pull_ao_driver, &priv,
+                                   mock_ao_wakeup, AF_FORMAT_S_TRUEHD,
+                                   192000, 8, true);
+    struct mp_filter *wroot = mp_filter_create_root(&global);
+    struct mp_filter *writer = mp_async_queue_create_filter(wroot, MP_PIN_IN,
+                                                            ao_get_queue(ao));
+    assert_true(writer);
+
+    struct wire_capture cap = {0};
+    uint32_t seq_id = 1;
+
+    wire_pull(ao, &cap, 4096);
+    wire_pull(ao, &cap, 4096);
+
+    // Sweep across 4096-vs-3840 phase remainders with reset, pause, and restart.
+    for (int round = 0; round < 18; round++) {
+        push_bursts(wroot, writer, &seq_id, 6, false);
+        ao_start(ao);
+
+        int pulls = 1 + (round % 4);
+        for (int k = 0; k < pulls; k++)
+            wire_pull(ao, &cap, 4096);
+
+        if (round % 5 == 0) {
+            ao_reset(ao);
+            wire_pull(ao, &cap, 4096);
+            wire_pull(ao, &cap, 4096);
+        } else if (round % 5 == 1) {
+            ao_reset(ao);
+            push_bursts(wroot, writer, &seq_id, 4, false);
+            ao_start(ao);
+            wire_pull(ao, &cap, 4096);
+            ao_reset(ao);
+            wire_pull(ao, &cap, 4096);
+        } else if (round % 5 == 2) {
+            ao_reset(ao);
+            ao_reset(ao);
+            wire_pull(ao, &cap, 4096);
+        } else if (round % 5 == 3) {
+            ao_set_paused(ao, true, false);
+            wire_pull(ao, &cap, 4096);
+            wire_pull(ao, &cap, 4096);
+            ao_set_paused(ao, false, false);
+            wire_pull(ao, &cap, 4096);
+            ao_reset(ao);
+            wire_pull(ao, &cap, 4096);
+        } else {
+            ao_set_paused(ao, true, false);
+            wire_pull(ao, &cap, 4096);
+            ao_reset(ao);
+            ao_set_paused(ao, false, false);
+            wire_pull(ao, &cap, 4096);
+        }
+    }
+
+    int mat_bursts = 0;
+    int pause_bursts = 0;
+    verify_iec61937_wire_stream(cap.buf, cap.len, &mat_bursts, &pause_bursts);
+    assert_true(mat_bursts >= 40);
+    assert_true(pause_bursts >= 10000);
+
+    free(cap.buf);
+    talloc_free(wroot);
+    ao_uninit(ao);
+
+    // Pull AO with DTS-HD 2048-frame bursts across non-dividing 1536-frame quanta.
+    struct mock_ao_priv dts_priv = {0};
+    struct ao *dts_ao = create_mock_ao(&global, &mock_pull_ao_driver, &dts_priv,
+                                       mock_ao_wakeup, AF_FORMAT_S_DTSHD,
+                                       192000, 8, true);
+    struct mp_filter *droot = mp_filter_create_root(&global);
+    struct mp_filter *dwriter = mp_async_queue_create_filter(droot, MP_PIN_IN,
+                                                             ao_get_queue(dts_ao));
+    struct wire_capture dcap = {0};
+    for (int r = 0; r < 6; r++) {
+        push_bursts(droot, dwriter, &seq_id, 4, true);
+        ao_start(dts_ao);
+        wire_pull(dts_ao, &dcap, 1536);
+        if (r % 2 == 0) {
+            ao_reset(dts_ao);
+        } else {
+            ao_set_paused(dts_ao, true, false);
+            wire_pull(dts_ao, &dcap, 1536);
+            ao_set_paused(dts_ao, false, false);
+            ao_reset(dts_ao);
+        }
+        wire_pull(dts_ao, &dcap, 1536);
+    }
+    int dts_bursts = 0, dts_pauses = 0;
+    verify_iec61937_wire_stream(dcap.buf, dcap.len, &dts_bursts, &dts_pauses);
+    assert_true(dts_bursts >= 6);
+    assert_true(dts_pauses > 0);
+    free(dcap.buf);
+    talloc_free(droot);
+    ao_uninit(dts_ao);
+
+    // Non-regression: stream_silence=false discards partial tail on ao_reset().
+    struct mock_ao_priv ns_priv = {0};
+    struct ao *ns_ao = create_mock_ao(&global, &mock_pull_ao_driver, &ns_priv,
+                                      mock_ao_wakeup, AF_FORMAT_S_TRUEHD,
+                                      192000, 8, false);
+    struct mp_filter *ns_wroot = mp_filter_create_root(&global);
+    struct mp_filter *ns_writer = mp_async_queue_create_filter(ns_wroot, MP_PIN_IN,
+                                                               ao_get_queue(ns_ao));
+    push_bursts(ns_wroot, ns_writer, &seq_id, 2, false);
+    ao_start(ns_ao);
+    struct wire_capture ns_cap = {0};
+    wire_pull(ns_ao, &ns_cap, 2048);
+    ao_reset(ns_ao);
+    void *planes[1] = { malloc(4096 * 16) };
+    assert_true(planes[0]);
+    int got = ao_read_data(ns_ao, planes, 4096, 0, NULL, true, true);
+    assert_int_equal(got, 0);
+    free(planes[0]);
+    free(ns_cap.buf);
+    talloc_free(ns_wroot);
+    ao_uninit(ns_ao);
+
+    // Non-regression: PCM with stream_silence=true discards immediately on reset.
+    struct mock_ao_priv pcm_priv = {0};
+    struct ao *pcm_ao = create_mock_ao(&global, &mock_pull_ao_driver, &pcm_priv,
+                                       mock_ao_wakeup, AF_FORMAT_S16,
+                                       48000, 2, true);
+    struct mp_filter *p_wroot = mp_filter_create_root(&global);
+    struct mp_filter *p_writer = mp_async_queue_create_filter(p_wroot, MP_PIN_IN,
+                                                              ao_get_queue(pcm_ao));
+    struct mp_aframe *pf = mp_aframe_create();
+    struct mp_chmap ch2;
+    mp_chmap_from_channels(&ch2, 2);
+    assert_true(mp_aframe_set_format(pf, AF_FORMAT_S16));
+    assert_true(mp_aframe_set_rate(pf, 48000));
+    assert_true(mp_aframe_set_chmap(pf, &ch2));
+    assert_true(mp_aframe_alloc_data(pf, 4096));
+    memset(mp_aframe_get_data_rw(pf)[0], 0x55, 4096 * 4);
+    mp_filter_graph_run(p_wroot);
+    assert_true(mp_pin_in_write(p_writer->pins[0], MAKE_FRAME(MP_FRAME_AUDIO, pf)));
+    mp_filter_graph_run(p_wroot);
+    ao_start(pcm_ao);
+    uint8_t *pbuf = malloc(4096 * 4);
+    void *pplanes[1] = { pbuf };
+    assert_int_equal(ao_read_data(pcm_ao, pplanes, 1024, 0, NULL, true, true), 1024);
+    ao_reset(pcm_ao);
+    assert_int_equal(ao_read_data(pcm_ao, pplanes, 4096, 0, NULL, true, true), 0);
+    for (int i = 0; i < 4096 * 4; i++)
+        assert_int_equal(pbuf[i], 0);
+    free(pbuf);
+    talloc_free(p_wroot);
+    ao_uninit(pcm_ao);
+}
+
+struct mock_push_priv {
+    mp_mutex lock;
+    mp_cond cond;
+    int credits;
+    int writes;
+    int chunk_frames;
+    bool playing;
+    struct wire_capture cap;
+};
+
+static void mock_push_wakeup(void *ctx)
+{
+}
+
+static void mock_push_start(struct ao *ao)
+{
+    struct mock_push_priv *p = ao->priv;
+    mp_mutex_lock(&p->lock);
+    p->playing = true;
+    mp_mutex_unlock(&p->lock);
+}
+
+static void mock_push_reset(struct ao *ao)
+{
+    struct mock_push_priv *p = ao->priv;
+    mp_mutex_lock(&p->lock);
+    p->playing = false;
+    mp_mutex_unlock(&p->lock);
+}
+
+static void mock_push_get_state(struct ao *ao, struct mp_pcm_state *state)
+{
+    struct mock_push_priv *p = ao->priv;
+    mp_mutex_lock(&p->lock);
+    state->playing = p->playing;
+    state->delay = p->playing ? 0.020 : 0.0;
+    state->free_samples = p->credits > 0 ? p->chunk_frames : 0;
+    mp_mutex_unlock(&p->lock);
+}
+
+static bool mock_push_write(struct ao *ao, void **data, int samples)
+{
+    struct mock_push_priv *p = ao->priv;
+    mp_mutex_lock(&p->lock);
+    wire_append(&p->cap, data[0], (size_t)samples * ao->sstride);
+    if (p->credits > 0)
+        p->credits--;
+    p->writes++;
+    mp_cond_broadcast(&p->cond);
+    mp_mutex_unlock(&p->lock);
+    return true;
+}
+
+static const struct ao_driver mock_push_ao_driver = {
+    .name = "mock_push",
+    .start = mock_push_start,
+    .reset = mock_push_reset,
+    .uninit = mock_ao_uninit,
+    .get_state = mock_push_get_state,
+    .write = mock_push_write,
+};
+
+static void push_ao_step(struct ao *ao, struct mock_push_priv *priv, int count)
+{
+    mp_mutex_lock(&priv->lock);
+    int target = priv->writes + count;
+    priv->credits += count;
+    mp_mutex_unlock(&priv->lock);
+    ao_wakeup(ao);
+    mp_mutex_lock(&priv->lock);
+    while (priv->writes < target)
+        mp_cond_wait(&priv->cond, &priv->lock);
+    mp_mutex_unlock(&priv->lock);
+}
+
+static void test_push_ao_partial_spdif_drain(void)
+{
+    struct mpv_global global = {0};
+    struct mock_push_priv priv = { .chunk_frames = 1536 };
+    mp_mutex_init(&priv.lock);
+    mp_cond_init(&priv.cond);
+
+    struct ao *ao = create_mock_ao(&global, &mock_push_ao_driver, &priv,
+                                   mock_push_wakeup, AF_FORMAT_S_TRUEHD,
+                                   192000, 8, true);
+    struct mp_filter *wroot = mp_filter_create_root(&global);
+    struct mp_filter *writer = mp_async_queue_create_filter(wroot, MP_PIN_IN,
+                                                            ao_get_queue(ao));
+    uint32_t seq_id = 100;
+
+    // Start mid-burst (1536 of 3840 frames), then reset and drain.
+    push_bursts(wroot, writer, &seq_id, 4, false);
+    ao_start(ao);
+    push_ao_step(ao, &priv, 1);
+    ao_reset(ao);
+    push_ao_step(ao, &priv, 3);
+
+    // Restart, write 2 chunks (3072 of 3840 frames), pause mid-burst, drain.
+    push_bursts(wroot, writer, &seq_id, 4, false);
+    ao_start(ao);
+    push_ao_step(ao, &priv, 2);
+    ao_set_paused(ao, true, false);
+    push_ao_step(ao, &priv, 3);
+
+    talloc_free(wroot);
+    ao_uninit(ao);
+
+    int mat_bursts = 0, pause_bursts = 0;
+    verify_iec61937_wire_stream(priv.cap.buf, priv.cap.len,
+                                &mat_bursts, &pause_bursts);
+    assert_int_equal(mat_bursts, 2);
+    assert_true(pause_bursts > 0);
+
+    free(priv.cap.buf);
+    mp_cond_destroy(&priv.cond);
+    mp_mutex_destroy(&priv.lock);
+}
+
 int main(void)
 {
     test_truehd_pts_pacing();
     test_truehd_44k_family();
     test_spdif_pause_silence();
+    test_partial_spdif_burst_drain();
+    test_push_ao_partial_spdif_drain();
     return 0;
 }

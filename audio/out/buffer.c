@@ -55,6 +55,8 @@ struct buffer_state {
     struct mp_filter *filter_root;
     struct mp_filter *input;    // connected to queue
     struct mp_aframe *pending;  // last, not fully consumed output
+    bool pending_partial_spdif; // pending holds a partially emitted S/PDIF burst
+    bool draining_partial_spdif;// drain pending before silence or new bursts
 
     bool streaming;             // AO streaming active
     bool playing;               // logically playing audio from buffer
@@ -124,9 +126,29 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
     int pos = 0;
     *eof = false;
 
+    // Finish emitting an already-started S/PDIF burst before silence or new data.
+    if (data && p->draining_partial_spdif) {
+        if (p->pending && mp_aframe_get_size(p->pending) > 0) {
+            int copy = MPMIN(mp_aframe_get_size(p->pending), samples - pos);
+            uint8_t **fdata = mp_aframe_get_data_ro(p->pending);
+            for (int n = 0; n < ao->num_planes; n++) {
+                memcpy((char *)data[n] + pos * ao->sstride,
+                       fdata[n], copy * ao->sstride);
+            }
+            mp_aframe_skip_samples(p->pending, copy);
+            pos += copy;
+        }
+        if (!p->pending || !mp_aframe_get_size(p->pending)) {
+            TA_FREEP(&p->pending);
+            p->pending_partial_spdif = false;
+            p->draining_partial_spdif = false;
+        }
+    }
+
     while (p->playing && !p->paused && pos < samples) {
         if (!p->pending || !mp_aframe_get_size(p->pending)) {
             TA_FREEP(&p->pending);
+            p->pending_partial_spdif = false;
             struct mp_frame frame = mp_pin_out_read(p->input->pins[0]);
             if (!frame.type)
                 break; // we can't/don't want to block
@@ -150,6 +172,12 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
                    fdata[n], copy * ao->sstride);
         }
         mp_aframe_skip_samples(p->pending, copy);
+        if (mp_aframe_get_size(p->pending) == 0) {
+            TA_FREEP(&p->pending);
+            p->pending_partial_spdif = false;
+        } else if (copy > 0 && af_fmt_is_spdif(ao->format)) {
+            p->pending_partial_spdif = true;
+        }
         pos += copy;
         *eof = false;
     }
@@ -184,7 +212,7 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
 
     int pos = read_buffer(ao, data, samples, eof, pad_silence);
 
-    if (pos > 0)
+    if (pos > 0 && p->playing && !p->paused)
         p->end_time_ns = out_time_ns;
 
     if (pos < samples && p->playing && !p->paused) {
@@ -202,7 +230,8 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
 // or EOF), return the number of samples that could be copied, and fill the
 // rest of the user-provided buffer with silence.
 // This basically assumes that the audio device doesn't care about underruns.
-// If this is called in paused mode, it will always return 0.
+// In paused mode, this returns 0 except when finishing an already-started
+// S/PDIF burst with stream_silence enabled.
 // The caller should set out_time_ns to the expected delay until the last sample
 // reaches the speakers, in nanoseconds, using mp_time_ns() as reference.
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking)
@@ -318,6 +347,14 @@ double ao_get_delay(struct ao *ao)
     return driver_delay + pending / (double)ao->samplerate;
 }
 
+static bool has_partial_spdif_tail(struct ao *ao)
+{
+    struct buffer_state *p = ao->buffer_state;
+    return ao->stream_silence && p->streaming && af_fmt_is_spdif(ao->format) &&
+           p->pending && p->pending_partial_spdif &&
+           mp_aframe_get_size(p->pending) > 0;
+}
+
 // Fully stop playback; clear buffers, including queue.
 void ao_reset(struct ao *ao)
 {
@@ -327,7 +364,13 @@ void ao_reset(struct ao *ao)
 
     mp_mutex_lock(&p->lock);
 
-    TA_FREEP(&p->pending);
+    if (has_partial_spdif_tail(ao)) {
+        p->draining_partial_spdif = true;
+    } else {
+        TA_FREEP(&p->pending);
+        p->pending_partial_spdif = false;
+        p->draining_partial_spdif = false;
+    }
     mp_async_queue_reset(p->queue);
     mp_filter_reset(p->filter_root);
     mp_async_queue_resume_reading(p->queue);
@@ -342,7 +385,7 @@ void ao_reset(struct ao *ao)
         }
         p->streaming = false;
     }
-    wakeup = p->playing || p->wait_open_silence;
+    wakeup = p->playing || p->wait_open_silence || p->draining_partial_spdif;
     p->playing = false;
     p->wait_open_silence = false;
     p->recover_pause = false;
@@ -403,6 +446,8 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
     if ((p->playing || p->wait_open_silence || !ao->driver->write) &&
         !p->paused && paused)
     {
+        if (has_partial_spdif_tail(ao))
+            p->draining_partial_spdif = true;
         if (p->streaming && !ao->stream_silence) {
             if (ao->driver->write) {
                 if (!p->recover_pause && p->playing)
