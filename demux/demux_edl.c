@@ -304,7 +304,7 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
             struct tl_part p = { .length = -1 };
             p.filename = get_param0(&ctx, tl, "file");
             if (!p.filename || !p.filename[0]) {
-                mp_err(log, "Missing filename in segment.'\n");
+                mp_err(log, "Missing filename in segment.\n");
                 goto error;
             }
             p.offset_set = get_param_time(&ctx, "start", &p.offset);
@@ -340,7 +340,7 @@ static struct tl_root *parse_edl(bstr str, struct mp_log *log)
 #endif
     for (int n = 0; n < root->num_pars; n++) {
         if (root->pars[n]->num_parts < 1) {
-            mp_err(log, "EDL specifies no segments.'\n");
+            mp_err(log, "EDL specifies no segments.\n");
             goto error;
         }
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
