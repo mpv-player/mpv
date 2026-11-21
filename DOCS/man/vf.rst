@@ -775,6 +775,12 @@ Available mpv-only filters are:
     AMD Frame Rate Conversion filter. Requires AMD hardware and drivers
     supporting AMF FRC.
 
+    .. warning:: This filter is deprecated and will be removed in a future
+                 release. Use FFmpeg's ``frc_amf`` filter instead, for example
+                 ``--vf=lavfi=[frc_amf]``. Its options are ``profile``,
+                 ``mv_search_mode``, ``fallback_mode`` (``duplicate`` or
+                 ``blend``), ``indicator`` and ``use_future_frame``.
+
     AMF FRC is a technique for achieving high-end video frame rate conversion
     results from lower frame rate video inputs. The filter doubles the input
     frame rate by generating intermediate frames.
