@@ -904,7 +904,7 @@ local function add_single_video(json)
     mp.set_property_native("file-local-options/stream-lavf-o", stream_opts)
 end
 
-local function run_ytdl_hook(url)
+local function run_ytdl_hook(url, load_fail)
     local start_time = os.clock()
     stream_delay = 0
 
@@ -1057,8 +1057,17 @@ local function run_ytdl_hook(url)
 
     -- what did we get?
     if json["direct"] then
-        -- direct URL, nothing to do
         msg.verbose("Got direct URL")
+        -- apply any headers, cookies, or proxies that yt-dlp sent
+        set_http_headers(json.http_headers)
+        if json.proxy and json.proxy ~= "" and not option_was_set("http-proxy") then
+            mp.set_property("file-local-options/http-proxy", json.proxy)
+        end
+        set_cookies(json.cookies, json.url or url)
+        if load_fail and (json.http_headers or json.cookies or json.proxy) then
+            -- minimal non-network change to url to trigger retry on failure
+            mp.set_property("stream-open-filename", url .. "#ytdlp-retry")
+        end
         return
     elseif json["_type"] == "playlist" or
            json["_type"] == "multi_video" then
@@ -1220,7 +1229,7 @@ local function on_load_hook(load_fail, hook)
     if not force and (not url:find("^https?://") or is_blacklisted(url)) then
         return
     end
-    run_ytdl_hook(url)
+    run_ytdl_hook(url, load_fail)
 
     -- defer loading until the formats become available
     if stream_delay > 0 then
