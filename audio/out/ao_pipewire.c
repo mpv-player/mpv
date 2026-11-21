@@ -199,11 +199,11 @@ static void on_process(void *userdata)
     end_time += MP_TIME_S_TO_NS(time.buffered) / ao->samplerate;
     end_time -= pw_stream_get_nsec(p->stream) - time.now;
 
-    int samples = ao_read_data(ao, data, nframes, end_time, NULL, false, false);
-    b->size = samples;
+    int samples = ao_read_data(ao, data, nframes, end_time, NULL, true, true);
+    b->size = nframes;
 
     for (int i = 0; i < buf->n_datas; i++) {
-        buf->datas[i].chunk->size = samples * ao->sstride;
+        buf->datas[i].chunk->size = nframes * ao->sstride;
         buf->datas[i].chunk->offset = 0;
         buf->datas[i].chunk->stride = ao->sstride;
     }
