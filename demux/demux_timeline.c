@@ -208,6 +208,27 @@ static void close_lazy_segments(struct demuxer *demuxer,
     }
 }
 
+// delay_open streams were added with the codec params guessed by the EDL.
+// Replace them with the real ones, and set the duration if it was unknown.
+static void update_delayed_streams(struct demuxer *demuxer, struct segment *seg)
+{
+    struct priv *p = demuxer->priv;
+
+    if (!seg->d)
+        return;
+
+    for (int n = 0; n < seg->num_stream_map; n++) {
+        struct virtual_stream *vs = seg->stream_map[n];
+        if (vs)
+            demux_set_stream_codec(demuxer, vs->sh, demux_get_stream(seg->d, n)->codec);
+    }
+
+    if (seg->end < seg->start && seg->d->duration > p->duration) {
+        p->duration = seg->d->duration;
+        demux_set_duration(demuxer, p->duration);
+    }
+}
+
 static void reopen_lazy_segments(struct demuxer *demuxer,
                                  struct virtual_source *src)
 {
@@ -233,6 +254,8 @@ static void reopen_lazy_segments(struct demuxer *demuxer,
     if (src->current->d)
         update_slave_stats(demuxer, src->current->d);
     associate_streams(demuxer, src, src->current);
+    if (src->delay_open)
+        update_delayed_streams(demuxer, src->current);
 }
 
 static void switch_segment(struct demuxer *demuxer, struct virtual_source *src,
