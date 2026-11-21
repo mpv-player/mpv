@@ -379,6 +379,7 @@ typedef struct MPOpts {
 
     struct mp_bluray_opts *stream_bluray_opts;
     struct cdda_opts *stream_cdda_opts;
+    struct sacd_opts *stream_sacd_opts;
     struct dvb_opts *stream_dvb_opts;
     struct mp_network_opts *network_opts;
     struct stream_lavf_opts *stream_lavf_opts;
