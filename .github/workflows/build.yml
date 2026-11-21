@@ -97,6 +97,9 @@ jobs:
         id: build
         run: |
           ./ci/build-mingw64.sh meson pack
+          cat artifact/build-details.md >> "$GITHUB_STEP_SUMMARY"
+        env:
+          CONTAINER_ID: ${{ job.container.id }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -157,6 +160,9 @@ jobs:
         id: build
         run: |
           ./ci/build-mingw64-full.sh
+          cat artifact/build-details.md >> "$GITHUB_STEP_SUMMARY"
+        env:
+          CONTAINER_ID: ${{ job.container.id }}
 
       - name: Print meson log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -283,6 +289,7 @@ jobs:
           Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
           Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=${{ matrix.arch }} -host_arch=${{ matrix.arch }}"
           ./ci/build-win32.ps1
+          Get-Content build/build-details.md >> $env:GITHUB_STEP_SUMMARY
 
       - name: Print build log
         if: ${{ failure() && steps.build.outcome == 'failure' }}
@@ -321,6 +328,7 @@ jobs:
             build/mpv.???
             build/mpv-*.bat
             build/vulkan-*.dll
+            build/build-details.md
             !build/mpv.lib
             !build/mpv.pdb
 
@@ -420,6 +428,7 @@ jobs:
         id: build
         run: |
           ./ci/build-macos.sh
+          cat build-details.md >> "$GITHUB_STEP_SUMMARY"
         env:
           TRAVIS_OS_NAME: "${{ matrix.os }}"
           SWIFT_FLAGS: "${{ matrix.swift }}"
@@ -459,7 +468,9 @@ jobs:
         if: ${{ matrix.target-os != 'test' }}
         with:
           name: ${{ steps.artifact.outputs.name }}
-          path: mpv.tar.gz
+          path: |
+            mpv.tar.gz
+            build-details.md
 
       - name: Save Cache
         uses: actions/cache/save@v6

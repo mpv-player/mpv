@@ -398,7 +398,8 @@ if [ "$2" = pack ]; then
     # grab everything we can get our hands on
     cp -p "$prefix_dir/bin/"*.dll artifact/tmp/
     shopt -s nullglob
-    for file in /usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll; do
+    toolchain_dlls=(/usr/lib/gcc/$TARGET/*-posix/*.dll /usr/$TARGET/lib/*.dll)
+    for file in "${toolchain_dlls[@]}"; do
         cp -p "$file" artifact/tmp/
     done
     # pick DLLs we need
@@ -416,4 +417,13 @@ if [ "$2" = pack ]; then
     mv -v "${dlls[@]}" ..
     popd
     rm -rf artifact/tmp
+
+    toolchain_packages() {
+        local files=$(command -v ${CC#ccache } ${CXX#ccache } $AR)
+        for file in "${toolchain_dlls[@]}"; do
+            [[ -f artifact/${file##*/} ]] && files+=" $file"
+        done
+        dpkg-query -S $files | cut -d: -f1 | xargs dpkg-query -W
+    }
+    build_details $build toolchain_packages > artifact/build-details.md
 fi

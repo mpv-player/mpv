@@ -82,6 +82,7 @@ Automated development build of the latest \`master\` branch.
 - Version: \`$version\`
 - Commit: $GITHUB_SHA
 - Built: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+- Build details: https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID
 
 ### Windows
 

@@ -68,6 +68,9 @@ def main():
     parser.add_option("-c", "--category", action="store", dest="category",
                       type="choice", choices=["video", "games"], default="video",
                       help="sets bundle category")
+    parser.add_option("-l", "--list-libs", action="store_true", dest="list_libs",
+                      default=False,
+                      help="list the linked libraries that get bundled")
 
     (options, args) = parser.parse_args()
 
@@ -77,6 +80,13 @@ def main():
         binary_name = args[0]
         build_path = os.path.dirname(binary_name)
         src_path = args[1] if len(args) > 1 else "."
+
+    if options.list_libs:
+        binary = os.path.abspath(binary_name)
+        libs, _ = dylib_unhell.libraries(binary)
+        del libs[binary]
+        print("\n".join(sorted({os.path.realpath(lib) for lib in libs})))
+        return
 
     version = bundle_version(build_path).rstrip()
 
