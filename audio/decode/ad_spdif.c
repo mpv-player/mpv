@@ -314,11 +314,14 @@ static int init_filter(struct mp_filter *da)
         samplerate                      = 48000;
         num_channels                    = 2;
         break;
-    case AV_CODEC_ID_TRUEHD:
+    case AV_CODEC_ID_TRUEHD: {
+        bool rate_44k = c_rate > 0 ? (c_rate % 44100 == 0)
+                                   : (pkt->size >= 9 && (pkt->data[8] & 0x80));
         sample_format                   = AF_FORMAT_S_TRUEHD;
-        samplerate                      = 192000;
+        samplerate                      = rate_44k ? 176400 : 192000;
         num_channels                    = 8;
         break;
+    }
     default:
         abort();
     }
