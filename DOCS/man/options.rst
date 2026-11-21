@@ -5447,6 +5447,10 @@ libavfilter, within the system audio API resampler, or any other places).
     (decoder downmixing), or in the audio output (system mixer), this has no
     effect.
 
+    When the stream carries its own downmix levels (AC-3 and E-AC-3), mpv
+    mixes the center, surround and LFE channels with them instead of the
+    libswresample defaults.
+
 ``--audio-resample-max-output-size=<length>``
     Limit maximum size of audio frames filtered at once, in ms (default: 40).
     The output size is limited in order to make resample speed changes
