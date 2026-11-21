@@ -941,16 +941,16 @@ Program Behavior
 
         May be dangerous if playing from untrusted media.
 
-``--ytdl=<yes|no>``
-    Enable the youtube-dl hook-script. It will look at the input URL, and will
-    play the video located on the website. This works with many streaming sites,
-    not just the one that the script is named after. This requires a recent
-    version of youtube-dl to be installed on the system (default: yes).
+``--script-opt=ytdl_hook-<option>=<value>``
+    Configure the youtube-dl hook-script, which is the ``ytdl_hook`` entry of
+    ``--builtin-scripts``. It will look at the input URL, and will play the
+    video located on the website. This works with many streaming sites, not just
+    the one that the script is named after. This requires a recent version of
+    youtube-dl to be installed on the system.
 
     If the script can't do anything with an URL, it will do nothing.
 
-    This accepts a set of options, which can be passed to it with the
-    ``--script-opts`` option (using ``ytdl_hook-`` as prefix):
+    It accepts the following options:
 
     ``try_ytdl_first=<yes|no>``
         If 'yes' will try parsing the URL with youtube-dl first, instead of the
@@ -1099,35 +1099,46 @@ Program Behavior
     memory usage. This option will only work if it is enabled before mpv is
     started.
 
-``--load-stats-overlay=<yes|no>``
-    Enable the builtin script that shows useful playback information on a key
-    binding (default: yes). By default, the ``i`` key is used (``I`` to make
-    the overlay permanent).
+``--builtin-scripts=<script1,script2,...>``
+    The builtin scripts to load. The following scripts can be listed:
 
-``--load-console=<yes|no>``
-    Enable the built-in script to handle textual input (default: yes).
+    :osc:           The on-screen-controller.
+    :ytdl_hook:     The youtube-dl hook-script. See
+                    ``--script-opts=ytdl_hook-<option>=<value>``.
+    :stats:         Shows useful playback information on a key binding. By
+                    default, the ``i`` key is used (``I`` to make the overlay
+                    permanent).
+    :console:       Handles textual input.
+    :commands:      Lets you enter commands in the console. The ````` key is
+                    used to activate this by default.
+    :auto_profiles: Does auto profiles. See `Conditional auto profiles`_ for
+                    details. It unloads itself if there are no conditional
+                    profiles.
+    :select:        Lets you select from lists of items. By default, its
+                    keybindings start with the ``g`` key.
+    :context_menu:  Implements a context menu.
+    :positioning:   Provides various keybindings to pan videos and images.
 
-``--load-commands=<yes|no>``
-    Enable the built-in script to enter commands in the console (default: yes).
-    The ````` key is used to activate this by default.
+    All of them are enabled by default, except for ``context_menu`` on platforms
+    where integration with a native context menu is implemented.
+
+    This is a string list option. See `List Options`_ for details.
+
+    .. admonition:: Examples
+
+        - ``--builtin-scripts-remove=stats`` disables the stats overlay.
+        - ``--builtin-scripts-append=context_menu`` makes ``select.lua`` use
+          ``context_menu.lua`` on platforms with a native context menu.
+
+``--osc=<yes|no>``, ``--ytdl=<yes|no>``, ``--load-stats-overlay=<yes|no>``, ``--load-console=<yes|no>``, ``--load-commands=<yes|no>``, ``--load-select=<yes|no>``, ``--load-context-menu=<yes|no>``, ``--load-positioning=<yes|no>``
+    Deprecated. Use ``--builtin-scripts`` instead. ``no`` disables the
+    corresponding script even if it is in that list, and ``yes`` does nothing
+    (default: yes).
 
 ``--load-auto-profiles=<yes|no|auto>``
-    Enable the builtin script that does auto profiles (default: auto). See
-    `Conditional auto profiles`_ for details. ``auto`` will load the script,
-    but immediately unload it if there are no conditional profiles.
-
-``--load-select=<yes|no>``
-    Enable the builtin script that lets you select from lists of items (default:
-    yes). By default, its keybindings start with the ``g`` key.
-
-``--load-context-menu=<yes|no>``
-    Enable the builtin script that implements a context menu. Defaults to
-    ``yes`` on platforms where integration with a native context menu is not
-    implemented, and to ``no`` on platform where it is.
-
-``--load-positioning=<yes|no>``
-    Enable the builtin script that provides various keybindings to pan videos
-    and images (default: yes).
+    Deprecated. Use ``--builtin-scripts`` instead. ``no`` disables the script
+    even if ``auto_profiles`` is in that list, and ``yes`` keeps it loaded if
+    there are no conditional profiles (default: auto).
 
 ``--player-operation-mode=<cplayer|pseudo-gui>``
     For enabling "pseudo GUI mode", which means that the defaults for some
@@ -4814,9 +4825,6 @@ Input
 OSD
 ---
 
-``--osc=<yes|no>``
-    Whether to load the on-screen-controller (default: yes).
-
 ``--osd-bar=<yes|no>``
     Enable display of the OSD bar (default: yes).
 
@@ -5059,7 +5067,7 @@ OSD
     all OSD rendering, use ``--osd-level=0``.
 
     It does not affect subtitles or overlays created by scripts (in particular,
-    the OSC needs to be disabled with ``--osc=no``).
+    the OSC needs to be disabled with ``--builtin-scripts-remove=osc``).
 
     This option is somewhat experimental and could be replaced by another
     mechanism in the future.

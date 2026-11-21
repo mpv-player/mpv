@@ -40,10 +40,11 @@ where it is not, it opens ``context_menu.lua``.
 
 On platforms without integration with the native context menu,
 ``context_menu.lua`` can be disabled entirely using the
-``--load-context-menu=no`` option. On platforms where the integration is
-implemented, it is already disabled by default, and ``--load-context-menu=yes``
-will make ``select.lua`` use it. It is also loaded when ``--d3d11-exclusive-fs``
-is enabled, and ``select.lua`` uses it in exclusive fullscreen.
+``--builtin-scripts-remove=context_menu`` option. On platforms where the
+integration is implemented, it is already disabled by default, and
+``--builtin-scripts-append=context_menu`` will make ``select.lua`` use it. It is
+also loaded when ``--d3d11-exclusive-fs`` is enabled, and ``select.lua`` uses it
+in exclusive fullscreen.
 
 Script messages
 ---------------

@@ -1,0 +1,2 @@
+deprecate `--osc`, `--ytdl`, `--load-auto-profiles`, `--load-commands`, `--load-console`, `--load-context-menu`, `--load-positioning`, `--load-select` and `--load-stats-overlay` in favor of `--builtin-scripts`
+add `--builtin-scripts` option

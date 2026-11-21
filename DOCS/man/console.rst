@@ -4,7 +4,7 @@ CONSOLE
 This script provides the ability to process the user's textual input to other
 scripts through the ``mp.input`` API. It can be displayed on both the video
 window and the terminal. It can be disabled entirely using the
-``--load-console=no`` option.
+``--builtin-scripts-remove=console`` option.
 
 Console can either process free-form text or select from a predefined list of
 items.

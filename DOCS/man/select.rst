@@ -5,7 +5,7 @@ console can present a list of items to browse and select from with the
 ``mp.input.select`` API. ``select.lua`` is a builtin client of this API
 providing script bindings that gather and format the data to be selected in the
 console and do operations on the selected item. It can be disabled using the
-``--load-select=no`` option.
+``--builtin-scripts-remove=select`` option.
 
 This script is also used to populate the context menu.
 

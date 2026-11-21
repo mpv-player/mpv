@@ -567,22 +567,34 @@ static const m_option_t mp_opts[] = {
     {"js-memory-report", OPT_BOOL(js_memory_report)},
 #endif
 #if HAVE_LUA
-    {"osc", OPT_BOOL(lua_load_osc), .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"ytdl", OPT_BOOL(lua_load_ytdl), .flags = UPDATE_BUILTIN_SCRIPTS},
+    {"osc", OPT_BOOL(lua_load_osc), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=osc"},
+    {"ytdl", OPT_BOOL(lua_load_ytdl), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=ytdl_hook"},
     {"ytdl-format", OPT_STRING(lua_ytdl_format)},
     {"ytdl-raw-options", OPT_KEYVALUELIST(lua_ytdl_raw_options)},
+    {"builtin-scripts", OPT_STRINGLIST(builtin_scripts),
+        .flags = UPDATE_BUILTIN_SCRIPTS},
     {"load-stats-overlay", OPT_BOOL(lua_load_stats),
-        .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"load-console", OPT_BOOL(lua_load_console),
-        .flags = UPDATE_BUILTIN_SCRIPTS},
+        .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=stats"},
+    {"load-console", OPT_BOOL(lua_load_console), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=console"},
     {"load-osd-console", OPT_REPLACED("load-console")},
     {"load-auto-profiles",
         OPT_CHOICE(lua_load_auto_profiles, {"no", 0}, {"yes", 1}, {"auto", -1}),
-        .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"load-select", OPT_BOOL(lua_load_select), .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"load-positioning", OPT_BOOL(lua_load_positioning), .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"load-commands", OPT_BOOL(lua_load_commands), .flags = UPDATE_BUILTIN_SCRIPTS},
-    {"load-context-menu", OPT_BOOL(lua_load_context_menu), .flags = UPDATE_BUILTIN_SCRIPTS},
+        .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=auto_profiles"},
+    {"load-select", OPT_BOOL(lua_load_select), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=select"},
+    {"load-positioning", OPT_BOOL(lua_load_positioning),
+        .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=positioning"},
+    {"load-commands", OPT_BOOL(lua_load_commands), .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=commands"},
+    {"load-context-menu", OPT_BOOL(lua_load_context_menu),
+        .flags = UPDATE_BUILTIN_SCRIPTS,
+        .deprecation_message = "use --builtin-scripts-remove=context_menu"},
 #endif
 
 // ------------------------- stream options --------------------
@@ -1036,9 +1048,15 @@ static const struct MPOpts mp_default_opts = {
     .lua_load_select = true,
     .lua_load_positioning = true,
     .lua_load_commands = true,
-#ifndef _WIN32
     .lua_load_context_menu = true,
+    .builtin_scripts = (char *[]){
+        "osc", "ytdl_hook", "stats", "console", "auto_profiles", "select",
+        "positioning", "commands",
+#ifndef _WIN32
+        "context_menu",
 #endif
+        NULL
+    },
 #endif
     .auto_load_scripts = true,
     .loop_times = 1,
