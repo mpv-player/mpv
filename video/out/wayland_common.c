@@ -3191,14 +3191,16 @@ static bool check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
     *edges = 0;
 
     edge_pixels = handle_round(wl->scaling, edge_pixels);
-    if (pos[0] < edge_pixels)
+    if (pos[0] < edge_pixels) {
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_LEFT;
-    if (pos[0] >= (mp_rect_w(wl->geometry) - edge_pixels))
+    } else if (pos[0] >= (mp_rect_w(wl->geometry) - edge_pixels)) {
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_RIGHT;
-    if (pos[1] < edge_pixels)
+    }
+    if (pos[1] < edge_pixels) {
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_TOP;
-    if (pos[1] >= (mp_rect_h(wl->geometry) - edge_pixels))
+    } else if (pos[1] >= (mp_rect_h(wl->geometry) - edge_pixels)) {
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM;
+    }
 
     return *edges != 0;
 }
