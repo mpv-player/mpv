@@ -2932,6 +2932,8 @@ local function enable_osc(enable)
     else
         hide_osc() -- acts immediately when state.enabled == false
         hide_wc()
+        -- tick() returns early while disabled, so it would never remove the logo
+        render_wipe(state.logo_osd)
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
             mp.disable_key_bindings("showhide_wc")
@@ -3141,6 +3143,8 @@ tick = function()
         msg.trace("idle message")
         if user_opts.idlescreen then
             render_logo()
+        else
+            render_wipe(state.logo_osd)
         end
 
         -- Hide main OSC but keep window controls functional
