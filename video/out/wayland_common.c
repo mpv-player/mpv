@@ -3005,8 +3005,8 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t id)
 {
     struct vo_wayland_state *wl = data;
-    struct vo_wayland_output *output, *output_tmp;
-    wl_list_for_each_safe(output, output_tmp, &wl->output_list, link) {
+    struct vo_wayland_output *output;
+    wl_list_for_each(output, &wl->output_list, link) {
         if (output->id == id) {
             remove_output(output);
             if (wl_list_length(&wl->output_list) == 0)
@@ -3015,8 +3015,8 @@ static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t
         }
     }
 
-    struct vo_wayland_seat *seat, *seat_tmp;
-    wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link) {
+    struct vo_wayland_seat *seat;
+    wl_list_for_each(seat, &wl->seat_list, link) {
         if (seat->id == id) {
             remove_seat(seat);
             goto ack_global_remove;
