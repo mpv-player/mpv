@@ -220,7 +220,6 @@ static void wayland_egl_update_render_opts(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
-    wl_surface_commit(wl->surface);
 }
 
 static bool wayland_egl_init(struct ra_ctx *ctx)
