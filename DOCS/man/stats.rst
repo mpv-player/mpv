@@ -134,6 +134,13 @@ Configurable Options
 
     Show track info for selected tracks only instead of all tracks.
 
+``track_info_max_length``
+    Default: 256
+
+    Shorten track titles and external file names on the track info page to
+    their first line and to at most this length, in bytes. Shortened text ends
+    with an ellipsis.
+
 ``plot_perfdata``
     Default: no
 
