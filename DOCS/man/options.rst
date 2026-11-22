@@ -3440,8 +3440,8 @@ Window
     ignored and does nothing if ``--fs-screen`` is explicitly set.
 
 ``--keep-open=<yes|no|always>``
-    Do not terminate when playing or seeking beyond the end of the file, and
-    there is no next file to be played (and ``--loop`` is not used).
+    Do not unload the current file when playing or seeking beyond the end of the
+    file, and there is no next file to be played (and ``--loop`` is not used).
     Instead, pause the player. When trying to seek beyond end of the file, the
     player will attempt to seek to the last frame.
 
@@ -3450,10 +3450,10 @@ Window
 
     The following arguments can be given:
 
-    :no:        If the current file ends, go to the next file or terminate.
-                (Default.)
-    :yes:       Don't terminate if the current file is the last playlist entry.
-                Equivalent to ``--keep-open`` without arguments.
+    :no:        If the current file ends, go to the next file or unload the
+                current file. (Default.)
+    :yes:       Don't unload file if the current file is the last playlist
+                entry. Equivalent to ``--keep-open`` without arguments.
     :always:    Like ``yes``, but also applies to files before the last playlist
                 entry. This means playback will never automatically advance to
                 the next file.
@@ -3466,6 +3466,9 @@ Window
 
         Also, if errors or unusual circumstances happen, the player can quit
         anyway.
+
+        Whether the player enters idle mode or quits when the current file is
+        unloaded is controlled by ``--idle``.
 
     ``yes`` doesn't pause if there is a next file in the playlist, or the
     playlist is looped. Approximately, this will pause when the player would
