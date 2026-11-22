@@ -179,6 +179,8 @@ struct vo_wayland_output {
     uint32_t flags;
     int phys_width;
     int phys_height;
+    int mode_width;
+    int mode_height;
     int transform;
     int scale;
     double refresh_rate;
@@ -1596,8 +1598,8 @@ static void output_handle_mode(void *data, struct wl_output *wl_output,
     if (!(flags & WL_OUTPUT_MODE_CURRENT))
         return;
 
-    output->geometry.x1 = width;
-    output->geometry.y1 = height;
+    output->mode_width = width;
+    output->mode_height = height;
     output->flags = flags;
     output->refresh_rate = (double)refresh * 0.001;
 }
@@ -1607,6 +1609,8 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
     struct vo_wayland_output *o = data;
     struct vo_wayland_state *wl = o->wl;
 
+    o->geometry.x1 = o->mode_width;
+    o->geometry.y1 = o->mode_height;
     if (o->transform % 2)
         MPSWAP(int, o->geometry.x1, o->geometry.y1);
 
