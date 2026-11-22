@@ -1675,30 +1675,49 @@ static const struct wl_output_listener output_listener = {
     .description = output_handle_description,
 };
 
-static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
-                                 struct wl_output *output)
+static void save_output_geometry(struct vo_wayland_state *wl)
 {
-    struct vo_wayland_state *wl = data;
-
     if (wl->current_output) {
         wl->old_output_geometry = wl->current_output->geometry;
         wl->old_geometry = wl->geometry;
     }
+}
+
+static void update_surface_outputs(struct vo_wayland_state *wl, bool reselect)
+{
+    int outputs = 0;
+    struct vo_wayland_output *output, *last_output = NULL;
+    wl_list_for_each(output, &wl->output_list, link) {
+        if (output->has_surface) {
+            last_output = output;
+            ++outputs;
+        }
+    }
+
+    if (reselect)
+        wl->current_output = last_output;
+    if (outputs == 1)
+        update_output_geometry(wl);
+    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
+}
+
+static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
+                                 struct wl_output *output)
+{
+    struct vo_wayland_state *wl = data;
+    save_output_geometry(wl);
 
     wl->current_output = NULL;
-    int outputs = 0;
     struct vo_wayland_output *o;
     wl_list_for_each(o, &wl->output_list, link) {
         if (o->output == output) {
+            o->has_surface = true;
             wl->current_output = o;
-            wl->current_output->has_surface = true;
+            break;
         }
-        if (o->has_surface)
-            ++outputs;
     }
 
-    if (outputs == 1)
-        update_output_geometry(wl);
+    update_surface_outputs(wl, false);
 
     if (wl->current_output) {
         MP_VERBOSE(wl, "Surface entered output %s %s (%s) (0x%x), scale = %f, refresh rate = %f Hz\n",
@@ -1707,38 +1726,23 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     } else {
         MP_VERBOSE(wl, "Surface entered unknown output\n");
     }
-
-    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
 static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
     struct vo_wayland_state *wl = data;
+    save_output_geometry(wl);
 
-    if (wl->current_output) {
-        wl->old_output_geometry = wl->current_output->geometry;
-        wl->old_geometry = wl->geometry;
-    }
-
-    int outputs = 0;
     struct vo_wayland_output *o;
     wl_list_for_each(o, &wl->output_list, link) {
-        if (o->output == output)
+        if (o->output == output) {
             o->has_surface = false;
-        if (o->has_surface)
-            ++outputs;
-        if (o->output != output && o->has_surface)
-            wl->current_output = o;
+            break;
+        }
     }
 
-    if (!outputs)
-        wl->current_output = NULL;
-
-    if (outputs == 1)
-        update_output_geometry(wl);
-
-    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
+    update_surface_outputs(wl, true);
 }
 
 static void surface_handle_preferred_buffer_scale(void *data,
