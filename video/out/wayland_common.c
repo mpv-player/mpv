@@ -3018,9 +3018,9 @@ static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t
     struct vo_wayland_output *output;
     wl_list_for_each(output, &wl->output_list, link) {
         if (output->id == id) {
-            remove_output(output);
-            if (wl_list_length(&wl->output_list) == 0)
+            if (wl->current_output == output)
                 wl->current_output = NULL;
+            remove_output(output);
             goto ack_global_remove;
         }
     }
