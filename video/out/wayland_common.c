@@ -1818,11 +1818,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct vo_wayland_toplevel_pending_state *pending = &wl->pending_state;
     struct vo_wayland_toplevel_pending_flags *flags = &pending->flags;
 
-    if (width < 0 || height < 0) {
-        MP_WARN(wl, "Compositor sent negative width/height values. Treating them as zero.\n");
-        width = height = 0;
-    }
-
     pending->width = width;
     pending->height = height;
     *flags = (struct vo_wayland_toplevel_pending_flags){ 0 };
