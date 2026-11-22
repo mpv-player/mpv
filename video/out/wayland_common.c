@@ -1579,8 +1579,8 @@ static void output_handle_geometry(void *data, struct wl_output *wl_output,
                                    int32_t transform)
 {
     struct vo_wayland_output *output = data;
-    output->make = talloc_strdup(output->wl, make);
-    output->model = talloc_strdup(output->wl, model);
+    ta_replace(output, output->make, make);
+    ta_replace(output, output->model, model);
     output->geometry.x0 = x;
     output->geometry.y0 = y;
     output->phys_width = phys_width;
@@ -1654,7 +1654,7 @@ static void output_handle_name(void *data, struct wl_output *wl_output,
                                const char *name)
 {
     struct vo_wayland_output *output = data;
-    output->name = talloc_strdup(output->wl, name);
+    ta_replace(output, output->name, name);
 }
 
 static void output_handle_description(void *data, struct wl_output *wl_output,
@@ -2860,7 +2860,9 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         output->wl     = wl;
         output->id     = id;
         output->scale  = 1;
-        output->name   = "";
+        output->name   = talloc_strdup(output, "");
+        output->make   = talloc_strdup(output, "");
+        output->model  = talloc_strdup(output, "");
 
         ver = MPMIN(ver, 4); /* Cap at 4 in case new events are added later. */
         output->output = wl_registry_bind(reg, id, &wl_output_interface, ver);
@@ -3543,8 +3545,6 @@ static void remove_output(struct vo_wayland_output *out)
                out->model, out->name, out->id);
     wl_list_remove(&out->link);
     wl_output_destroy(out->output);
-    talloc_free(out->make);
-    talloc_free(out->model);
     talloc_free(out);
 }
 
