@@ -1219,6 +1219,10 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
         get_shape_device(s->wl, s);
         wl_pointer_add_listener(s->pointer, &pointer_listener, s);
     } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && s->pointer) {
+        if (s->cursor_shape_device) {
+            wp_cursor_shape_device_v1_destroy(s->cursor_shape_device);
+            s->cursor_shape_device = NULL;
+        }
         wl_pointer_destroy(s->pointer);
         s->pointer = NULL;
     }
