@@ -1223,7 +1223,7 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
             wp_cursor_shape_device_v1_destroy(s->cursor_shape_device);
             s->cursor_shape_device = NULL;
         }
-        wl_pointer_destroy(s->pointer);
+        WL_RELEASE_OR_DESTROY(wl_pointer, s->pointer, WL_POINTER_RELEASE_SINCE_VERSION);
         s->pointer = NULL;
     }
 
@@ -1231,7 +1231,7 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
         s->keyboard = wl_seat_get_keyboard(seat);
         wl_keyboard_add_listener(s->keyboard, &keyboard_listener, s);
     } else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && s->keyboard) {
-        wl_keyboard_destroy(s->keyboard);
+        WL_RELEASE_OR_DESTROY(wl_keyboard, s->keyboard, WL_KEYBOARD_RELEASE_SINCE_VERSION);
         s->keyboard = NULL;
     }
 
@@ -1240,7 +1240,7 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
         wl_touch_set_user_data(s->touch, s);
         wl_touch_add_listener(s->touch, &touch_listener, s);
     } else if (!(caps & WL_SEAT_CAPABILITY_TOUCH) && s->touch) {
-        wl_touch_destroy(s->touch);
+        WL_RELEASE_OR_DESTROY(wl_touch, s->touch, WL_TOUCH_RELEASE_SINCE_VERSION);
         s->touch = NULL;
     }
 }
@@ -3548,7 +3548,7 @@ static void remove_output(struct vo_wayland_output *out)
     MP_VERBOSE(out->wl, "Deregistering output %s %s (%s) (0x%x)\n", out->make,
                out->model, out->name, out->id);
     wl_list_remove(&out->link);
-    wl_output_destroy(out->output);
+    WL_RELEASE_OR_DESTROY(wl_output, out->output, WL_OUTPUT_RELEASE_SINCE_VERSION);
     talloc_free(out);
 }
 
@@ -3614,13 +3614,13 @@ static void remove_seat(struct vo_wayland_seat *seat)
     if (seat == seat->wl->last_button_seat)
         seat->wl->last_button_seat = NULL;
     if (seat->keyboard)
-        wl_keyboard_destroy(seat->keyboard);
+        WL_RELEASE_OR_DESTROY(wl_keyboard, seat->keyboard, WL_KEYBOARD_RELEASE_SINCE_VERSION);
     if (seat->pointer)
-        wl_pointer_destroy(seat->pointer);
+        WL_RELEASE_OR_DESTROY(wl_pointer, seat->pointer, WL_POINTER_RELEASE_SINCE_VERSION);
     if (seat->touch)
-        wl_touch_destroy(seat->touch);
+        WL_RELEASE_OR_DESTROY(wl_touch, seat->touch, WL_TOUCH_RELEASE_SINCE_VERSION);
     if (seat->data_device)
-        wl_data_device_destroy(seat->data_device);
+        wl_data_device_release(seat->data_device);
     if (seat->text_input)
         zwp_text_input_v3_destroy(seat->text_input->text_input);
     if (seat->cursor_shape_device)
@@ -3652,7 +3652,7 @@ static void remove_seat(struct vo_wayland_seat *seat)
     if (seat->data_source)
         wl_data_source_destroy(seat->data_source);
 
-    wl_seat_destroy(seat->seat);
+    WL_RELEASE_OR_DESTROY(wl_seat, seat->seat, WL_SEAT_RELEASE_SINCE_VERSION);
     talloc_free(seat);
 }
 
