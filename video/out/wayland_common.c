@@ -3022,9 +3022,15 @@ static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t
     struct vo_wayland_output *output;
     wl_list_for_each(output, &wl->output_list, link) {
         if (output->id == id) {
+            bool affected = output->has_surface || wl->current_output == output;
+            if (affected)
+                save_output_geometry(wl);
             if (wl->current_output == output)
                 wl->current_output = NULL;
             remove_output(output);
+            if (affected)
+                update_surface_outputs(wl, !wl->current_output ||
+                                           !wl->current_output->has_surface);
             goto ack_global_remove;
         }
     }
