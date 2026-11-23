@@ -1,0 +1,2 @@
+add `term-show-tracks` option
+add `term-show-editions` option
