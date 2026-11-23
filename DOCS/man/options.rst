@@ -5555,6 +5555,20 @@ Terminal
 
     Default: ``[-+-]``.
 
+``--term-show-tracks=<all|selected|none>``
+    Control which tracks are printed on the terminal (default: all).
+
+    :all:       print all available tracks
+    :selected:  print only selected tracks
+    :none:      do not print any tracks
+
+``--term-show-editions=<all|selected|none>``
+    Control which editions are printed on the terminal (default: all).
+
+    :all:       print all available editions
+    :selected:  print only the active edition
+    :none:      do not print any edition listings
+
 ``--term-playing-msg=<string>``
     Print out a string after starting playback. The string is expanded for
     properties, e.g. ``--term-playing-msg='file: ${filename}'`` will print the string

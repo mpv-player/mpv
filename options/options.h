@@ -279,6 +279,8 @@ typedef struct MPOpts {
     int frame_dropping;
     bool video_latency_hacks;
     int term_osd;
+    int term_show_tracks;
+    int term_show_editions;
     bool term_osd_bar;
     char *term_osd_bar_chars;
     char *term_title;
