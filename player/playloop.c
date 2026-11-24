@@ -990,11 +990,11 @@ void seek_to_last_frame(struct MPContext *mpctx)
     }
 }
 
-static void handle_keep_open(struct MPContext *mpctx)
+static void handle_keep_file_open(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE &&
-        (opts->keep_open == 2 ||
+    if (opts->keep_file_open && mpctx->stop_play == AT_END_OF_FILE &&
+        (opts->keep_file_open == 2 ||
         (!playlist_get_next(mpctx->playlist, 1) && opts->loop_times == 1)))
     {
         mpctx->stop_play = KEEP_PLAYING;
@@ -1005,7 +1005,7 @@ static void handle_keep_open(struct MPContext *mpctx)
                 mpctx->video_status = STATUS_EOF;
             }
         }
-        if (opts->keep_open_pause) {
+        if (opts->keep_file_open_pause) {
             if (mpctx->ao && ao_is_playing(mpctx->ao))
                 return;
             set_pause_state(mpctx, true);
@@ -1281,7 +1281,7 @@ static void handle_lazy_streams(struct MPContext *mpctx)
 static void handle_eof(struct MPContext *mpctx)
 {
     if (mpctx->seek.type)
-        return; // for proper keep-open operation
+        return; // for proper keep-file-open operation
 
     /* Don't quit while paused and we're displaying the last video frame. On the
      * other hand, if we don't have a video frame, then the user probably seeked
@@ -1368,7 +1368,7 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_loop_file(mpctx);
 
-    handle_keep_open(mpctx);
+    handle_keep_file_open(mpctx);
 
     handle_sstep(mpctx);
 

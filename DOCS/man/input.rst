@@ -2767,9 +2767,9 @@ Property list
 
 ``eof-reached``
     Whether the end of playback was reached. Note that this is usually
-    interesting only if ``--keep-open`` is enabled, since otherwise the player
-    will immediately play the next file (or exit or enter idle mode), and in
-    these cases the ``eof-reached`` property will logically be cleared
+    interesting only if ``--keep-file-open`` is enabled, since otherwise the
+    player will immediately play the next file (or exit or enter idle mode),
+    and in these cases the ``eof-reached`` property will logically be cleared
     immediately after it's set.
 
 ``seeking``

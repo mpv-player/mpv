@@ -1013,7 +1013,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         if (chapter < 0) // avoid using -1 if first chapter starts at 0
             chapter = (chapter_start_time(mpctx, 0) <= 0) ? 0 : -1;
         if (chapter >= num && step_all > 0) {
-            if (mpctx->opts->keep_open) {
+            if (mpctx->opts->keep_file_open) {
                 seek_to_last_frame(mpctx);
             } else {
                 // semi-broken file; ignore for user convenience
