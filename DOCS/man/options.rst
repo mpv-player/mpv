@@ -861,10 +861,12 @@ Program Behavior
 
     This option is useful for debugging only.
 
-``--idle=<no|yes|once>``
+``--keep-player-open=<no|yes|once>``
     Makes mpv wait idly instead of quitting when there is no file to play.
     Mostly useful in input mode, where mpv can be controlled through input
     commands. (Default: ``no``)
+
+    ``--idle`` is an alias for ``--keep-player-open``.
 
     ``once`` will only idle at start and let the player close once the
     first playlist has finished playing back.
@@ -3470,7 +3472,7 @@ Window
         anyway.
 
         Whether the player enters idle mode or quits when the current file is
-        unloaded is controlled by ``--idle``.
+        unloaded is controlled by ``--keep-player-open``.
 
     ``yes`` doesn't pause if there is a next file in the playlist, or the
     playlist is looped. Approximately, this will pause when the player would

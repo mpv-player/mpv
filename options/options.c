@@ -917,8 +917,9 @@ static const m_option_t mp_opts[] = {
 
     {"video-osd", OPT_BOOL(video_osd), .flags = UPDATE_OSD},
 
-    {"idle", OPT_CHOICE(player_idle_mode,
+    {"keep-player-open", OPT_CHOICE(keep_player_open,
         {"no",   0}, {"once", 1}, {"yes",  2})},
+    {"idle", OPT_ALIAS("keep-player-open")},
 
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     {"input-commands", OPT_STRINGLIST(input_commands)},

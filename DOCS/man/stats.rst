@@ -279,10 +279,10 @@ The keys are grouped automatically using a simple analysis of the command
 string, and one should not expect documentation-level grouping accuracy,
 however, it should still be reasonably useful.
 
-Using ``--idle --script-opt=stats-bindlist=yes`` will print the list to
-the terminal and quit immediately. Long lines are clipped to the terminal width
-unless this is disabled with ``--script-opt=stats-term_clip=no``. Escape
-sequences can be disabled by adding ``-`` before ``yes``, i.e.
+Using ``--keep-player-open --script-opt=stats-bindlist=yes`` will print the
+list to the terminal and quit immediately. Long lines are clipped to the
+terminal width unless this is disabled with ``--script-opt=stats-term_clip=no``.
+Escape sequences can be disabled by adding ``-`` before ``yes``, i.e.
 ``--script-opt=stats-bindlist=-yes``.
 
 Like with ``--input-test``, the list includes bindings from ``input.conf`` and

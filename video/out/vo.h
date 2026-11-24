@@ -263,8 +263,9 @@ struct vo_frame {
     // Dropping the frame is allowed if the VO is behind.
     bool can_drop;
     // The current frame to be drawn.
-    // Warning: When OSD should be redrawn in --force-window --idle mode, this
-    //          can be NULL. The VO should draw a black background, OSD on top.
+    // Warning: When OSD should be redrawn in --force-window --keep-player-open
+    //          mode, this can be NULL. The VO should draw a black background,
+    //          OSD on top.
     struct mp_image *current;
     // List of future images, starting with the current one. This does not
     // care about repeated frames - it simply contains the next real frames.

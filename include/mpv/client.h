@@ -455,7 +455,7 @@ MPV_EXPORT int64_t mpv_client_id(mpv_handle *ctx);
  *      (call mpv_initialize() _after_ this)
  * - Idle mode is enabled, which means the playback core will enter idle mode
  *   if there are no more files to play on the internal playlist, instead of
- *   exiting. This is equivalent to the --idle option.
+ *   exiting. This is equivalent to the --keep-player-open option.
  * - Disable parts of input handling.
  * - Most of the different settings can be viewed with the command line player
  *   by running "mpv --show-profile=libmpv".
@@ -1293,8 +1293,8 @@ typedef enum mpv_event_id {
     /**
      * Idle mode was entered. In this mode, no file is played, and the playback
      * core waits for new commands. (The command line player normally quits
-     * instead of entering idle mode, unless --idle was specified. If mpv
-     * was started with mpv_create(), idle mode is enabled by default.)
+     * instead of entering idle mode, unless --keep-player-open was specified.
+     * If mpv was started with mpv_create(), idle mode is enabled by default.)
      *
      * @deprecated This is equivalent to using mpv_observe_property() on the
      *             "idle-active" property. The event is redundant, and might be

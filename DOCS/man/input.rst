@@ -35,7 +35,7 @@ In general, keys can be combined with ``Shift``, ``Ctrl`` and ``Alt``::
 **mpv** can be started in input test mode, which displays key bindings and the
 commands they're bound to on the OSD, instead of executing the commands::
 
-    mpv --input-test --force-window --idle
+    mpv --input-test --force-window --keep-player-open
 
 (Only closing the window will make **mpv** exit, pressing normal keys will
 merely display the binding, even if mapped to quit.)
@@ -524,8 +524,8 @@ Playlist Manipulation
         even if playback is currently inactive,
 
     <none>
-        Playback is stopped. If idle mode (``--idle``) is enabled, the player
-        will enter idle mode, otherwise it will exit.
+        Playback is stopped. If idle mode (``--keep-player-open``) is enabled,
+        the player will enter idle mode, otherwise it will exit.
 
     Setting ``preserve-options`` (``MPV_FORMAT_FLAG``) will not reset file-local
     options when the playback of the current playlist index is restarted.
@@ -2625,7 +2625,7 @@ Property list
 
 ``idle-active``
     Returns ``yes``/true if no file is loaded, but the player is staying around
-    because of the ``--idle`` option.
+    because of the ``--keep-player-open`` option.
 
     (Renamed from ``idle``.)
 

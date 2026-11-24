@@ -291,7 +291,7 @@ typedef struct MPOpts {
     char *osd_status_msg;
     char *osd_msg[3];
     int playlist_entry_name;
-    int player_idle_mode;
+    int keep_player_open;
     char **input_commands;
     bool consolecontrols;
     int playlist_pos;

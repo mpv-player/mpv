@@ -1417,7 +1417,7 @@ void idle_loop(struct MPContext *mpctx)
 {
     // ================= idle loop (STOP state) =========================
     bool need_reinit = true;
-    while (mpctx->opts->player_idle_mode && mpctx->stop_play == PT_STOP) {
+    while (mpctx->opts->keep_player_open && mpctx->stop_play == PT_STOP) {
         if (need_reinit) {
             uninit_audio_out(mpctx);
             handle_force_window(mpctx, true);

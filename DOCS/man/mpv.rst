@@ -1584,7 +1584,7 @@ The profile is currently defined as follows:
     [builtin-pseudo-gui]
     terminal=no
     force-window=yes
-    idle=yes
+    keep-player-open=yes
     screenshot-directory=~~desktop/
 
 The ``pseudo-gui`` profile exists for compatibility. The options in the
@@ -1608,7 +1608,7 @@ works like in older mpv releases:
 
             [gui]
             profile-cond=p["player-operation-mode"]=="pseudo-gui"
-            idle=once
+            keep-player-open=once
 
 .. include:: options.rst
 
