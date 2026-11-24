@@ -97,6 +97,7 @@ void handle_command_updates(struct MPContext *mpctx);
 
 int mp_get_property_id(struct MPContext *mpctx, const char *name);
 uint64_t mp_get_property_event_mask(const char *name);
+const char *mp_resolve_property_alias(struct MPContext *mpctx, const char *name);
 
 enum {
     // Must start with the first unused positive value in enum mpv_event_id

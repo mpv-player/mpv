@@ -5046,6 +5046,16 @@ int mp_get_property_id(struct MPContext *mpctx, const char *name)
     return -1;
 }
 
+const char *mp_resolve_property_alias(struct MPContext *mpctx, const char *name)
+{
+    if (strncmp(name, "options/", 8) == 0)
+        name += 8;
+    struct m_property *prop = m_property_list_find(&mpctx->command_ctx->properties, name);
+    if (prop && (prop->call == mp_property_alias || prop->call == mp_property_deprecated_alias))
+        return mp_resolve_property_alias(mpctx, prop->priv);
+    return name;
+}
+
 static bool is_property_set(int action, void *val)
 {
     switch (action) {
