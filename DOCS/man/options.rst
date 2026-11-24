@@ -863,8 +863,8 @@ Program Behavior
 
 ``--idle=<no|yes|once>``
     Makes mpv wait idly instead of quitting when there is no file to play.
-    Mostly useful in input mode, where mpv can be controlled through input
-    commands. (Default: ``no``)
+    Default: ``no``. In pseudo-gui mode (see PSEUDO GUI MODE), this defaults to
+    ``yes``.
 
     ``once`` will only idle at start and let the player close once the
     first playlist has finished playing back.
