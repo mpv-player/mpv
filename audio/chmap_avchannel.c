@@ -31,8 +31,26 @@ bool mp_chmap_from_av_layout(struct mp_chmap *dst, const AVChannelLayout *src)
     case AV_CHANNEL_ORDER_NATIVE:
         mp_chmap_from_lavc(dst, src->u.mask);
         return dst->num == src->nb_channels;
+    case AV_CHANNEL_ORDER_CUSTOM: {
+        if (src->nb_channels > MP_NUM_CHANNELS)
+            return false;
+        struct mp_chmap map = {.num = src->nb_channels};
+        for (int n = 0; n < map.num; n++) {
+            // Speaker IDs below 64 are the AVChannel values.
+            enum AVChannel id = src->u.map[n].id;
+            if (id >= 0 && id < 64)
+                map.speaker[n] = id;
+            else if (id == AV_CHAN_UNUSED)
+                map.speaker[n] = MP_SPEAKER_ID_NA;
+            else
+                return false;
+        }
+        if (!mp_chmap_is_valid(&map))
+            return false;
+        *dst = map;
+        return true;
+    }
     default:
-        // TODO: handle custom layouts
         return false;
     }
 }

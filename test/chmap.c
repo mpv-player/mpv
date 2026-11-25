@@ -1,5 +1,10 @@
 #include "config.h"
 
+#include <stdio.h>
+#include <string.h>
+
+#include <libavutil/mem.h>
+
 #include "audio/chmap.h"
 #include "audio/chmap_avchannel.h"
 #include "audio/chmap_sel.h"
@@ -30,6 +35,67 @@ static void test_sel(const char *input, const char *expected_selection,
     // problems with ambiguous layouts.
     assert_string_equal(mp_chmap_to_str(&input_map),
                         mp_chmap_to_str(&expected_map));
+}
+
+static void custom_layout(AVChannelLayout *dst, const char *names)
+{
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s", names);
+    enum AVChannel ids[MP_NUM_CHANNELS + 1];
+    int num = 0;
+    for (char *s = strtok(buf, "+"); s; s = strtok(NULL, "+")) {
+        enum AVChannel id = !strcmp(s, "UNSD") ? AV_CHAN_UNUSED :
+                            !strcmp(s, "UNK") ? AV_CHAN_UNKNOWN :
+                            av_channel_from_string(s);
+        assert_true(id != AV_CHAN_NONE && num < MP_ARRAY_SIZE(ids));
+        ids[num++] = id;
+    }
+    av_channel_layout_uninit(dst);
+    dst->order = AV_CHANNEL_ORDER_CUSTOM;
+    dst->nb_channels = num;
+    dst->u.map = av_calloc(num, sizeof(*dst->u.map));
+    assert_true(dst->u.map);
+    for (int n = 0; n < num; n++)
+        dst->u.map[n].id = ids[n];
+}
+
+static void test_custom_av_layout_to_mp_chmap(void)
+{
+    // FFmpeg channels, mpv map or NULL if there is none
+    static const char *const cases[][2] = {
+        {"FC+FL+FR+SL+SR+LFE",              "fc-fl-fr-sl-sr-lfe"},
+        {"FR+BR+FC+FL+LFE+SR+BL+SL",        "fr-br-fc-fl-lfe-sr-bl-sl"},
+        {"LFE2+TSR+BFL+WL+SDR+DL+TBC+BFC",  "lfe2-tsr-bfl-wl-sdr-dl-tbc-bfc"},
+        {"FL+FR+FC+LFE+SL+SR",              "5.1(side)"},
+        {"UNSD+FL+FR",                      "na-fl-fr"},
+        {"FL+UNSD+FR+UNSD",                 "fl-na-fr-na"},
+        {"FL+UNK+FR",                       NULL},
+        {"UNK+UNK+UNK",                     NULL},
+        {"FL+FR+AMBI0",                     NULL},
+        {"FL+FR+FL",                        NULL},
+    };
+
+    for (int i = 0; i < MP_ARRAY_SIZE(cases); i++) {
+        AVChannelLayout av_layout = {0};
+        custom_layout(&av_layout, cases[i][0]);
+        struct mp_chmap mp_layout, expected = {0};
+        if (cases[i][1])
+            assert_true(mp_chmap_from_str(&expected, bstr0(cases[i][1])));
+        assert_int_equal(mp_chmap_from_av_layout(&mp_layout, &av_layout), !!cases[i][1]);
+        assert_true(mp_chmap_equals(&mp_layout, &expected));
+        av_channel_layout_uninit(&av_layout);
+    }
+
+    // More channels than a map has.
+    char names[(MP_NUM_CHANNELS + 1) * 5] = "";
+    for (int n = 0; n <= MP_NUM_CHANNELS; n++)
+        mp_snprintf_cat(names, sizeof(names), "%sUNSD", n ? "+" : "");
+    AVChannelLayout av_layout = {0};
+    custom_layout(&av_layout, names);
+    struct mp_chmap mp_layout;
+    assert_false(mp_chmap_from_av_layout(&mp_layout, &av_layout));
+    assert_true(mp_chmap_is_empty(&mp_layout));
+    av_channel_layout_uninit(&av_layout);
 }
 
 static bool layout_matches(const AVChannelLayout *av_layout,
@@ -207,6 +273,7 @@ int main(void)
 
     test_av_channel_layout_to_mp_chmap();
     test_mp_chmap_to_av_channel_layout();
+    test_custom_av_layout_to_mp_chmap();
 
     return 0;
 }
