@@ -34,7 +34,10 @@
 
 typedef void *GLeglImageOES;
 typedef void *EGLImageKHR;
+typedef void *EGLSyncKHR;
 #define EGL_NATIVE_BUFFER_ANDROID 0x3140
+#define EGL_SYNC_NATIVE_FENCE_ANDROID 0x3144
+#define EGL_NO_NATIVE_FENCE_FD_ANDROID -1
 
 struct priv_owner {
     struct mp_hwdec_ctx hwctx;
@@ -52,6 +55,7 @@ struct priv_owner {
     void (*AImageReader_delete)(AImageReader *);
     media_status_t (*AImage_getHardwareBuffer)(const AImage *, AHardwareBuffer **);
     void (*AImage_delete)(AImage *);
+    void (*AImage_deleteAsync)(AImage *, int); // optional
     void (*AHardwareBuffer_describe)(const AHardwareBuffer *, AHardwareBuffer_Desc *);
     jobject (*ANativeWindow_toSurface)(JNIEnv *, ANativeWindow *);
 };
@@ -63,6 +67,13 @@ struct priv {
     AImage *image;
     EGLImageKHR egl_image;
 
+    bool accessed;
+    // Signaled once the GPU is done with the last use of the image.
+    // Native fence if use_native_fence, otherwise a GL fence.
+    bool use_native_fence;
+    EGLSyncKHR native_fence;
+    GLsync gl_fence;
+
     mp_mutex lock;
     mp_cond cond;
     bool image_available;
@@ -73,9 +84,12 @@ struct priv {
     EGLClientBuffer (EGLAPIENTRY *GetNativeClientBufferANDROID)(
         const struct AHardwareBuffer *);
     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
+    EGLSyncKHR (EGLAPIENTRY *CreateSyncKHR)(EGLDisplay, EGLenum, const EGLint *);
+    EGLBoolean (EGLAPIENTRY *DestroySyncKHR)(EGLDisplay, EGLSyncKHR);
+    EGLint (EGLAPIENTRY *DupNativeFenceFDANDROID)(EGLDisplay, EGLSyncKHR);
 };
 
-static const struct { const char *symbol; int offset; } lib_functions[] = {
+static const struct { const char *symbol; int offset; bool optional; } lib_functions[] = {
     { "AImageReader_newWithUsage", offsetof(struct priv_owner, AImageReader_newWithUsage) },
     { "AImageReader_getWindow", offsetof(struct priv_owner, AImageReader_getWindow) },
     { "AImageReader_setImageListener", offsetof(struct priv_owner, AImageReader_setImageListener) },
@@ -83,6 +97,7 @@ static const struct { const char *symbol; int offset; } lib_functions[] = {
     { "AImageReader_delete", offsetof(struct priv_owner, AImageReader_delete) },
     { "AImage_getHardwareBuffer", offsetof(struct priv_owner, AImage_getHardwareBuffer) },
     { "AImage_delete", offsetof(struct priv_owner, AImage_delete) },
+    { "AImage_deleteAsync", offsetof(struct priv_owner, AImage_deleteAsync), true },
     { "AHardwareBuffer_describe", offsetof(struct priv_owner, AHardwareBuffer_describe) },
     { "ANativeWindow_toSurface", offsetof(struct priv_owner, ANativeWindow_toSurface) },
     { NULL, 0 },
@@ -117,7 +132,8 @@ static bool load_lib_functions(struct priv_owner *p, struct mp_log *log)
             fun = dlsym(RTLD_DEFAULT, sym);
         if (!fun) {
             mp_warn(log, "Could not resolve symbol %s\n", sym);
-            return false;
+            if (!lib_functions[i].optional)
+                return false;
         }
 
         *(void **) ((uint8_t*)p + lib_functions[i].offset) = fun;
@@ -256,6 +272,22 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
         !p->GetNativeClientBufferANDROID || !p->EGLImageTargetTexture2DOES)
         return -1;
 
+    // With a native fence the decoder waits for the GPU on its own when it
+    // reuses the buffer, otherwise we have to block before releasing it.
+    const char *exts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
+    if (o->AImage_deleteAsync &&
+        gl_check_extension(exts, "EGL_ANDROID_native_fence_sync"))
+    {
+        p->CreateSyncKHR = (void *)eglGetProcAddress("eglCreateSyncKHR");
+        p->DestroySyncKHR = (void *)eglGetProcAddress("eglDestroySyncKHR");
+        p->DupNativeFenceFDANDROID =
+            (void *)eglGetProcAddress("eglDupNativeFenceFDANDROID");
+        p->use_native_fence = p->CreateSyncKHR && p->DestroySyncKHR &&
+                              p->DupNativeFenceFDANDROID;
+    }
+    MP_VERBOSE(p, "Releasing images %s.\n", p->use_native_fence
+               ? "with a native release fence" : "after waiting for the GPU");
+
     AImageReader_ImageListener listener = {
         .context = p,
         .onImageAvailable = image_callback,
@@ -313,20 +345,112 @@ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
     mp_cond_destroy(&p->cond);
 }
 
-static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+static void clear_fence(struct ra_hwdec_mapper *mapper)
+{
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
+
+    if (p->native_fence) {
+        p->DestroySyncKHR(eglGetCurrentDisplay(), p->native_fence);
+        p->native_fence = NULL;
+    }
+    if (p->gl_fence) {
+        gl->DeleteSync(p->gl_fence);
+        p->gl_fence = NULL;
+    }
+}
+
+// Hand the image over for one render. There is nothing to wait for here:
+// AImageReader_acquireLatestImage() only returns the image once the decoder
+// has finished writing to it.
+static int mapper_begin_access(struct ra_hwdec_mapper *mapper)
+{
+    struct priv *p = mapper->priv;
+    p->accessed = true;
+    return 0;
+}
+
+// Take the image back after a render and record when the GPU is done reading
+// from it, so the decoder doesn't write to it before then. The fence comes
+// after all previous uses too, so only the latest one is kept.
+static void mapper_end_access(struct ra_hwdec_mapper *mapper)
+{
+    struct priv *p = mapper->priv;
+    GL *gl = ra_gl_get(mapper->ra);
+
+    if (!p->accessed)
+        return;
+
+    if (p->image) {
+        clear_fence(mapper);
+
+        if (p->use_native_fence) {
+            const EGLint attribs[] = {EGL_NONE};
+            p->native_fence = p->CreateSyncKHR(eglGetCurrentDisplay(),
+                                               EGL_SYNC_NATIVE_FENCE_ANDROID, attribs);
+        } else if (gl->FenceSync) {
+            p->gl_fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        }
+
+        if (!p->native_fence && !p->gl_fence)
+            gl->Finish();
+    }
+
+    p->accessed = false;
+}
+
+// Return the image's buffer to the decoder, which may decode a new frame into
+// it right away. If the GPU were still reading from it, the rendered frame
+// would end up with parts of two different frames.
+static void release_image(struct ra_hwdec_mapper *mapper)
 {
     struct priv *p = mapper->priv;
     struct priv_owner *o = mapper->owner->priv;
+    GL *gl = ra_gl_get(mapper->ra);
+
+    int fence_fd = EGL_NO_NATIVE_FENCE_FD_ANDROID;
+    if (p->native_fence) {
+        // The fd only exists once the fence command has been flushed.
+        gl->Flush();
+        fence_fd = p->DupNativeFenceFDANDROID(eglGetCurrentDisplay(),
+                                              p->native_fence);
+        if (fence_fd == EGL_NO_NATIVE_FENCE_FD_ANDROID) {
+            MP_WARN(p, "Failed to export release fence.\n");
+            gl->Finish();
+        }
+    } else if (p->gl_fence) {
+        GLenum res = gl->ClientWaitSync(p->gl_fence, GL_SYNC_FLUSH_COMMANDS_BIT,
+                                        MP_TIME_S_TO_NS(1));
+        if (res != GL_ALREADY_SIGNALED && res != GL_CONDITION_SATISFIED)
+            MP_WARN(p, "Waiting for the GPU to release the image failed.\n");
+    }
+
+    clear_fence(mapper);
+
+    if (fence_fd != EGL_NO_NATIVE_FENCE_FD_ANDROID) {
+        // The decoder waits for the fence before writing to the buffer.
+        // This takes ownership of the fd.
+        o->AImage_deleteAsync(p->image, fence_fd);
+    } else {
+        o->AImage_delete(p->image);
+    }
+    p->image = NULL;
+}
+
+static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+{
+    struct priv *p = mapper->priv;
+
+    // In case the image is still being accessed.
+    mapper_end_access(mapper);
 
     if (p->egl_image) {
         p->DestroyImageKHR(eglGetCurrentDisplay(), p->egl_image);
         p->egl_image = 0;
     }
 
-    if (p->image) {
-        o->AImage_delete(p->image);
-        p->image = NULL;
-    }
+    if (p->image)
+        release_image(mapper);
 }
 
 static int mapper_map(struct ra_hwdec_mapper *mapper)
@@ -423,5 +547,7 @@ const struct ra_hwdec_driver ra_hwdec_aimagereader = {
         .uninit = mapper_uninit,
         .map = mapper_map,
         .unmap = mapper_unmap,
+        .begin_access = mapper_begin_access,
+        .end_access = mapper_end_access,
     },
 };
