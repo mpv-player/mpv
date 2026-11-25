@@ -673,7 +673,9 @@ static int init(struct ao *ao)
         p->format = AudioFormat.ENCODING_PCM_16BIT;
     }
 
-    if (AudioTrack.getNativeOutputSampleRate) {
+    // The native output rate is the PCM mixer's. The rate of an IEC 61937
+    // stream is set by the codec (192000 Hz for E-AC-3), so don't clamp it.
+    if (AudioTrack.getNativeOutputSampleRate && !af_fmt_is_spdif(ao->format)) {
         jint samplerate = MP_JNI_CALL_STATIC_INT(
             AudioTrack.clazz,
             AudioTrack.getNativeOutputSampleRate,
