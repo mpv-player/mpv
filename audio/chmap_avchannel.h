@@ -25,4 +25,5 @@
 
 bool mp_chmap_from_av_layout(struct mp_chmap *dst, const AVChannelLayout *src);
 
+// dst is uninitialized first, it has to be zeroed or hold a layout.
 void mp_chmap_to_av_layout(AVChannelLayout *dst, const struct mp_chmap *src);
