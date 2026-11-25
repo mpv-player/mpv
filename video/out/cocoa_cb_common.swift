@@ -33,7 +33,7 @@ class CocoaCB: Common, EventSubscriber {
     init(_ mpv: OpaquePointer) {
         let log = LogHelper(mp_log_new(UnsafeMutablePointer(mpv), mp_client_get_log(mpv), "cocoacb"))
         let option = OptionHelper(UnsafeMutablePointer(mpv), mp_client_get_global(mpv))
-        libmpv = LibmpvHelper(mpv, log)
+        libmpv = LibmpvHelper(mpv, option, log)
         super.init(option, log)
         layer = GLLayer(cocoaCB: self)
         AppHub.shared.event?.subscribe(self, event: .init(name: "MPV_EVENT_SHUTDOWN"))

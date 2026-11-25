@@ -293,7 +293,7 @@ $projects = @(
     @{
         Path = "$subprojects/aom-cmake.wrap"
         URL = "https://aomedia.googlesource.com/aom"
-        Revision = "main"
+        Revision = "b64bd5b78635440b68dc7e62c26957be0be6b7cf"
     }
 )
 

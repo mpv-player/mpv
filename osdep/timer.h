@@ -20,6 +20,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <time.h>
 #include "config.h"
 
 // Initialize timer, must be called at least once at start.
@@ -30,6 +31,12 @@ int64_t mp_time_ns(void);
 
 // Return time in nanoseconds. Converts raw time in nanoseconds to mp time, subtracts init offset.
 int64_t mp_time_ns_from_raw_time(uint64_t raw_time);
+
+#if HAVE_POSIX
+// Return time in nanoseconds. Converts a time of the given clock in
+// nanoseconds to mp time.
+int64_t mp_time_ns_from_clock(clockid_t clk_id, int64_t clk_time);
+#endif
 
 // Return time in seconds. Can have down to 1 nanosecond resolution, but will
 // be much worse when casted to float.

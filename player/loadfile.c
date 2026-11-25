@@ -325,12 +325,16 @@ bool track_is_visible(struct MPContext *mpctx, struct track *track)
 
 void print_track_list(struct MPContext *mpctx, const char *msg)
 {
+    if (mpctx->opts->term_show_tracks == 2)
+        return;
     if (msg)
         MP_INFO(mpctx, "%s\n", msg);
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int n = 0; n < mpctx->num_tracks; n++) {
             struct track *track = mpctx->tracks[n];
             if (track->type != t || !track_is_visible(mpctx, track))
+                continue;
+            if (mpctx->opts->term_show_tracks == 1 && !track->selected)
                 continue;
             // Indent tracks after messages like "Tracks switched" and
             // "Playing:".
@@ -348,8 +352,12 @@ void update_demuxer_properties(struct MPContext *mpctx)
         return;
     demux_update(demuxer, get_current_time(mpctx));
     int events = demuxer->events;
-    if ((events & DEMUX_EVENT_INIT) && demuxer->num_editions > 1) {
+    if ((events & DEMUX_EVENT_INIT) && demuxer->num_editions > 1 &&
+        mpctx->opts->term_show_editions != 2)
+    {
         for (int n = 0; n < demuxer->num_editions; n++) {
+            if (mpctx->opts->term_show_editions == 1 && n != demuxer->edition)
+                continue;
             struct demux_edition *edition = &demuxer->editions[n];
             char b[128] = {0};
             if (mpctx->playlist->num_entries > 1 || mpctx->playing->playlist_path)

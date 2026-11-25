@@ -20,9 +20,9 @@
 #include <libplacebo/renderer.h>
 
 struct mp_log;
+struct ra;
 struct ra_ctx;
-struct ra_ctx_opts;
-struct vo;
+struct ra_tex;
 
 struct gpu_ctx {
     struct mp_log *log;
@@ -35,6 +35,10 @@ struct gpu_ctx {
     void *priv;
 };
 
-struct gpu_ctx *gpu_ctx_create(struct vo *vo, struct ra_ctx_opts *ctx_opts);
+// The ra_ctx has to outlive the returned context.
+struct gpu_ctx *gpu_ctx_create(struct mp_log *log, struct ra_ctx *ra_ctx, bool probing);
+bool gpu_ctx_create_swapchain(struct gpu_ctx *ctx, int swapchain_depth);
 bool gpu_ctx_resize(struct gpu_ctx *ctx, int w, int h);
+pl_tex gpu_ctx_wrap_ra_tex(pl_gpu gpu, struct ra *ra, struct ra_tex *ratex);
+void gpu_ctx_unwrap_ra_tex(pl_gpu gpu, struct ra *ra, pl_tex *tex);
 void gpu_ctx_destroy(struct gpu_ctx **ctxp);

@@ -827,6 +827,23 @@ static int mp_property_vo_delayed_frame_count(void *ctx, struct m_property *prop
     return m_property_int_ro(action, arg, vo_get_delayed_count(mpctx->video_out));
 }
 
+static int mp_property_vo_presentation_delay(void *ctx, struct m_property *prop,
+                                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->vo_chain)
+        return M_PROPERTY_UNAVAILABLE;
+    double delay = vo_get_presentation_delay(mpctx->video_out);
+    if (isnan(delay))
+        return M_PROPERTY_UNAVAILABLE;
+    if (action == M_PROPERTY_PRINT || action == M_PROPERTY_FIXED_LEN_PRINT) {
+        *(char **)arg = mp_format_double(NULL, delay, 5, true, false,
+                                         action != M_PROPERTY_FIXED_LEN_PRINT);
+        return M_PROPERTY_OK;
+    }
+    return m_property_double_ro(action, arg, delay);
+}
+
 /// Current position in percent (RW)
 static int mp_property_percent_pos(void *ctx, struct m_property *prop,
                                    int action, void *arg)
@@ -2130,7 +2147,9 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct sh_stream *sh = track->stream;
 
     double par = 0.0;
-    if (p.par_h)
+    if (p.dar_h && p.disp_w)
+        par = p.dar_w * (double) p.disp_h / (p.dar_h * (double) p.disp_w);
+    else if (p.par_h)
         par = p.par_w / (double) p.par_h;
 
     int order = -1;
@@ -4715,6 +4734,7 @@ static const struct m_property mp_properties_base[] = {
     {"decoder-frame-drop-count", mp_property_frame_drop_dec},
     {"frame-drop-count", mp_property_frame_drop_vo},
     {"vo-delayed-frame-count", mp_property_vo_delayed_frame_count},
+    {"vo-presentation-delay", mp_property_vo_presentation_delay},
     {"percent-pos", mp_property_percent_pos},
     {"time-pos", mp_property_time_pos},
     {"time-remaining", mp_property_remaining},
@@ -4937,7 +4957,8 @@ static const char *const *const mp_event_property_change[] = {
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "total-avsync-change", "audio-speed-correction",
       "video-speed-correction", "vo-delayed-frame-count", "mistimed-frame-count",
-      "vsync-ratio", "estimated-display-fps", "vsync-jitter", "sub-text",
+      "vsync-ratio", "estimated-display-fps",
+      "vsync-jitter", "sub-text",
       "secondary-sub-text", "audio-bitrate", "video-bitrate", "sub-bitrate",
       "decoder-frame-drop-count", "frame-drop-count", "video-frame-info",
       "vf-metadata", "af-metadata", "sub-start", "sub-end", "secondary-sub-start",
@@ -4968,6 +4989,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MP_EVENT_WIN_STATE2, "display-hidpi-scale"),
     E(MP_EVENT_FOCUS, "focused"),
     E(MP_EVENT_AMBIENT_LIGHTING_CHANGED, "ambient-light"),
+    E(MP_EVENT_PRESENTATION_DELAY, "vo-presentation-delay"),
     E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
       "playlist-count", "playlist/count", "playlist-current-pos",
       "playlist-playing-pos"),
@@ -8664,7 +8686,9 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
 
     if (opt_ptr == &opts->audio_delay) {
         if (mpctx->ao_chain) {
-            mpctx->delay += mpctx->opts->audio_delay - mpctx->ao_chain->delay;
+            double change = mpctx->opts->audio_delay - mpctx->ao_chain->delay;
+            mpctx->delay += change;
+            mpctx->ao_chain->delayed_start_gap += change;
             mpctx->ao_chain->delay = mpctx->opts->audio_delay;
         }
         mp_wakeup_core(mpctx);

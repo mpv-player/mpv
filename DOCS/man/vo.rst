@@ -584,8 +584,8 @@ Available video output drivers are:
     other contexts.
     (See ``<mpv/render.h>``.)
 
-    This also supports many of the options the ``gpu`` VO has, depending on the
-    backend.
+    This also supports many of the options the ``gpu-next`` or the ``gpu`` VO
+    has, depending on the renderer and the backend the application selects.
 
 ``drm`` (Direct Rendering Manager)
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.

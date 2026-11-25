@@ -17,67 +17,12 @@
 
 import Cocoa
 
-extension MenuBar {
-    class MenuItem: NSMenuItem {
-        var config: Config?
-    }
-
-    enum `Type`: Comparable {
-        case menu
-        case menuWindow
-        case menuServices
-        case separator
-        case item
-        case itemNormalSize
-        case itemHalfSize
-        case itemDoubleSize
-        case itemMinimize
-        case itemZoom
-    }
-
-    struct Config {
-        let name: String
-        let key: String
-        let modifiers: NSEvent.ModifierFlags
-        let type: Type
-        let action: Selector?
-        let target: AnyObject?
-        let command: String
-        let url: String
-        var configs: [Config]
-
-        init(
-            name: String = "",
-            key: String = "",
-            modifiers: NSEvent.ModifierFlags = .command,
-            type: Type? = nil,
-            action: Selector? = nil,
-            target: AnyObject? = nil,
-            command: String = "",
-            url: String = "",
-            configs: [Config] = []
-        ) {
-            self.name = name
-            self.key = key
-            self.modifiers = modifiers
-            self.type = type ?? (configs.isEmpty ? .item : .menu)
-            self.action = action
-            self.target = target
-            self.command = command
-            self.url = url
-            self.configs = configs
-        }
-    }
-}
-
-class MenuBar: NSObject, EventSubscriber {
+class MenuBar: Menu, EventSubscriber {
     unowned let appHub: AppHub
-    var option: OptionHelper? { return appHub.option }
     var event: EventHelper? { return appHub.event }
     let mainMenu = NSMenu(title: "Main")
     let servicesMenu = NSMenu(title: "Services")
     var menuConfigs: [Config] = []
-    var dynamicMenuItems: [Type: [MenuItem]] = [:]
     let dialog: Dialog
     let appIcon: NSImage
     var path: String?
@@ -95,7 +40,7 @@ class MenuBar: NSObject, EventSubscriber {
         appIcon = appHub.getIcon()
         dialog = Dialog(appHub.option)
 
-        super.init()
+        super.init(input: appHub.input, option: appHub.option)
 
         let appMenuConfigs = [
             Config(name: "About mpv", action: #selector(about), target: self),
@@ -267,39 +212,13 @@ class MenuBar: NSObject, EventSubscriber {
         event?.subscribe(self, event: .init(name: "path", format: MPV_FORMAT_STRING))
     }
 
-    func createMenu(parentMenu: NSMenu, configs: [Config]) {
-        for config in configs {
-            let item = createMenuItem(parentMenu: parentMenu, config: config)
+    override func createSubmenu(for config: Config) -> NSMenu {
+        if config.type == .menuServices { return servicesMenu }
 
-            if config.type <= .menuServices {
-                let menu = config.type == .menuServices ? servicesMenu : NSMenu(title: config.name)
-                item.submenu = menu
-                createMenu(parentMenu: menu, configs: config.configs)
+        let menu = super.createSubmenu(for: config)
+        if config.type == .menuWindow { NSApp.windowsMenu = menu }
 
-                if config.type == .menuWindow {
-                    NSApp.windowsMenu = menu
-                }
-            }
-
-            if config.type > Type.item {
-                dynamicMenuItems[config.type] = (dynamicMenuItems[config.type] ?? []) + [item]
-            }
-        }
-    }
-
-    func createMenuItem(parentMenu: NSMenu, config: Config) -> MenuItem {
-        var item = MenuItem(title: config.name, action: config.action,
-              keyEquivalent: (option?.mac.macos_menu_shortcuts ?? true) ? config.key : "")
-        item.config = config
-        item.target = config.target
-        item.keyEquivalentModifierMask = config.modifiers
-
-        if config.type == .separator {
-            item = MenuItem.separator() as? MenuItem ?? item
-        }
-        parentMenu.addItem(item)
-
-        return item
+        return menu
     }
 
     @objc func about() {
@@ -339,28 +258,17 @@ class MenuBar: NSObject, EventSubscriber {
 
     @objc func openFiles() {
         guard let files = dialog.openFiles(path: currentDir) else { return }
-        appHub.input.open(files: files)
+        input.open(files: files)
     }
 
     @objc func openPlaylist() {
         guard let file = dialog.openPlaylist(path: currentDir) else { return }
-        appHub.input.command("loadlist \"\(file)\"")
+        input.command("loadlist \"\(file)\"")
     }
 
     @objc func openUrl() {
         guard let file = dialog.openUrl() else { return }
-        appHub.input.open(files: [file])
-    }
-
-    @objc func command(_ menuItem: MenuItem) {
-        guard let menuConfig = menuItem.config else { return }
-        appHub.input.command(menuConfig.command)
-    }
-
-    @objc func url(_ menuItem: MenuItem) {
-        guard let menuConfig = menuItem.config,
-              let url = URL(string: menuConfig.url) else { return }
-        NSWorkspace.shared.open(url)
+        input.open(files: [file])
     }
 
     @objc func showFile(_ menuItem: MenuItem) {
@@ -372,12 +280,6 @@ class MenuBar: NSObject, EventSubscriber {
         }
 
         dialog.alert(title: "No log File found.", text: "You deactivated logging for the Bundle.")
-    }
-
-    func register(_ selector: Selector, key: Type) {
-        for menuItem in dynamicMenuItems[key] ?? [] {
-            menuItem.action = selector
-        }
     }
 
     func handle(event: EventHelper.Event) {

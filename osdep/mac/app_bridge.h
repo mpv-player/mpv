@@ -86,6 +86,11 @@ enum {
     MAC_CSP_ADOBE,
 };
 
+enum {
+    MAC_RENDERER_GPU = 0,
+    MAC_RENDERER_GPU_NEXT,
+};
+
 struct macos_opts {
     int macos_title_bar_appearance;
     int macos_title_bar_material;
@@ -100,6 +105,7 @@ struct macos_opts {
     int cocoa_cb_sw_renderer;
     bool cocoa_cb_10bit_context;
     int cocoa_cb_output_csp;
+    int cocoa_cb_renderer;
 };
 
 void cocoa_init_media_keys(void);

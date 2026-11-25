@@ -1,0 +1,7 @@
+remove `stats-plot_vsync_ratio` and `stats-plot_vsync_jitter` script-opts, the sync page of stats.lua has these graphs
+remove `stats-skip_frames` script-opt
+add `stats-sync_window` script-opt
+add a page 6 to stats.lua with sync graphs
+add `stats-plot_sync_dashes` script-opt
+add `stats-plot_sync_band` script-opt
+add `stats-plot_sync_every_frame` script-opt

@@ -891,6 +891,11 @@ static const m_option_t mp_opts[] = {
     {"term-osd", OPT_CHOICE(term_osd,
         {"force", 1}, {"auto", 2}, {"no", 0}), .flags = UPDATE_OSD},
 
+    {"term-show-tracks", OPT_CHOICE(term_show_tracks,
+        {"all", 0}, {"selected", 1}, {"none", 2})},
+    {"term-show-editions", OPT_CHOICE(term_show_editions,
+        {"all", 0}, {"selected", 1}, {"none", 2})},
+
     {"term-osd-bar", OPT_BOOL(term_osd_bar), .flags = UPDATE_OSD},
     {"term-osd-bar-chars", OPT_STRING(term_osd_bar_chars), .flags = UPDATE_OSD},
     {"term-title", OPT_STRING(term_title), .flags = UPDATE_OSD},
@@ -1036,7 +1041,7 @@ static const struct MPOpts mp_default_opts = {
     .lua_load_select = true,
     .lua_load_positioning = true,
     .lua_load_commands = true,
-#ifndef _WIN32
+#if !defined(_WIN32) && !HAVE_COCOA
     .lua_load_context_menu = true,
 #endif
 #endif

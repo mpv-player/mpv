@@ -18,6 +18,7 @@ local o = {
     key_page_3 = "3",
     key_page_4 = "4",
     key_page_5 = "5",
+    key_page_6 = "6",
     key_page_0 = "0",
     -- For pages which support scrolling
     key_scroll_up = "UP",
@@ -28,6 +29,7 @@ local o = {
 
     duration = 4,
     redraw_delay = 1,                -- acts as duration in the toggling case
+    sync_window = 5,                 -- seconds the sync values are averaged over
     ass_formatting = true,
     persistent_overlay = false,      -- whether the stats can be overwritten by other output
     filter_params_max_length = 100,  -- show one filter per line if list exceeds this length
@@ -40,11 +42,11 @@ local o = {
 
     -- Graph options and style
     plot_perfdata = false,
-    plot_vsync_ratio = false,
-    plot_vsync_jitter = false,
     plot_cache = true,
     plot_tonemapping_lut = false,
-    skip_frames = 5,
+    plot_sync_dashes = false,
+    plot_sync_band = false,
+    plot_sync_every_frame = false,
     global_max = true,
     flush_graph_data = true,         -- clear data buffers when toggling
     plot_bg_border_color = "0000FF",
@@ -93,8 +95,10 @@ local o = {
 
 local update_scale
 require "mp.options".read_options(o, nil, function ()
+    o.sync_window = math.max(o.sync_window, 1)
     update_scale()
 end)
+o.sync_window = math.max(o.sync_window, 1)
 
 local format = string.format
 local max = math.max
@@ -106,8 +110,6 @@ local border_size = o.border_size
 local shadow_x_offset = o.shadow_x_offset
 local shadow_y_offset = o.shadow_y_offset
 local plot_bg_border_width = o.plot_bg_border_width
--- Function used to record performance data
-local recorder = nil
 -- Timer used for redrawing (toggling) and clearing the screen (oneshot)
 local display_timer = nil
 -- Timer used to update cache stats.
@@ -118,18 +120,27 @@ local pages = {}
 local scroll_bound = false
 local searched_text
 local tm_viz_prev = nil
+local overlay = false
 -- Save these sequences locally as we'll need them a lot
 local ass_start = mp.get_property_osd("osd-ass-cc/0")
 local ass_stop = mp.get_property_osd("osd-ass-cc/1")
 -- Ring buffers for the values used to construct a graph.
 -- .pos denotes the current position, .len the buffer length
 -- .max is the max value in the corresponding buffer
-local vsratio_buf, vsjitter_buf
-local function init_buffers()
-    vsratio_buf = {0, pos = 1, len = 50, max = 0}
-    vsjitter_buf = {0, pos = 1, len = 50, max = 0}
-end
 local cache_ahead_buf, cache_speed_buf
+local sync_props = {"avsync", "vo-presentation-delay",
+                    "video-speed-correction", "audio-speed-correction",
+                    "vsync-ratio", "vsync-jitter",
+                    "frame-drop-count", "decoder-frame-drop-count",
+                    "vo-delayed-frame-count", "mistimed-frame-count"}
+local sync
+local function init_sync()
+    sync = {now = 0}
+    for _, prop in ipairs(sync_props) do
+        sync[prop] = {head = 1, tail = 0, time = {}, value = {}}
+    end
+end
+init_sync()
 local perf_buffers = {}
 local process_key_binding
 
@@ -151,7 +162,7 @@ end
 local function no_ASS(t)
     if not o.use_ass then
         return t
-    elseif not o.persistent_overlay then
+    elseif not overlay then
         -- mp.osd_message supports ass-escape using osd-ass-cc/{0|1}
         return ass_stop .. t .. ass_start
     else
@@ -315,6 +326,288 @@ local function append_property(s, prop, attr, excluded, cached)
         return false
     end
     return append(s, ret, attr)
+end
+
+-- Call fn with every value a sync property had in the last o.sync_window
+-- seconds, and the time it held from and to.
+local function sync_values(prop, fn)
+    local samples, start = sync[prop], sync.now - o.sync_window
+    for i = samples.head, samples.tail do
+        local from, to = max(samples.time[i], start), samples.time[i + 1] or sync.now
+        if samples.value[i] and from < to then
+            fn(samples.value[i], from, to)
+        end
+    end
+end
+
+-- Return the mean and the standard deviation of a sync property over the
+-- last o.sync_window seconds.
+local function sync_mean_dev(prop)
+    local time, sum = 0, 0
+    sync_values(prop, function(value, from, to)
+        time = time + to - from
+        sum = sum + value * (to - from)
+    end)
+    if time == 0 then
+        return
+    end
+    local mean, squares = sum / time, 0
+    sync_values(prop, function(value, from, to)
+        squares = squares + (value - mean) ^ 2 * (to - from)
+    end)
+    return mean, math.sqrt(squares / time)
+end
+
+local sync_units = {
+    ["avsync"] = {offset = 0, scale = 1e3, digits = 2, suffix = " ms"},
+    ["vo-presentation-delay"] = {offset = 0, scale = 1e3, digits = 2, suffix = " ms"},
+    ["video-speed-correction"] = {offset = 1, scale = 100, digits = 4, suffix = "%"},
+    ["audio-speed-correction"] = {offset = 1, scale = 100, digits = 4, suffix = "%"},
+    ["vsync-ratio"] = {offset = 0, scale = 1, digits = 3, suffix = "", unsigned = true},
+    ["vsync-jitter"] = {offset = 0, scale = 1, digits = 4, suffix = "", unsigned = true},
+}
+
+local function append_sync(s, prop, attr)
+    local value, unit = mp.get_property_number(prop), sync_units[prop]
+    if not value then
+        return false
+    end
+    local mean, dev = sync_mean_dev(prop)
+    local text = format("%" .. (unit.unsigned and "" or "+") .. "." .. unit.digits .. "f",
+                        ((mean or value) - unit.offset) * unit.scale)
+    if dev then
+        text = text .. format(" ±%." .. unit.digits .. "f", dev * unit.scale)
+    end
+    attr.suffix = unit.suffix
+    return append(s, text, attr)
+end
+
+-- Cover lo to hi with four divisions of a round size. Returns the index of the first and the size.
+local function graph_range(lo, hi, min_div, unsigned)
+    -- A division of half the extent of the values holds them and none below
+    -- a quarter of it does, so one of the five from that quarter on fits.
+    local pow = 10 ^ math.floor(math.log(max((hi - lo) / 4, min_div)) / math.log(10))
+    for _, mantissa in ipairs({1, 2, 5, 10, 20}) do
+        local div = mantissa * pow
+        local first = math.floor((lo + hi) / 2 / div + 0.5) - 2
+        if unsigned then
+            first = max(first, 0)
+        end
+        if div >= min_div and first * div <= lo and hi <= (first + 4) * div then
+            return first, div
+        end
+    end
+end
+
+local sync_colors = {surface = "19191A", grid = "353838", zero = "818789", label = "B7C2C3",
+                     trace = "E58739"}
+
+local sync_marks = {
+    {color = "3B3BD0", props = {"frame-drop-count", "decoder-frame-drop-count"}},
+    {color = "5A83EC", props = {"vo-delayed-frame-count"}},
+    {color = "19B2FA", props = {"mistimed-frame-count"}},
+}
+
+-- The time between grid lines, 1, 2 or 5 times a power of ten with six of them at most.
+local function graph_time_step(window)
+    local pow = 10 ^ math.floor(math.log(window / 6) / math.log(10))
+    for _, mantissa in ipairs({1, 2, 5, 10}) do
+        if window <= 6 * mantissa * pow then
+            return mantissa * pow
+        end
+    end
+end
+
+-- Returns the y below the graph, or nil if there is no value to show.
+local function sync_graph(events, prop, title, x, y, width, last)
+    local unit, lo, hi, count, newest = sync_units[prop], math.huge, -math.huge, 0
+    sync_values(prop, function(value)
+        lo = min(lo, value)
+        hi = max(hi, value)
+        count = count + 1
+        newest = value
+    end)
+    if count == 0 then
+        return
+    end
+    -- A division is 20 times the last shown digit or more.
+    local base, div = graph_range((lo - unit.offset) * unit.scale,
+                                  (hi - unit.offset) * unit.scale, 2 * 10 ^ (1 - unit.digits),
+                                  unit.unsigned)
+    lo, hi = base * div, (base + 4) * div
+
+    local fs = font_size
+    local strip, labels_w, h, line, hair = fs * 1.3, fs * 3.2, fs * 4.1, fs / 10, fs / 20
+    local hist_w = fs * 4.8
+    local plot_w = width - labels_w - hist_w
+    -- The drawings are relative to the upper left corner of the plot.
+    local px, py = x + labels_w, y + fs * 0.4 + strip
+    local start = sync.now - o.sync_window
+    local function pos_x(time)
+        return (time - start) / o.sync_window * plot_w
+    end
+    local function pos_y(value)
+        return h * (hi - (value - unit.offset) * unit.scale) / (hi - lo)
+    end
+    -- The Default style is not affected by the OSD options of the user.
+    local function draw(color, alpha, shapes)
+        events[#events+1] = format("{\\rDefault\\an7\\pos(%.2f,%.2f)\\bord0\\shad0\\1c&H%s&" ..
+                                   "\\1a&H%s&\\p1}", px, py, color, alpha) .. shapes .. "{\\p0}"
+    end
+    local function point(dx, dy)
+        return format("%.2f %.2f ", dx, dy)
+    end
+    local function rect(x0, y0, x1, y1)
+        return "m " .. point(x0, y0) .. "l " .. point(x1, y0) .. point(x1, y1) .. point(x0, y1)
+    end
+    -- The first alignment and position of an event count.
+    local function text(align, tx, ty, tags, str)
+        events[#events+1] = format("{\\an%d\\pos(%.2f,%.2f)}%s{%s}%s", align, tx, ty, text_style(),
+                                   tags, str)
+    end
+
+    draw(sync_colors.surface, "18", rect(0, -strip, plot_w + hist_w, h))
+    local grid = {}
+    for i = 1, 3 do
+        grid[#grid+1] = rect(0, h * i / 4 - hair / 2, plot_w, h * i / 4 + hair / 2)
+    end
+    local step = graph_time_step(o.sync_window)
+    for i = 1, math.ceil(o.sync_window / step) - 1 do
+        local gx = plot_w * (1 - i * step / o.sync_window)
+        grid[#grid+1] = rect(gx - hair / 2, 0, gx + hair / 2, h)
+    end
+    draw(sync_colors.grid, "00", table.concat(grid))
+    if o.plot_sync_band then
+        local mean, dev = sync_mean_dev(prop)
+        local my = pos_y(mean)
+        draw(sync_colors.trace, "D0", rect(0, max(pos_y(mean + dev), 0), plot_w,
+                                           min(pos_y(mean - dev), h)))
+        draw(sync_colors.label, "60", rect(0, my - hair / 2, plot_w, my + hair / 2))
+    end
+    if lo < 0 and hi > 0 then
+        local zero = h * hi / (hi - lo)
+        draw(sync_colors.zero, "00", rect(0, zero - hair / 2, plot_w, zero + hair / 2))
+    end
+
+    -- The columns are fixed in time, so that a trace keeps its shape when it moves on.
+    local cols = 400
+    local col_time = o.sync_window / cols
+    local top, bottom = {}, {}
+    local function column(time)
+        return math.floor(time / col_time)
+    end
+    sync_values(prop, function(value, from, to)
+        local vy = pos_y(value)
+        for col = column(from), column(to) do
+            top[col] = min(top[col] or vy, vy - line / 2)
+            bottom[col] = max(bottom[col] or vy, vy + line / 2)
+        end
+    end)
+    local function col_x(col)
+        return min(max(pos_x(col * col_time), 0), plot_w)
+    end
+    local function outline(upper, upper_offset, lower, lower_offset)
+        local path = {}
+        local col = column(start)
+        while col <= column(sync.now) do
+            if top[col] then
+                local first = col
+                while top[col + 1] do
+                    col = col + 1
+                end
+                path[#path+1] = "m " .. point(col_x(first), upper[first] + upper_offset) .. "l "
+                for i = first, col do
+                    path[#path+1] = point(col_x(i + 0.5), upper[i] + upper_offset)
+                end
+                path[#path+1] = point(col_x(col + 1), upper[col] + upper_offset)
+                path[#path+1] = point(col_x(col + 1), lower[col] + lower_offset)
+                for i = col, first, -1 do
+                    path[#path+1] = point(col_x(i + 0.5), lower[i] + lower_offset)
+                end
+                path[#path+1] = point(col_x(first), lower[first] + lower_offset)
+            end
+            col = col + 1
+        end
+        return table.concat(path)
+    end
+    if count > cols then
+        -- More values than columns fill their extent. Both edges of it and a
+        -- wash between them keep it from becoming a block.
+        draw(sync_colors.trace, "B0", outline(top, 0, bottom, 0))
+        draw(sync_colors.trace, "00",
+             outline(top, 0, top, line) .. outline(bottom, -line, bottom, 0))
+    elseif o.plot_sync_dashes then
+        local dashes = {}
+        sync_values(prop, function(value, from, to)
+            local vy = pos_y(value)
+            dashes[#dashes+1] = rect(pos_x(from), vy - line * 0.625,
+                                     max(pos_x(to) - hair, pos_x(from) + line), vy + line * 0.625)
+        end)
+        draw(sync_colors.trace, "00", table.concat(dashes))
+    else
+        draw(sync_colors.trace, "00", outline(top, 0, bottom, 0))
+    end
+    local function dot(r)
+        local cx, cy, k = plot_w - fs * 0.3, pos_y(newest), r * 0.5523
+        return "m " .. point(cx - r, cy) ..
+               "b " .. point(cx - r, cy - k) .. point(cx - k, cy - r) .. point(cx, cy - r) ..
+               "b " .. point(cx + k, cy - r) .. point(cx + r, cy - k) .. point(cx + r, cy) ..
+               "b " .. point(cx + r, cy + k) .. point(cx + k, cy + r) .. point(cx, cy + r) ..
+               "b " .. point(cx - k, cy + r) .. point(cx - r, cy + k) .. point(cx - r, cy)
+    end
+    draw(sync_colors.surface, "00", dot(fs * 0.3))
+    draw(sync_colors.trace, "00", dot(fs * 0.2))
+
+    -- The share of the time at each value, as bars to the right of the plot.
+    draw(sync_colors.grid, "00", rect(plot_w - hair / 2, 0, plot_w + hair / 2, h))
+    local bins, share, peak = 20, {}, 0
+    sync_values(prop, function(value, from, to)
+        local bin = min(math.floor(pos_y(value) / h * bins), bins - 1)
+        share[bin] = (share[bin] or 0) + to - from
+        peak = max(peak, share[bin])
+    end)
+    local bars = {}
+    for bin = 0, bins - 1 do
+        if share[bin] then
+            local bx, length = plot_w + hair * 7, share[bin] / peak * (hist_w - hair * 14)
+            bars[#bars+1] = rect(bx, h * bin / bins + hair, bx + max(length, line),
+                                 h * (bin + 1) / bins - hair)
+        end
+    end
+    draw(sync_colors.trace, "40", table.concat(bars))
+
+    for _, mark in ipairs(sync_marks) do
+        local ticks = {}
+        for _, counter in ipairs(mark.props) do
+            local samples = sync[counter]
+            for i = samples.head + 1, samples.tail do
+                local value, prev = samples.value[i], samples.value[i - 1]
+                if value and prev and value > prev and samples.time[i] >= start then
+                    local tx = pos_x(samples.time[i])
+                    ticks[#ticks+1] = rect(tx - hair * 1.5, 0, tx + hair * 1.5, fs * 0.45)
+                end
+            end
+        end
+        if #ticks > 0 then
+            draw(mark.color, "00", table.concat(ticks))
+        end
+    end
+
+    text(7, px + fs * 0.4, py - strip + fs * 0.15, "", title)
+    local small = format("\\fs%.2f\\1c&H%s&", fs * 0.7, sync_colors.label)
+    for i = 0, 4 do
+        local value = (base + 4 - i) * div
+        text(6, px - fs * 0.35, py + h * i / 4, small,
+             format("%" .. ((value == 0 or unit.unsigned) and "" or "+") .. "g", value))
+    end
+    if not last then
+        return py + h
+    end
+    for i = -math.floor(o.sync_window / step), 0 do
+        text(8, px + plot_w * (1 + i * step / o.sync_window), py + h + fs * 0.1, small,
+             format("%g s", i * step))
+    end
+    return py + h + fs * 1.1
 end
 
 local function sorted_keys(t, comp_fn)
@@ -601,29 +894,10 @@ local function append_display_sync(s)
     append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl="",
                                                   indent=o.prefix_sep .. o.prefix_sep})
 
-    -- As we need to plot some graphs we print jitter and ratio on their own lines
-    if not display_timer.oneshot and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.use_ass then
-        local ratio_graph = ""
-        local jitter_graph = ""
-        if o.plot_vsync_ratio then
-            ratio_graph = generate_graph(vsratio_buf, vsratio_buf.pos,
-                                         vsratio_buf.len, vsratio_buf.max, nil, 0.8, 1)
-        end
-        if o.plot_vsync_jitter then
-            jitter_graph = generate_graph(vsjitter_buf, vsjitter_buf.pos,
-                                          vsjitter_buf.len, vsjitter_buf.max, nil, 0.8, 1)
-        end
-        append_property(s, "vsync-ratio", {prefix="VSync Ratio:",
-                                           suffix=o.prefix_sep .. ratio_graph})
-        append_property(s, "vsync-jitter", {prefix="VSync Jitter:",
-                                            suffix=o.prefix_sep .. jitter_graph})
-    else
-        -- Since no graph is needed we can print ratio/jitter on the same line and save some space
-        local vr = append_property(s, "vsync-ratio", {prefix="VSync Ratio:"})
-        append_property(s, "vsync-jitter", {prefix="VSync Jitter:",
-                            nl=vr and "" or o.nl,
-                            indent=vr and o.prefix_sep .. o.prefix_sep})
-    end
+    local vr = append_property(s, "vsync-ratio", {prefix="VSync Ratio:"})
+    append_property(s, "vsync-jitter", {prefix="VSync Jitter:",
+                        nl=vr and "" or o.nl,
+                        indent=vr and o.prefix_sep .. o.prefix_sep})
 end
 
 
@@ -949,7 +1223,9 @@ local function add_video_out(s)
                     no_prefix_markup=true, nl="", indent=" "}, nil, true)
     append(s, mp.get_property_native("current-gpu-context"),
            {prefix="Context:", nl="", indent=o.prefix_sep .. o.prefix_sep})
-    append_property(s, "avsync", {prefix="A-V:"})
+    local av = append_sync(s, "avsync", {prefix="A-V:"})
+    append_sync(s, "vo-presentation-delay", {prefix="Presentation:", nl=av and "" or o.nl,
+                                             indent=av and o.prefix_sep .. o.prefix_sep})
     append_fps(s, "display-fps", "estimated-display-fps")
     if append_property(s, "decoder-frame-drop-count",
                        {prefix="Dropped Frames:", suffix=" (decoder)"}) then
@@ -1175,7 +1451,6 @@ end
 -- Returns an ASS string with "normal" stats
 local function default_stats()
     local stats = {}
-    eval_ass_formatting()
     add_header(stats)
     add_file(stats, true, false)
     add_video_out(stats)
@@ -1187,7 +1462,6 @@ end
 -- Returns an ASS string with extended VO stats
 local function vo_stats()
     local header, content = {}, {}
-    eval_ass_formatting()
     add_header(header)
     append_perfdata(header, content, true)
     header = {table.concat(header)}
@@ -1198,7 +1472,6 @@ local kbinfo_lines = nil
 local function keybinding_info(after_scroll, bindlist)
     local header = {}
     local page = pages[o.key_page_4]
-    eval_ass_formatting()
     add_header(header)
     local prefix = bindlist and page.desc or page.desc .. ":" .. scroll_hint(true)
     append(header, "", {prefix=prefix, nl="", indent=""})
@@ -1321,7 +1594,6 @@ end
 
 local function track_info()
     local h, c = {}, {}
-    eval_ass_formatting()
     add_header(h)
     local desc = pages[o.key_page_5].desc
     append(h, "", {prefix=format("%s:%s", desc, scroll_hint()), nl="", indent=""})
@@ -1338,7 +1610,6 @@ end
 
 local function perf_stats()
     local header, content = {}, {}
-    eval_ass_formatting()
     add_header(header)
     local page = pages[o.key_page_0]
     append(header, "", {prefix=format("%s:%s", page.desc, scroll_hint()), nl="", indent=""})
@@ -1358,7 +1629,6 @@ end
 local function cache_stats()
     local stats = {}
 
-    eval_ass_formatting()
     add_header(stats)
     append(stats, "", {prefix="Cache Info:", nl="", indent=""})
 
@@ -1446,8 +1716,90 @@ local function cache_stats()
     return finalize_page({}, stats, false)
 end
 
+-- With graphs the page is a list of overlay events, as their labels need fixed positions.
+local function sync_stats()
+    local stats = {}
+    add_header(stats)
+    append(stats, "", {prefix="Sync Info:", nl="", indent=""})
+    append_property(stats, "video-sync", {prefix="Video Sync:"})
+    append_fps(stats, "display-fps", "estimated-display-fps")
+    append_fps(stats, "container-fps", "estimated-vf-fps")
+
+    local graphs = not display_timer.oneshot and o.use_ass
+    local function mark(i)
+        if not graphs then
+            return ""
+        end
+        local size = font_size * 0.6
+        return format("{\\rDefault\\bord0\\shad0\\1c&H%s&\\p1}m 0 0 l %f 0 %f %f 0 %f{\\p0}%s%s",
+                      sync_marks[i].color, size, size, size, size, text_style(), o.prefix_sep)
+    end
+    if append_property(stats, "decoder-frame-drop-count",
+                       {prefix="Dropped Frames:", suffix=" (decoder)",
+                        indent=o.indent .. mark(1)}) then
+        append_property(stats, "frame-drop-count", {suffix=" (output)", nl="", indent=""})
+    end
+    local display_sync = mp.get_property_bool("display-sync-active", false)
+    if display_sync then
+        append_property(stats, "vo-delayed-frame-count",
+                        {prefix="Delayed:", nl="", indent=o.prefix_sep .. o.prefix_sep .. mark(2)})
+        append_property(stats, "mistimed-frame-count",
+                        {prefix="Mistimed:", nl="", indent=o.prefix_sep .. o.prefix_sep .. mark(3)})
+    end
+
+    local values = {{"avsync", "A-V:"}, {"vo-presentation-delay", "Presentation:"}}
+    if display_sync then
+        values[#values+1] = {"video-speed-correction", "Video Speed:"}
+        values[#values+1] = {"audio-speed-correction", "Audio Speed:"}
+        values[#values+1] = {"vsync-ratio", "VSync Ratio:"}
+        values[#values+1] = {"vsync-jitter", "VSync Jitter:"}
+    end
+    if not graphs then
+        for _, value in ipairs(values) do
+            append_sync(stats, value[1], {prefix=value[2]})
+        end
+        return finalize_page({}, stats, false)
+    end
+
+    local events = {}
+    local x, y = font_size * 0.75, font_size * 0.75
+    local top, width = y, font_size * 47.2
+    local function line(str)
+        events[#events+1] = format("{\\pos(%.2f,%.2f)}%s%s", x, y, text_style(), str)
+        y = y + font_size
+    end
+    for i, str in ipairs(stats) do
+        line(i == 1 and str or str:sub(#o.nl + 1))
+    end
+    local shown = {}
+    for _, value in ipairs(values) do
+        local title = {}
+        if append_sync(title, value[1], {prefix=value[2], indent=""}) then
+            shown[#shown+1] = {value[1], title[1]:sub(#o.nl + 1)}
+        end
+    end
+    for i, value in ipairs(shown) do
+        local below = sync_graph(events, value[1], value[2], x, y, width, i == #shown)
+        if below then
+            y = below
+        else
+            line(o.indent .. value[2])
+        end
+    end
+    -- With the box style every event gets a box that covers the events before
+    -- it. Hide them and add an empty drawing below with the one box of the page.
+    if mp.get_property("osd-border-style") == "background-box" then
+        for i, event in ipairs(events) do
+            events[i] = event .. "{\\4a&HFF&}"
+        end
+        table.insert(events, 1, format("{\\pos(%.2f,%.2f)\\bord0\\1a&HFF&\\p1}" ..
+                                       "m 0 0 l %.2f 0 %.2f %.2f 0 %.2f{\\p0}",
+                                       x, top, width, width, y - top, y - top))
+    end
+    return table.concat(events, "\n")
+end
+
 -- Record 1 sample of cache statistics.
--- (Unlike record_data(), this does not return a function, but runs directly.)
 local function record_cache_stats()
     local info = mp.get_property_native("demuxer-cache-state")
     if info == nil then
@@ -1474,53 +1826,51 @@ pages = {
     [o.key_page_3] = { idx = 3, f = cache_stats, desc = "Cache Statistics" },
     [o.key_page_4] = { idx = 4, f = keybinding_info, desc = "Active Key Bindings", scroll = true },
     [o.key_page_5] = { idx = 5, f = track_info, desc = "Tracks Info", scroll = true },
+    [o.key_page_6] = { idx = 6, f = sync_stats, desc = "Sync Statistics", overlay = true },
     [o.key_page_0] = { idx = 0, f = perf_stats, desc = "Internal Performance Info", scroll = true },
 }
 
 
--- Returns a function to record vsratio/jitter with the specified `skip` value
-local function record_data(skip)
-    init_buffers()
-    skip = max(skip, 0)
-    local i = skip
-    return function()
-        if i < skip then
-            i = i + 1
-            return
-        else
-            i = 0
-        end
-
-        if o.plot_vsync_jitter then
-            local r = mp.get_property_number("vsync-jitter")
-            if r then
-                vsjitter_buf.pos = (vsjitter_buf.pos % vsjitter_buf.len) + 1
-                vsjitter_buf[vsjitter_buf.pos] = r
-                vsjitter_buf.max = max(vsjitter_buf.max, r)
-            end
-        end
-
-        if o.plot_vsync_ratio then
-            local r = mp.get_property_number("vsync-ratio")
-            if r then
-                vsratio_buf.pos = (vsratio_buf.pos % vsratio_buf.len) + 1
-                vsratio_buf[vsratio_buf.pos] = r
-                vsratio_buf.max = max(vsratio_buf.max, r)
-            end
-        end
+local function record_sync(name, value)
+    local samples = sync[name]
+    sync.now = mp.get_time()
+    samples.tail = samples.tail + 1
+    samples.time[samples.tail] = sync.now
+    samples.value[samples.tail] = value
+    while samples.head < samples.tail and
+          samples.time[samples.head + 1] <= sync.now - o.sync_window do
+        samples.time[samples.head] = nil
+        samples.value[samples.head] = nil
+        samples.head = samples.head + 1
     end
+end
+
+local function clear_screen()
+    if overlay then mp.set_osd_ass(0, 0, "") else mp.osd_message("", 0) end
 end
 
 -- Call the function for `page` and print it to OSD
 local function print_page(page, after_scroll)
+    eval_ass_formatting()
+    local to_overlay = o.persistent_overlay or pages[page].overlay and o.use_ass or false
+    if to_overlay ~= overlay then
+        clear_screen()
+        overlay = to_overlay
+    end
     -- the page functions assume we start in ass-enabled mode.
     -- that's true for mp.set_osd_ass, but not for mp.osd_message.
     local ass_content = pages[page].f(after_scroll)
-    if o.persistent_overlay then
+    if overlay then
         mp.set_osd_ass(0, 0, ass_content)
     else
         mp.osd_message((o.use_ass and ass_start or "") .. ass_content,
                        display_timer.oneshot and o.duration or o.redraw_delay + 1)
+    end
+end
+
+local function redraw_sync()
+    if curr_page == o.key_page_6 then
+        print_page(curr_page)
     end
 end
 
@@ -1547,10 +1897,6 @@ update_scale = function ()
     if display_timer:is_enabled() then
         print_page(curr_page)
     end
-end
-
-local function clear_screen()
-    if o.persistent_overlay then mp.set_osd_ass(0, 0, "") else mp.osd_message("", 0) end
 end
 
 local function scroll_delta(d)
@@ -1701,27 +2047,18 @@ process_key_binding = function(oneshot)
         elseif not display_timer.oneshot and not oneshot then
             display_timer:kill()
             cache_recorder_timer:stop()
+            mp.unobserve_property(record_sync)
+            mp.unobserve_property(redraw_sync)
+            init_sync()
             if tm_viz_prev ~= nil then
                 mp.set_property_native("tone-mapping-visualize", tm_viz_prev)
                 tm_viz_prev = nil
             end
             clear_screen()
             remove_page_bindings()
-            if recorder then
-                mp.unobserve_property(recorder)
-                recorder = nil
-            end
         end
     -- No stats are being displayed yet
     else
-        if not oneshot and (o.plot_vsync_jitter or o.plot_vsync_ratio) then
-            recorder = record_data(o.skip_frames)
-            -- Rely on the fact that "vsync-ratio" is updated at the same time.
-            -- Using "none" to get a sample any time, even if it does not change.
-            -- Will stop working if "vsync-jitter" property change notification
-            -- changes, but it's fine for an internal script.
-            mp.observe_property("vsync-jitter", "none", recorder)
-        end
         if not oneshot and o.plot_tonemapping_lut then
             tm_viz_prev = mp.get_property_native("tone-mapping-visualize")
             mp.set_property_native("tone-mapping-visualize", true)
@@ -1730,6 +2067,14 @@ process_key_binding = function(oneshot)
             cache_ahead_buf = {0, pos = 1, len = 50, max = 0}
             cache_speed_buf = {0, pos = 1, len = 50, max = 0}
             cache_recorder_timer:resume()
+            for _, prop in ipairs(sync_props) do
+                mp.observe_property(prop, "number", record_sync)
+            end
+            if o.plot_sync_every_frame then
+                -- time-pos changes with every frame. Observed after the sync
+                -- properties, it comes when their values are recorded.
+                mp.observe_property("time-pos", "number", redraw_sync)
+            end
         end
         display_timer:kill()
         display_timer.oneshot = oneshot
@@ -1804,6 +2149,7 @@ if o.bindlist ~= "no" then
         end
         o.ass_formatting = false
         o.no_ass_indent = " "
+        eval_ass_formatting()
         mp.osd_message(keybinding_info(false, true))
         -- wait for next tick to print status line and flush it without clearing
         mp.add_timeout(0, function()

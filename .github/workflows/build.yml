@@ -350,15 +350,18 @@ jobs:
             homebrew: "956fbd2598f7b0bc3c7ef72edaa622e19415f6c9"
           - os: "macos-26"
             target-os: "macos-26-arm"
-          - os: "macos-26"
-            target-os: "test"
-            swift: "-target arm64-apple-macosx10.15"
-            target: "10.15"
+          - os: "macos-26-intel"
+            target-os: "macos-26-intel"
+            homebrew: "d2c61af67cd857f003d0293cf1d26b59351a85f7"
           - os: "xcode-27"
             target-os: "macos-27-arm"
             xcode: "Xcode_27.2"
             swift: "-target arm64-apple-macosx27.2"
             target: "27.2"
+          - os: "xcode-27"
+            target-os: "test"
+            swift: "-target arm64-apple-macosx10.15"
+            target: "10.15"
     steps:
       - uses: actions/checkout@v7
 
@@ -599,7 +602,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Start OpenBSD VM
-        uses: cross-platform-actions/action@v1.7.0
+        uses: cross-platform-actions/action@v1.8.0
         with:
           operating_system: openbsd
           version: '7.8'
@@ -669,7 +672,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Start FreeBSD VM
-        uses: cross-platform-actions/action@v1.7.0
+        uses: cross-platform-actions/action@v1.8.0
         with:
           operating_system: freebsd
           version: '15.1'

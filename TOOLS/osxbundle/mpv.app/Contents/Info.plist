@@ -68,7 +68,6 @@
           <string>io.mpv.mk3d</string>
           <string>io.mpv.mts</string>
           <string>io.mpv.nsv</string>
-          <string>io.mpv.vcd</string>
           <string>io.mpv.vob</string>
           <string>io.mpv.webm</string>
           <string>io.mpv.wmv</string>
@@ -87,6 +86,24 @@
           <string>public.mpeg-4</string>
           <string>public.mpeg</string>
           <string>public.video</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleTypeIconFile</key>
+        <string>document.icns</string>
+        <key>CFBundleTypeName</key>
+        <string>Disc File</string>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>LSHandlerRank</key>
+        <string>Alternate</string>
+        <key>LSTypeIsPackage</key>
+        <false/>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>io.mpv.bdmv</string>
+          <string>io.mpv.ifo</string>
+          <string>public.iso-image</string>
         </array>
       </dict>
       <dict>
@@ -191,7 +208,6 @@
         <array>
           <string>cdda</string>
           <string>dvd</string>
-          <string>vcd</string>
           <string>bd</string>
         </array>
       </dict>
@@ -753,29 +769,6 @@
           <string>public.movie</string>
         </array>
         <key>UTTypeDescription</key>
-        <string>Video CD File</string>
-        <key>UTTypeIconFile</key>
-        <string>document.icns</string>
-        <key>UTTypeIdentifier</key>
-        <string>io.mpv.vcd</string>
-        <key>UTTypeReferenceURL</key>
-        <string>https://en.wikipedia.org/wiki/Video_CD</string>
-        <key>UTTypeTagSpecification</key>
-        <dict>
-          <key>public.filename-extension</key>
-          <array>
-            <string>vcd</string>
-            <string>svcd</string>
-            <string>dat</string>
-          </array>
-        </dict>
-      </dict>
-      <dict>
-        <key>UTTypeConformsTo</key>
-        <array>
-          <string>public.movie</string>
-        </array>
-        <key>UTTypeDescription</key>
         <string>Video Object</string>
         <key>UTTypeIconFile</key>
         <string>document.icns</string>
@@ -955,6 +948,48 @@
           <key>public.filename-extension</key>
           <array>
             <string>y4m</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.data</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>DVD Information File</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.ifo</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/DVD-Video</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>ifo</string>
+          </array>
+        </dict>
+      </dict>
+      <dict>
+        <key>UTTypeConformsTo</key>
+        <array>
+          <string>public.data</string>
+        </array>
+        <key>UTTypeDescription</key>
+        <string>Blu-ray Disc Information File</string>
+        <key>UTTypeIconFile</key>
+        <string>document.icns</string>
+        <key>UTTypeIdentifier</key>
+        <string>io.mpv.bdmv</string>
+        <key>UTTypeReferenceURL</key>
+        <string>https://en.wikipedia.org/wiki/Blu-ray</string>
+        <key>UTTypeTagSpecification</key>
+        <dict>
+          <key>public.filename-extension</key>
+          <array>
+            <string>bdmv</string>
           </array>
         </dict>
       </dict>

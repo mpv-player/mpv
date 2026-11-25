@@ -590,6 +590,8 @@ int mp_parse_raw_primaries(struct mp_log *log, const char *str,
     int ret = m_option_type_choice.parse(log, &choice_opt, bstr0("target-gamut"),
                                          bstr0(str), &prim_choice);
     if (ret >= 0) {
+        if (!prim_choice)
+            return 0;
         *out = *pl_raw_primaries_get(prim_choice);
     } else if (ret != M_OPT_MISSING_PARAM) {
         mp_info(log, "    Rx,Ry,Gx,Gy,Bx,By,Wx,Wy (custom CIE xy primaries)\n");

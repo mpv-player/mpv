@@ -214,8 +214,50 @@ static wchar_t *w32_get_shortcut_path(struct mp_log *log)
     return shortcut_path;
 }
 
+static void remove_registration(struct mp_log *log, HKEY root)
+{
+    reg_del(log, root, KEY_MPV_APP_PATH(".exe"), NULL);
+    reg_del(log, root, KEY_MPV_APP_PATH(".com"), NULL);
+    reg_del(log, root, KEY_MPV_APP, NULL);
+    reg_del(log, root, KEY_MPV_CAPABILITIES_APP, NULL);
+    reg_del(log, root, L"Software\\RegisteredApplications", MPV_NAME);
+
+    reg_del(log, root, KEY_MPV_PROG_ID("bluray"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("cdda"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("dvd"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("dvda"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("file"), NULL);
+    reg_del(log, root, KEY_MPV_PROG_ID("url"), NULL);
+
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayCDAudioOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayCDAudioOnArrival",
+            L"MpvPlayCDAudioOnArrival");
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDMovieOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDMovieOnArrival",
+            L"MpvPlayDVDMovieOnArrival");
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDAudioOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDAudioOnArrival",
+            L"MpvPlayDVDAudioOnArrival");
+    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayBluRayOnArrival", NULL);
+    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayBluRayOnArrival",
+            L"MpvPlayBluRayOnArrival");
+
+    wchar_t *shortcut_path = w32_get_shortcut_path(log);
+    if (shortcut_path) {
+        mp_msg(log, MSGL_V, "Removing shortcut: '%ls'\n", shortcut_path);
+        if (!DeleteFileW(shortcut_path)) {
+            DWORD err = GetLastError();
+            mp_msg(log, err == ERROR_FILE_NOT_FOUND ? MSGL_DEBUG : MSGL_ERR,
+                   "Failed to delete shortcut: '%ls' -> %s\n", shortcut_path,
+                   mp_LastError_to_str());
+        }
+        LocalFree(shortcut_path);
+    }
+
+    reg_del(log, root, KEY_MPV_UNINSTALL, NULL);
+}
+
 #define REGISTER_AUTOPLAY_HANDLER(media, event, action)                        \
-    reg_add_str(log, root, KEY_MPV_PROG_ID(media) L"\\shell", NULL, L"open");  \
     reg_add_str(log, root, KEY_MPV_PROG_ID(media) L"\\shell\\open\\command",   \
                 NULL, L"mpv.exe " media L":// --" media L"-device=%L");        \
     reg_add_str(log, root,                                                     \
@@ -258,6 +300,8 @@ static void w32_register(struct MPContext *mpctx)
     mp_msg(log, MSGL_INFO, "Registering mpv for %s...\n",
            root == HKEY_LOCAL_MACHINE ? "all users" : "the current user");
 
+    remove_registration(log, root);
+
     // Register mpv as an application
     // <https://learn.microsoft.com/windows/win32/shell/app-registration>
     reg_add_str(log, root, KEY_MPV_APP_PATH(".exe"), NULL, mpv_path);
@@ -275,7 +319,6 @@ static void w32_register(struct MPContext *mpctx)
     // reg_add_str(log, root, KEY_MPV_APP, L"FriendlyAppName", MPV_FRIENDLY_NAME);
 
     // Add shell open command
-    reg_add_str(log, root, KEY_MPV_APP L"\\shell", NULL, L"open");
     reg_add_str(log, root, KEY_MPV_APP L"\\shell\\open\\command", NULL,
                 L"mpv.exe -- \"%L\"");
 
@@ -294,7 +337,6 @@ static void w32_register(struct MPContext *mpctx)
     reg_add_dwr(log, root, KEY_MPV_PROG_ID("url"), L"EditFlags", FTA_Show);
     reg_add_str(log, root, KEY_MPV_PROG_ID("url"), L"FriendlyTypeName",
                 L"mpv URL handler");
-    reg_add_str(log, root, KEY_MPV_PROG_ID("url") L"\\shell", NULL, L"open");
     reg_add_str(log, root, KEY_MPV_PROG_ID("url") L"\\shell\\open\\command",
                 NULL, L"mpv.exe -- \"%L\"");
     reg_add_str(log, root, KEY_MPV_PROG_ID("url") L"\\shell\\open\\ddeexec",
@@ -336,20 +378,30 @@ static void w32_register(struct MPContext *mpctx)
                     mp_from_utf8(tmp, protocols_str));
     }
 
-    // Register file handler
-    reg_add_str(log, root, KEY_MPV_PROG_ID("file"), NULL, L"mpv");
-    reg_add_str(log, root, KEY_MPV_PROG_ID("file"), L"FriendlyTypeName", L"mpv Media File");
+    // Register file handler. Without a name, so it will be identified by its extension.
     reg_add_dwr(log, root, KEY_MPV_PROG_ID("file"), L"EditFlags", FTA_OpenIsSafe);
-    reg_add_str(log, root, KEY_MPV_PROG_ID("file") L"\\shell", NULL, L"open");
     reg_add_str(log, root, KEY_MPV_PROG_ID("file") L"\\shell\\open\\command",
                 NULL, L"mpv.exe -- \"%L\"");
 
     // Register file associations
+    char *disc_exts[] = {
+#if HAVE_DVDNAV || HAVE_DVDA || HAVE_LIBBLURAY
+        "iso",
+#endif
+#if HAVE_DVDNAV || HAVE_DVDA
+        "ifo",
+#endif
+#if HAVE_LIBBLURAY
+        "bdmv",
+#endif
+        NULL
+    };
     char **exts_groups[] = {
 #if HAVE_LIBARCHIVE
         mpctx->opts->archive_exts,
 #endif
         mpctx->opts->audio_exts,
+        disc_exts,
         mpctx->opts->image_exts,
         mpctx->opts->playlist_exts,
         mpctx->opts->video_exts,
@@ -425,6 +477,8 @@ static void w32_register(struct MPContext *mpctx)
     if (SUCCEEDED(PathCchRemoveFileSpec(mpv_path, MP_PATH_MAX)))
         reg_add_str(log, root, KEY_MPV_UNINSTALL, L"InstallLocation", mpv_path);
 
+    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+
     mp_msg(log, MSGL_INFO, "mpv has been successfully registered.\n");
     mp_msg(log, MSGL_INFO, "Note: The mpv binary has not been copied or moved. Please keep it in the current directory.\n");
     mp_msg(log, MSGL_INFO, "If you move it, simply run this process again to re-register.\n");
@@ -440,45 +494,9 @@ static void w32_unregister(struct MPContext *mpctx)
     mp_msg(log, MSGL_INFO, "Unregistering mpv for %s...\n",
            root == HKEY_LOCAL_MACHINE ? "all users" : "the current user");
 
-    reg_del(log, root, KEY_MPV_APP_PATH(".exe"), NULL);
-    reg_del(log, root, KEY_MPV_APP_PATH(".com"), NULL);
-    reg_del(log, root, KEY_MPV_APP, NULL);
-    reg_del(log, root, KEY_MPV_CAPABILITIES_APP, NULL);
-    reg_del(log, root, L"Software\\RegisteredApplications", MPV_NAME);
+    remove_registration(log, root);
 
-    reg_del(log, root, KEY_MPV_PROG_ID("bluray"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("cdda"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("dvd"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("dvda"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("file"), NULL);
-    reg_del(log, root, KEY_MPV_PROG_ID("url"), NULL);
-
-    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayCDAudioOnArrival", NULL);
-    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayCDAudioOnArrival",
-            L"MpvPlayCDAudioOnArrival");
-    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDMovieOnArrival", NULL);
-    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDMovieOnArrival",
-            L"MpvPlayDVDMovieOnArrival");
-    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayDVDAudioOnArrival", NULL);
-    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayDVDAudioOnArrival",
-            L"MpvPlayDVDAudioOnArrival");
-    reg_del(log, root, KEY_AUTOPLAY L"\\Handlers\\MpvPlayBluRayOnArrival", NULL);
-    reg_del(log, root, KEY_AUTOPLAY L"\\EventHandlers\\PlayBluRayOnArrival",
-            L"MpvPlayBluRayOnArrival");
-
-    wchar_t *shortcut_path = w32_get_shortcut_path(log);
-    if (shortcut_path) {
-        mp_msg(log, MSGL_V, "Removing shortcut: '%ls'\n", shortcut_path);
-        if (!DeleteFileW(shortcut_path)) {
-            DWORD err = GetLastError();
-            mp_msg(log, err == ERROR_FILE_NOT_FOUND ? MSGL_DEBUG : MSGL_ERR,
-                   "Failed to delete shortcut: '%ls' -> %s\n", shortcut_path,
-                   mp_LastError_to_str());
-        }
-        LocalFree(shortcut_path);
-    }
-
-    reg_del(log, root, KEY_MPV_UNINSTALL, NULL);
+    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
 
     mp_msg(log, MSGL_INFO, "mpv has been successfully unregistered.\n");
     mp_msg(log, MSGL_INFO, "You may now safely delete the mpv binary if desired.\n");

@@ -27,6 +27,7 @@ stats:
 3      Input cache stats
 4      Active key bindings (scroll)
 5      Selected Tracks Info (scroll)
+6      Sync stats
 0      Internal stuff (scroll)
 ====   ==================
 
@@ -69,6 +70,8 @@ Configurable Options
     Default: 4
 ``key_page_5``
     Default: 5
+``key_page_6``
+    Default: 6
 ``key_page_0``
     Default: 0
 ``key_exit``
@@ -96,6 +99,12 @@ Configurable Options
     Default: 1
 
     How long it takes to refresh the displayed stats in seconds (toggling).
+
+``sync_window``
+    Default: 5 (minimum: 1)
+
+    How many seconds the mean and the standard deviation of the sync values
+    cover (toggling). The graphs of the sync page show the same time.
 
 ``persistent_overlay``
     Default: no
@@ -130,14 +139,6 @@ Configurable Options
 
     Show graphs for performance data (page 2).
 
-``plot_vsync_ratio``
-    Default: no
-
-``plot_vsync_jitter``
-    Default: no
-
-    Show graphs for vsync and jitter values (page 1). Only when toggled.
-
 ``plot_cache``
     Default: yes
 
@@ -147,6 +148,22 @@ Configurable Options
     Default: no
 
     Enable tone-mapping LUT visualization automatically. Only when toggled.
+
+``plot_sync_dashes``
+    Default: no
+
+    Draw one dash per value in the graphs of the sync page instead of a line.
+
+``plot_sync_band``
+    Default: no
+
+    Show the mean of each value on the sync page as a line in its graph, with a
+    band of one standard deviation around it.
+
+``plot_sync_every_frame``
+    Default: no
+
+    Also redraw the sync page with every video frame. This takes more CPU time.
 
 ``flush_graph_data``
     Default: yes
@@ -270,6 +287,21 @@ sequences can be disabled by adding ``-`` before ``yes``, i.e.
 
 Like with ``--input-test``, the list includes bindings from ``input.conf`` and
 from user scripts. Use ``--no-config`` to list only built-in bindings.
+
+Sync stats page
+~~~~~~~~~~~~~~~
+
+Shows the A/V difference and the presentation delay. With display sync it also
+shows the speed corrections of video and audio, the vsync ratio and the vsync
+jitter.
+
+When toggled, each value is shown as its mean over the last ``sync_window``
+seconds, followed by the standard deviation. Marks on the upper edge of a graph
+show the frames that were dropped (red), delayed (orange) or mistimed (yellow).
+The bars at its right end show the share of that time the value spent at each
+height.
+
+This page is always shown as with ``persistent_overlay=yes``.
 
 Internal stuff page
 ~~~~~~~~~~~~~~~~~~~
