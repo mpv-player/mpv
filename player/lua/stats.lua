@@ -38,6 +38,7 @@ local o = {
     show_frame_info = false,         -- whether to show the current frame info
     term_clip = true,
     track_info_selected_only = true, -- only show selected track info
+    track_info_max_length = 256,     -- shorten track titles and file names to this length in bytes
     debug = false,
 
     -- Graph options and style
@@ -1508,6 +1509,28 @@ local function float2rational(x)
     return m00, m10
 end
 
+-- Keep only the first line of str and at most max_len bytes of it, without
+-- splitting a UTF-8 character, and append an ellipsis if anything was cut.
+-- Very long text, such as a memory:// subtitle URL, is slow to render.
+local function truncate(str, max_len)
+    if not str then
+        return nil
+    end
+    local text = str:match("^[^\r\n]*")
+    if #text > max_len then
+        local cut = max_len + 1
+        -- Move back to the first byte of the character at the cut.
+        while cut > 1 and text:byte(cut) >= 0x80 and text:byte(cut) <= 0xbf do
+            cut = cut - 1
+        end
+        text = text:sub(1, cut - 1)
+    end
+    if text ~= str then
+        text = text .. "…"
+    end
+    return text
+end
+
 local function add_track(c, t, i)
     if not t then
         return
@@ -1515,12 +1538,12 @@ local function add_track(c, t, i)
 
     local type = t.image and "Image" or t["type"]:sub(1, 1):upper() .. t["type"]:sub(2)
     append(c, "", {prefix=type .. ":", nl=o.nl .. o.nl, indent=""})
-    append(c, t["title"], {prefix_sep="", nl="", indent=""})
+    append(c, truncate(t["title"], o.track_info_max_length), {prefix_sep="", nl="", indent=""})
     append(c, t["id"], {prefix="ID:"})
     append(c, t["src-id"], {prefix="Demuxer ID:", nl="", indent=o.prefix_sep .. o.prefix_sep})
     append(c, t["program-id"], {prefix="Program ID:", nl="", indent=o.prefix_sep .. o.prefix_sep})
     append(c, t["ff-index"], {prefix="FFmpeg Index:", nl="", indent=o.prefix_sep .. o.prefix_sep})
-    append(c, t["external-filename"], {prefix="File:"})
+    append(c, truncate(t["external-filename"], o.track_info_max_length), {prefix="File:"})
     append(c, "", {prefix="Flags:"})
     local flags = {"default", "forced", "dependent", "visual-impaired",
                    "hearing-impaired", "original", "commentary", "image",
