@@ -178,7 +178,7 @@ class InputHelper: NSObject {
         }
     }
 
-    @discardableResult @objc func command(_ cmd: String) -> Bool {
+    @discardableResult func command(_ cmd: String) -> Bool {
         lock.withLock {
             guard let input = input else { return false }
             let cCmd = UnsafePointer<Int8>(strdup(cmd))
