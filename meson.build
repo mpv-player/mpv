@@ -182,6 +182,7 @@ sources = files(
     'player/scripting.c',
     'player/sub.c',
     'player/video.c',
+    'player/history.c',
 
     ## clipboard
     'player/clipboard/clipboard.c',
