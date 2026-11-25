@@ -55,11 +55,14 @@ struct buffer_state {
     struct mp_filter *filter_root;
     struct mp_filter *input;    // connected to queue
     struct mp_aframe *pending;  // last, not fully consumed output
+    bool pending_partial_spdif; // pending holds a partially emitted S/PDIF burst
+    bool draining_partial_spdif;// drain pending before silence or new bursts
 
     bool streaming;             // AO streaming active
     bool playing;               // logically playing audio from buffer
     bool paused;                // logically paused
     bool hw_paused;             // driver->set_pause() was used successfully
+    bool wait_open_silence;     // pre-play silence lead-in (--audio-wait-open)
 
     int64_t end_time_ns;        // absolute output time of last played sample
     int64_t queued_time_ns;     // duration of samples that have been queued to
@@ -123,9 +126,29 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
     int pos = 0;
     *eof = false;
 
+    // Finish emitting an already-started S/PDIF burst before silence or new data.
+    if (data && p->draining_partial_spdif) {
+        if (p->pending && mp_aframe_get_size(p->pending) > 0) {
+            int copy = MPMIN(mp_aframe_get_size(p->pending), samples - pos);
+            uint8_t **fdata = mp_aframe_get_data_ro(p->pending);
+            for (int n = 0; n < ao->num_planes; n++) {
+                memcpy((char *)data[n] + pos * ao->sstride,
+                       fdata[n], copy * ao->sstride);
+            }
+            mp_aframe_skip_samples(p->pending, copy);
+            pos += copy;
+        }
+        if (!p->pending || !mp_aframe_get_size(p->pending)) {
+            TA_FREEP(&p->pending);
+            p->pending_partial_spdif = false;
+            p->draining_partial_spdif = false;
+        }
+    }
+
     while (p->playing && !p->paused && pos < samples) {
         if (!p->pending || !mp_aframe_get_size(p->pending)) {
             TA_FREEP(&p->pending);
+            p->pending_partial_spdif = false;
             struct mp_frame frame = mp_pin_out_read(p->input->pins[0]);
             if (!frame.type)
                 break; // we can't/don't want to block
@@ -149,6 +172,12 @@ static int read_buffer(struct ao *ao, void **data, int samples, bool *eof,
                    fdata[n], copy * ao->sstride);
         }
         mp_aframe_skip_samples(p->pending, copy);
+        if (mp_aframe_get_size(p->pending) == 0) {
+            TA_FREEP(&p->pending);
+            p->pending_partial_spdif = false;
+        } else if (copy > 0 && af_fmt_is_spdif(ao->format)) {
+            p->pending_partial_spdif = true;
+        }
         pos += copy;
         *eof = false;
     }
@@ -183,7 +212,7 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
 
     int pos = read_buffer(ao, data, samples, eof, pad_silence);
 
-    if (pos > 0)
+    if (pos > 0 && p->playing && !p->paused)
         p->end_time_ns = out_time_ns;
 
     if (pos < samples && p->playing && !p->paused) {
@@ -201,7 +230,8 @@ static int ao_read_data_locked(struct ao *ao, void **data, int samples,
 // or EOF), return the number of samples that could be copied, and fill the
 // rest of the user-provided buffer with silence.
 // This basically assumes that the audio device doesn't care about underruns.
-// If this is called in paused mode, it will always return 0.
+// In paused mode, this returns 0 except when finishing an already-started
+// S/PDIF burst with stream_silence enabled.
 // The caller should set out_time_ns to the expected delay until the last sample
 // reaches the speakers, in nanoseconds, using mp_time_ns() as reference.
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_ns, bool *eof, bool pad_silence, bool blocking)
@@ -317,6 +347,14 @@ double ao_get_delay(struct ao *ao)
     return driver_delay + pending / (double)ao->samplerate;
 }
 
+static bool has_partial_spdif_tail(struct ao *ao)
+{
+    struct buffer_state *p = ao->buffer_state;
+    return ao->stream_silence && p->streaming && af_fmt_is_spdif(ao->format) &&
+           p->pending && p->pending_partial_spdif &&
+           mp_aframe_get_size(p->pending) > 0;
+}
+
 // Fully stop playback; clear buffers, including queue.
 void ao_reset(struct ao *ao)
 {
@@ -326,7 +364,13 @@ void ao_reset(struct ao *ao)
 
     mp_mutex_lock(&p->lock);
 
-    TA_FREEP(&p->pending);
+    if (has_partial_spdif_tail(ao)) {
+        p->draining_partial_spdif = true;
+    } else {
+        TA_FREEP(&p->pending);
+        p->pending_partial_spdif = false;
+        p->draining_partial_spdif = false;
+    }
     mp_async_queue_reset(p->queue);
     mp_filter_reset(p->filter_root);
     mp_async_queue_resume_reading(p->queue);
@@ -341,8 +385,9 @@ void ao_reset(struct ao *ao)
         }
         p->streaming = false;
     }
-    wakeup = p->playing;
+    wakeup = p->playing || p->wait_open_silence || p->draining_partial_spdif;
     p->playing = false;
+    p->wait_open_silence = false;
     p->recover_pause = false;
     p->hw_paused = false;
     p->end_time_ns = 0;
@@ -368,6 +413,7 @@ void ao_start(struct ao *ao)
     mp_mutex_lock(&p->lock);
 
     p->playing = true;
+    p->wait_open_silence = false;
 
     if (!ao->driver->write && !p->paused && !p->streaming) {
         p->streaming = true;
@@ -397,17 +443,21 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
 
     mp_mutex_lock(&p->lock);
 
-    if ((p->playing || !ao->driver->write) && !p->paused && paused) {
+    if ((p->playing || p->wait_open_silence || !ao->driver->write) &&
+        !p->paused && paused)
+    {
+        if (has_partial_spdif_tail(ao))
+            p->draining_partial_spdif = true;
         if (p->streaming && !ao->stream_silence) {
             if (ao->driver->write) {
-                if (!p->recover_pause)
+                if (!p->recover_pause && p->playing)
                     get_dev_state(ao, &p->prepause_state);
                 if (ao->driver->set_pause && ao->driver->set_pause(ao, true)) {
                     p->hw_paused = true;
                 } else {
                     ao->driver->reset(ao);
                     p->streaming = false;
-                    p->recover_pause = !ao->untimed;
+                    p->recover_pause = p->playing && !ao->untimed;
                 }
             } else if (ao->driver->reset || ao->driver->set_pause) {
                 // See ao_reset() why this is done outside of the lock.
@@ -417,7 +467,7 @@ void ao_set_paused(struct ao *ao, bool paused, bool eof)
             }
         }
         wakeup = true;
-    } else if (p->playing && p->paused && !paused) {
+    } else if ((p->playing || p->wait_open_silence) && p->paused && !paused) {
         if (ao->driver->write) {
             if (p->hw_paused)
                 ao->driver->set_pause(ao, false);
@@ -580,6 +630,9 @@ bool init_buffer_post(struct ao *ao)
     };
     mp_async_queue_set_config(p->queue, cfg);
 
+    p->wait_open_silence = (ao->init_flags & AO_INIT_WAIT_OPEN) &&
+                           !ao->untimed && !ao->driver->write_frames;
+
     if (ao->driver->write) {
         mp_filter_graph_set_wakeup_cb(p->filter_root, wakeup_filters, ao);
 
@@ -589,7 +642,7 @@ bool init_buffer_post(struct ao *ao)
             return false;
         }
     } else {
-        if (ao->stream_silence) {
+        if (ao->stream_silence || p->wait_open_silence) {
             ao->driver->start(ao);
             p->streaming = true;
         }
@@ -629,8 +682,9 @@ static bool realloc_buf(struct ao *ao, int samples)
 static bool ao_play_data(struct ao *ao)
 {
     struct buffer_state *p = ao->buffer_state;
+    bool wait_silence = p->wait_open_silence && !p->playing && !p->paused;
 
-    if ((!p->playing || p->paused) && !ao->stream_silence)
+    if ((!p->playing || p->paused) && !ao->stream_silence && !wait_silence)
         return false;
 
     struct mp_pcm_state state;
@@ -638,6 +692,9 @@ static bool ao_play_data(struct ao *ao)
 
     if (p->streaming && !state.playing && !ao->untimed)
         goto eof;
+
+    if (wait_silence && state.delay >= 0.040)
+        return false;
 
     void **planes = NULL;
     int space = state.free_samples;
@@ -665,7 +722,12 @@ static bool ao_play_data(struct ao *ao)
             mp_aframe_set_silence(p->temp_buf, 0, space);
         }
 
-        if (!samples) {
+        if (wait_silence) {
+            int target = MPMAX(1, ao->samplerate / 25);
+            int buffered = (int)(MPMAX(0.0, state.delay) * ao->samplerate);
+            samples = MPMIN(space, MPMAX(1, target - buffered));
+            mp_aframe_set_silence(p->temp_buf, 0, samples);
+        } else if (!samples) {
             samples = read_buffer(ao, planes, space, &got_eof, true);
             if (p->paused || (ao->stream_silence && !p->playing))
                 samples = space; // read_buffer() sets remainder to silent
@@ -692,6 +754,9 @@ static bool ao_play_data(struct ao *ao)
     if (got_eof)
         goto eof;
 
+    if (wait_silence)
+        return false;
+
     // For ao_drain(), an untimed AO took everything.
     if (ao->untimed && !samples)
         mp_cond_broadcast(&p->wakeup);
@@ -701,7 +766,7 @@ static bool ao_play_data(struct ao *ao)
 eof:
     MP_VERBOSE(ao, "audio end or underrun\n");
     // Normal AOs signal EOF on underrun, untimed AOs never signal underruns.
-    if (ao->untimed || !state.playing || ao->stream_silence) {
+    if (ao->untimed || !state.playing || ao->stream_silence || p->wait_open_silence) {
         p->streaming = state.playing && !ao->untimed;
         p->playing = false;
     }
@@ -724,11 +789,14 @@ static MP_THREAD_VOID ao_thread(void *arg)
         // Wait until the device wants us to write more data to it.
         // Fallback to guessing.
         int64_t timeout = INT64_MAX;
-        if (p->streaming && !retry && (!p->paused || ao->stream_silence)) {
+        double dev_wait = ao->device_buffer / (double)ao->samplerate * 0.25;
+        if (p->streaming && !retry && p->wait_open_silence && !p->playing && !p->paused) {
+            timeout = MP_TIME_S_TO_NS(MPMIN(0.010, dev_wait));
+        } else if (p->streaming && !retry && (!p->paused || ao->stream_silence)) {
             // Wake up again if half of the audio buffer has been played.
             // Since audio could play at a faster or slower pace, wake up twice
             // as often as ideally needed.
-            timeout = MP_TIME_S_TO_NS(ao->device_buffer / (double)ao->samplerate * 0.25);
+            timeout = MP_TIME_S_TO_NS(dev_wait);
         }
 
         mp_mutex_unlock(&p->lock);

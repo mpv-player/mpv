@@ -225,6 +225,7 @@ static void ao_chain_reset_state(struct ao_chain *ao_c)
     ao_c->untimed_throttle = false;
     ao_c->underrun = false;
     ao_c->delaying_audio_start = false;
+    ao_c->ao_resume_time = 0;
 }
 
 void reset_audio_state(struct MPContext *mpctx)
@@ -426,6 +427,9 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
     if (opts->audio_stream_silence)
         ao_flags |= AO_INIT_STREAM_SILENCE;
 
+    if (opts->audio_wait_open > 0 && !mpctx->encode_lavc_ctx)
+        ao_flags |= AO_INIT_WAIT_OPEN;
+
     if (opts->audio_exclusive)
         ao_flags |= AO_INIT_EXCLUSIVE;
 
@@ -493,7 +497,8 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
     update_window_title(mpctx, true);
 
     ao_c->ao_resume_time =
-        opts->audio_wait_open > 0 ? mp_time_sec() + opts->audio_wait_open : 0;
+        (opts->audio_wait_open > 0 && !ao_untimed(mpctx->ao)) ?
+        mp_time_sec() + opts->audio_wait_open : 0;
 
     bool eof = mpctx->audio_status == STATUS_EOF;
     ao_set_paused(mpctx->ao, get_internal_paused(mpctx), eof);
@@ -953,10 +958,17 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
             mp_filter_wakeup(ao_c->ao_filter);
         }
 
-        if (ao_c->ao && mp_async_queue_is_full(ao_c->ao_queue)) {
-            mpctx->audio_status = STATUS_READY;
-            mp_wakeup_core(mpctx);
-            MP_VERBOSE(mpctx, "audio ready\n");
+        if (ao_c->ao && (mp_async_queue_is_full(ao_c->ao_queue) || ao_c->out_eof)) {
+            double now = mp_time_sec();
+            if (ao_c->ao_resume_time > now) {
+                mp_set_timeout(mpctx, ao_c->ao_resume_time - now);
+            } else {
+                ao_c->ao_resume_time = 0;
+                mpctx->audio_status = STATUS_READY;
+                mp_wakeup_core(mpctx);
+                MP_VERBOSE(mpctx, "audio ready%s\n",
+                           ao_c->out_eof ? " (and EOF)" : "");
+            }
         } else if (ao_c->out_eof) {
             // Force playback start early.
             mpctx->audio_status = STATUS_READY;

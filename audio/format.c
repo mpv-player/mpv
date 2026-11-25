@@ -150,6 +150,31 @@ const char *af_fmt_to_str(int format)
 
 void af_fill_silence(void *dst, size_t bytes, int format)
 {
+    if (af_fmt_is_spdif(format)) {
+        if (!bytes)
+            return;
+        // IEC 61937-2 pause burst (Pa=0xF872, Pb=0x4E1F, Pc=0x0003, Pd=32 bits),
+        // little-endian, padded to 16 bytes (one 8ch HBR frame / four 2ch frames).
+        static const uint8_t spdif_pause[16] = {
+            0x72, 0xF8, 0x1F, 0x4E, 0x03, 0x00, 0x20, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        };
+        // IEC 61937-9 uses 1 HBR frame (16 B); IEC 61937-3 uses 32 2ch frames (128 B).
+        size_t period = (format == AF_FORMAT_S_TRUEHD ||
+                         format == AF_FORMAT_S_DTSHD) ? 16 : 128;
+        uint8_t *p = dst;
+        if (period > sizeof(spdif_pause))
+            memset(p, 0, bytes);
+        while (bytes >= period) {
+            memcpy(p, spdif_pause, sizeof(spdif_pause));
+            p += period;
+            bytes -= period;
+        }
+        if (bytes && period == sizeof(spdif_pause))
+            memset(p, 0, bytes);
+        return;
+    }
+
     int fill = 0;
     if (af_fmt_is_unsigned(format))
         fill = 0x80;
