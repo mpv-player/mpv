@@ -25,6 +25,15 @@ struct mp_image;
 struct mp_log;
 struct mpv_global;
 
+enum screenshot_flags {
+    SCREENSHOT_VIDEO = 0,
+    SCREENSHOT_SCALED = 1 << 0,
+    SCREENSHOT_SUBTITLES = 1 << 1,
+    SCREENSHOT_OSD = 1 << 2,
+    SCREENSHOT_EACH_FRAME = 1 << 3,
+    SCREENSHOT_WINDOW = SCREENSHOT_SCALED | SCREENSHOT_SUBTITLES | SCREENSHOT_OSD,
+};
+
 // One time initialization at program start.
 void screenshot_init(struct MPContext *mpctx);
 
@@ -37,6 +46,10 @@ void handle_each_frame_screenshot(struct MPContext *mpctx);
  */
 struct mp_image *convert_image(struct mp_image *image, int destfmt,
                                struct mpv_global *global, struct mp_log *log);
+
+// Capture using the screenshot image options. The caller owns the returned image.
+// Mode uses the screenshot command flags. Returns NULL on failure.
+struct mp_image *screenshot_get_image(struct MPContext *mpctx, int mode);
 
 // Handlers for the user-facing commands.
 void cmd_screenshot(void *p);

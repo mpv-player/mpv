@@ -45,9 +45,8 @@
 
 #include "video/csputils.h"
 
-#define MODE_SCALED 1
-#define MODE_SUBTITLES 2
-#define MODE_OSD 4
+// Internal flag for commands scheduled by handle_each_frame_screenshot().
+#define SCREENSHOT_EACH_FRAME_ACTIVE (1 << 4)
 
 typedef struct screenshot_ctx {
     struct MPContext *mpctx;
@@ -330,13 +329,13 @@ static char *gen_fname(struct mp_cmd_ctx *cmd, const char *file_ext)
 
 static void add_osd(struct MPContext *mpctx, struct mp_image *image, int mode)
 {
-    struct mp_osd_res res = (mode & MODE_SCALED) ? osd_get_vo_res(mpctx->video_out->osd) :
+    struct mp_osd_res res = (mode & SCREENSHOT_SCALED) ? osd_get_vo_res(mpctx->video_out->osd) :
                             osd_res_from_image_params(&image->params);
-    if (mode & MODE_SUBTITLES) {
+    if (mode & SCREENSHOT_SUBTITLES) {
         osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
                           OSD_DRAW_SUB_ONLY, image);
     }
-    if (mode & MODE_OSD) {
+    if (mode & SCREENSHOT_OSD) {
         osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
                           OSD_DRAW_OSD_ONLY, image);
     }
@@ -347,8 +346,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
 {
     struct mp_image *image = NULL;
     const struct image_writer_opts *imgopts = mpctx->opts->screenshot_image_opts;
-    if ((mode & MODE_SUBTITLES) && osd_get_render_subs_in_filter(mpctx->osd))
-        mode &= ~MODE_SUBTITLES;
+    if ((mode & SCREENSHOT_SUBTITLES) && osd_get_render_subs_in_filter(mpctx->osd))
+        mode &= ~SCREENSHOT_SUBTITLES;
 
     if (!mpctx->video_out || !mpctx->video_out->config_ok)
         return NULL;
@@ -356,9 +355,9 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
     vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
     bool use_sw = mpctx->opts->screenshot_sw;
-    bool scaled = mode & MODE_SCALED;
-    bool subs = mode & MODE_SUBTITLES;
-    bool osd = mode & MODE_OSD;
+    bool scaled = mode & SCREENSHOT_SCALED;
+    bool subs = mode & SCREENSHOT_SUBTITLES;
+    bool osd = mode & SCREENSHOT_OSD;
     struct voctrl_screenshot ctrl = {
         .scaled = scaled,
         .subs = subs,
@@ -412,10 +411,11 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode,
                 talloc_free(image);
                 return NULL;
             }
-            struct mp_sws_context *sws = mp_sws_alloc(NULL);
-            mp_sws_scale(sws, nimage, image);
+            if (mp_image_swscale(nimage, image, mpctx->global, mpctx->log) < 0) {
+                talloc_free(nimage);
+                nimage = NULL;
+            }
             talloc_free(image);
-            talloc_free(sws);
             image = nimage;
         }
     }
@@ -456,14 +456,7 @@ struct mp_image *convert_image(struct mp_image *image, int destfmt,
 
     dst->params = p;
 
-    struct mp_sws_context *sws = mp_sws_alloc(NULL);
-    sws->log = log;
-    if (global)
-        mp_sws_enable_cmdline_opts(sws, global);
-    bool ok = mp_sws_scale(sws, dst, image) >= 0;
-    talloc_free(sws);
-
-    if (!ok) {
+    if (mp_image_swscale(dst, image, global, log) < 0) {
         mp_err(log, "Error when converting image.\n");
         talloc_free(dst);
         return NULL;
@@ -509,19 +502,25 @@ void cmd_screenshot_to_file(void *p)
     talloc_free(path);
 }
 
+struct mp_image *screenshot_get_image(struct MPContext *mpctx, int mode)
+{
+    bool high_depth = image_writer_high_depth(mpctx->opts->screenshot_image_opts);
+    return screenshot_get(mpctx, mode, high_depth);
+}
+
 void cmd_screenshot(void *p)
 {
     struct mp_cmd_ctx *cmd = p;
     struct MPContext *mpctx = cmd->mpctx;
     struct mpv_node *res = &cmd->result;
-    int mode = cmd->args[0].v.i & 7;
-    bool each_frame_toggle = (cmd->args[0].v.i | cmd->args[1].v.i) & 8;
-    bool each_frame_mode = cmd->args[0].v.i & 16;
+    int mode = cmd->args[0].v.i & SCREENSHOT_WINDOW;
+    bool each_frame_toggle = (cmd->args[0].v.i | cmd->args[1].v.i) & SCREENSHOT_EACH_FRAME;
+    bool each_frame_mode = cmd->args[0].v.i & SCREENSHOT_EACH_FRAME_ACTIVE;
 
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
-    if ((mode & MODE_SUBTITLES) && osd_get_render_subs_in_filter(mpctx->osd))
-        mode &= ~MODE_SUBTITLES;
+    if ((mode & SCREENSHOT_SUBTITLES) && osd_get_render_subs_in_filter(mpctx->osd))
+        mode &= ~SCREENSHOT_SUBTITLES;
 
     if (!each_frame_mode) {
         if (each_frame_toggle) {
@@ -530,7 +529,7 @@ void cmd_screenshot(void *p)
                 return;
             }
             ctx->each_frame = talloc_steal(ctx, mp_cmd_clone(cmd->cmd));
-            ctx->each_frame->args[0].v.i |= 16;
+            ctx->each_frame->args[0].v.i |= SCREENSHOT_EACH_FRAME_ACTIVE;
         } else {
             TA_FREEP(&ctx->each_frame);
         }
