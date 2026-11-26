@@ -16,7 +16,9 @@
  */
 
 #include <libavutil/channel_layout.h>
+#include <libavutil/mem.h>
 
+#include "common/common.h"
 #include "chmap.h"
 #include "chmap_avchannel.h"
 
@@ -31,21 +33,48 @@ bool mp_chmap_from_av_layout(struct mp_chmap *dst, const AVChannelLayout *src)
     case AV_CHANNEL_ORDER_NATIVE:
         mp_chmap_from_lavc(dst, src->u.mask);
         return dst->num == src->nb_channels;
+    case AV_CHANNEL_ORDER_CUSTOM: {
+        if (src->nb_channels > MP_NUM_CHANNELS)
+            return false;
+        struct mp_chmap map = {.num = src->nb_channels};
+        for (int n = 0; n < map.num; n++) {
+            // Speaker IDs below 64 are the AVChannel values.
+            enum AVChannel id = src->u.map[n].id;
+            if (id >= 0 && id < 64)
+                map.speaker[n] = id;
+            else if (id == AV_CHAN_UNUSED)
+                map.speaker[n] = MP_SPEAKER_ID_NA;
+            else
+                return false;
+        }
+        if (!mp_chmap_is_valid(&map))
+            return false;
+        *dst = map;
+        return true;
+    }
     default:
-        // TODO: handle custom layouts
         return false;
     }
 }
 
 void mp_chmap_to_av_layout(AVChannelLayout *dst, const struct mp_chmap *src)
 {
-    *dst = (AVChannelLayout){
-        .order = AV_CHANNEL_ORDER_UNSPEC,
-        .nb_channels = src->num,
-    };
+    av_channel_layout_uninit(dst);
+    dst->nb_channels = src->num;
 
-    // TODO: handle custom layouts
-    if (!mp_chmap_is_unknown(src)) {
+    if (mp_chmap_is_empty(src) || mp_chmap_is_unknown(src))
+        return;
+
+    if (mp_chmap_is_lavc(src)) {
         av_channel_layout_from_mask(dst, mp_chmap_to_lavc(src));
+        return;
+    }
+
+    dst->order = AV_CHANNEL_ORDER_CUSTOM;
+    dst->u.map = av_calloc(src->num, sizeof(*dst->u.map));
+    MP_HANDLE_OOM(dst->u.map);
+    for (int n = 0; n < src->num; n++) {
+        int sp = src->speaker[n];
+        dst->u.map[n].id = sp == MP_SPEAKER_ID_NA ? AV_CHAN_UNUSED : sp;
     }
 }

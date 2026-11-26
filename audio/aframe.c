@@ -164,9 +164,6 @@ struct AVFrame *mp_aframe_to_avframe(struct mp_aframe *frame)
     if (af_to_avformat(frame->format) != frame->av_frame->format)
         return NULL;
 
-    if (!mp_chmap_is_lavc(&frame->chmap))
-        return NULL;
-
     if (!frame->av_frame->opaque_ref && frame->speed != 1.0) {
         frame->av_frame->opaque_ref =
             av_buffer_alloc(sizeof(struct avframe_opaque));

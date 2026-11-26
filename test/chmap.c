@@ -1,5 +1,10 @@
 #include "config.h"
 
+#include <stdio.h>
+#include <string.h>
+
+#include <libavutil/mem.h>
+
 #include "audio/chmap.h"
 #include "audio/chmap_avchannel.h"
 #include "audio/chmap_sel.h"
@@ -32,6 +37,183 @@ static void test_sel(const char *input, const char *expected_selection,
                         mp_chmap_to_str(&expected_map));
 }
 
+static bool channels_match(const AVChannelLayout *av_layout, const struct mp_chmap *mp_layout)
+{
+    for (int n = 0; n < mp_layout->num; n++) {
+        enum AVChannel id = av_channel_layout_channel_from_index(av_layout, n);
+        int sp = mp_layout->speaker[n];
+        if (id != (sp == MP_SPEAKER_ID_NA ? AV_CHAN_UNUSED : sp))
+            return false;
+    }
+    return true;
+}
+
+static bool native_order(const AVChannelLayout *layout)
+{
+    AVChannelLayout native = {0};
+    uint64_t mask = av_channel_layout_subset(layout, ~(uint64_t)0);
+    return av_channel_layout_from_mask(&native, mask) >= 0 &&
+           !av_channel_layout_compare(&native, layout);
+}
+
+static void custom_layout(AVChannelLayout *dst, const char *names)
+{
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s", names);
+    enum AVChannel ids[MP_NUM_CHANNELS + 1];
+    int num = 0;
+    for (char *s = strtok(buf, "+"); s; s = strtok(NULL, "+")) {
+        enum AVChannel id = !strcmp(s, "UNSD") ? AV_CHAN_UNUSED :
+                            !strcmp(s, "UNK") ? AV_CHAN_UNKNOWN :
+                            av_channel_from_string(s);
+        assert_true(id != AV_CHAN_NONE && num < MP_ARRAY_SIZE(ids));
+        ids[num++] = id;
+    }
+    av_channel_layout_uninit(dst);
+    dst->order = AV_CHANNEL_ORDER_CUSTOM;
+    dst->nb_channels = num;
+    dst->u.map = av_calloc(num, sizeof(*dst->u.map));
+    assert_true(dst->u.map);
+    for (int n = 0; n < num; n++)
+        dst->u.map[n].id = ids[n];
+}
+
+static uint32_t rnd(uint32_t *state, uint32_t range)
+{
+    *state = *state * 1664525 + 1013904223;
+    return (*state >> 8) % range;
+}
+
+// Distinct speakers out of all 64 IDs, some or all channels NA, in native
+// order (NA last) or shuffled.
+static void random_map(struct mp_chmap *map, uint32_t *state)
+{
+    uint8_t ids[64];
+    for (int n = 0; n < 64; n++)
+        ids[n] = n;
+    map->num = 1 + rnd(state, rnd(state, 2) ? 8 : MP_NUM_CHANNELS);
+    int na = rnd(state, 3) ? 0 : 1 + rnd(state, map->num);
+    for (int n = 0; n < map->num; n++) {
+        int k = n + rnd(state, 64 - n);
+        MPSWAP(uint8_t, ids[n], ids[k]);
+        map->speaker[n] = n < na ? MP_SPEAKER_ID_NA : ids[n];
+    }
+    if (rnd(state, 2)) {
+        for (int n = 1; n < map->num; n++) {
+            for (int i = n; i > 0 && map->speaker[i - 1] > map->speaker[i]; i--)
+                MPSWAP(uint8_t, map->speaker[i - 1], map->speaker[i]);
+        }
+    } else {
+        for (int n = map->num - 1; n > 0; n--) {
+            int k = rnd(state, n + 1);
+            MPSWAP(uint8_t, map->speaker[n], map->speaker[k]);
+        }
+    }
+    assert_true(mp_chmap_is_valid(map));
+}
+
+static void test_mp_chmap_to_av_layout_exact(void)
+{
+    static const char *const cases[][2] = {
+        {"fc-fl-fr-sl-sr-lfe",              "FC+FL+FR+SL+SR+LFE"},
+        {"fr-br-fc-fl-lfe-sr-bl-sl",        "FR+BR+FC+FL+LFE+SR+BL+SL"},
+        {"lfe2-tsr-bfl-wl-sdr-dl-tbc-bfc",  "LFE2+TSR+BFL+WL+SDR+DL+TBC+BFC"},
+        {"7.1(alsa)",                       "FL+FR+BL+BR+FC+LFE+SL+SR"},
+        {"5.1(side)",                       "FL+FR+FC+LFE+SL+SR"},
+        {"fl-fr-na",                        "FL+FR+UNSD"},
+        {"na-fl-fr",                        "UNSD+FL+FR"},
+        {"fl-na-fr-na-na",                  "FL+UNSD+FR+UNSD+UNSD"},
+    };
+
+    for (int i = 0; i < MP_ARRAY_SIZE(cases); i++) {
+        struct mp_chmap mp_layout;
+        AVChannelLayout av_layout = {0}, expected = {0};
+        assert_true(mp_chmap_from_str(&mp_layout, bstr0(cases[i][0])));
+        custom_layout(&expected, cases[i][1]);
+        mp_chmap_to_av_layout(&av_layout, &mp_layout);
+        assert_true(av_channel_layout_check(&av_layout));
+        assert_int_equal(av_channel_layout_compare(&av_layout, &expected), 0);
+        assert_int_equal(av_layout.order, native_order(&expected) ?
+                         AV_CHANNEL_ORDER_NATIVE : AV_CHANNEL_ORDER_CUSTOM);
+        av_channel_layout_uninit(&av_layout);
+        av_channel_layout_uninit(&expected);
+    }
+
+    uint32_t state = 1;
+    for (int i = 0; i < 100000; i++) {
+        struct mp_chmap mp_layout;
+        random_map(&mp_layout, &state);
+        AVChannelLayout av_layout = {0};
+        mp_chmap_to_av_layout(&av_layout, &mp_layout);
+        assert_true(av_channel_layout_check(&av_layout));
+        assert_int_equal(av_layout.nb_channels, mp_layout.num);
+        if (mp_chmap_is_unknown(&mp_layout)) {
+            assert_int_equal(av_layout.order, AV_CHANNEL_ORDER_UNSPEC);
+        } else {
+            assert_true(channels_match(&av_layout, &mp_layout));
+            assert_int_equal(av_layout.order, native_order(&av_layout) ?
+                             AV_CHANNEL_ORDER_NATIVE : AV_CHANNEL_ORDER_CUSTOM);
+
+            struct mp_chmap back;
+            assert_true(mp_chmap_from_av_layout(&back, &av_layout));
+            assert_true(mp_chmap_equals(&back, &mp_layout));
+
+            // Unknown channels in place of the unused ones are rejected.
+            bool unknown = false;
+            if (av_layout.order == AV_CHANNEL_ORDER_CUSTOM) {
+                for (int n = 0; n < av_layout.nb_channels; n++) {
+                    if (av_layout.u.map[n].id == AV_CHAN_UNUSED) {
+                        av_layout.u.map[n].id = AV_CHAN_UNKNOWN;
+                        unknown = true;
+                    }
+                }
+            }
+            assert_int_equal(mp_chmap_from_av_layout(&back, &av_layout), !unknown);
+            assert_true(unknown ? mp_chmap_is_empty(&back) : mp_chmap_equals(&back, &mp_layout));
+        }
+        av_channel_layout_uninit(&av_layout);
+    }
+}
+
+static void test_custom_av_layout_to_mp_chmap(void)
+{
+    // FFmpeg channels, mpv map or NULL if there is none
+    static const char *const cases[][2] = {
+        {"FC+FL+FR+SL+SR+LFE",              "fc-fl-fr-sl-sr-lfe"},
+        {"FR+BR+FC+FL+LFE+SR+BL+SL",        "fr-br-fc-fl-lfe-sr-bl-sl"},
+        {"LFE2+TSR+BFL+WL+SDR+DL+TBC+BFC",  "lfe2-tsr-bfl-wl-sdr-dl-tbc-bfc"},
+        {"FL+FR+FC+LFE+SL+SR",              "5.1(side)"},
+        {"UNSD+FL+FR",                      "na-fl-fr"},
+        {"FL+UNSD+FR+UNSD",                 "fl-na-fr-na"},
+        {"FL+UNK+FR",                       NULL},
+        {"UNK+UNK+UNK",                     NULL},
+        {"FL+FR+AMBI0",                     NULL},
+        {"FL+FR+FL",                        NULL},
+    };
+
+    for (int i = 0; i < MP_ARRAY_SIZE(cases); i++) {
+        AVChannelLayout av_layout = {0};
+        custom_layout(&av_layout, cases[i][0]);
+        struct mp_chmap mp_layout, expected = {0};
+        if (cases[i][1])
+            assert_true(mp_chmap_from_str(&expected, bstr0(cases[i][1])));
+        assert_int_equal(mp_chmap_from_av_layout(&mp_layout, &av_layout), !!cases[i][1]);
+        assert_true(mp_chmap_equals(&mp_layout, &expected));
+        av_channel_layout_uninit(&av_layout);
+    }
+
+    // More channels than a map has.
+    char names[(MP_NUM_CHANNELS + 1) * 5] = "";
+    for (int n = 0; n <= MP_NUM_CHANNELS; n++)
+        mp_snprintf_cat(names, sizeof(names), "%sUNSD", n ? "+" : "");
+    AVChannelLayout av_layout = {0};
+    custom_layout(&av_layout, names);
+    struct mp_chmap mp_layout;
+    assert_false(mp_chmap_from_av_layout(&mp_layout, &av_layout));
+    assert_true(mp_chmap_is_empty(&mp_layout));
+    av_channel_layout_uninit(&av_layout);
+}
+
 static bool layout_matches(const AVChannelLayout *av_layout,
                            const struct mp_chmap *mp_layout,
                            bool require_default_unspec)
@@ -57,8 +239,9 @@ static bool layout_matches(const AVChannelLayout *av_layout,
     }
     case AV_CHANNEL_ORDER_NATIVE:
         return av_layout->u.mask == mp_chmap_to_lavc(mp_layout);
+    case AV_CHANNEL_ORDER_CUSTOM:
+        return channels_match(av_layout, mp_layout);
     default:
-        // TODO: handle custom layouts
         return false;
     }
 
@@ -207,6 +390,8 @@ int main(void)
 
     test_av_channel_layout_to_mp_chmap();
     test_mp_chmap_to_av_channel_layout();
+    test_mp_chmap_to_av_layout_exact();
+    test_custom_av_layout_to_mp_chmap();
 
     return 0;
 }

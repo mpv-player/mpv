@@ -521,11 +521,13 @@ static bool init_pads(struct lavfi *c)
             pad->buffer = avfilter_graph_alloc_filter(c->graph, filter, name);
         }
         if (!pad->buffer) {
+            av_channel_layout_uninit(&params->ch_layout);
             av_free(params);
             goto error;
         }
 
         int ret = av_buffersrc_parameters_set(pad->buffer, params);
+        av_channel_layout_uninit(&params->ch_layout);
         av_free(params);
         if (ret < 0)
             goto error;
