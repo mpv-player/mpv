@@ -2120,7 +2120,7 @@ static void play_current_file(struct MPContext *mpctx)
         run_playloop(mpctx);
     mpctx->in_playloop = false;
 
-    MP_VERBOSE(mpctx, "EOF code: %d  \n", mpctx->stop_play);
+    MP_VERBOSE(mpctx, "EOF code: %d\n", mpctx->stop_play);
 
 terminate_playback:
 
