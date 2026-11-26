@@ -28,6 +28,8 @@
 #include <limits.h>
 #include <math.h>
 
+#include <libavformat/version.h>
+
 #include "config.h"
 
 #ifdef _WIN32
@@ -59,6 +61,7 @@ static void print_version(struct mp_log *log)
 
 extern const struct m_sub_options stream_bluray_conf;
 extern const struct m_sub_options stream_cdda_conf;
+extern const struct m_sub_options stream_sacd_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options mp_network_conf;
 extern const struct m_sub_options stream_lavf_conf;
@@ -600,6 +603,9 @@ static const m_option_t mp_opts[] = {
 #if HAVE_LIBBLURAY
     {"bluray", OPT_SUBSTRUCT(stream_bluray_opts, stream_bluray_conf)},
 #endif /* HAVE_LIBBLURAY */
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(63, 19, 100)
+    {"sacd", OPT_SUBSTRUCT(stream_sacd_opts, stream_sacd_conf)},
+#endif
 
 // ------------------------- demuxer options --------------------
 

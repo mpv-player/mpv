@@ -21,6 +21,8 @@
 
 #include <assert.h>
 
+#include <libavformat/version.h>
+
 #include "osdep/io.h"
 
 #include "mpv_talloc.h"
@@ -44,6 +46,7 @@
 
 extern const stream_info_t stream_info_mpv;
 extern const stream_info_t stream_info_cdda;
+extern const stream_info_t stream_info_sacd;
 extern const stream_info_t stream_info_dvb;
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_memory;
@@ -71,6 +74,9 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_mpv,
 #if HAVE_CDDA
     &stream_info_cdda,
+#endif
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(63, 19, 100)
+    &stream_info_sacd,
 #endif
     &stream_info_avdevice,
 #if HAVE_DVBIN
