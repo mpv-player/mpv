@@ -32,7 +32,7 @@ abgr: fcsp=rgb ctype=uint
     1: p=0  st=4  o=2  sh=0  d=8
     2: p=0  st=4  o=1  sh=0  d=8
     3: p=0  st=4  o=0  sh=0  d=8
-amf: [GENERIC] ctype=unknown
+amf: ctype=unknown
   Basic desc: [le][be][hw]
     planes=0, chroma=0:0 align=1:1
     {}
