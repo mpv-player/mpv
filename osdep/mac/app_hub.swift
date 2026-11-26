@@ -28,6 +28,7 @@ class AppHub: NSObject {
     var menu: MenuBar?
 #if HAVE_MACOS_MEDIA_PLAYER
     var remote: RemoteCommandCenter?
+    var remoteStarted = false
 #endif
 #if HAVE_MACOS_TOUCHBAR
     var touchBar: TouchBar?
@@ -44,9 +45,6 @@ class AppHub: NSObject {
         input = InputHelper()
         log = LogHelper()
         super.init()
-#if HAVE_MACOS_MEDIA_PLAYER
-        remote = RemoteCommandCenter(self)
-#endif
         log.verbose("AppHub initialised")
     }
 
@@ -67,7 +65,17 @@ class AppHub: NSObject {
         }
 
 #if HAVE_MACOS_MEDIA_PLAYER
-        remote?.registerEvents()
+        // RemoteCommandCenter publishes Now Playing info and requests QuickLook
+        // thumbnails of every played file, so only create it when enabled
+        if option?.root.media_controls ?? true {
+            remote = remote ?? RemoteCommandCenter(self)
+            remote?.registerEvents()
+            // startRemote() can be called before initMpv(), when the input
+            // options are loaded, so start it here if that already happened
+            if remoteStarted { remote?.start() }
+        } else {
+            log.verbose("Media controls disabled, not using RemoteCommandCenter")
+        }
 #endif
 #if HAVE_MACOS_TOUCHBAR
         touchBar = TouchBar(self)
@@ -93,6 +101,7 @@ class AppHub: NSObject {
     @objc func startRemote() {
 #if HAVE_MACOS_MEDIA_PLAYER
         log.verbose("Starting RemoteCommandCenter")
+        remoteStarted = true
         remote?.start()
 #endif
     }
@@ -100,6 +109,7 @@ class AppHub: NSObject {
     @objc func stopRemote() {
 #if HAVE_MACOS_MEDIA_PLAYER
         log.verbose("Stopping RemoteCommandCenter")
+        remoteStarted = false
         remote?.stop()
 #endif
     }
