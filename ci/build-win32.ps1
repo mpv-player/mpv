@@ -1,3 +1,7 @@
+param(
+    [switch]$SpatialAudioObjectOnly
+)
+
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 Set-StrictMode -Version Latest
@@ -361,6 +365,29 @@ meson setup build `
     -Drubberband=disabled `
     -Dwayland=disabled `
     -Dx11=disabled
+if ($SpatialAudioObjectOnly) {
+    $config = Get-Content -Path "build/config.h" -Raw
+    if ($config.IndexOf("#define HAVE_WASAPI_SPATIAL 1", [StringComparison]::Ordinal) -lt 0) {
+        throw "Meson did not enable HAVE_WASAPI_SPATIAL; check the Windows SDK and Meson feature detection."
+    }
+
+    $targetLine = & ninja -C build -t targets all |
+        Where-Object { $_.Contains('ao_wasapi_spatial.c.obj:') -or $_.Contains('ao_wasapi_spatial.c.o:') } |
+        Select-Object -First 1
+    if (-not $targetLine) {
+        throw "Meson did not generate a Ninja object target for ao_wasapi_spatial.c."
+    }
+
+    $target = ($targetLine -split ':', 2)[0]
+    Write-Host "Compiling Spatial Audio translation unit: $target"
+    & ninja -C build $target
+    if ($LASTEXITCODE -ne 0) {
+        throw "Clang failed to compile ao_wasapi_spatial.c (exit code $LASTEXITCODE)."
+    }
+    Write-Host "Spatial Audio translation unit compiled successfully."
+    return
+}
+
 ninja -C build mpv.exe mpv.com
 cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
 cp ./etc/mpv-*.bat ./build

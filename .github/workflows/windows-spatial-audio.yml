@@ -1,0 +1,187 @@
+name: Windows Spatial Audio (VS Clang + Windows SDK)
+
+on:
+  push:
+    branches:
+      - "feature/wasapi-spatial-audio"
+  workflow_dispatch:
+
+concurrency:
+  group: windows-spatial-audio-x64
+  cancel-in-progress: true
+
+jobs:
+  windows-sdk-x64:
+    name: Windows SDK / Clang x64
+    runs-on: windows-2025
+    timeout-minutes: 120
+    env:
+      CC: "clang"
+      CXX: "clang++"
+      CC_LD: "lld-link"
+      CXX_LD: "lld-link"
+      RUST_LD: "lld-link"
+      WINDRES: "llvm-rc"
+
+    steps:
+      - name: Configure Git line endings
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Install build tools
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python -m pip install --upgrade meson
+
+          # Download the official NASM 3.02 Windows archive directly.
+          # Pin and verify the archive hash before extracting any executable.
+          $nasmVersion = "3.02"
+          $nasmArchive = Join-Path $env:RUNNER_TEMP "nasm-$nasmVersion-win64.zip"
+          $nasmUrl = "https://www.nasm.us/pub/nasm/releasebuilds/$nasmVersion/win64/nasm-$nasmVersion-win64.zip"
+          Invoke-WebRequest -Uri $nasmUrl -OutFile $nasmArchive
+
+          $expectedHash = "161D0BFAFF53C2F9E9F3E69FD0672323EBABAFD1268976A5CEC11BE92A19AEE7"
+          $actualHash = (Get-FileHash -Path $nasmArchive -Algorithm SHA256).Hash
+          if ($actualHash -ne $expectedHash) {
+            throw "NASM archive SHA-256 mismatch. Expected $expectedHash, got $actualHash."
+          }
+
+          $nasmExtractDir = Join-Path $env:RUNNER_TEMP "nasm-$nasmVersion"
+          if (Test-Path $nasmExtractDir) {
+            Remove-Item -Path $nasmExtractDir -Recurse -Force
+          }
+          New-Item -Path $nasmExtractDir -ItemType Directory -Force | Out-Null
+          Expand-Archive -Path $nasmArchive -DestinationPath $nasmExtractDir -Force
+
+          $nasmExe = Get-ChildItem -Path $nasmExtractDir -Filter "nasm.exe" -File -Recurse |
+            Select-Object -First 1
+          if (-not $nasmExe) {
+            throw "The verified NASM archive did not contain nasm.exe."
+          }
+          $nasmDir = $nasmExe.DirectoryName
+          "NASM_DIR=$nasmDir" >> $env:GITHUB_ENV
+          "$nasmDir" >> $env:GITHUB_PATH
+          Write-Host "Using NASM from $($nasmExe.FullName)"
+          & $nasmExe.FullName -v
+
+          rustup default nightly
+
+      - name: Update Meson wraps
+        shell: pwsh
+        run: |
+          meson wrap update-db
+          meson wrap install expat
+          meson wrap install harfbuzz
+          meson wrap install libpng
+          meson wrap install zlib
+
+      - name: Locate Visual Studio and Windows SDK
+        shell: pwsh
+        run: |
+          $programFilesX86 = [Environment]::GetFolderPath([Environment+SpecialFolder]::ProgramFilesX86)
+          $vswhere = Join-Path $programFilesX86 "Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vsPath) {
+            throw "Visual Studio C++ build tools were not found on this runner."
+          }
+          "VS=$vsPath" >> $env:GITHUB_ENV
+
+          $sdkHeaders = Join-Path $programFilesX86 "Windows Kits\10\Include\*\um\spatialaudioclient.h"
+          $headers = Get-ChildItem -Path $sdkHeaders -ErrorAction SilentlyContinue
+          if (-not $headers) {
+            throw "spatialaudioclient.h was not found in the installed Windows SDK."
+          }
+          Write-Host "Found Windows Spatial Audio SDK header: $($headers[0].FullName)"
+
+      - name: Build complete mpv with Visual Studio Clang and Windows SDK
+        id: build
+        shell: pwsh
+        run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object {
+            $_ -ne 'C:\Program Files\LLVM\bin' -and
+            $_ -ne 'C:\Program Files\CMake\bin' -and
+            $_ -ne 'C:\Strawberry\c\bin'
+          }) -join ';'
+          $env:PATH += ';C:\Program Files\NASM'
+
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
+
+          # Ensure the VS developer-shell environment still exposes the verified NASM archive to CMake.
+          if (-not $env:NASM_DIR -or -not (Test-Path (Join-Path $env:NASM_DIR "nasm.exe"))) {
+            throw "The verified NASM executable is unavailable after activating the VS developer shell."
+          }
+          $env:PATH = "$env:NASM_DIR;$env:PATH"
+          $nasm = Get-Command nasm.exe -ErrorAction Stop
+          Write-Host "Using NASM: $($nasm.Source)"
+          & $nasm.Source -v
+
+          clang --version
+          lld-link --version
+          meson --version
+
+          try {
+            ./ci/build-win32.ps1
+          } catch {
+            if (Test-Path "build/meson-logs/meson-log.txt") {
+              Get-Content "build/meson-logs/meson-log.txt"
+            }
+            throw
+          }
+
+      - name: Verify Spatial Audio driver was enabled
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "build/config.h")) {
+            throw "Meson did not generate build/config.h."
+          }
+          $enabled = Select-String -Path "build/config.h" -Pattern '^\s*#define HAVE_WASAPI_SPATIAL 1\s*$' -Quiet
+          if (-not $enabled) {
+            Write-Host "Relevant Meson feature configuration:"
+            Select-String -Path "build/config.h" -Pattern 'WASAPI|WIN32_DESKTOP'
+            throw "HAVE_WASAPI_SPATIAL is not enabled. The CI must not pass without compiling the new backend."
+          }
+          Write-Host "HAVE_WASAPI_SPATIAL=1"
+
+
+      - name: Run Meson tests
+        id: tests
+        shell: pwsh
+        run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object {
+            $_ -ne 'C:\Program Files\LLVM\bin' -and
+            $_ -ne 'C:\Program Files\CMake\bin' -and
+            $_ -ne 'C:\Strawberry\c\bin'
+          }) -join ';'
+          $env:PATH += ';C:\Program Files\NASM'
+
+          Import-Module "$env:VS\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+          Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=x64 -host_arch=x64"
+
+          try {
+            meson test -C build -t 2
+          } catch {
+            if (Test-Path "build/meson-logs/testlog.txt") {
+              Get-Content "build/meson-logs/testlog.txt"
+            }
+            throw
+          }
+
+      - name: Upload complete Windows SDK build
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: mpv-spatial-audio-windows-sdk-x64-${{ github.run_number }}
+          path: |
+            build/mpv.exe
+            build/mpv.com
+            build/mpv-*.bat
+            build/vulkan-1.dll
+          if-no-files-found: error
+          retention-days: 14
