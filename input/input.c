@@ -241,7 +241,7 @@ const struct m_sub_options input_config = {
         {"input-touch-emulate-mouse", OPT_BOOL(touch_emulate_mouse)},
         {"input-tablet-emulate-mouse", OPT_BOOL(tablet_emulate_mouse)},
         {"input-dragging-deadzone", OPT_INT(dragging_deadzone)},
-#if HAVE_SDL2_GAMEPAD
+#if HAVE_SDL_GAMEPAD
         {"input-gamepad", OPT_BOOL(use_gamepad)},
 #endif
         {"window-dragging", OPT_BOOL(allow_win_drag)},
@@ -1797,7 +1797,7 @@ void mp_input_load_config(struct input_ctx *ictx)
     bool use_gamepad = ictx->opts->use_gamepad;
     input_unlock(ictx);
 
-#if HAVE_SDL2_GAMEPAD
+#if HAVE_SDL_GAMEPAD
     if (use_gamepad)
         mp_input_sdl_gamepad_add(ictx);
 #else

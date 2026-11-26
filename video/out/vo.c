@@ -91,7 +91,7 @@ static const struct vo_driver *const video_out_drivers[] =
 #if HAVE_ANDROID
     &video_out_mediacodec_embed,
 #endif
-#if HAVE_SDL2_VIDEO
+#if HAVE_SDL_VIDEO
     &video_out_sdl,
 #endif
 #if HAVE_VAAPI_X11 && HAVE_GPL

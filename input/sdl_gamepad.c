@@ -17,7 +17,7 @@
 
 #include <stdbool.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #include "common/common.h"
 #include "common/msg.h"
@@ -26,7 +26,7 @@
 #include "osdep/threads.h"
 
 struct gamepad_priv {
-    SDL_GameController *controller;
+    SDL_Gamepad *gamepad;
 };
 
 static Uint32 gamepad_cancel_wakeup;
@@ -41,21 +41,21 @@ static mp_once events_initialized = MP_STATIC_ONCE_INITIALIZER;
 #define INVALID_KEY -1
 
 static const int button_map[][2] = {
-    { SDL_CONTROLLER_BUTTON_A, MP_KEY_GAMEPAD_ACTION_DOWN },
-    { SDL_CONTROLLER_BUTTON_B, MP_KEY_GAMEPAD_ACTION_RIGHT },
-    { SDL_CONTROLLER_BUTTON_X, MP_KEY_GAMEPAD_ACTION_LEFT },
-    { SDL_CONTROLLER_BUTTON_Y,  MP_KEY_GAMEPAD_ACTION_UP },
-    { SDL_CONTROLLER_BUTTON_BACK, MP_KEY_GAMEPAD_BACK },
-    { SDL_CONTROLLER_BUTTON_GUIDE, MP_KEY_GAMEPAD_MENU },
-    { SDL_CONTROLLER_BUTTON_START, MP_KEY_GAMEPAD_START },
-    { SDL_CONTROLLER_BUTTON_LEFTSTICK, MP_KEY_GAMEPAD_LEFT_STICK },
-    { SDL_CONTROLLER_BUTTON_RIGHTSTICK, MP_KEY_GAMEPAD_RIGHT_STICK },
-    { SDL_CONTROLLER_BUTTON_LEFTSHOULDER, MP_KEY_GAMEPAD_LEFT_SHOULDER },
-    { SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, MP_KEY_GAMEPAD_RIGHT_SHOULDER },
-    { SDL_CONTROLLER_BUTTON_DPAD_UP, MP_KEY_GAMEPAD_DPAD_UP },
-    { SDL_CONTROLLER_BUTTON_DPAD_DOWN, MP_KEY_GAMEPAD_DPAD_DOWN },
-    { SDL_CONTROLLER_BUTTON_DPAD_LEFT, MP_KEY_GAMEPAD_DPAD_LEFT },
-    { SDL_CONTROLLER_BUTTON_DPAD_RIGHT, MP_KEY_GAMEPAD_DPAD_RIGHT },
+    { SDL_GAMEPAD_BUTTON_SOUTH, MP_KEY_GAMEPAD_ACTION_DOWN },
+    { SDL_GAMEPAD_BUTTON_EAST, MP_KEY_GAMEPAD_ACTION_RIGHT },
+    { SDL_GAMEPAD_BUTTON_WEST, MP_KEY_GAMEPAD_ACTION_LEFT },
+    { SDL_GAMEPAD_BUTTON_NORTH,  MP_KEY_GAMEPAD_ACTION_UP },
+    { SDL_GAMEPAD_BUTTON_BACK, MP_KEY_GAMEPAD_BACK },
+    { SDL_GAMEPAD_BUTTON_GUIDE, MP_KEY_GAMEPAD_MENU },
+    { SDL_GAMEPAD_BUTTON_START, MP_KEY_GAMEPAD_START },
+    { SDL_GAMEPAD_BUTTON_LEFT_STICK, MP_KEY_GAMEPAD_LEFT_STICK },
+    { SDL_GAMEPAD_BUTTON_RIGHT_STICK, MP_KEY_GAMEPAD_RIGHT_STICK },
+    { SDL_GAMEPAD_BUTTON_LEFT_SHOULDER, MP_KEY_GAMEPAD_LEFT_SHOULDER },
+    { SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER, MP_KEY_GAMEPAD_RIGHT_SHOULDER },
+    { SDL_GAMEPAD_BUTTON_DPAD_UP, MP_KEY_GAMEPAD_DPAD_UP },
+    { SDL_GAMEPAD_BUTTON_DPAD_DOWN, MP_KEY_GAMEPAD_DPAD_DOWN },
+    { SDL_GAMEPAD_BUTTON_DPAD_LEFT, MP_KEY_GAMEPAD_DPAD_LEFT },
+    { SDL_GAMEPAD_BUTTON_DPAD_RIGHT, MP_KEY_GAMEPAD_DPAD_RIGHT },
 };
 
 static const int analog_map[][5] = {
@@ -64,37 +64,37 @@ static const int analog_map[][5] = {
     // 2 -> neutral-negative state
     // 3 -> neutral-positive state
     // 4 -> positive state
-    { SDL_CONTROLLER_AXIS_LEFTX,
+    { SDL_GAMEPAD_AXIS_LEFTX,
         MP_KEY_GAMEPAD_LEFT_STICK_LEFT | MP_KEY_STATE_DOWN,
         MP_KEY_GAMEPAD_LEFT_STICK_LEFT | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_LEFT_STICK_RIGHT | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_LEFT_STICK_RIGHT | MP_KEY_STATE_DOWN },
 
-    { SDL_CONTROLLER_AXIS_LEFTY,
+    { SDL_GAMEPAD_AXIS_LEFTY,
         MP_KEY_GAMEPAD_LEFT_STICK_UP | MP_KEY_STATE_DOWN,
         MP_KEY_GAMEPAD_LEFT_STICK_UP | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_LEFT_STICK_DOWN | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_LEFT_STICK_DOWN | MP_KEY_STATE_DOWN },
 
-    { SDL_CONTROLLER_AXIS_RIGHTX,
+    { SDL_GAMEPAD_AXIS_RIGHTX,
         MP_KEY_GAMEPAD_RIGHT_STICK_LEFT | MP_KEY_STATE_DOWN,
         MP_KEY_GAMEPAD_RIGHT_STICK_LEFT | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_RIGHT_STICK_RIGHT | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_RIGHT_STICK_RIGHT | MP_KEY_STATE_DOWN },
 
-    { SDL_CONTROLLER_AXIS_RIGHTY,
+    { SDL_GAMEPAD_AXIS_RIGHTY,
         MP_KEY_GAMEPAD_RIGHT_STICK_UP | MP_KEY_STATE_DOWN,
         MP_KEY_GAMEPAD_RIGHT_STICK_UP | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_RIGHT_STICK_DOWN | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_RIGHT_STICK_DOWN | MP_KEY_STATE_DOWN },
 
-    { SDL_CONTROLLER_AXIS_TRIGGERLEFT,
+    { SDL_GAMEPAD_AXIS_LEFT_TRIGGER,
         INVALID_KEY,
         INVALID_KEY,
         MP_KEY_GAMEPAD_LEFT_TRIGGER | MP_KEY_STATE_UP,
         MP_KEY_GAMEPAD_LEFT_TRIGGER | MP_KEY_STATE_DOWN },
 
-    { SDL_CONTROLLER_AXIS_TRIGGERRIGHT,
+    { SDL_GAMEPAD_AXIS_RIGHT_TRIGGER,
         INVALID_KEY,
         INVALID_KEY,
         MP_KEY_GAMEPAD_RIGHT_TRIGGER | MP_KEY_STATE_UP,
@@ -160,24 +160,22 @@ static void uninit(struct mp_input_src *src)
     MP_VERBOSE(src, "exited.\n");
 }
 
-#define GUID_LEN 33
-
 static void add_gamepad(struct mp_input_src *src, int id)
 {
     struct gamepad_priv *p = src->priv;
 
-    if (p->controller) {
-        MP_WARN(src, "can't add more than one controller\n");
+    if (p->gamepad) {
+        MP_WARN(src, "can't add more than one gamepad\n");
         return;
     }
 
-    if (SDL_IsGameController(id)) {
-        SDL_GameController *controller = SDL_GameControllerOpen(id);
+    if (SDL_IsGamepad(id)) {
+        SDL_Gamepad *gamepad = SDL_OpenGamepad(id);
 
-        if (controller) {
-            const char *name = SDL_GameControllerName(controller);
-            MP_INFO(src, "added controller: %s\n", name);
-            p->controller = controller;
+        if (gamepad) {
+            const char *name = SDL_GetGamepadName(gamepad);
+            MP_INFO(src, "added gamepad: %s\n", name);
+            p->gamepad = gamepad;
             return;
         }
     }
@@ -186,47 +184,44 @@ static void add_gamepad(struct mp_input_src *src, int id)
 static void remove_gamepad(struct mp_input_src *src, int id)
 {
     struct gamepad_priv *p = src->priv;
-    SDL_GameController *controller = p->controller;
-    if (!controller)
+    SDL_Gamepad *gamepad = p->gamepad;
+    if (!gamepad)
         return;
-    SDL_Joystick* j = SDL_GameControllerGetJoystick(controller);
-    SDL_JoystickID jid = SDL_JoystickInstanceID(j);
+    SDL_Joystick* j = SDL_GetGamepadJoystick(gamepad);
+    SDL_JoystickID jid = SDL_GetJoystickID(j);
 
     if (jid == id) {
-        const char *name = SDL_GameControllerName(controller);
-        MP_INFO(src, "removed controller: %s\n", name);
-        SDL_GameControllerClose(controller);
-        p->controller = NULL;
+        const char *name = SDL_GetGamepadName(gamepad);
+        MP_INFO(src, "removed gamepad: %s\n", name);
+        SDL_CloseGamepad(gamepad);
+        p->gamepad = NULL;
     }
 }
 
 static void read_gamepad_thread(struct mp_input_src *src, void *param)
 {
-#if SDL_VERSION_ATLEAST(2, 0, 14)
-    SDL_SetHint(SDL_HINT_JOYSTICK_THREAD, "1");
-#endif
-
     if (SDL_WasInit(SDL_INIT_EVENTS)) {
         MP_ERR(src, "Another component is using SDL already.\n");
         mp_input_src_init_done(src);
         return;
     }
 
-    if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER)) {
-        MP_ERR(src, "SDL_Init failed\n");
+    if (!SDL_InitSubSystem(SDL_INIT_GAMEPAD)) {
+        MP_ERR(src, "SDL_Init failed: %s\n", SDL_GetError());
         mp_input_src_init_done(src);
         return;
     }
 
     mp_exec_once(&events_initialized, initialize_events);
 
-    if (gamepad_cancel_wakeup == (Uint32)-1) {
+    if (!gamepad_cancel_wakeup) {
         MP_ERR(src, "Can't register SDL custom events\n");
+        SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
         mp_input_src_init_done(src);
         return;
     }
 
-    struct gamepad_priv *p =src->priv = talloc_zero(src, struct gamepad_priv);
+    struct gamepad_priv *p = src->priv = talloc_zero(src, struct gamepad_priv);
     src->cancel = request_cancel;
     src->uninit = uninit;
 
@@ -234,37 +229,37 @@ static void read_gamepad_thread(struct mp_input_src *src, void *param)
 
     SDL_Event ev;
 
-    while (SDL_WaitEvent(&ev) != 0) {
+    while (SDL_WaitEvent(&ev)) {
         if (ev.type == gamepad_cancel_wakeup) {
             break;
         }
 
         switch (ev.type) {
-            case SDL_CONTROLLERDEVICEADDED: {
-                add_gamepad(src, ev.cdevice.which);
+            case SDL_EVENT_GAMEPAD_ADDED: {
+                add_gamepad(src, ev.gdevice.which);
                 continue;
             }
-            case SDL_CONTROLLERDEVICEREMOVED: {
-                remove_gamepad(src, ev.cdevice.which);
+            case SDL_EVENT_GAMEPAD_REMOVED: {
+                remove_gamepad(src, ev.gdevice.which);
                 continue;
             }
-            case SDL_CONTROLLERBUTTONDOWN: {
-                const int key = lookup_button_mp_key(ev.cbutton.button);
+            case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
+                const int key = lookup_button_mp_key(ev.gbutton.button);
                 if (key != INVALID_KEY) {
                     mp_input_put_key(src->input_ctx, key | MP_KEY_STATE_DOWN);
                 }
                 continue;
             }
-            case SDL_CONTROLLERBUTTONUP: {
-                const int key = lookup_button_mp_key(ev.cbutton.button);
+            case SDL_EVENT_GAMEPAD_BUTTON_UP: {
+                const int key = lookup_button_mp_key(ev.gbutton.button);
                 if (key != INVALID_KEY) {
                     mp_input_put_key(src->input_ctx, key | MP_KEY_STATE_UP);
                 }
                 continue;
             }
-            case SDL_CONTROLLERAXISMOTION: {
+            case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
                 const int key =
-                    lookup_analog_mp_key(ev.caxis.axis, ev.caxis.value);
+                    lookup_analog_mp_key(ev.gaxis.axis, ev.gaxis.value);
                 if (key != INVALID_KEY) {
                     mp_input_put_key(src->input_ctx, key);
                 }
@@ -274,15 +269,15 @@ static void read_gamepad_thread(struct mp_input_src *src, void *param)
         }
     }
 
-    if (p->controller) {
-        SDL_Joystick* j = SDL_GameControllerGetJoystick(p->controller);
-        SDL_JoystickID jid = SDL_JoystickInstanceID(j);
+    if (p->gamepad) {
+        SDL_Joystick* j = SDL_GetGamepadJoystick(p->gamepad);
+        SDL_JoystickID jid = SDL_GetJoystickID(j);
         remove_gamepad(src, jid);
     }
 
     // must be called on the same thread of SDL_InitSubSystem, so uninit
     // callback can't be used for this
-    SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
+    SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
 }
 
 void mp_input_sdl_gamepad_add(struct input_ctx *ictx)
