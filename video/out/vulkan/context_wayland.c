@@ -177,7 +177,6 @@ static void wayland_vk_update_render_opts(struct ra_ctx *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wl;
     vo_wayland_set_opaque_region(wl, ctx->opts.want_alpha);
-    wl_surface_commit(wl->surface);
 }
 
 const struct ra_ctx_fns ra_ctx_vulkan_wayland = {

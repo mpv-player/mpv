@@ -56,14 +56,8 @@
 #include "tablet-unstable-v2.h"
 #include "cursor-shape-v1.h"
 #include "fifo-v1.h"
-
-#if HAVE_WAYLAND_PROTOCOLS_1_41
 #include "color-management-v1.h"
-#endif
-
-#if HAVE_WAYLAND_PROTOCOLS_1_44
 #include "color-representation-v1.h"
-#endif
 
 #if HAVE_WAYLAND_PROTOCOLS_1_48
 #include "xdg-session-management-v1.h"
@@ -185,6 +179,8 @@ struct vo_wayland_output {
     uint32_t flags;
     int phys_width;
     int phys_height;
+    int mode_width;
+    int mode_height;
     int transform;
     int scale;
     double refresh_rate;
@@ -1223,7 +1219,11 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
         get_shape_device(s->wl, s);
         wl_pointer_add_listener(s->pointer, &pointer_listener, s);
     } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && s->pointer) {
-        wl_pointer_destroy(s->pointer);
+        if (s->cursor_shape_device) {
+            wp_cursor_shape_device_v1_destroy(s->cursor_shape_device);
+            s->cursor_shape_device = NULL;
+        }
+        WL_RELEASE_OR_DESTROY(wl_pointer, s->pointer, WL_POINTER_RELEASE_SINCE_VERSION);
         s->pointer = NULL;
     }
 
@@ -1231,7 +1231,7 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
         s->keyboard = wl_seat_get_keyboard(seat);
         wl_keyboard_add_listener(s->keyboard, &keyboard_listener, s);
     } else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && s->keyboard) {
-        wl_keyboard_destroy(s->keyboard);
+        WL_RELEASE_OR_DESTROY(wl_keyboard, s->keyboard, WL_KEYBOARD_RELEASE_SINCE_VERSION);
         s->keyboard = NULL;
     }
 
@@ -1240,7 +1240,7 @@ static void seat_handle_caps(void *data, struct wl_seat *seat,
         wl_touch_set_user_data(s->touch, s);
         wl_touch_add_listener(s->touch, &touch_listener, s);
     } else if (!(caps & WL_SEAT_CAPABILITY_TOUCH) && s->touch) {
-        wl_touch_destroy(s->touch);
+        WL_RELEASE_OR_DESTROY(wl_touch, s->touch, WL_TOUCH_RELEASE_SINCE_VERSION);
         s->touch = NULL;
     }
 }
@@ -1583,8 +1583,8 @@ static void output_handle_geometry(void *data, struct wl_output *wl_output,
                                    int32_t transform)
 {
     struct vo_wayland_output *output = data;
-    output->make = talloc_strdup(output->wl, make);
-    output->model = talloc_strdup(output->wl, model);
+    ta_replace(output, output->make, make);
+    ta_replace(output, output->model, model);
     output->geometry.x0 = x;
     output->geometry.y0 = y;
     output->phys_width = phys_width;
@@ -1602,8 +1602,8 @@ static void output_handle_mode(void *data, struct wl_output *wl_output,
     if (!(flags & WL_OUTPUT_MODE_CURRENT))
         return;
 
-    output->geometry.x1 = width;
-    output->geometry.y1 = height;
+    output->mode_width = width;
+    output->mode_height = height;
     output->flags = flags;
     output->refresh_rate = (double)refresh * 0.001;
 }
@@ -1613,6 +1613,8 @@ static void output_handle_done(void *data, struct wl_output *wl_output)
     struct vo_wayland_output *o = data;
     struct vo_wayland_state *wl = o->wl;
 
+    o->geometry.x1 = o->mode_width;
+    o->geometry.y1 = o->mode_height;
     if (o->transform % 2)
         MPSWAP(int, o->geometry.x1, o->geometry.y1);
 
@@ -1656,7 +1658,7 @@ static void output_handle_name(void *data, struct wl_output *wl_output,
                                const char *name)
 {
     struct vo_wayland_output *output = data;
-    output->name = talloc_strdup(output->wl, name);
+    ta_replace(output, output->name, name);
 }
 
 static void output_handle_description(void *data, struct wl_output *wl_output,
@@ -1673,30 +1675,49 @@ static const struct wl_output_listener output_listener = {
     .description = output_handle_description,
 };
 
-static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
-                                 struct wl_output *output)
+static void save_output_geometry(struct vo_wayland_state *wl)
 {
-    struct vo_wayland_state *wl = data;
-
     if (wl->current_output) {
         wl->old_output_geometry = wl->current_output->geometry;
         wl->old_geometry = wl->geometry;
     }
+}
+
+static void update_surface_outputs(struct vo_wayland_state *wl, bool reselect)
+{
+    int outputs = 0;
+    struct vo_wayland_output *output, *last_output = NULL;
+    wl_list_for_each(output, &wl->output_list, link) {
+        if (output->has_surface) {
+            last_output = output;
+            ++outputs;
+        }
+    }
+
+    if (reselect)
+        wl->current_output = last_output;
+    if (outputs == 1)
+        update_output_geometry(wl);
+    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
+}
+
+static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
+                                 struct wl_output *output)
+{
+    struct vo_wayland_state *wl = data;
+    save_output_geometry(wl);
 
     wl->current_output = NULL;
-    int outputs = 0;
     struct vo_wayland_output *o;
     wl_list_for_each(o, &wl->output_list, link) {
         if (o->output == output) {
+            o->has_surface = true;
             wl->current_output = o;
-            wl->current_output->has_surface = true;
+            break;
         }
-        if (o->has_surface)
-            ++outputs;
     }
 
-    if (outputs == 1)
-        update_output_geometry(wl);
+    update_surface_outputs(wl, false);
 
     if (wl->current_output) {
         MP_VERBOSE(wl, "Surface entered output %s %s (%s) (0x%x), scale = %f, refresh rate = %f Hz\n",
@@ -1705,38 +1726,23 @@ static void surface_handle_enter(void *data, struct wl_surface *wl_surface,
     } else {
         MP_VERBOSE(wl, "Surface entered unknown output\n");
     }
-
-    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
 }
 
 static void surface_handle_leave(void *data, struct wl_surface *wl_surface,
                                  struct wl_output *output)
 {
     struct vo_wayland_state *wl = data;
+    save_output_geometry(wl);
 
-    if (wl->current_output) {
-        wl->old_output_geometry = wl->current_output->geometry;
-        wl->old_geometry = wl->geometry;
-    }
-
-    int outputs = 0;
     struct vo_wayland_output *o;
     wl_list_for_each(o, &wl->output_list, link) {
-        if (o->output == output)
+        if (o->output == output) {
             o->has_surface = false;
-        if (o->has_surface)
-            ++outputs;
-        if (o->output != output && o->has_surface)
-            wl->current_output = o;
+            break;
+        }
     }
 
-    if (!outputs)
-        wl->current_output = NULL;
-
-    if (outputs == 1)
-        update_output_geometry(wl);
-
-    wl->pending_vo_events |= VO_EVENT_WIN_STATE;
+    update_surface_outputs(wl, true);
 }
 
 static void surface_handle_preferred_buffer_scale(void *data,
@@ -1811,11 +1817,6 @@ static void handle_toplevel_config(void *data, struct xdg_toplevel *toplevel,
     struct vo_wayland_state *wl = data;
     struct vo_wayland_toplevel_pending_state *pending = &wl->pending_state;
     struct vo_wayland_toplevel_pending_flags *flags = &pending->flags;
-
-    if (width < 0 || height < 0) {
-        MP_WARN(wl, "Compositor sent negative width/height values. Treating them as zero.\n");
-        width = height = 0;
-    }
 
     pending->width = width;
     pending->height = height;
@@ -1994,8 +1995,8 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
                                     int32_t width, int32_t height)
 {
     struct vo_wayland_state *wl = data;
-    wl->pending_state.bounded_width = handle_round(wl->scaling, width);
-    wl->pending_state.bounded_height = handle_round(wl->scaling, height);
+    wl->pending_state.bounded_width = width;
+    wl->pending_state.bounded_height = height;
 }
 
 static void handle_wm_capabilities(void *data, struct xdg_toplevel *xdg_toplevel,
@@ -2038,7 +2039,6 @@ static const struct wp_fractional_scale_v1_listener fractional_scale_listener = 
     .preferred_scale = preferred_scale,
 };
 
-#if HAVE_WAYLAND_PROTOCOLS_1_41
 static void log_color_space(struct mp_log *log,
                            struct vo_wayland_preferred_description_info *wd)
 {
@@ -2106,9 +2106,7 @@ static enum pl_color_transfer map_tf(uint32_t tf)
 {
     switch (tf) {
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_BT1886: return PL_COLOR_TRC_BT_1886;
-#if HAVE_WAYLAND_PROTOCOLS_1_47
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_COMPOUND_POWER_2_4: // fallthrough
-#endif
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_SRGB: return PL_COLOR_TRC_SRGB;
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_EXT_LINEAR: return PL_COLOR_TRC_LINEAR;
         case WP_COLOR_MANAGER_V1_TRANSFER_FUNCTION_GAMMA22: return PL_COLOR_TRC_GAMMA22;
@@ -2229,9 +2227,7 @@ static void image_description_ready(void *data, struct wp_image_description_v1 *
 static const struct wp_image_description_v1_listener image_description_listener = {
     .failed = image_description_failed,
     .ready = image_description_ready,
-#if HAVE_WAYLAND_PROTOCOLS_1_47
     .ready2 = image_description_ready2,
-#endif
 };
 
 static void info_done(void *data, struct wp_image_description_info_v1 *image_description_info)
@@ -2421,13 +2417,9 @@ static void preferred_changed(void *data, struct wp_color_management_surface_fee
 
 static const struct wp_color_management_surface_feedback_v1_listener surface_feedback_listener = {
     .preferred_changed = preferred_changed,
-#if HAVE_WAYLAND_PROTOCOLS_1_47
     .preferred_changed2 = preferred_changed2,
-#endif
 };
-#endif
 
-#if HAVE_WAYLAND_PROTOCOLS_1_44
 static void supported_alpha_mode(void *data, struct wp_color_representation_manager_v1 *color_representation_manager,
                                  uint32_t alpha_mode)
 {
@@ -2510,7 +2502,6 @@ static const struct wp_color_representation_manager_v1_listener color_representa
     .supported_coefficients_and_ranges = supported_coefficients_and_ranges,
     .done = color_representation_done,
 };
-#endif
 
 static const char *zxdg_decoration_mode_to_str(const uint32_t mode)
 {
@@ -2872,7 +2863,9 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         output->wl     = wl;
         output->id     = id;
         output->scale  = 1;
-        output->name   = "";
+        output->name   = talloc_strdup(output, "");
+        output->make   = talloc_strdup(output, "");
+        output->model  = talloc_strdup(output, "");
 
         ver = MPMIN(ver, 4); /* Cap at 4 in case new events are added later. */
         output->output = wl_registry_bind(reg, id, &wl_output_interface, ver);
@@ -2921,13 +2914,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
     }
 #endif
 
-#if HAVE_WAYLAND_PROTOCOLS_1_44
     if (!strcmp(interface, wp_color_representation_manager_v1_interface.name) && found++) {
         ver = 1;
         wl->color_representation_manager = wl_registry_bind(reg, id, &wp_color_representation_manager_v1_interface, ver);
         wp_color_representation_manager_v1_add_listener(wl->color_representation_manager, &color_representation_listener, wl);
     }
-#endif
 
     if (!strcmp(interface, wp_content_type_manager_v1_interface.name) && found++) {
         ver = 1;
@@ -2966,17 +2957,11 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
         xdg_wm_base_add_listener(wl->wm_base, &xdg_wm_base_listener, wl);
     }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_41
     if (!strcmp(interface, wp_color_manager_v1_interface.name) && found++) {
-#if HAVE_WAYLAND_PROTOCOLS_1_47
         ver = MPMIN(ver, 2);
-#else
-        ver = 1;
-#endif
         wl->color_manager = wl_registry_bind(reg, id, &wp_color_manager_v1_interface, ver);
         wp_color_manager_v1_add_listener(wl->color_manager, &color_manager_listener, wl);
     }
-#endif
 
     if (!strcmp(interface, xdg_activation_v1_interface.name) && found++) {
         ver = 1;
@@ -3029,18 +3014,24 @@ static void registry_handle_add(void *data, struct wl_registry *reg, uint32_t id
 static void registry_handle_remove(void *data, struct wl_registry *reg, uint32_t id)
 {
     struct vo_wayland_state *wl = data;
-    struct vo_wayland_output *output, *output_tmp;
-    wl_list_for_each_safe(output, output_tmp, &wl->output_list, link) {
+    struct vo_wayland_output *output;
+    wl_list_for_each(output, &wl->output_list, link) {
         if (output->id == id) {
-            remove_output(output);
-            if (wl_list_length(&wl->output_list) == 0)
+            bool affected = output->has_surface || wl->current_output == output;
+            if (affected)
+                save_output_geometry(wl);
+            if (wl->current_output == output)
                 wl->current_output = NULL;
+            remove_output(output);
+            if (affected)
+                update_surface_outputs(wl, !wl->current_output ||
+                                           !wl->current_output->has_surface);
             goto ack_global_remove;
         }
     }
 
-    struct vo_wayland_seat *seat, *seat_tmp;
-    wl_list_for_each_safe(seat, seat_tmp, &wl->seat_list, link) {
+    struct vo_wayland_seat *seat;
+    wl_list_for_each(seat, &wl->seat_list, link) {
         if (seat->id == id) {
             remove_seat(seat);
             goto ack_global_remove;
@@ -3215,14 +3206,16 @@ static bool check_for_resize(struct vo_wayland_state *wl, int edge_pixels,
     *edges = 0;
 
     edge_pixels = handle_round(wl->scaling, edge_pixels);
-    if (pos[0] < edge_pixels)
+    if (pos[0] < edge_pixels) {
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_LEFT;
-    if (pos[0] >= (mp_rect_w(wl->geometry) - edge_pixels))
+    } else if (pos[0] >= (mp_rect_w(wl->geometry) - edge_pixels)) {
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_RIGHT;
-    if (pos[1] < edge_pixels)
+    }
+    if (pos[1] < edge_pixels) {
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_TOP;
-    if (pos[1] >= (mp_rect_h(wl->geometry) - edge_pixels))
+    } else if (pos[1] >= (mp_rect_h(wl->geometry) - edge_pixels)) {
         *edges |= XDG_TOPLEVEL_RESIZE_EDGE_BOTTOM;
+    }
 
     return *edges != 0;
 }
@@ -3237,7 +3230,6 @@ static void clean_feedback_pool(struct vo_wayland_feedback_pool *fback_pool)
     }
 }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_41
 static void cm_dispatch_color_queue(struct vo_wayland_state *wl,
                                     struct wp_image_description_v1 *image_description)
 {
@@ -3273,7 +3265,6 @@ static bool cm_metadata_sanitize(struct vo_wayland_state *wl, struct pl_hdr_meta
 
     return true;
 }
-#endif
 
 static bool create_input(struct vo_wayland_state *wl)
 {
@@ -3373,7 +3364,6 @@ static struct vo_wayland_output *find_output(struct vo_wayland_state *wl)
 
 static void get_compositor_preferred_description(struct vo_wayland_state *wl)
 {
-#if HAVE_WAYLAND_PROTOCOLS_1_41
     if (!wl->color_surface_feedback)
         return;
 
@@ -3393,7 +3383,6 @@ static void get_compositor_preferred_description(struct vo_wayland_state *wl)
             break;
     wp_image_description_v1_destroy(image_description);
     wl_event_queue_destroy(image_description_info_queue);
-#endif
 }
 
 static char **get_displays_spanned(struct vo_wayland_state *wl)
@@ -3564,9 +3553,7 @@ static void remove_output(struct vo_wayland_output *out)
     MP_VERBOSE(out->wl, "Deregistering output %s %s (%s) (0x%x)\n", out->make,
                out->model, out->name, out->id);
     wl_list_remove(&out->link);
-    wl_output_destroy(out->output);
-    talloc_free(out->make);
-    talloc_free(out->model);
+    WL_RELEASE_OR_DESTROY(wl_output, out->output, WL_OUTPUT_RELEASE_SINCE_VERSION);
     talloc_free(out);
 }
 
@@ -3632,13 +3619,13 @@ static void remove_seat(struct vo_wayland_seat *seat)
     if (seat == seat->wl->last_button_seat)
         seat->wl->last_button_seat = NULL;
     if (seat->keyboard)
-        wl_keyboard_destroy(seat->keyboard);
+        WL_RELEASE_OR_DESTROY(wl_keyboard, seat->keyboard, WL_KEYBOARD_RELEASE_SINCE_VERSION);
     if (seat->pointer)
-        wl_pointer_destroy(seat->pointer);
+        WL_RELEASE_OR_DESTROY(wl_pointer, seat->pointer, WL_POINTER_RELEASE_SINCE_VERSION);
     if (seat->touch)
-        wl_touch_destroy(seat->touch);
+        WL_RELEASE_OR_DESTROY(wl_touch, seat->touch, WL_TOUCH_RELEASE_SINCE_VERSION);
     if (seat->data_device)
-        wl_data_device_destroy(seat->data_device);
+        wl_data_device_release(seat->data_device);
     if (seat->text_input)
         zwp_text_input_v3_destroy(seat->text_input->text_input);
     if (seat->cursor_shape_device)
@@ -3670,7 +3657,7 @@ static void remove_seat(struct vo_wayland_seat *seat)
     if (seat->data_source)
         wl_data_source_destroy(seat->data_source);
 
-    wl_seat_destroy(seat->seat);
+    WL_RELEASE_OR_DESTROY(wl_seat, seat->seat, WL_SEAT_RELEASE_SINCE_VERSION);
     talloc_free(seat);
 }
 
@@ -3721,7 +3708,6 @@ static void seat_create_text_input(struct vo_wayland_seat *seat)
     zwp_text_input_v3_add_listener(seat->text_input->text_input, &text_input_listener, seat);
 }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_41
 static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color)
 {
     if (!wl->color_surface || !wl->color_queue || !wl->supports_parametric)
@@ -3840,9 +3826,7 @@ nosupport:
     pl_color_space_infer(color);
     return;
 }
-#endif
 
-#if HAVE_WAYLAND_PROTOCOLS_1_44
 static void set_color_representation(struct vo_wayland_state *wl, struct mp_image_params *params)
 {
     if (!wl->color_representation_manager)
@@ -3886,7 +3870,6 @@ static void set_color_representation(struct vo_wayland_state *wl, struct mp_imag
         wp_color_representation_surface_v1_set_chroma_location(wl->color_representation_surface, chroma_location);
     }
 }
-#endif
 
 static void set_content_type(struct vo_wayland_state *wl)
 {
@@ -3991,10 +3974,11 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
     struct vo_win_geometry geo;
     struct mp_rect screenrc = wl->current_output->geometry;
     struct m_geometry bounds = {
-        .w = wl->bounded_width,
-        .h = wl->bounded_height,
-        .wh_valid = opts->wl_configure_bounds == 1 ||
-            (opts->wl_configure_bounds == -1 && !autofit_or_geometry),
+        .w = handle_round(wl->scaling, wl->bounded_width),
+        .h = handle_round(wl->scaling, wl->bounded_height),
+        .wh_valid = (wl->bounded_width || wl->bounded_height) &&
+            (opts->wl_configure_bounds == 1 ||
+             (opts->wl_configure_bounds == -1 && !autofit_or_geometry)),
     };
     vo_calc_window_geometry(vo, opts, &screenrc, &screenrc, wl->scaling_factor,
                             false, &geo, &bounds);
@@ -4497,7 +4481,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 
 void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params *params)
 {
-#if HAVE_WAYLAND_PROTOCOLS_1_41
     if (!params) {
         if (wl->color_surface) {
             wp_color_management_surface_v1_destroy(wl->color_surface);
@@ -4529,12 +4512,9 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
     } else {
         params->color = wl->current_params.color;
     }
-#if HAVE_WAYLAND_PROTOCOLS_1_44
     if (color_repr_changed)
         set_color_representation(wl, params);
-#endif
     wl->current_params = *params;
-#endif
 }
 
 void vo_wayland_handle_scale(struct vo_wayland_state *wl)
@@ -4666,7 +4646,6 @@ bool vo_wayland_init(struct vo *vo)
         wl_subsurface_place_above(wl->video_subsurface, wl->surface);
     }
 
-#if HAVE_WAYLAND_PROTOCOLS_1_41
     if (wl->color_manager) {
         wl->color_surface_feedback = wp_color_manager_v1_get_surface_feedback(wl->color_manager, wl->callback_surface);
         wp_color_management_surface_feedback_v1_add_listener(wl->color_surface_feedback, &surface_feedback_listener, wl);
@@ -4675,16 +4654,13 @@ bool vo_wayland_init(struct vo *vo)
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_color_manager_v1_interface.name);
     }
-#endif
 
     get_compositor_preferred_description(wl);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_44
     if (!wl->color_representation_manager) {
         MP_VERBOSE(wl, "Compositor doesn't support the %s protocol!\n",
                    wp_color_representation_surface_v1_interface.name);
     }
-#endif
 
     if (wl->content_type_manager) {
         wl->content_type = wp_content_type_manager_v1_get_surface_content_type(wl->content_type_manager, wl->surface);
@@ -4892,7 +4868,6 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->cursor_theme)
         wl_cursor_theme_destroy(wl->cursor_theme);
 
-#if HAVE_WAYLAND_PROTOCOLS_1_41
     if (wl->color_queue)
         wl_event_queue_destroy(wl->color_queue);
 
@@ -4904,15 +4879,12 @@ void vo_wayland_uninit(struct vo *vo)
 
     if (wl->color_surface_feedback)
         wp_color_management_surface_feedback_v1_destroy(wl->color_surface_feedback);
-#endif
 
-#if HAVE_WAYLAND_PROTOCOLS_1_44
     if (wl->color_representation_manager)
         wp_color_representation_manager_v1_destroy(wl->color_representation_manager);
 
     if (wl->color_representation_surface)
         wp_color_representation_surface_v1_destroy(wl->color_representation_surface);
-#endif
 
     if (wl->content_type)
         wp_content_type_v1_destroy(wl->content_type);
@@ -4974,7 +4946,7 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->shm)
         wl_shm_destroy(wl->shm);
 
-#ifdef WL_FIXES_DESTROY
+#ifdef WL_FIXES_ACK_GLOBAL_REMOVE
     if (wl->fixes)
         wl_fixes_destroy(wl->fixes);
 #endif

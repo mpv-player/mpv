@@ -26,6 +26,15 @@
 #include "vo.h"
 #include "xdg-activation-v1.h"
 
+#define WL_RELEASE_OR_DESTROY(type, object, since) do { \
+    struct type *release_proxy = (object);              \
+    if (type##_get_version(release_proxy) >= (since)) { \
+        type##_release(release_proxy);                  \
+    } else {                                            \
+        type##_destroy(release_proxy);                  \
+    }                                                   \
+} while (0)
+
 struct compositor_format;
 struct vo_wayland_seat;
 struct vo_wayland_tranche;
