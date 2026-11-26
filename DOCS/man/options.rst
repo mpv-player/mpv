@@ -8396,7 +8396,8 @@ Video Sync
                         video. This mode will cause severe audio artifacts if
                         the real monitor refresh rate is too different from
                         the reported or forced rate. This acts on entire audio
-                        frames, instead of single samples.
+                        frames, instead of single samples. Disabled for HBR
+                        S/PDIF passthrough (TrueHD and DTS-HD).
     :display-desync:    Sync video to display, and let audio play on its own.
                         May desync with audio by an arbitrary amount, until it
                         is manually fixed with a seek.
