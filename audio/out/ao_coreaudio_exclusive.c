@@ -337,8 +337,10 @@ static int init(struct ao *ao)
     // virtual format.
     ca_change_physical_format_sync(ao, p->stream, hwfmt);
 
-    if (!ca_init_chmap(ao, p->device))
-        goto coreaudio_error;
+    if (!af_fmt_is_spdif(ao->format)) {
+        if (!ca_init_chmap(ao, p->device))
+            goto coreaudio_error;
+    }
 
     err = CA_GET(p->stream, kAudioStreamPropertyVirtualFormat, &p->stream_asbd);
     CHECK_CA_ERROR("could not get stream's virtual format");
@@ -363,11 +365,16 @@ static int init(struct ao *ao)
         goto coreaudio_error;
     }
 
-    ao->samplerate = p->stream_asbd.mSampleRate;
+    if (af_fmt_is_spdif(ao->format)) {
+        ao->samplerate = p->stream_asbd.mSampleRate *
+                         p->stream_asbd.mChannelsPerFrame / ao->channels.num;
+    } else {
+        ao->samplerate = p->stream_asbd.mSampleRate;
 
-    if (ao->channels.num != p->stream_asbd.mChannelsPerFrame) {
-        ca_get_active_chmap(ao, p->device, p->stream_asbd.mChannelsPerFrame,
-                            &ao->channels);
+        if (ao->channels.num != p->stream_asbd.mChannelsPerFrame) {
+            ca_get_active_chmap(ao, p->device, p->stream_asbd.mChannelsPerFrame,
+                                &ao->channels);
+        }
     }
     if (!ao->channels.num) {
         MP_ERR(ao, "number of channels changed, and unknown channel layout!\n");
