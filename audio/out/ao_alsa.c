@@ -576,11 +576,15 @@ static int try_open_device(struct ao *ao, const char *device, int mode)
 
     if (af_fmt_is_spdif(ao->format)) {
         void *tmp = talloc_new(NULL);
+        // 8-channel HBR carries four 2-channel IEC 60958 subpackets per frame.
+        int iec_srate = ao->samplerate;
+        if (ao->channels.num == 8 && iec_srate <= 192000)
+            iec_srate *= 4;
         char *params = talloc_asprintf(tmp,
                         "AES0=%d,AES1=%d,AES2=0,AES3=%d",
                         IEC958_AES0_NONAUDIO | IEC958_AES0_PRO_EMPHASIS_NONE,
                         IEC958_AES1_CON_ORIGINAL | IEC958_AES1_CON_PCM_CODER,
-                        map_iec958_srate(ao->samplerate));
+                        map_iec958_srate(iec_srate));
         const char *ac3_device = append_params(tmp, device, params);
         MP_VERBOSE(ao, "opening device '%s' => '%s'\n", device, ac3_device);
         err = snd_pcm_open(&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, mode);
