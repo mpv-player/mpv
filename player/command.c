@@ -1013,7 +1013,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         if (chapter < 0) // avoid using -1 if first chapter starts at 0
             chapter = (chapter_start_time(mpctx, 0) <= 0) ? 0 : -1;
         if (chapter >= num && step_all > 0) {
-            if (mpctx->opts->keep_open) {
+            if (mpctx->opts->keep_file_open) {
                 seek_to_last_frame(mpctx);
             } else {
                 // semi-broken file; ignore for user convenience
@@ -5046,6 +5046,16 @@ int mp_get_property_id(struct MPContext *mpctx, const char *name)
     return -1;
 }
 
+const char *mp_resolve_property_alias(struct MPContext *mpctx, const char *name)
+{
+    if (strncmp(name, "options/", 8) == 0)
+        name += 8;
+    struct m_property *prop = m_property_list_find(&mpctx->command_ctx->properties, name);
+    if (prop && (prop->call == mp_property_alias || prop->call == mp_property_deprecated_alias))
+        return mp_resolve_property_alias(mpctx, prop->priv);
+    return name;
+}
+
 static bool is_property_set(int action, void *val)
 {
     switch (action) {
@@ -6738,7 +6748,7 @@ static void cmd_stop(void *p)
     if (!(flags & 1))
         playlist_clear(mpctx->playlist);
 
-    if (mpctx->opts->player_idle_mode < 2 &&
+    if (mpctx->opts->keep_player_open < 2 &&
         mpctx->opts->position_save_on_quit)
     {
         mp_write_watch_later_conf(mpctx);

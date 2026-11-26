@@ -1,0 +1,3 @@
+rename `--keep-open` to `--keep-file-open`, the old name remains as an alias
+rename `--keep-open-pause` to `--keep-file-open-pause`, the old name remains as an alias
+rename `--idle` to `--keep-player-open`, the old name remains as an alias

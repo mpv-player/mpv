@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     if (mpv_initialize(ctx) != 0)
         return 1;
 
-    set_property_string("idle", "once");
+    set_property_string("keep-player-open", "once");
 
     const char *cmd[] = {"loadfile", "av://lavfi:testsrc", NULL};
     command(cmd);

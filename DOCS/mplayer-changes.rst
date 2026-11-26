@@ -34,7 +34,7 @@ Player
 * Re-enable screensaver while the player is paused.
 * Allow resuming playback at a later point with ``Shift+q``, also see the
   ``quit-watch-later`` input command.
-* ``--keep-open`` option to stop the player from closing the window and
+* ``--keep-file-open`` option to stop the player from closing the window and
   exiting after playback ends.
 * A client API, that allows embedding **mpv** into applications
   (see ``mpv/client.h`` in the sources).

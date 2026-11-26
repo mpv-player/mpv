@@ -861,10 +861,12 @@ Program Behavior
 
     This option is useful for debugging only.
 
-``--idle=<no|yes|once>``
+``--keep-player-open=<no|yes|once>``
     Makes mpv wait idly instead of quitting when there is no file to play.
     Default: ``no``. In pseudo-gui mode (see PSEUDO GUI MODE), this defaults to
     ``yes``.
+
+    ``--idle`` is an alias for ``--keep-player-open``.
 
     ``once`` will only idle at start and let the player close once the
     first playlist has finished playing back.
@@ -3439,21 +3441,23 @@ Window
     caveats in the ``--fs-screen`` option also apply here. This option is
     ignored and does nothing if ``--fs-screen`` is explicitly set.
 
-``--keep-open=<yes|no|always>``
+``--keep-file-open=<yes|no|always>``
     Do not unload the current file when playing or seeking beyond the end of the
     file, and there is no next file to be played (and ``--loop`` is not used).
     Instead, pause the player. When trying to seek beyond end of the file, the
     player will attempt to seek to the last frame.
 
+    ``--keep-open`` is an alias for ``--keep-file-open``.
+
     Normally, this will act like ``set pause yes`` on EOF, unless the
-    ``--keep-open-pause=no`` option is set.
+    ``--keep-file-open-pause=no`` option is set.
 
     The following arguments can be given:
 
     :no:        If the current file ends, go to the next file or unload the
                 current file. (Default.)
     :yes:       Don't unload file if the current file is the last playlist
-                entry. Equivalent to ``--keep-open`` without arguments.
+                entry. Equivalent to ``--keep-file-open`` without arguments.
     :always:    Like ``yes``, but also applies to files before the last playlist
                 entry. This means playback will never automatically advance to
                 the next file.
@@ -3468,25 +3472,27 @@ Window
         anyway.
 
         Whether the player enters idle mode or quits when the current file is
-        unloaded is controlled by ``--idle``.
+        unloaded is controlled by ``--keep-player-open``.
 
     ``yes`` doesn't pause if there is a next file in the playlist, or the
     playlist is looped. Approximately, this will pause when the player would
     normally exit, but in practice there are corner cases in which this is not
-    the case (e.g. ``mpv --keep-open file.mkv /dev/null`` will play file.mkv
-    normally, then fail to open ``/dev/null``, then exit).
+    the case (e.g. ``mpv --keep-file-open file.mkv /dev/null`` will play
+    file.mkv normally, then fail to open ``/dev/null``, then exit).
 
-``--keep-open-pause=<yes|no>``
-    If set to ``no``, instead of pausing when ``--keep-open`` is active, just
-    stop at end of file and continue playing forward when you seek backwards
-    until end where it stops again. Default: ``yes``.
+``--keep-file-open-pause=<yes|no>``
+    If set to ``no``, instead of pausing when ``--keep-file-open`` is active,
+    just stop at end of file and continue playing forward when you seek
+    backwards until end where it stops again. Default: ``yes``.
+
+    ``--keep-open-pause`` is an alias for ``--keep-file-open-pause``.
 
 ``--image-display-duration=<seconds|inf>``
     If the current file is an image, play the image for the given amount of
     seconds (default: 5). ``inf`` means the file is kept open forever (until
     the user stops playback manually).
 
-    Unlike ``--keep-open``, the player is not paused, but simply continues
+    Unlike ``--keep-file-open``, the player is not paused, but simply continues
     playback until the time has elapsed. (It should not use any resources
     during "playback".)
 

@@ -406,7 +406,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     check_library_versions(mp_null_log, 0);
 
-    if (!mpctx->playlist->num_entries && !opts->player_idle_mode &&
+    if (!mpctx->playlist->num_entries && !opts->keep_player_open &&
         options)
     {
         // nothing to play
@@ -444,7 +444,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return -1;
 
     // Needed to properly enter _initial_ idle mode if playlist empty.
-    if (mpctx->opts->player_idle_mode && !mpctx->playlist->num_entries)
+    if (mpctx->opts->keep_player_open && !mpctx->playlist->num_entries)
         mpctx->stop_play = PT_STOP;
 
     MP_STATS(mpctx, "end init");

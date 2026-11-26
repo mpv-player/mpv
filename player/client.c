@@ -87,7 +87,8 @@ struct observe_property {
     // -- immutable
     struct mpv_handle *owner;
     char *name;
-    int id;                 // ==mp_get_property_id(name)
+    char *target;           // ==mp_resolve_property_alias(name)
+    int id;                 // ==mp_get_property_id(target)
     uint64_t event_mask;    // ==mp_get_property_event_mask(name)
     int64_t reply_id;
     mpv_format format;
@@ -1567,10 +1568,12 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
     mp_assert(!ctx->destroying);
     struct observe_property *prop = talloc_ptrtype(ctx, prop);
     talloc_set_destructor(prop, property_free);
+    const char *target = mp_resolve_property_alias(ctx->mpctx, name);
     *prop = (struct observe_property){
         .owner = ctx,
         .name = talloc_strdup(prop, name),
-        .id = mp_get_property_id(ctx->mpctx, name),
+        .target = talloc_strdup(prop, target),
+        .id = mp_get_property_id(ctx->mpctx, target),
         .event_mask = mp_get_property_event_mask(name),
         .reply_id = userdata,
         .format = format,
@@ -1649,7 +1652,7 @@ void mp_client_property_change(struct MPContext *mpctx, const char *name)
         mp_mutex_lock(&client->lock);
         for (int i = 0; i < client->num_properties; i++) {
             if (client->properties[i]->id == id &&
-                property_shared_prefix(name, client->properties[i]->name)) {
+                property_shared_prefix(name, client->properties[i]->target)) {
                 client->properties[i]->change_ts += 1;
                 client->has_pending_properties = true;
                 any_pending = true;

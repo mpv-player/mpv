@@ -36,8 +36,8 @@ Then you can control it using socat:
 In this case, socat copies data between stdin/stdout and the mpv socket
 connection.
 
-See the ``--idle`` option how to make mpv start without exiting immediately or
-playing a file.
+See the ``--keep-player-open`` option how to make mpv start without exiting
+immediately or playing a file.
 
 It's also possible to send input.conf style text-only commands:
 

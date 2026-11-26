@@ -2330,7 +2330,7 @@ void mp_play_files(struct MPContext *mpctx)
         mpctx->playlist->current_was_replaced = false;
         mpctx->stop_play = new_entry ? PT_NEXT_ENTRY : PT_STOP;
 
-        if (!mpctx->playlist->current && mpctx->opts->player_idle_mode < 2)
+        if (!mpctx->playlist->current && mpctx->opts->keep_player_open < 2)
             break;
     }
 

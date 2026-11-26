@@ -625,11 +625,13 @@ static const m_option_t mp_opts[] = {
         {"no", 0}, {"yes", 1}, {"current", 2})},
 
     {"pause", OPT_BOOL(pause)},
-    {"keep-open", OPT_CHOICE(keep_open,
+    {"keep-file-open", OPT_CHOICE(keep_file_open,
         {"no", 0},
         {"yes", 1},
         {"always", 2})},
-    {"keep-open-pause", OPT_BOOL(keep_open_pause)},
+    {"keep-open", OPT_ALIAS("keep-file-open")},
+    {"keep-file-open-pause", OPT_BOOL(keep_file_open_pause)},
+    {"keep-open-pause", OPT_ALIAS("keep-file-open-pause")},
     {"image-display-duration", OPT_DOUBLE(image_display_duration),
         M_RANGE(0, INFINITY)},
 
@@ -915,8 +917,9 @@ static const m_option_t mp_opts[] = {
 
     {"video-osd", OPT_BOOL(video_osd), .flags = UPDATE_OSD},
 
-    {"idle", OPT_CHOICE(player_idle_mode,
+    {"keep-player-open", OPT_CHOICE(keep_player_open,
         {"no",   0}, {"once", 1}, {"yes",  2})},
+    {"idle", OPT_ALIAS("keep-player-open")},
 
 #ifndef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     {"input-commands", OPT_STRINGLIST(input_commands)},
@@ -1076,7 +1079,7 @@ static const struct MPOpts mp_default_opts = {
     .playlist_pos = -1,
     .play_frames = -1,
     .rebase_start_time = true,
-    .keep_open_pause = true,
+    .keep_file_open_pause = true,
     .image_display_duration = 5.0,
     .stream_id = { { [STREAM_AUDIO] = -1,
                      [STREAM_VIDEO] = -1,

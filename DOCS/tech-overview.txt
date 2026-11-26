@@ -17,7 +17,8 @@ player/*.c:
         * check help options etc. (call handle_help_options()), possibly exit
         * call mp_play_files() function that works down the playlist:
             * run idle loop (idle_loop()), until there are files in the
-                playlist or an exit command was given (only if --idle it set)
+                playlist or an exit command was given (only if
+                --keep-player-open is set)
             * actually load and play a file in play_current_file():
                 * run all the dozens of functions to load the file and
                   initialize playback

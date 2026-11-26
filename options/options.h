@@ -291,7 +291,7 @@ typedef struct MPOpts {
     char *osd_status_msg;
     char *osd_msg[3];
     int playlist_entry_name;
-    int player_idle_mode;
+    int keep_player_open;
     char **input_commands;
     bool consolecontrols;
     int playlist_pos;
@@ -315,8 +315,8 @@ typedef struct MPOpts {
     bool save_watch_history;
     char *watch_history_path;
     bool pause;
-    int keep_open;
-    bool keep_open_pause;
+    int keep_file_open;
+    bool keep_file_open_pause;
     double image_display_duration;
     char *lavfi_complex;
     int stream_id[2][STREAM_TYPE_COUNT];
