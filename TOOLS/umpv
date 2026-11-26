@@ -6,11 +6,10 @@ playback with this script, it will try to reuse an already running instance of
 mpv (but only if that was started with umpv). Other mpv instances (not started
 by umpv) are ignored, and the script doesn't know about them.
 
-This only takes filenames as arguments. Custom options can't be used; the script
-interprets them as filenames. If mpv is already running, the files passed to
-umpv are appended to mpv's internal playlist. If a file does not exist or is
-otherwise not playable, mpv will skip the playlist entry when attempting to
-play it (from the GUI perspective, it's silently ignored).
+If mpv is already running, the files passed to umpv are appended to mpv's internal
+playlist. If a file does not exist or is otherwise not playable, mpv will skip the
+playlist entry when attempting to play it (from the GUI perspective, it's silently
+ignored).
 
 If mpv isn't running yet, this script will start mpv and let it control the
 current terminal. It will not write output to stdout/stderr, because this
@@ -26,6 +25,7 @@ Note: you can supply custom mpv path and options with the MPV environment
       is already running), this will be ignored.
 """
 
+import argparse
 import os
 import shlex
 import socket
@@ -63,12 +63,16 @@ def get_socket_path() -> str:
 
     return os.path.join(base_dir, ".umpv")
 
-def send_files_to_mpv(conn: socket.socket | BinaryIO, files: Iterable[str]) -> None:
+def send_files_to_mpv(
+    conn: socket.socket | BinaryIO, files: Iterable[str], replace: bool = False,
+) -> None:
     try:
         send = conn.send if isinstance(conn, socket.socket) else conn.write
         for f in files:
+            flag = "replace" if replace else "append-play"
+            replace = False
             f = f.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
-            send(f'raw loadfile "{f}" append-play\n'.encode())
+            send(f'raw loadfile "{f}" {flag}\n'.encode())
     except Exception:
         print("mpv is terminating or the connection was lost.", file=sys.stderr)
         sys.exit(1)
@@ -85,17 +89,26 @@ def start_mpv(files: Iterable[str], socket_path: str) -> None:
     subprocess.Popen(mpv_command, start_new_session=True)
 
 def main() -> None:
-    files = (os.path.abspath(f) if not is_url(f) else f for f in sys.argv[1:])
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="replace the currently playing file",
+    )
+    parser.add_argument("files", nargs="*")
+    args = parser.parse_args()
+
+    files = (os.path.abspath(f) if not is_url(f) else f for f in args.files)
     socket_path = get_socket_path()
 
     try:
         if os.name == "nt":
             with open(socket_path, "r+b", buffering=0) as pipe:
-                send_files_to_mpv(pipe, files)
+                send_files_to_mpv(pipe, files, args.replace)
         else:
             with socket.socket(socket.AF_UNIX) as sock:
                 sock.connect(socket_path)
-                send_files_to_mpv(sock, files)
+                send_files_to_mpv(sock, files, args.replace)
     except (FileNotFoundError, ConnectionRefusedError):
         start_mpv(files, socket_path)
 
