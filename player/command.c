@@ -8608,6 +8608,11 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
     if (opt_ptr == &opts->playback_speed || opt_ptr == &opts->playback_pitch ||
         opt_ptr == &opts->pitch_correction) {
         update_playback_speed(mpctx);
+        // The audio buffered before the change was made at the old speed and
+        // would play at that speed after unpausing, moving the position by
+        // up to several seconds. While paused, refill it from where we are.
+        if (mpctx->paused && mpctx->ao_chain)
+            issue_refresh_seek(mpctx, MPSEEK_EXACT);
         mp_wakeup_core(mpctx);
     }
 
