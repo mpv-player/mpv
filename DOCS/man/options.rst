@@ -2494,6 +2494,16 @@ Audio
         This modifies certain subtle player behavior, like A/V-sync and underrun
         handling. Enabling this option is strongly discouraged.
 
+``--audio-spdif-pause-bursts=<yes|no>``
+    With spdif/HDMI passthrough, fill silence (while paused with
+    ``--audio-stream-silence``, on underruns and when padding) with IEC 61937
+    pause bursts instead of zero bytes. Zeros are not a valid IEC 61937 stream:
+    some receivers loop the last audio they decoded, or lose sync and take a
+    moment to lock again. Pause bursts keep the receiver locked and muted.
+    With ``ao=pipewire``, buffers are then always queued full, padded with
+    pause bursts. Takes effect when the audio output is (re)opened. Default:
+    no.
+
 ``--audio-wait-open=<secs>``
     This makes sense for use with ``--audio-stream-silence=yes``. If this option
     is given, the player will wait for the given amount of seconds after opening

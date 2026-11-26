@@ -768,6 +768,7 @@ static const m_option_t mp_opts[] = {
     {"audio-exclusive", OPT_BOOL(audio_exclusive), .flags = UPDATE_AUDIO},
     {"audio-fallback-to-null", OPT_BOOL(ao_null_fallback)},
     {"audio-stream-silence", OPT_BOOL(audio_stream_silence)},
+    {"audio-spdif-pause-bursts", OPT_BOOL(audio_spdif_pause_bursts)},
     {"audio-wait-open", OPT_FLOAT(audio_wait_open), M_RANGE(0, 60)},
     {"force-window", OPT_CHOICE(force_vo,
         {"no", 0}, {"yes", 1}, {"immediate", 2})},
