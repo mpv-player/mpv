@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <libavutil/downmix_info.h>
 #include <libavutil/opt.h>
 #include <libavutil/common.h>
 #include <libavutil/samplefmt.h>
@@ -50,6 +51,8 @@ struct priv {
     int out_rate;
     int out_format;
     struct mp_chmap out_channels;
+    bool has_downmix;
+    AVDownmixInfo downmix; // mix levels the stream asks for
 
     double current_pts;
     struct mp_aframe *input;
@@ -303,6 +306,12 @@ static bool configure_lavrr(struct priv *p, bool verbose)
     int normalize = p->opts->normalize;
     av_opt_set_double(p->avrctx, "rematrix_maxval", normalize ? 1 : 1000, 0);
 
+    if (p->has_downmix) {
+        av_opt_set_double(p->avrctx, "clev", p->downmix.center_mix_level, 0);
+        av_opt_set_double(p->avrctx, "slev", p->downmix.surround_mix_level, 0);
+        av_opt_set_double(p->avrctx, "lfe_mix_level", p->downmix.lfe_mix_level, 0);
+    }
+
     if (mp_set_avopts(p->log, p->avrctx, p->opts->avopts) < 0)
         goto error;
 
@@ -466,6 +475,14 @@ static void swresample_process(struct mp_filter *f)
             return;
         }
 
+        AVFrameSideData *sd =
+            av_frame_get_side_data(mp_aframe_get_raw_avframe(input),
+                                   AV_FRAME_DATA_DOWNMIX_INFO);
+        bool has_downmix = sd && sd->size >= sizeof(AVDownmixInfo);
+        AVDownmixInfo downmix = {0};
+        if (has_downmix)
+            downmix = *(AVDownmixInfo *)sd->data;
+
         int out_rate = s->out_rate ? s->out_rate : in_rate;
         int out_format = s->out_format ? s->out_format : in_format;
         struct mp_chmap out_channels =
@@ -477,6 +494,11 @@ static void swresample_process(struct mp_filter *f)
             p->out_rate != out_rate ||
             p->out_format != out_format ||
             !mp_chmap_equals(&p->out_channels, &out_channels) ||
+            p->has_downmix != has_downmix ||
+            (has_downmix &&
+             (p->downmix.center_mix_level != downmix.center_mix_level ||
+              p->downmix.surround_mix_level != downmix.surround_mix_level ||
+              p->downmix.lfe_mix_level != downmix.lfe_mix_level)) ||
             !p->avrctx)
         {
             if (p->avrctx) {
@@ -499,6 +521,8 @@ static void swresample_process(struct mp_filter *f)
             p->out_rate = out_rate;
             p->out_format = out_format;
             p->out_channels = out_channels;
+            p->has_downmix = has_downmix;
+            p->downmix = downmix;
 
             if (!configure_lavrr(p, true)) {
                 talloc_free(input);
