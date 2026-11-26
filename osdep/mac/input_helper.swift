@@ -63,6 +63,14 @@ class InputHelper: NSObject {
         .init(0, 0)
     ]
 
+    lazy var modifierBits: UInt32 = { return modifierMap.reduce(0) { $0 | $1.key } }()
+    let modifierMap: [(key: UInt32, modifier: NSEvent.ModifierFlags)] = [
+        (MP_KEY_MODIFIER_SHIFT, .shift),
+        (MP_KEY_MODIFIER_CTRL, .control),
+        (MP_KEY_MODIFIER_ALT, .option),
+        (MP_KEY_MODIFIER_META, .command)
+    ]
+
     init(_ input: OpaquePointer? = nil, _ option: OptionHelper? = nil) {
         super.init()
         self.input = input
@@ -221,6 +229,34 @@ class InputHelper: NSObject {
         }
 
         return Int32(mask)
+    }
+
+    func map(shortcut: String) -> (key: String, modifiers: NSEvent.ModifierFlags)? {
+        let inputKey = mp_input_get_key_from_name(shortcut)
+        // remove modifier bits and try to map key code (unicode, MP_KEY_*)
+        guard inputKey > 0, let key = map(keyCode: inputKey & ~Int32(modifierBits)) else { return nil }
+        let modifiers = modifierMap.filter { UInt32(inputKey) & $0.key != 0 }.map { $0.modifier }
+
+        return (key, NSEvent.ModifierFlags(modifiers))
+    }
+
+    func map(keyCode: Int32) -> String? {
+        // valid printable unicode range
+        if keyCode >= 32 && keyCode <= 0x10FFFF { return UnicodeScalar(Int(keyCode)).map { String($0) }}
+
+        // BS maps to NSDeleteCharacter, DEL maps to NSDeleteFunctionKey
+        // both of these map to the same visible character ⌦ (forward delete)
+        // work around this by manually mapping BS to NSBackspaceCharacter
+        if keyCode == MP_KEY_BACKSPACE { return String(UnicodeScalar(UInt8(NSBackspaceCharacter)))}
+
+        // try to map MP_KEY_* to kVK_* to string representation
+        if let code = keymap.first(where: { $0.to == keyCode })?.from,
+           let event = CGEvent(keyboardEventSource: nil, virtualKey: CGKeyCode(code), keyDown: true),
+           let char = NSEvent(cgEvent: event)?.charactersIgnoringModifiers {
+            return char
+        }
+
+        return nil
     }
 
     private func map(button: Int) -> Int32 {
