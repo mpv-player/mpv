@@ -190,6 +190,7 @@ struct vo_internal {
     int64_t presentation_delay;     // display time minus pts of the last timed frame, INT64_MIN if none
     int64_t vsync_grid;             // a recent vsync of the display, steadied against the feedback's jitter
     int grid_misses;                // display times in a row that were not on the grid
+    int64_t sync_end;               // vsync the current display synced frame ends on, 0 if none
 
     // Timed frames on the vsync grid, see render_frame().
     int64_t last_due;               // vsync the last presented timed frame was due on, 0 if none
@@ -427,6 +428,7 @@ static void reset_vsync_timings(struct vo *vo)
     struct vo_internal *in = vo->in;
     in->drop_point = 0;
     in->base_vsync = 0;
+    in->sync_end = 0;
     in->expecting_vsync = false;
     in->num_successive_vsyncs = 0;
 }
@@ -1005,20 +1007,25 @@ void vo_wait_frame(struct vo *vo)
     mp_mutex_unlock(&in->lock);
 }
 
-// Returns the predicted display time of the frame submitted at submit_time,
-// or -1 if it cannot be determined.
-static int64_t predict_display_time(const struct vo_vsync_info *vsync, int64_t submit_time)
+// Returns the predicted display time of the last flip, or -1 if it cannot be
+// determined. The flips after the one the backend reports are displayed in
+// order, a vsync apart, and none before the vsync after its flip_page() call.
+static int64_t predict_display_time(struct vo_internal *in, const struct vo_vsync_info *vsync)
 {
     int64_t known = vsync->displayed_time;
     int age = vsync->displayed_age;
     int64_t vd = vsync->vsync_duration;
     if (known <= 0 || (age && vd <= 0))
         return -1;
-    if (!age)
-        return known;
-    int64_t display = known + age * vd;
-    if (submit_time > known)
-        display = MPMAX(display, known + ((submit_time - known) / vd + 1) * vd);
+    int64_t display = known;
+    for (int64_t flip = in->flips - age; flip < in->flips; flip++) {
+        display += vd;
+        // A flip that is not kept any more was called long before.
+        bool kept = flip >= 0 && in->flips - flip <= MP_ARRAY_SIZE(in->presents);
+        int64_t time = kept ? in->presents[flip % MP_ARRAY_SIZE(in->presents)].time : 0;
+        if (time > known)
+            display = MPMAX(display, known + ((time - known) / vd + 1) * vd);
+    }
     return display;
 }
 
@@ -1152,6 +1159,48 @@ static void wait_until(int64_t target, bool exact)
     while (mp_time_ns() < target) {}
 }
 
+// A flip that is displayed late moves the end of the frame, effectively
+// shifting all presentation times after it. This causes the video to be
+// delayed, and resampling has to slow the audio down until the video catches
+// up. In principle it's fine, but it causes unnecessary audio speed changes.
+// So when a flip of the frame is displayed late, shorten the frame's on-screen
+// time by the amount it was delayed, instead of pushing the whole timeline
+// forward. This keeps us in sync with the audio, as long as the frame has a
+// repeat to give up. display-resample is meant to keep the audio in sync at
+// different refresh rates, not to compensate for frames that were displayed
+// too late. Late frames are already not paced correctly.
+// Always called locked.
+static void update_display_synced_end(struct vo *vo, int planned, bool on_grid)
+{
+    struct vo_internal *in = vo->in;
+    struct vo_frame *frame = in->current_frame;
+    // A seek took the frame out of display sync while it was flipped.
+    if (!frame->display_synced)
+        return;
+    if (!on_grid) {
+        if (planned)
+            in->sync_end = 0;
+        return;
+    }
+    if (planned) {
+        int late = in->sync_end ? lrint((in->vsync_grid - in->sync_end) / in->vsync_interval) : 0;
+        in->sync_end = in->vsync_grid + (int64_t)(MPMAX(planned - late, 1) * in->vsync_interval);
+    }
+    if (!in->sync_end || frame->num_vsyncs < 1)
+        return;
+    int left = MPMAX(lrint((in->sync_end - in->vsync_grid) / in->vsync_interval) - 1, 0);
+    if (left == frame->num_vsyncs)
+        return;
+    MP_VERBOSE(vo, "Display synced frame has %d flips left, not %d\n", left, frame->num_vsyncs);
+    // The offsets of the next draw were stepped by one vsync.
+    int skipped = frame->num_vsyncs - MPMAX(left, 1);
+    frame->vsync_offset += skipped * frame->vsync_interval;
+    frame->ideal_frame_vsync += skipped * frame->ideal_frame_vsync_duration;
+    frame->num_vsyncs = left;
+    if (!left)
+        wakeup_core(vo);
+}
+
 static bool render_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
@@ -1189,6 +1238,7 @@ static bool render_frame(struct vo *vo)
     int64_t pts = frame->pts;
     int64_t duration = frame->duration;
     int64_t end_time = pts + duration;
+    int planned = frame->repeat ? 0 : frame->num_vsyncs;
 
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? sync_target : pts - in->flip_queue_offset;
@@ -1350,12 +1400,7 @@ static bool render_frame(struct vo *vo)
         };
         if (vo->driver->get_vsync)
             vo->driver->get_vsync(vo, &vsync);
-        int64_t display_time = predict_display_time(&vsync, present_time);
-        bool have_feedback = display_time > 0;
-
-        // Make up some crap if presentation feedback is missing.
-        if (!have_feedback)
-            display_time = mp_time_ns();
+        int64_t flipped = mp_time_ns();
 
         stats_time_end(in->stats, "video-flip");
 
@@ -1363,8 +1408,13 @@ static bool render_frame(struct vo *vo)
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
 
-        in->refresh_kind = have_feedback ? vsync.refresh_kind : VO_REFRESH_UNKNOWN;
         record_present(in, (struct present_record){present_time, pts, due});
+        int64_t display_time = predict_display_time(in, &vsync);
+        bool have_feedback = display_time > 0;
+        // Make up some crap if presentation feedback is missing.
+        if (!have_feedback)
+            display_time = flipped;
+        in->refresh_kind = have_feedback ? vsync.refresh_kind : VO_REFRESH_UNKNOWN;
         // The flip the backend reports as displayed, if it measured the time
         // and the flip is one of the last.
         int64_t shown_flip = in->flips - 1 - vsync.displayed_age;
@@ -1388,6 +1438,8 @@ static bool render_frame(struct vo *vo)
         bool grid = have_feedback && in->vsync_interval > 1 && !in->follows;
         bool on_grid = grid && update_vsync_grid(in, display_time);
         update_vsync_timing_after_swap(vo, display_time, grid, on_grid);
+        if (use_vsync)
+            update_display_synced_end(vo, planned, on_grid);
     }
 
     if (vo->driver->caps & VO_CAP_NORETAIN) {
