@@ -1083,7 +1083,7 @@ endif
 wayland = {
     'deps': [dependency('wayland-client', version: '>= 1.23.0', required: get_option('wayland')),
              dependency('wayland-cursor', version: '>= 1.23.0', required: get_option('wayland')),
-             dependency('wayland-protocols', version: '>= 1.38', required: get_option('wayland')),
+             dependency('wayland-protocols', version: '>= 1.47', required: get_option('wayland')),
              dependency('xkbcommon', version: '>= 0.3.0', required: get_option('wayland'))],
     'header': cc.has_header('linux/input-event-codes.h', required: get_option('wayland'),
                             # Pass CFLAGS from a related package as a hint for non-Linux
@@ -1101,9 +1101,6 @@ features += {'wayland': wayland_deps and wayland['header'] and wayland['scanner'
 
 if features['wayland']
     subdir(join_paths('video', 'out'))
-endif
-
-if features['wayland'] and features['wayland-protocols-1-39']
     sources += files('player/clipboard/clipboard-wayland.c')
 endif
 

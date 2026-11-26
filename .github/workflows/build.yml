@@ -539,13 +539,14 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # We want to test ffmpeg 6.1.2, which Alpine 3.21 includes.
-      # Also test compatibility with Wayland Protocols 1.38 and Wayland libs 1.23.
+      # Also test compatibility with Wayland Protocols >=1.47 and Wayland libs 1.23.
       # Musl support is an added bonus.
       image: alpine:3.21
     steps:
       - uses: actions/checkout@v7
       - name: Install dependencies
         run: |
+          echo '@wp https://dl-cdn.alpinelinux.org/alpine/v3.24/main' >> /etc/apk/repositories
           apk update
           apk add \
               binutils \
@@ -570,7 +571,7 @@ jobs:
               rust \
               samurai \
               wayland-dev \
-              wayland-protocols
+              'wayland-protocols@wp>=1.47'
 
       - name: Build with meson
         id: build
