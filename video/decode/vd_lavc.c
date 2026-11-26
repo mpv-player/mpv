@@ -18,6 +18,7 @@
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <stdbool.h>
 
@@ -67,6 +68,11 @@ static int hwdec_opt_help(struct mp_log *log, const m_option_t *opt,
 
 #define HWDEC_DELAY_QUEUE_COUNT 4
 #define HWDEC_WAIT_KEYFRAME_COUNT 96
+
+// Upper bound for the packets kept since the last keyframe while hardware
+// decoding, so that a hwdec failure in the middle of a stream can be replayed
+// with the fallback decoder. Above it, fallback waits for the next keyframe.
+#define HWDEC_REPLAY_MAX_BYTES (64 * 1024 * 1024)
 
 // Fallback number of extra surfaces for fixed-size hw frame pools, if the
 // actual requirement cannot be determined.
@@ -229,6 +235,17 @@ typedef struct lavc_ctx {
 
     struct demux_packet **requeue_packets;
     int num_requeue_packets;
+
+    // While hardware decoding: copies of the packets sent since the keyframe
+    // before the last one, for re-sending on a mid-stream fallback. The
+    // previous GOP is kept because the decoder may still hold frames from it.
+    struct demux_packet **replay_packets;
+    int num_replay_packets;
+    size_t replay_bytes;
+    int replay_gop_start;   // index of the last keyframe in replay_packets
+    bool replay_valid;      // replay_packets starts at a keyframe
+    double last_out_pts;    // pts of the last frame returned
+    double replay_skip_pts; // after a replay, drop frames up to this pts
 
     struct mp_image **delay_queue;
     int num_delay_queue;
@@ -914,6 +931,38 @@ static void reset_avctx(struct mp_filter *vd)
     ctx->wait_for_keyframe = ctx->use_hwdec ? HWDEC_WAIT_KEYFRAME_COUNT : 0;
 }
 
+static void clear_replay(struct mp_filter *vd)
+{
+    vd_ffmpeg_ctx *ctx = vd->priv;
+
+    for (int n = 0; n < ctx->num_replay_packets; n++)
+        demux_packet_pool_push(vd->packet_pool, ctx->replay_packets[n]);
+    ctx->num_replay_packets = 0;
+    ctx->replay_bytes = 0;
+    ctx->replay_gop_start = 0;
+    ctx->replay_valid = false;
+}
+
+// Drop the replay packets before the last keyframe, so that the GOP starting
+// there becomes the previous one.
+static void drop_previous_gop(struct mp_filter *vd)
+{
+    vd_ffmpeg_ctx *ctx = vd->priv;
+
+    int drop = ctx->replay_gop_start;
+    for (int n = 0; n < drop; n++)
+        demux_packet_pool_push(vd->packet_pool, ctx->replay_packets[n]);
+    ctx->num_replay_packets -= drop;
+    memmove(ctx->replay_packets, ctx->replay_packets + drop,
+            ctx->num_replay_packets * sizeof(ctx->replay_packets[0]));
+    ctx->replay_bytes = 0;
+    for (int n = 0; n < ctx->num_replay_packets; n++) {
+        ctx->replay_bytes +=
+            demux_packet_estimate_total_size(ctx->replay_packets[n]);
+    }
+    ctx->replay_gop_start = 0;
+}
+
 static void flush_all(struct mp_filter *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
@@ -929,6 +978,10 @@ static void flush_all(struct mp_filter *vd)
     for (int n = 0; n < ctx->num_requeue_packets; n++)
         talloc_free(ctx->requeue_packets[n]);
     ctx->num_requeue_packets = 0;
+
+    clear_replay(vd);
+    ctx->last_out_pts = MP_NOPTS_VALUE;
+    ctx->replay_skip_pts = MP_NOPTS_VALUE;
 
     reset_avctx(vd);
 }
@@ -1254,6 +1307,28 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         return ret;
 
+    if (ctx->use_hwdec && pkt) {
+        if (pkt->keyframe) {
+            if (ctx->replay_valid) {
+                drop_previous_gop(vd);
+                ctx->replay_gop_start = ctx->num_replay_packets;
+            } else {
+                clear_replay(vd);
+                ctx->replay_valid = true;
+            }
+        }
+        if (ctx->replay_valid) {
+            struct demux_packet *copy = demux_copy_packet(vd->packet_pool, pkt);
+            if (copy) {
+                MP_TARRAY_APPEND(ctx, ctx->replay_packets,
+                                 ctx->num_replay_packets, copy);
+                ctx->replay_bytes += demux_packet_estimate_total_size(copy);
+            }
+            if (!copy || ctx->replay_bytes > HWDEC_REPLAY_MAX_BYTES)
+                clear_replay(vd); // wait for the next keyframe
+        }
+    }
+
     if (ctx->hw_probing && ctx->num_sent_packets < 32 &&
         ctx->hwdec_opts->software_fallback <= 32)
     {
@@ -1354,6 +1429,24 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
         ctx->sent_packets = NULL;
         ctx->num_sent_packets = 0;
 
+        // Failure in the middle of a stream (probing has ended): re-send
+        // everything since the last keyframe, and drop the frames that were
+        // already returned, so playback continues without a gap.
+        double skip_pts = MP_NOPTS_VALUE;
+        if (!num_pkts && ctx->replay_valid && ctx->num_replay_packets &&
+            ctx->last_out_pts != MP_NOPTS_VALUE)
+        {
+            pkts = ctx->replay_packets;
+            num_pkts = ctx->num_replay_packets;
+            ctx->replay_packets = NULL;
+            ctx->num_replay_packets = 0;
+            ctx->replay_bytes = 0;
+            ctx->replay_valid = false;
+            skip_pts = ctx->last_out_pts;
+            MP_VERBOSE(vd, "Re-sending %d packets after hwdec failure.\n",
+                       num_pkts);
+        }
+
         /*
          * We repeatedly force_fallback until we get an avctx, because there are
          * certain hwdecs that are really full decoders, and so if these fail,
@@ -1370,6 +1463,7 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
 
         ctx->requeue_packets = pkts;
         ctx->num_requeue_packets = num_pkts;
+        ctx->replay_skip_pts = skip_pts;
 
         return 0; // force retry
     }
@@ -1401,6 +1495,15 @@ static int receive_frame(struct mp_filter *vd, struct mp_frame *out_frame)
             return AVERROR_UNKNOWN;
         }
     }
+
+    if (ctx->replay_skip_pts != MP_NOPTS_VALUE) {
+        if (res->pts != MP_NOPTS_VALUE && res->pts <= ctx->replay_skip_pts) {
+            talloc_free(res);
+            return 0; // already returned before the hwdec failure
+        }
+        ctx->replay_skip_pts = MP_NOPTS_VALUE;
+    }
+    ctx->last_out_pts = res->pts;
 
     if (!ctx->hwdec_notified) {
         if (ctx->use_hwdec) {
@@ -1519,6 +1622,8 @@ static struct mp_decoder *create(struct mp_filter *parent,
     ctx->codec = codec;
     ctx->decoder = talloc_strdup(ctx, decoder);
     ctx->hwdec_swpool = mp_image_pool_new(ctx);
+    ctx->last_out_pts = MP_NOPTS_VALUE;
+    ctx->replay_skip_pts = MP_NOPTS_VALUE;
     ctx->dr_pool = mp_image_pool_new(ctx);
 
     ctx->public.f = vd;
