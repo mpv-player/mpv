@@ -17,8 +17,9 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
 #include <assert.h>
+#include <math.h>
+#include <string.h>
 
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
@@ -54,6 +55,8 @@ struct spdifContext {
     int              codec_profile;
     int              codec_rate;
     unsigned int     dropped_startup_packets;
+    double           next_pts;
+    double           burst_pts;
     struct mp_aframe *fmt;
     int              sstride;
     struct mp_aframe_pool *pool;
@@ -94,6 +97,8 @@ static void close_lavf_context(struct spdifContext *spdif_ctx, bool write_traile
         spdif_ctx->lavf_ctx = NULL;
     }
     spdif_ctx->need_close = false;
+    spdif_ctx->next_pts = MP_NOPTS_VALUE;
+    spdif_ctx->burst_pts = MP_NOPTS_VALUE;
     TA_FREEP(&spdif_ctx->fmt);
 }
 
@@ -314,11 +319,14 @@ static int init_filter(struct mp_filter *da)
         samplerate                      = 48000;
         num_channels                    = 2;
         break;
-    case AV_CODEC_ID_TRUEHD:
+    case AV_CODEC_ID_TRUEHD: {
+        bool rate_44k = c_rate > 0 ? (c_rate % 44100 == 0)
+                                   : (pkt->size >= 9 && (pkt->data[8] & 0x80));
         sample_format                   = AF_FORMAT_S_TRUEHD;
-        samplerate                      = 192000;
+        samplerate                      = rate_44k ? 176400 : 192000;
         num_channels                    = 8;
         break;
+    }
     default:
         abort();
     }
@@ -403,6 +411,9 @@ static void ad_spdif_process(struct mp_filter *da)
         mp_assert(spdif_ctx->lavf_ctx);
     }
 
+    if (spdif_ctx->burst_pts == MP_NOPTS_VALUE)
+        spdif_ctx->burst_pts = pts;
+
     spdif_ctx->out_buffer_len  = 0;
     int ret = av_write_frame(spdif_ctx->lavf_ctx, spdif_ctx->avpkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
@@ -415,6 +426,10 @@ static void ad_spdif_process(struct mp_filter *da)
                    spdif_ctx->dropped_startup_packets,
                    spdif_ctx->dropped_startup_packets == 1 ? "" : "s");
         spdif_ctx->dropped_startup_packets = 0;
+    }
+    if (spdif_ctx->out_buffer_len == 0) {
+        drop_packet = true;
+        goto done;
     }
 
     out = mp_aframe_new_ref(spdif_ctx->fmt);
@@ -431,7 +446,29 @@ static void ad_spdif_process(struct mp_filter *da)
     }
 
     memcpy(data[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
-    mp_aframe_set_pts(out, pts);
+
+    double out_pts = spdif_ctx->burst_pts != MP_NOPTS_VALUE ?
+                     spdif_ctx->burst_pts : pts;
+    spdif_ctx->burst_pts = MP_NOPTS_VALUE;
+
+    int out_fmt = mp_aframe_get_format(spdif_ctx->fmt);
+    if (out_fmt == AF_FORMAT_S_TRUEHD) {
+        // Advance TrueHD MAT burst PTS monotonically by burst duration to
+        // avoid VBR pre-buffering swings.
+        if (out_pts != MP_NOPTS_VALUE &&
+            (spdif_ctx->next_pts == MP_NOPTS_VALUE ||
+             fabs(out_pts - spdif_ctx->next_pts) > 0.250))
+        {
+            spdif_ctx->next_pts = out_pts;
+        }
+        if (spdif_ctx->next_pts != MP_NOPTS_VALUE) {
+            out_pts = spdif_ctx->next_pts;
+            int srate = mp_aframe_get_rate(spdif_ctx->fmt);
+            if (srate > 0)
+                spdif_ctx->next_pts += samples / (double)srate;
+        }
+    }
+    mp_aframe_set_pts(out, out_pts);
 
 done:
     talloc_free(mpkt);
@@ -522,6 +559,8 @@ static struct mp_decoder *create(struct mp_filter *parent,
     struct spdifContext *spdif_ctx = da->priv;
     spdif_ctx->log = da->log;
     spdif_ctx->codec = codec;
+    spdif_ctx->next_pts = MP_NOPTS_VALUE;
+    spdif_ctx->burst_pts = MP_NOPTS_VALUE;
     spdif_ctx->pool = mp_aframe_pool_create(spdif_ctx);
     spdif_ctx->public.f = da;
 
