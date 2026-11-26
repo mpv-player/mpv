@@ -41,6 +41,7 @@
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
+#include "video/out/vo.h"
 
 static const char *const vsscript_lib_names[] = {
 #ifdef _WIN32
@@ -64,6 +65,9 @@ struct vapoursynth_opts {
 };
 
 struct priv {
+    // VO for allocating output frames in GPU-mapped memory (direct
+    // rendering), so the VO uploads them without another CPU copy.
+    struct vo *dr_vo;
     struct mp_log *log;
     struct vapoursynth_opts *opts;
     char *script_path;
@@ -294,7 +298,14 @@ static void VS_CC vs_frame_done(void *userData, const VSFrame *f, int n,
         } else {
             img.nominal_fps = 1.0 / img.pkt_duration;
         }
-        res = mp_image_new_copy(&img);
+        if (p->dr_vo)
+            res = vo_get_image(p->dr_vo, img.imgfmt, img.w, img.h, 64, 0);
+        if (res) {
+            mp_image_copy(res, &img);
+            mp_image_copy_attributes(res, &img);
+        } else {
+            res = mp_image_new_copy(&img);
+        }
         p->vsapi->freeFrame(f);
     }
 
@@ -754,6 +765,10 @@ static struct mp_filter *vf_vapoursynth_create(struct mp_filter *parent,
     p->log = f->log;
     p->drv = p->opts->drv;
     p->f = f;
+
+    struct mp_stream_info *info = mp_filter_find_stream_info(f);
+    if (info)
+        p->dr_vo = info->dr_vo;
 
     mp_mutex_init(&p->lock);
     mp_cond_init(&p->wakeup);
