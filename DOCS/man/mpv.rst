@@ -167,6 +167,9 @@ Alt+v
 j and J
     Cycle through the available subtitles.
 
+k and K
+    Cycle through the available secondary subtitles.
+
 z and Z
     Adjust subtitle delay by -/+ 0.1 seconds. The ``x`` key does the same as
     ``Z`` currently, but use is discouraged.
