@@ -1235,42 +1235,109 @@ static void process_hooks(struct MPContext *mpctx, char *name)
     }
 }
 
+// Called locked, temporarily unlocks the core.
+static struct demuxer *open_chapters_file(struct MPContext *mpctx,
+                                          const char *filename,
+                                          struct mp_cancel *cancel)
+{
+    char *path = mp_get_user_path(NULL, mpctx->global, filename);
+    struct demuxer_params p = {
+        .stream_flags = STREAM_ORIGIN_DIRECT,
+        .depth = mpctx->demuxer ? mpctx->demuxer->depth + 1 : 0,
+    };
+    mp_core_unlock(mpctx);
+    struct demuxer *demux = demux_open_url(path, &p, cancel, mpctx->global);
+    mp_core_lock(mpctx);
+    talloc_free(path);
+    return demux;
+}
+
+static void set_chapters(struct MPContext *mpctx, struct demuxer *src)
+{
+    if (!src)
+        src = mpctx->demuxer;
+    TA_FREEP(&mpctx->chapters);
+    mpctx->num_chapters = 0;
+    if (!src)
+        return;
+    mpctx->num_chapters = src->num_chapters;
+    mpctx->chapters = demux_copy_chapter_data(src->chapters, src->num_chapters);
+    if (mpctx->opts->rebase_start_time) {
+        for (int n = 0; n < mpctx->num_chapters; n++)
+            mpctx->chapters[n].pts -= src->start_time;
+    }
+}
+
 // to be run on a worker thread, locked (temporarily unlocks core)
 static void load_chapters(struct MPContext *mpctx)
 {
-    struct demuxer *src = mpctx->demuxer;
-    bool free_src = false;
+    struct demuxer *src = NULL;
     char *chapter_file = mpctx->opts->chapter_file;
-    if (chapter_file && chapter_file[0]) {
-        chapter_file = mp_get_user_path(NULL, mpctx->global, chapter_file);
-        mp_core_unlock(mpctx);
-        struct demuxer_params p = {
-            .stream_flags = STREAM_ORIGIN_DIRECT,
-            .depth = src ? src->depth + 1 : 0,
-        };
-        struct demuxer *demux = demux_open_url(chapter_file, &p,
-                                               mpctx->playback_abort,
-                                               mpctx->global);
-        mp_core_lock(mpctx);
-        if (demux) {
-            src = demux;
-            free_src = true;
-        }
-        talloc_free(mpctx->chapters);
-        mpctx->chapters = NULL;
-        talloc_free(chapter_file);
-    }
-    if (src && !mpctx->chapters) {
-        talloc_free(mpctx->chapters);
-        mpctx->num_chapters = src->num_chapters;
-        mpctx->chapters = demux_copy_chapter_data(src->chapters, src->num_chapters);
-        if (mpctx->opts->rebase_start_time) {
-            for (int n = 0; n < mpctx->num_chapters; n++)
-                mpctx->chapters[n].pts -= src->start_time;
-        }
-    }
-    if (free_src)
+    if (chapter_file && chapter_file[0])
+        src = open_chapters_file(mpctx, chapter_file, mpctx->playback_abort);
+    set_chapters(mpctx, src);
+    if (src)
         demux_cancel_and_free(src);
+}
+
+struct reload_chapters_ctx {
+    struct MPContext *mpctx;
+    char *chapter_file;
+    struct mp_abort_entry abort;
+};
+
+static void reload_chapters_thread(void *p)
+{
+    struct reload_chapters_ctx *ctx = p;
+    struct MPContext *mpctx = ctx->mpctx;
+
+    mp_core_lock(mpctx);
+
+    struct demuxer *src = NULL;
+    if (ctx->chapter_file[0])
+        src = open_chapters_file(mpctx, ctx->chapter_file, ctx->abort.cancel);
+
+    char *cur = mpctx->opts->chapter_file;
+    if (!mp_cancel_test(ctx->abort.cancel) && mpctx->demuxer &&
+        strcmp(ctx->chapter_file, cur ? cur : "") == 0)
+    {
+        set_chapters(mpctx, src);
+        mp_notify(mpctx, MP_EVENT_CHAPTER_CHANGE, NULL);
+        mp_notify_property(mpctx, "chapter-list");
+        mp_notify_property(mpctx, "chapters");
+    }
+
+    if (src)
+        demux_cancel_and_free(src);
+
+    mp_abort_remove(mpctx, &ctx->abort);
+    talloc_free(ctx);
+
+    mpctx->outstanding_async -= 1;
+    if (!mpctx->outstanding_async && mp_is_shutting_down(mpctx))
+        mp_wakeup_core(mpctx);
+
+    mp_core_unlock(mpctx);
+}
+
+void mp_reload_chapters(struct MPContext *mpctx)
+{
+    if (!mpctx->demuxer)
+        return;
+
+    struct reload_chapters_ctx *ctx = talloc_zero(NULL, struct reload_chapters_ctx);
+    ctx->mpctx = mpctx;
+    ctx->chapter_file = talloc_strdup(ctx, mpctx->opts->chapter_file ?
+                                           mpctx->opts->chapter_file : "");
+    ctx->abort.coupled_to_playback = true;
+    mp_abort_add(mpctx, &ctx->abort);
+
+    mpctx->outstanding_async += 1;
+    if (!mp_thread_pool_queue(mpctx->thread_pool, reload_chapters_thread, ctx)) {
+        mpctx->outstanding_async -= 1;
+        mp_abort_remove(mpctx, &ctx->abort);
+        talloc_free(ctx);
+    }
 }
 
 static void load_per_file_options(m_config_t *conf,

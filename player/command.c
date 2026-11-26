@@ -8621,6 +8621,9 @@ void mp_option_run_callback(struct MPContext *mpctx, struct mp_option_callback *
         }
     }
 
+    if (opt_ptr == &opts->chapter_file)
+        mp_reload_chapters(mpctx);
+
     if (opt_ptr == &opts->edition_id) {
         struct demuxer *demuxer = mpctx->demuxer;
         if (mpctx->playback_initialized && demuxer && demuxer->num_editions > 0) {
