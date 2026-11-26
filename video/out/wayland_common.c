@@ -4930,7 +4930,7 @@ void vo_wayland_uninit(struct vo *vo)
     if (wl->shm)
         wl_shm_destroy(wl->shm);
 
-#ifdef WL_FIXES_DESTROY
+#ifdef WL_FIXES_ACK_GLOBAL_REMOVE
     if (wl->fixes)
         wl_fixes_destroy(wl->fixes);
 #endif
