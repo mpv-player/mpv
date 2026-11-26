@@ -1996,8 +1996,8 @@ static void handle_configure_bounds(void *data, struct xdg_toplevel *xdg_topleve
                                     int32_t width, int32_t height)
 {
     struct vo_wayland_state *wl = data;
-    wl->pending_state.bounded_width = handle_round(wl->scaling, width);
-    wl->pending_state.bounded_height = handle_round(wl->scaling, height);
+    wl->pending_state.bounded_width = width;
+    wl->pending_state.bounded_height = height;
 }
 
 static void handle_wm_capabilities(void *data, struct xdg_toplevel *xdg_toplevel,
@@ -3969,10 +3969,11 @@ static void set_geometry(struct vo_wayland_state *wl, bool resize)
     struct vo_win_geometry geo;
     struct mp_rect screenrc = wl->current_output->geometry;
     struct m_geometry bounds = {
-        .w = wl->bounded_width,
-        .h = wl->bounded_height,
-        .wh_valid = opts->wl_configure_bounds == 1 ||
-            (opts->wl_configure_bounds == -1 && !autofit_or_geometry),
+        .w = handle_round(wl->scaling, wl->bounded_width),
+        .h = handle_round(wl->scaling, wl->bounded_height),
+        .wh_valid = (wl->bounded_width || wl->bounded_height) &&
+            (opts->wl_configure_bounds == 1 ||
+             (opts->wl_configure_bounds == -1 && !autofit_or_geometry)),
     };
     vo_calc_window_geometry(vo, opts, &screenrc, &screenrc, wl->scaling_factor,
                             false, &geo, &bounds);
