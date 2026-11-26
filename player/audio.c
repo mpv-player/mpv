@@ -474,8 +474,13 @@ static int reinit_audio_filters_and_output(struct MPContext *mpctx)
             mp_decoder_wrapper_set_spdif_flag(ao_c->track->dec, false);
             if (!mp_decoder_wrapper_reinit(ao_c->track->dec))
                 goto init_error;
+            mp_filter_reset(ao_c->track->dec->f);
             reset_audio_state(mpctx);
             mp_output_chain_reset_harder(ao_c->filter);
+            mp_filter_reset(ao_c->ao_filter);
+            mp_filter_wakeup(ao_c->ao_filter);
+            if (mpctx->demuxer && mpctx->demuxer->seekable)
+                issue_refresh_seek(mpctx, MPSEEK_EXACT);
             mp_wakeup_core(mpctx); // reinit with new format next time
             return 0;
         }
@@ -797,6 +802,8 @@ void reload_audio_output(struct MPContext *mpctx)
     if (ao_c) {
         reset_audio_state(mpctx);
         mp_output_chain_reset_harder(ao_c->filter);
+        mp_filter_reset(ao_c->ao_filter);
+        mp_filter_wakeup(ao_c->ao_filter);
     }
 
     // Whether we can use spdif might have changed. If we failed to use spdif
@@ -811,6 +818,10 @@ void reload_audio_output(struct MPContext *mpctx)
             if (!mp_decoder_wrapper_reinit(dec)) {
                 MP_ERR(mpctx, "Error reinitializing audio.\n");
                 error_on_track(mpctx, ao_c->track);
+            } else {
+                mp_filter_reset(dec->f);
+                if (mpctx->demuxer && mpctx->demuxer->seekable)
+                    issue_refresh_seek(mpctx, MPSEEK_EXACT);
             }
         }
     }
