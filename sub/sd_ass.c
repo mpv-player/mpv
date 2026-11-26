@@ -52,6 +52,7 @@ struct sd_ass_priv {
     struct sd_filter **filters;
     int num_filters;
     bool clear_once;
+    bool clear_on_seek;
     struct mp_sub_packer *packer;
     struct sub_bitmap_copy_cache *copy_cache;
     bstr last_text;
@@ -314,6 +315,12 @@ static int init(struct sd *sd)
         ctx->converter = lavc_conv_create(sd);
         if (!ctx->converter)
             return -1;
+        // Closed captions are decoded from a stream of control codes, and
+        // each caption gets its end time from the next one. The video
+        // decoder sends the packets again after every seek. Decode all of
+        // them in order, and drop the events on seeks, as events from
+        // separate decoding runs do not fit together.
+        ctx->clear_on_seek = strcmp(sd->codec->codec, "eia_608") == 0;
     }
 
     assobjects_init(sd);
@@ -472,7 +479,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     packet->sub_duration = packet->duration;
 
     if (ctx->converter) {
-        if (!sd->opts->sub_clear_on_seek && check_packet_seen(sd, packet))
+        if (!sd->opts->sub_clear_on_seek && !ctx->clear_on_seek &&
+            check_packet_seen(sd, packet))
             return;
 
         double sub_pts = 0;
@@ -1007,7 +1015,7 @@ static void fill_plaintext(struct sd *sd, double pts)
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (sd->opts->sub_clear_on_seek || ctx->clear_once) {
+    if (sd->opts->sub_clear_on_seek || ctx->clear_on_seek || ctx->clear_once) {
         ass_flush_events(ctx->ass_track);
         ctx->num_seen_packets = 0;
         sd->preload_ok = false;
