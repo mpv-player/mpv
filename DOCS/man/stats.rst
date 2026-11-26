@@ -29,11 +29,6 @@ stats:
 5      Selected Tracks Info (scroll)
 6      Sync stats
 0      Internal stuff (scroll)
-====   ==================
-
-If stats were displayed by toggling, these key bindings are also active:
-
-====   ==================
 ESC    Close the stats
 ====   ==================
 

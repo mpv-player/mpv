@@ -1976,14 +1976,15 @@ local function unbind_search()
 end
 
 local function bind_exit()
-    -- Don't bind in oneshot mode because if ESC is pressed right when the stats
-    -- stop being displayed, it would unintentionally trigger any user-defined
-    -- ESC binding.
-    if not display_timer.oneshot then
-        mp.add_forced_key_binding(o.key_exit, "__forced_" .. o.key_exit, function ()
+    mp.add_forced_key_binding(o.key_exit, "__forced_" .. o.key_exit, function ()
+        if display_timer.oneshot then
+            display_timer:kill()
+            clear_screen()
+            remove_page_bindings()
+        else
             process_key_binding(false)
-        end)
-    end
+        end
+    end)
 end
 
 local function unbind_exit()
@@ -2024,13 +2025,23 @@ end
 
 
 -- Remove keybindings for every page
-remove_page_bindings = function()
+remove_page_bindings = function(delay_unbinding_exit)
     for k, _ in pairs(pages) do
         mp.remove_key_binding("__forced_"..k)
     end
     unbind_scroll()
     unbind_search()
-    unbind_exit()
+    -- If ESC is pressed right after oneshot stats stop being displayed, don't
+    -- unintentionally trigger any user-defined ESC binding.
+    if delay_unbinding_exit then
+        mp.add_timeout(1, function ()
+            if not display_timer:is_enabled() then
+                unbind_exit()
+            end
+        end)
+    else
+        unbind_exit()
+    end
 end
 
 
@@ -2091,7 +2102,7 @@ end
 display_timer = mp.add_periodic_timer(o.duration,
     function()
         if display_timer.oneshot then
-            display_timer:kill() ; clear_screen() ; remove_page_bindings()
+            display_timer:kill() ; clear_screen() ; remove_page_bindings(true)
             -- Close the console only if it was opened for searching bindings.
             if searched_text then
                 input.terminate()
