@@ -724,6 +724,15 @@ local function request_tick()
     end
 end
 
+-- Like request_tick(), but only while the OSC or window controls are visible
+-- or animating. For properties that change on (almost) every frame or packet:
+-- showing the OSC requests a tick anyway, which then picks up current values.
+local function request_tick_if_shown()
+    if state.osc_visible or state.wc_visible or state.anitype or state.wc_anitype then
+        request_tick()
+    end
+end
+
 local function request_init()
     state.initREQ = true
     request_tick()
@@ -3290,9 +3299,9 @@ mp.observe_property("display-fps", "number", set_tick_delay)
 observe_cached("pause", request_tick)
 observe_cached("volume", request_tick)
 observe_cached("mute", request_tick)
-observe_cached("demuxer-cache-state", request_tick)
+observe_cached("demuxer-cache-state", request_tick_if_shown)
 mp.observe_property("vo-configured", "bool", request_tick)
-mp.observe_property("playback-time", "number", request_tick)
+mp.observe_property("playback-time", "number", request_tick_if_shown)
 observe_cached("osd-dimensions", request_init_resize)
 observe_cached("osd-scale-by-window", request_init_resize)
 mp.observe_property('touch-pos', 'native', handle_touch)
