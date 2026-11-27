@@ -240,6 +240,8 @@ typedef struct mkv_demuxer {
     int num_packets;
 
     bool probably_webm_dash_init;
+
+    uint8_t *decode_buf[2];
 } mkv_demuxer_t;
 
 #define OPT_BASE_STRUCT struct demux_mkv_opts
@@ -315,11 +317,13 @@ static int aac_get_sample_rate_index(uint32_t sample_rate)
     return i;
 }
 
-static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
+// Returns the decoded data, or data itself if no encoding applies. The decoded
+// data is in a buffer of the demuxer and valid until the next call.
+static bstr demux_mkv_decode(demuxer_t *demuxer, mkv_track_t *track,
                              bstr data, uint32_t type)
 {
+    mkv_demuxer_t *mkv_d = demuxer->priv;
     uint8_t *src = data.start;
-    uint8_t *orig_src = src;
     uint8_t *dest = src;
     uint32_t size = data.len;
 
@@ -328,9 +332,9 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
         if (!(enc->scope & type))
             continue;
 
-        if (src != dest && src != orig_src)
-            talloc_free(src);
         src = dest;  // output from last iteration is new source
+        // The buffer that does not hold the input.
+        uint8_t **buf = &mkv_d->decode_buf[src == mkv_d->decode_buf[0]];
 
         if (enc->comp_algo == 0) {
 #if HAVE_ZLIB
@@ -345,37 +349,33 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
             zstream.zfree = (free_func) 0;
             zstream.opaque = (voidpf) 0;
             if (inflateInit(&zstream) != Z_OK) {
-                mp_warn(log, "zlib initialization failed.\n");
+                MP_WARN(demuxer, "zlib initialization failed.\n");
                 goto error;
             }
             zstream.next_in = (Bytef *) src;
             zstream.avail_in = size;
 
-            dest = NULL;
             size_t dest_size = size;
             int result;
             do {
                 if (dest_size + AV_LZO_INPUT_PADDING >= INT_MAX / 2) {
-                    talloc_free(dest);
-                    dest = NULL;
                     inflateEnd(&zstream);
                     goto error;
                 }
-                MP_TARRAY_GROW(track->parser_tmp, dest, dest_size + AV_LZO_INPUT_PADDING);
-                dest_size = MP_TALLOC_AVAIL(dest) - AV_LZO_INPUT_PADDING;
-                zstream.next_out = (Bytef *) (dest + zstream.total_out);
+                MP_TARRAY_GROW(mkv_d, *buf, dest_size + AV_LZO_INPUT_PADDING);
+                dest_size = MP_TALLOC_AVAIL(*buf) - AV_LZO_INPUT_PADDING;
+                zstream.next_out = (Bytef *) (*buf + zstream.total_out);
                 zstream.avail_out = dest_size - zstream.total_out;
                 result = inflate(&zstream, Z_NO_FLUSH);
                 if (result != Z_OK && result != Z_STREAM_END) {
-                    mp_warn(log, "zlib decompression failed.\n");
-                    talloc_free(dest);
-                    dest = NULL;
+                    MP_WARN(demuxer, "zlib decompression failed.\n");
                     inflateEnd(&zstream);
                     goto error;
                 }
             } while (zstream.avail_out == 0 && zstream.avail_in != 0
                      && result != Z_STREAM_END);
 
+            dest = *buf;
             size = zstream.total_out;
             inflateEnd(&zstream);
             // The output can be the input of a following LZO encoding, so zero
@@ -390,29 +390,24 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
                 goto error;
             int dstlen = size * 3;
 
-            dest = NULL;
             while (1) {
                 int srclen = size;
-                dest = talloc_realloc_size(track->parser_tmp, dest,
-                                           dstlen + AV_LZO_OUTPUT_PADDING);
+                if (MP_TALLOC_AVAIL(*buf) < dstlen + AV_LZO_OUTPUT_PADDING)
+                    MP_RESIZE_ARRAY(mkv_d, *buf, dstlen + AV_LZO_OUTPUT_PADDING);
                 out_avail = dstlen;
-                int result = av_lzo1x_decode(dest, &out_avail, src, &srclen);
+                int result = av_lzo1x_decode(*buf, &out_avail, src, &srclen);
                 if (result == 0)
                     break;
                 if (!(result & AV_LZO_OUTPUT_FULL)) {
-                    mp_warn(log, "lzo decompression failed.\n");
-                    talloc_free(dest);
-                    dest = NULL;
+                    MP_WARN(demuxer, "lzo decompression failed.\n");
                     goto error;
                 }
-                mp_trace(log, "lzo decompression buffer too small.\n");
-                if (dstlen >= maxlen / 2) {
-                    talloc_free(dest);
-                    dest = NULL;
+                MP_TRACE(demuxer, "lzo decompression buffer too small.\n");
+                if (dstlen >= maxlen / 2)
                     goto error;
-                }
                 dstlen = MPMAX(1, 2 * dstlen);
             }
+            dest = *buf;
             size = dstlen - out_avail;
             // The output can be the input of a following LZO encoding, so zero
             // its input padding. The output padding always covers it.
@@ -420,11 +415,11 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
             memset(dest + size, 0, AV_LZO_INPUT_PADDING);
         } else if (enc->comp_algo == 3) {
             if (enc->comp_settings_len == 0 || !enc->comp_settings) {
-                mp_warn(log, "missing comp_settings, unable to reconstruct the data.\n");
+                MP_WARN(demuxer, "missing comp_settings, unable to reconstruct the data.\n");
                 goto error;
             }
-            dest = talloc_size(track->parser_tmp,
-                               size + enc->comp_settings_len + AV_LZO_INPUT_PADDING);
+            MP_TARRAY_GROW(mkv_d, *buf, size + enc->comp_settings_len + AV_LZO_INPUT_PADDING);
+            dest = *buf;
             memcpy(dest, enc->comp_settings, enc->comp_settings_len);
             memcpy(dest + enc->comp_settings_len, src, size);
             size += enc->comp_settings_len;
@@ -432,14 +427,11 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
         }
     }
 
+    if (size)
+        return (bstr){dest, size};
+
  error:
-    if (src != dest && src != orig_src)
-        talloc_free(src);
-    if (!size)
-        dest = NULL;
-    if (!dest)
-        size = 0;
-    return (bstr){dest, size};
+    return (bstr){0};
 }
 
 
@@ -2246,11 +2238,10 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track, int idx)
 
     sh->codec->codec = subtitle_type;
     bstr in = (bstr){track->private_data, track->private_size};
-    bstr buffer = demux_mkv_decode(demuxer->log, track, in, 2);
+    bstr buffer = demux_mkv_decode(demuxer, track, in, 2);
     if (buffer.start && buffer.start != track->private_data) {
         talloc_free(track->private_data);
-        talloc_steal(track, buffer.start);
-        track->private_data = buffer.start;
+        track->private_data = talloc_memdup(track, buffer.start, buffer.len + AV_LZO_INPUT_PADDING);
         track->private_size = buffer.len;
     }
     sh->codec->extradata = track->private_data;
@@ -2405,16 +2396,13 @@ static void probe_x264_garbage(demuxer_t *demuxer)
             continue;
 
         bstr sblock = {block->laces[0]->data, block->laces[0]->size};
-        bstr nblock = demux_mkv_decode(demuxer->log, track, sblock, 1);
+        bstr nblock = demux_mkv_decode(demuxer, track, sblock, 1);
         if (!nblock.len)
             continue;
 
         sh->codec->first_packet = new_demux_packet_from(demuxer->packet_pool,
                                                         nblock.start, nblock.len);
         talloc_steal(mkv_d, sh->codec->first_packet);
-
-        if (nblock.start != sblock.start)
-            talloc_free(nblock.start);
     }
 }
 
@@ -3195,12 +3183,12 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             demux_packet_t *dp = NULL;
 
             bstr block = {data->data, data->size};
-            bstr nblock = demux_mkv_decode(demuxer->log, track, block, 1);
+            bstr nblock = demux_mkv_decode(demuxer, track, block, 1);
             if (!nblock.len)
                 break;
 
             if (block.start != nblock.start || block.len != nblock.len) {
-                // (avoidable copy of the entire data)
+                // The packet gets a buffer of its size, the demuxer keeps the other.
                 dp = new_demux_packet_from(demuxer->packet_pool, nblock.start, nblock.len);
             } else {
                 dp = new_demux_packet_from_buf(demuxer->packet_pool, data);
