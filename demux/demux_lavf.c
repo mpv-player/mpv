@@ -157,6 +157,7 @@ struct format_hack {
     bool linearize_audio_ts : 1;// compensate timestamp resets (audio only)
     bool is_network : 1;
     bool no_seek : 1;
+    bool sup_seek_preroll : 1;
     bool no_pcm_seek : 1;
     bool no_seek_on_no_duration : 1;
     bool readall_on_no_streamseek : 1;
@@ -215,6 +216,8 @@ static const struct format_hack format_hacks[] = {
     TEXTSUB("subviewer1"), TEXTSUB("vplayer"), TEXTSUB("ass"),
 
     TEXTSUB_UTF8("webvtt"),
+
+    {"sup", .sup_seek_preroll = true},
 
     // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
     BLACKLIST("tty"),
@@ -1677,6 +1680,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         demuxer->start_time = avfc->start_time / (double)AV_TIME_BASE;
 
     demuxer->fully_read = priv->format_hack.fully_read;
+    // A cached seek can also land inside a PGS display set.
+    demuxer->no_cache_seeking = priv->format_hack.sup_seek_preroll;
 
 #ifdef AVFMTCTX_UNSEEKABLE
     if (avfc->ctx_flags & AVFMTCTX_UNSEEKABLE)
@@ -1987,6 +1992,17 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
         // beginning.
         avsflags &= ~AVSEEK_FLAG_BACKWARD;
         r = av_seek_frame(priv->avfc, seek_stream, seek_pts_av, avsflags);
+    }
+
+    if (r >= 0 && priv->format_hack.sup_seek_preroll) {
+        // The SUP index can point inside a display set. Start one entry earlier.
+        AVStream *st = priv->avfc->streams[0];
+        int64_t ts = av_rescale_q(seek_pts_av, AV_TIME_BASE_Q, st->time_base);
+        int index = av_index_search_timestamp(st, ts, AVSEEK_FLAG_BACKWARD);
+        const AVIndexEntry *entry = index > 0
+            ? avformat_index_get_entry(st, index - 1) : NULL;
+        int64_t pos = avio_seek(priv->avfc->pb, entry ? entry->pos : 0, SEEK_SET);
+        r = pos < 0 ? pos : avformat_flush(priv->avfc);
     }
 
     if (r < 0) {
