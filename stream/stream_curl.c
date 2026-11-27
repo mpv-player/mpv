@@ -818,7 +818,19 @@ static void on_done(struct priv *p, CURLcode code)
     bool aborted = atomic_load_explicit(&p->aborted, memory_order_relaxed);
 
     if (!p->probed) {
-        // Connection died before any headers arrived.
+        // Connection died before any headers arrived. This happens when a
+        // reused connection was closed by the server while it was idle, so
+        // send the request again. Errors that mean the server cannot be
+        // reached still fail the open at once.
+        bool dropped = code == CURLE_RECV_ERROR || code == CURLE_SEND_ERROR ||
+                       code == CURLE_GOT_NOTHING;
+        if (dropped && !aborted && p->retry_count < p->opts->max_retries) {
+            p->retry_count++;
+            MP_WARN(p, "%s, retrying (#%d)\n", curl_easy_strerror(code),
+                    p->retry_count);
+            start_request(p);
+            return;
+        }
         if (code != CURLE_OK && !aborted)
             log_curl_error(p, "error", code);
         mp_mutex_lock(&p->mtx);
