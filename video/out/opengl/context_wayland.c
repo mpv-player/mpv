@@ -69,7 +69,7 @@ static pl_color_space_t wayland_egl_preferred_csp(struct ra_ctx *ctx)
 
 static bool wayland_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params, bool target)
 {
-    vo_wayland_handle_color(ctx->vo->wl, params);
+    vo_wayland_handle_color(ctx->vo->wl, params, target);
     return true;
 }
 

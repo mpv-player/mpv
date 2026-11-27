@@ -4501,7 +4501,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params *params)
+void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params *params,
+                             bool target)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_41
     if (!params) {
