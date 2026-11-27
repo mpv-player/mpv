@@ -673,7 +673,9 @@ static int init(struct ao *ao)
         p->format = AudioFormat.ENCODING_PCM_16BIT;
     }
 
-    if (AudioTrack.getNativeOutputSampleRate) {
+    // The native output rate is the PCM mixer's. The rate of an IEC 61937
+    // stream is set by the codec (192000 Hz for E-AC-3), so don't clamp it.
+    if (AudioTrack.getNativeOutputSampleRate && !af_fmt_is_spdif(ao->format)) {
         jint samplerate = MP_JNI_CALL_STATIC_INT(
             AudioTrack.clazz,
             AudioTrack.getNativeOutputSampleRate,
@@ -711,7 +713,10 @@ static int init(struct ao *ao)
     };
     static_assert(MP_ARRAY_SIZE(layout_map) == MP_ARRAY_SIZE(layouts), "");
     if (p->format == AudioFormat.ENCODING_IEC61937) {
-        p->channel_config = AudioFormat.CHANNEL_OUT_STEREO;
+        // High bitrate streams (TrueHD, DTS-HD MA) are carried in 8 channels.
+        p->channel_config = ao->channels.num > 2
+            ? AudioFormat.CHANNEL_OUT_7POINT1_SURROUND
+            : AudioFormat.CHANNEL_OUT_STEREO;
     } else {
         struct mp_chmap_sel sel = {0};
         for (int i = 0; i < MP_ARRAY_SIZE(layouts); i++) {
