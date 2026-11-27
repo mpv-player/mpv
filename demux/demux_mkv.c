@@ -352,18 +352,19 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
             zstream.avail_in = size;
 
             dest = NULL;
-            zstream.avail_out = size;
+            size_t dest_size = size;
             int result;
             do {
-                if (size >= INT_MAX - 4000) {
+                if (dest_size + AV_LZO_INPUT_PADDING >= INT_MAX / 2) {
                     talloc_free(dest);
                     dest = NULL;
                     inflateEnd(&zstream);
                     goto error;
                 }
-                size += 4000;
-                dest = talloc_realloc_size(track->parser_tmp, dest, size);
+                MP_TARRAY_GROW(track->parser_tmp, dest, dest_size + AV_LZO_INPUT_PADDING);
+                dest_size = MP_TALLOC_AVAIL(dest) - AV_LZO_INPUT_PADDING;
                 zstream.next_out = (Bytef *) (dest + zstream.total_out);
+                zstream.avail_out = dest_size - zstream.total_out;
                 result = inflate(&zstream, Z_NO_FLUSH);
                 if (result != Z_OK && result != Z_STREAM_END) {
                     mp_warn(log, "zlib decompression failed.\n");
@@ -372,15 +373,13 @@ static bstr demux_mkv_decode(struct mp_log *log, mkv_track_t *track,
                     inflateEnd(&zstream);
                     goto error;
                 }
-                zstream.avail_out += 4000;
-            } while (zstream.avail_out == 4000 && zstream.avail_in != 0
+            } while (zstream.avail_out == 0 && zstream.avail_in != 0
                      && result != Z_STREAM_END);
 
             size = zstream.total_out;
             inflateEnd(&zstream);
             // The output can be the input of a following LZO encoding, so zero
             // its input padding.
-            mp_require(zstream.avail_out >= AV_LZO_INPUT_PADDING);
             memset(dest + size, 0, AV_LZO_INPUT_PADDING);
 #endif
         } else if (enc->comp_algo == 2) {
