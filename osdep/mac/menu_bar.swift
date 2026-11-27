@@ -263,7 +263,7 @@ class MenuBar: Menu, EventSubscriber {
 
     @objc func openPlaylist() {
         guard let file = dialog.openPlaylist(path: currentDir) else { return }
-        input.command("loadlist \"\(file)\"")
+        input.command(args: ["loadlist", file])
     }
 
     @objc func openUrl() {

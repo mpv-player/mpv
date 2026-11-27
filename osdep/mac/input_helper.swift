@@ -178,7 +178,7 @@ class InputHelper: NSObject {
         }
     }
 
-    @discardableResult @objc func command(_ cmd: String) -> Bool {
+    @discardableResult func command(_ cmd: String) -> Bool {
         lock.withLock {
             guard let input = input else { return false }
             let cCmd = UnsafePointer<Int8>(strdup(cmd))
@@ -186,6 +186,15 @@ class InputHelper: NSObject {
             mp_input_queue_cmd(input, mpvCmd)
             free(UnsafeMutablePointer(mutating: cCmd))
             return true
+        }
+    }
+
+    func command(args: [String]) {
+        lock.withLock {
+            guard let input = input, !args.isEmpty else { return }
+            var cArgs: [UnsafePointer<CChar>?] = args.map { UnsafePointer(strdup($0)) } + [nil]
+            mp_input_run_cmd(input, &cArgs)
+            cArgs.forEach { free(UnsafeMutablePointer(mutating: $0)) }
         }
     }
 
@@ -258,7 +267,7 @@ class InputHelper: NSObject {
                 (NSEvent.modifierFlags.contains(.shift) ? "append" : "replace")
             let fileClean = cleanPath(file: file)
 
-            command("loadfile \"\(fileClean)\" \(action)")
+            command(args: ["loadfile", fileClean, action])
         }
     }
 
