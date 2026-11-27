@@ -3728,7 +3728,17 @@ static void seat_create_text_input(struct vo_wayland_seat *seat)
 }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
-static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color)
+// The reference white that the image description of a signal declares.
+static float image_ref_luma(const struct pl_color_space *color)
+{
+    if (pl_color_transfer_is_hdr(color->transfer))
+        return PL_COLOR_SDR_WHITE;
+    // The white of an SDR or linear signal is at most its peak.
+    return MPMIN(PL_COLOR_SDR_WHITE, color->hdr.max_luma);
+}
+
+static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color,
+                                 float ref_luma)
 {
     if (!wl->color_surface || !wl->color_queue || !wl->supports_parametric)
         goto nosupport;
@@ -3775,9 +3785,9 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
         case PL_COLOR_TRC_PQ:
             // Set min luminance to 0 for PQ as per SMPTE ST 2084
             wp_image_description_creator_params_v1_set_luminances(image_creator_params,
-                0 * WAYLAND_MIN_LUM_FACTOR, 10000, PL_COLOR_SDR_WHITE);
+                0 * WAYLAND_MIN_LUM_FACTOR, 10000, ref_luma);
             MP_VERBOSE(wl, "Setting PQ luminance range: min=0, max=10000, ref=%.2f\n",
-                PL_COLOR_SDR_WHITE);
+                ref_luma);
             // Mastering luminances will be set below
             break;
         case PL_COLOR_TRC_LINEAR:
@@ -3785,9 +3795,9 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
             // black, similar to PQ transfer. Configure it in the same way as PQ.
             if (use_metadata) {
                 wp_image_description_creator_params_v1_set_luminances(image_creator_params,
-                    0 * WAYLAND_MIN_LUM_FACTOR, lrintf(hdr.max_luma), PL_COLOR_SDR_WHITE);
+                    0 * WAYLAND_MIN_LUM_FACTOR, lrintf(hdr.max_luma), lrintf(ref_luma));
                 MP_VERBOSE(wl, "Setting linear luminance range: min=0, max=%.5f, ref=%.2f\n",
-                    hdr.max_luma, PL_COLOR_SDR_WHITE);
+                    hdr.max_luma, ref_luma);
                 if (wl->supports_display_primaries) {
                     wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
                         lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
@@ -3804,9 +3814,9 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
             if (use_metadata) {
                 wp_image_description_creator_params_v1_set_luminances(image_creator_params,
                     lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma),
-                    PL_COLOR_SDR_WHITE);
+                    lrintf(ref_luma));
                 MP_VERBOSE(wl, "Setting relative luminance range: min=%.5f, max=%.2f, ref=%.2f\n",
-                    hdr.min_luma, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                    hdr.min_luma, hdr.max_luma, ref_luma);
             }
             break;
         }
@@ -4537,7 +4547,7 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
     }
     wl->last_hint_params = *params;
     if (color_space_changed) {
-        set_color_management(wl, &params->color);
+        set_color_management(wl, &params->color, image_ref_luma(&params->color));
     } else {
         params->color = wl->current_params.color;
     }
