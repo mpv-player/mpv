@@ -464,7 +464,7 @@ static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
 
 #define UNKNOWN_DURATION (INT_MAX / 1000)
 
-static void decode(struct sd *sd, struct demux_packet *packet)
+static double decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
@@ -473,7 +473,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 
     if (ctx->converter) {
         if (!sd->opts->sub_clear_on_seek && check_packet_seen(sd, packet))
-            return;
+            return INFINITY;
 
         double sub_pts = 0;
         double sub_duration = 0;
@@ -515,6 +515,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         packet->seen = check_packet_seen(sd, packet);
         filter_and_add(sd, packet);
     }
+    return packet->pts;
 }
 
 // Calculate the height used for scaling subtitle text size so --sub-scale-with-window
