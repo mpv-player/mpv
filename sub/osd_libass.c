@@ -597,6 +597,7 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
         goto done;
     }
 
+    entry->update = true;
     entry->ov.format = ov->format;
     if (!entry->ov.data)
         entry->ov.data = talloc_strdup(entry, "");
@@ -611,8 +612,6 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
         osd_object_changed(osd, obj);
     }
     entry->ov.hidden = ov->hidden;
-
-    update_external(osd, &obj->vo_res, entry);
 
     if (zorder_changed) {
         qsort(obj->externals, obj->num_externals, sizeof(obj->externals[0]),
@@ -635,6 +634,8 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
                 vo_res.h = 720;
         }
 
+        update_external(osd, &vo_res, entry);
+        entry->update = false;
         ASS_Image *img_list = NULL;
         append_ass(&entry->ass, &vo_res, &img_list, NULL);
 
@@ -705,12 +706,16 @@ struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
 
     append_ass(&obj->ass, res, &obj->ass_imgs[0], &obj->changed);
     for (int n = 0; n < obj->num_externals; n++) {
-        if (obj->externals[n]->ov.hidden) {
-            update_playres(&obj->externals[n]->ass, res);
+        struct osd_external *ext = obj->externals[n];
+        if (ext->update) {
+            update_external(osd, res, ext);
+            ext->update = false;
+        }
+        if (ext->ov.hidden) {
+            update_playres(&ext->ass, res);
             obj->ass_imgs[n + 1] = NULL;
         } else {
-            append_ass(&obj->externals[n]->ass, res,
-                       &obj->ass_imgs[n + 1], &obj->changed);
+            append_ass(&ext->ass, res, &obj->ass_imgs[n + 1], &obj->changed);
         }
     }
 

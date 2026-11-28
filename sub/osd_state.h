@@ -76,6 +76,7 @@ struct osd_object {
 
 struct osd_external {
     struct osd_external_ass ov;
+    bool update;
     struct ass_state ass;
 };
 
