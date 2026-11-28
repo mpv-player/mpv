@@ -27,7 +27,6 @@ struct ass_state {
     struct ass_library *library;
     int res_x, res_y;
     bool changed;
-    struct mp_osd_res vo_res; // last known value
     // The rendered track, until its events change
     struct ass_image *imgs;
     struct mp_osd_res imgs_res;

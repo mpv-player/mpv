@@ -99,8 +99,6 @@ static void update_playres(struct ass_state *ass, struct mp_osd_res *vo_res)
     int old_res_x = track->PlayResX;
     int old_res_y = track->PlayResY;
 
-    ass->vo_res = *vo_res;
-
     double aspect = 1.0 * vo_res->w / MPMAX(vo_res->h, 1);
     if (vo_res->display_par > 0)
         aspect = aspect / vo_res->display_par;
@@ -622,7 +620,7 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     }
 
     if (ov->out_rc) {
-        struct mp_osd_res vo_res = entry->ass.vo_res;
+        struct mp_osd_res vo_res = obj->vo_res;
         // Defined fallback if VO has not drawn this yet
         if (vo_res.w < 1 || vo_res.h < 1) {
             vo_res = (struct mp_osd_res){
