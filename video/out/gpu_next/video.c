@@ -134,6 +134,10 @@ struct mppl_video {
     struct mp_osd_res osd_res;
     struct overlay_state osd_state;
 
+    // update_target_overlays() input
+    struct mp_image *osd_src;
+    int osd_flags;
+
     uint64_t last_id;
     uint64_t osd_sync;
     double last_pts;
@@ -611,6 +615,19 @@ static bool prefetch_overlays(struct mppl_video *p, struct mp_osd_res res, int f
     res.w /= div[0];
     res.h /= div[1];
     return osd_prefetch(p->osd, res, src->pts, flags, mp_draw_sub_formats);
+}
+
+static float get_ref_luma(struct mppl_video *p);
+
+static bool update_target_overlays(pl_gpu gpu, struct pl_frame *target)
+{
+    struct mppl_video *p = target->user_data;
+    stats_time_start(p->stats, "osd-update");
+    update_overlays(p, p->osd_res, p->osd_flags, PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state,
+                    target, p->osd_src, p->osd_src ? p->osd_src->params.stereo3d : 0,
+                    get_ref_luma(p));
+    stats_time_end(p->stats, "osd-update");
+    return true;
 }
 
 struct frame_priv {
@@ -1677,12 +1694,10 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
             target.color.transfer = PL_COLOR_TRC_SRGB;
 #endif
     }
-    stats_time_start(p->stats, "osd-update");
-    update_overlays(p, p->osd_res,
-                    OSD_DRAW_OSD_LATEST | ((frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0),
-                    PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current,
-                    frame->current ? frame->current->params.stereo3d : 0, get_ref_luma(p));
-    stats_time_end(p->stats, "osd-update");
+    p->osd_flags = OSD_DRAW_OSD_LATEST | ((frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0);
+    p->osd_src = frame->current;
+    target.user_data = p;
+    update_target_overlays(gpu, &target);
     apply_crop(&target, p->dst, swframe->fbo->params.w, swframe->fbo->params.h);
     update_tm_viz(&pars->color_map_params, &target);
 
