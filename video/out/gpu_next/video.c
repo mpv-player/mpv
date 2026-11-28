@@ -603,6 +603,16 @@ static struct mp_osd_res blend_subs_res(struct mppl_video *p, const struct pl_fr
     };
 }
 
+static bool prefetch_overlays(struct mppl_video *p, struct mp_osd_res res, int flags,
+                              struct mp_image *src)
+{
+    int div[2];
+    mp_get_3d_side_by_side(src->params.stereo3d, div);
+    res.w /= div[0];
+    res.h /= div[1];
+    return osd_prefetch(p->osd, res, src->pts, flags, mp_draw_sub_formats);
+}
+
 struct frame_priv {
     struct mppl_video *p;
     struct overlay_state subs;
@@ -1766,6 +1776,16 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
     if (!render_ok) {
         MP_ERR(p, "Failed rendering frame!\n");
         goto done;
+    }
+
+    // The subtitles of the next frame are rendered on another thread while
+    // this frame is on screen. They are asked for once this frame has its
+    // own, which keeps the renders in order.
+    if (frame->num_frames > 1 && !opts->blend_subs) {
+        prefetch_overlays(p, p->osd_res, 0, frame->frames[1]);
+    } else if (frame->num_frames > 1 && mix.num_frames) {
+        prefetch_overlays(p, blend_subs_res(p, mix.frames[mix.num_frames - 1], &target),
+                          OSD_DRAW_SUB_ONLY, frame->frames[1]);
     }
 
     struct pl_frame ref_frame;

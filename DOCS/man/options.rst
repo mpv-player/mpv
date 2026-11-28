@@ -5097,6 +5097,7 @@ OSD
 ``--osd-thread=<yes|no>``
     Render the subtitles of a video frame on a separate thread before the
     frame is drawn, if the VO supports it (default: yes).
+    (``gpu-next`` only)
 
 Screenshot
 ----------
