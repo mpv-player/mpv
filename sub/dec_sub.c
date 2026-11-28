@@ -50,9 +50,23 @@ static const struct sd_functions *const sd_list[] = {
     NULL
 };
 
+#define SUB_CACHE_SIZE 4
+
+struct sub_cache_entry {
+    struct sub_bitmaps *res;    // NULL if nothing is shown
+    struct mp_osd_res dim;
+    int format;
+    double pts;                 // as passed to sub_get_bitmaps()
+    double sub_pts;
+    uint64_t age;               // 0 if unused
+};
+
 struct dec_sub {
     mp_mutex lock;
 
+    mp_mutex cache_lock;
+    struct sub_cache_entry cache[SUB_CACHE_SIZE];
+    uint64_t cache_age;
     int change_id;
 
     struct mp_log *log;
@@ -130,9 +144,60 @@ static double pts_from_subtitle(struct dec_sub *sub, double pts)
     return pts;
 }
 
+// Drop the results at and after the given subtitle time.
+static void drop_results(struct dec_sub *sub, double sub_pts)
+{
+    mp_mutex_lock(&sub->cache_lock);
+    for (int n = 0; n < SUB_CACHE_SIZE; n++) {
+        struct sub_cache_entry *e = &sub->cache[n];
+        if (e->sub_pts >= sub_pts) {
+            talloc_free(e->res);
+            *e = (struct sub_cache_entry){0};
+        }
+    }
+    mp_mutex_unlock(&sub->cache_lock);
+}
+
+static bool get_result(struct dec_sub *sub, struct mp_osd_res dim, int format,
+                       double pts, struct sub_bitmaps **res)
+{
+    bool found = false;
+    mp_mutex_lock(&sub->cache_lock);
+    for (int n = 0; n < SUB_CACHE_SIZE && !found; n++) {
+        struct sub_cache_entry *e = &sub->cache[n];
+        if (e->age && e->pts == pts && e->format == format && osd_res_equals(e->dim, dim)) {
+            e->age = ++sub->cache_age;
+            *res = sub_bitmaps_copy(NULL, e->res);
+            found = true;
+        }
+    }
+    mp_mutex_unlock(&sub->cache_lock);
+    return found;
+}
+
+// Takes the place of the entry that was not used for the longest time.
+static void put_result(struct dec_sub *sub, struct sub_cache_entry entry)
+{
+    mp_mutex_lock(&sub->cache_lock);
+    struct sub_cache_entry *e = &sub->cache[0];
+    for (int n = 1; n < SUB_CACHE_SIZE; n++) {
+        if (sub->cache[n].age < e->age)
+            e = &sub->cache[n];
+    }
+    talloc_free(e->res);
+    *e = entry;
+    e->age = ++sub->cache_age;
+    mp_mutex_unlock(&sub->cache_lock);
+}
+
 static void decode_packet(struct dec_sub *sub, struct demux_packet *pkt)
 {
-    sub->sd->driver->decode(sub->sd, pkt);
+    double from = sub->sd->driver->decode(sub->sd, pkt);
+    // The timing fixes reach back from there. The decoders round times down
+    // to ms.
+    from -= (sub->opts->sub_fix_timing_threshold + 1) / 1000.0;
+    // Results before the start of the segment are from the previous decoder.
+    drop_results(sub, MPMAX(from, sub->start));
 }
 
 static void wakeup_demux(void *ctx)
@@ -163,6 +228,7 @@ void sub_destroy(struct dec_sub *sub)
         sub->sd->driver->uninit(sub->sd);
     }
     talloc_free(sub->sd);
+    mp_mutex_destroy(&sub->cache_lock);
     mp_mutex_destroy(&sub->lock);
     talloc_free(sub);
 }
@@ -227,6 +293,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct track *track,
     sub->opts = sub->opts_cache->opts;
     sub->shared_opts = sub->shared_opts_cache->opts;
     mp_mutex_init(&sub->lock);
+    mp_mutex_init(&sub->cache_lock);
 
     sub->sd = init_decoder(sub);
     if (sub->sd) {
@@ -247,6 +314,7 @@ static void update_segment(struct dec_sub *sub)
         MP_VERBOSE(sub, "Switch segment: %f at %f\n", sub->new_segment->start,
                    sub->last_vo_pts);
 
+        drop_results(sub, sub->new_segment->start);
         sub->codec = sub->new_segment->codec;
         sub->start = sub->new_segment->start;
         sub->end = sub->new_segment->end;
@@ -433,9 +501,12 @@ void sub_redecode_cached_packets(struct dec_sub *sub)
 struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
                                     int format, double pts)
 {
+    struct sub_bitmaps *res = NULL;
+    if (get_result(sub, dim, format, pts, &res))
+        return res;
+
     mp_mutex_lock(&sub->lock);
 
-    struct sub_bitmaps *res = NULL;
     double sub_pts = pts_to_subtitle(sub, pts);
     if (!sub->shared_opts->sub_visibility[sub->order])
         goto done;
@@ -455,6 +526,13 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
     }
 
 done:
+    // Without a time the result could not be dropped by time.
+    if (pts != MP_NOPTS_VALUE) {
+        put_result(sub, (struct sub_cache_entry){
+            .res = sub_bitmaps_copy(NULL, res), .dim = dim, .format = format,
+            .pts = pts, .sub_pts = sub_pts,
+        });
+    }
     mp_mutex_unlock(&sub->lock);
     return res;
 }
@@ -510,6 +588,7 @@ struct sd_times sub_get_times(struct dec_sub *sub, double pts)
 void sub_reset(struct dec_sub *sub)
 {
     mp_mutex_lock(&sub->lock);
+    drop_results(sub, -INFINITY);
     if (sub->sd->driver->reset)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
@@ -523,6 +602,7 @@ void sub_reset(struct dec_sub *sub)
 void sub_select(struct dec_sub *sub, bool selected)
 {
     mp_mutex_lock(&sub->lock);
+    drop_results(sub, -INFINITY);
     if (sub->sd->driver->select)
         sub->sd->driver->select(sub->sd, selected);
     mp_mutex_unlock(&sub->lock);
@@ -533,16 +613,25 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
     int r = CONTROL_UNKNOWN;
     mp_mutex_lock(&sub->lock);
     bool propagate = false;
+    // The player repeats some of these for every frame.
+    bool changed = true;
     switch (cmd) {
     case SD_CTRL_SET_VIDEO_DEF_FPS:
+        changed = sub->video_fps != *(double *)arg;
         sub->video_fps = *(double *)arg;
         update_subtitle_speed(sub);
         break;
     case SD_CTRL_SET_VIDEO_PARAMS:
+        changed = !mp_image_params_static_equal(&sub->video_params, arg);
         sub->video_params = *(struct mp_image_params *)arg;
         propagate = true;
         break;
+    case SD_CTRL_SET_ANIMATED_CHECK:
+        changed = false;
+        propagate = true;
+        break;
     case SD_CTRL_SUB_STEP: {
+        changed = false;
         double *a = arg;
         double arg2[2] = {a[0], a[1]};
         arg2[0] = pts_to_subtitle(sub, arg2[0]);
@@ -569,6 +658,8 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
     default:
         propagate = true;
     }
+    if (changed)
+        drop_results(sub, -INFINITY);
     if (propagate && sub->sd->driver->control)
         r = sub->sd->driver->control(sub->sd, cmd, arg);
     mp_mutex_unlock(&sub->lock);
@@ -585,6 +676,8 @@ void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink)
 void sub_set_play_dir(struct dec_sub *sub, int dir)
 {
     mp_mutex_lock(&sub->lock);
+    if (sub->play_dir != dir)
+        drop_results(sub, -INFINITY);
     sub->play_dir = dir;
     mp_mutex_unlock(&sub->lock);
 }
