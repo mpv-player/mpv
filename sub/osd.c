@@ -330,7 +330,8 @@ static bool has_result(struct osd_object *obj, struct mp_osd_res res, int format
 static void render_osd_object(struct osd_state *osd, struct osd_object *obj,
                               struct mp_osd_res res, int format)
 {
-    struct sub_bitmaps *imgs = osd_object_get_bitmaps(osd, obj, &res, format);
+    osd_object_prepare(osd, obj);
+    struct sub_bitmaps *imgs = osd_object_render(osd, obj, &res, format);
     if (imgs) {
         obj->result_change_id += imgs->change_id;
         imgs->change_id = obj->result_change_id;

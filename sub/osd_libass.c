@@ -692,17 +692,20 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
     }
 }
 
-struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
-                                           struct osd_object *obj,
-                                           struct mp_osd_res *res, int format)
+void osd_object_prepare(struct osd_state *osd, struct osd_object *obj)
 {
-    if (obj->type == OSDTYPE_OSD)
-        update_osd(osd, obj, res);
-
     if (!obj->sub_packer)
         obj->sub_packer = mp_sub_packer_alloc(obj);
 
     MP_TARRAY_GROW(obj, obj->ass_imgs, obj->num_externals + 1);
+}
+
+struct sub_bitmaps *osd_object_render(struct osd_state *osd,
+                                      struct osd_object *obj,
+                                      struct mp_osd_res *res, int format)
+{
+    if (obj->type == OSDTYPE_OSD)
+        update_osd(osd, obj, res);
 
     append_ass(&obj->ass, res, &obj->ass_imgs[0], &obj->changed);
     for (int n = 0; n < obj->num_externals; n++) {
