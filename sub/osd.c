@@ -393,8 +393,12 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
             obj->image_overlay->change_id = 0;
         }
     } else {
-        if (!has_result(obj, osdres, format))
-            render_osd_object(osd, obj, osdres, format);
+        if (!has_result(obj, osdres, format)) {
+            // A render of another thread may give it.
+            osd_wait_object_idle(osd, obj);
+            if (!has_result(obj, osdres, format))
+                render_osd_object(osd, obj, osdres, format);
+        }
         res = sub_bitmaps_copy(NULL, obj->result);
     }
 
