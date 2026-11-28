@@ -428,17 +428,20 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
 {
     mp_mutex_lock(&sub->lock);
 
+    struct sub_bitmaps *res = NULL;
+    if (!sub->shared_opts->sub_visibility[sub->order])
+        goto done;
+
     pts = pts_to_subtitle(sub, pts);
 
     sub->last_vo_pts = pts;
     update_segment(sub);
 
-    struct sub_bitmaps *res = NULL;
-
     if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
         sub->sd->driver->get_bitmaps)
         res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
 
+done:
     mp_mutex_unlock(&sub->lock);
     return res;
 }
