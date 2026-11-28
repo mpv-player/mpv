@@ -524,7 +524,6 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj,
 static void update_osd(struct osd_state *osd, struct osd_object *obj,
                        struct mp_osd_res *res)
 {
-    obj->osd_changed = false;
     clear_ass(&obj->ass);
     update_osd_text(osd, obj, res);
     update_progbar(osd, obj, res);
@@ -698,14 +697,8 @@ struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
                                            struct osd_object *obj,
                                            struct mp_osd_res *res, int format)
 {
-    if (obj->type == OSDTYPE_OSD) {
-        if (obj->osd_changed) {
-            update_osd(osd, obj, res);
-        } else {
-            mp_require(obj->sub_packer);
-            goto done;
-        }
-    }
+    if (obj->type == OSDTYPE_OSD)
+        update_osd(osd, obj, res);
 
     if (!obj->sub_packer)
         obj->sub_packer = mp_sub_packer_alloc(obj);
@@ -723,7 +716,6 @@ struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
         }
     }
 
-done:;
     struct sub_bitmaps out_imgs = {0};
     mp_sub_packer_pack_ass(obj->sub_packer, obj->ass_imgs, obj->num_externals + 1,
                        obj->changed, false, format, &out_imgs);

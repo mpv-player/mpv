@@ -39,7 +39,6 @@ struct osd_object {
     bool is_sub;
 
     // OSDTYPE_OSD
-    bool osd_changed;
     char *text;
     struct osd_progbar_state progbar_state;
 

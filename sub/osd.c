@@ -217,7 +217,6 @@ void osd_set_text(struct osd_state *osd, const char *text)
     if (strcmp(osd_obj->text, text) != 0) {
         talloc_free(osd_obj->text);
         osd_obj->text = talloc_strdup(osd_obj, text);
-        osd_obj->osd_changed = true;
         osd_object_changed(osd, osd_obj);
     }
     mp_mutex_unlock(&osd->lock);
@@ -280,7 +279,6 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
         memcpy(osd_obj->progbar_state.stops, s->stops,
                sizeof(osd_obj->progbar_state.stops[0]) * s->num_stops);
     }
-    osd_obj->osd_changed = true;
     osd_object_changed(osd, osd_obj);
     mp_mutex_unlock(&osd->lock);
 }
@@ -301,7 +299,6 @@ static void check_obj_resize(struct osd_state *osd, struct mp_osd_res res,
 {
     if (!osd_res_equals(res, obj->vo_res)) {
         obj->vo_res = res;
-        obj->osd_changed = true;
         mp_client_broadcast_event_external(osd->global->client_api,
                                            MP_EVENT_WIN_RESIZE, NULL);
     }
@@ -542,7 +539,6 @@ struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p)
 void osd_changed(struct osd_state *osd)
 {
     mp_mutex_lock(&osd->lock);
-    osd->objs[OSDTYPE_OSD]->osd_changed = true;
     // Done here for a lack of a better place.
     m_config_cache_update(osd->opts_cache);
     osd_object_changed(osd, osd->objs[OSDTYPE_OSD]);
