@@ -264,23 +264,21 @@ static ASS_Event *add_osd_ass_event_escaped(ASS_Track *track, const char *style,
     return e;
 }
 
-static ASS_Style *prepare_osd_ass(struct osd_state *osd, struct osd_object *obj)
+// The style of the OSD text in a track with MP_ASS_FONT_PLAYRESY
+static void set_osd_style(struct osd_state *osd, struct mp_osd_res *res,
+                          ASS_Style *style)
 {
     struct mp_osd_render_opts *opts = osd->opts;
-
-    create_ass_track(osd, obj, &obj->ass);
 
     struct osd_style_opts font = *opts->osd_style;
     font.font_size *= opts->osd_scale;
 
-    double playresy = obj->ass.track->PlayResY;
+    double playresy = MP_ASS_FONT_PLAYRESY;
     // Compensate for libass and mp_ass_set_style scaling the font etc.
-    if (!opts->osd_scale_by_window && obj->vo_res.h)
-        playresy *= 720.0 / obj->vo_res.h;
+    if (!opts->osd_scale_by_window && res->h)
+        playresy *= 720.0 / res->h;
 
-    ASS_Style *style = get_style(&obj->ass, "OSD");
     mp_ass_set_style(style, playresy, &font);
-    return style;
 }
 
 static void update_osd_text(struct osd_state *osd, struct osd_object *obj)
@@ -289,17 +287,19 @@ static void update_osd_text(struct osd_state *osd, struct osd_object *obj)
     if (!obj->text[0])
         return;
 
-    prepare_osd_ass(osd, obj);
+    create_ass_track(osd, obj, &obj->ass);
+    set_osd_style(osd, &obj->vo_res, get_style(&obj->ass, "OSD"));
     add_osd_ass_event_escaped(obj->ass.track, "OSD", obj->text);
 }
 
 void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h)
 {
     mp_mutex_lock(&osd->lock);
-    struct osd_object *obj = osd->objs[OSDTYPE_OSD];
-    ASS_Style *style = prepare_osd_ass(osd, obj);
-    *out_screen_h = obj->ass.track->PlayResY - style->MarginV;
-    *out_font_h = style->FontSize;
+    ASS_Style style = {0};
+    set_osd_style(osd, &osd->objs[OSDTYPE_OSD]->vo_res, &style);
+    *out_screen_h = MP_ASS_FONT_PLAYRESY - style.MarginV;
+    *out_font_h = style.FontSize;
+    free(style.FontName);
     mp_mutex_unlock(&osd->lock);
 }
 
