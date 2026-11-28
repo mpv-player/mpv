@@ -600,11 +600,6 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
         goto done;
     }
 
-    if (!entry->ov.hidden || !ov->hidden) {
-        obj->changed = true;
-        osd->want_redraw_notification = true;
-    }
-
     entry->ov.format = ov->format;
     if (!entry->ov.data)
         entry->ov.data = talloc_strdup(entry, "");
@@ -614,6 +609,10 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     entry->ov.res_y = ov->res_y;
     zorder_changed |= entry->ov.z != ov->z;
     entry->ov.z = ov->z;
+    if (!entry->ov.hidden || !ov->hidden) {
+        obj->changed = true;
+        osd->want_redraw_notification = true;
+    }
     entry->ov.hidden = ov->hidden;
 
     update_external(osd, &obj->vo_res, entry);
