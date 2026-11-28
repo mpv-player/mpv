@@ -380,15 +380,18 @@ static struct sub_bitmaps *render_sub_object(struct osd_state *osd, struct osd_o
     return imgs;
 }
 
+static int get_format(struct osd_state *osd, const bool formats[SUBBITMAP_COUNT])
+{
+    if (!formats[SUBBITMAP_LIBASS] || osd->opts->force_rgba_osd)
+        return SUBBITMAP_BGRA;
+    return SUBBITMAP_LIBASS;
+}
+
 static struct sub_bitmaps *render_object(struct osd_state *osd,
                                          struct osd_object *obj,
                                          struct mp_osd_res osdres, double video_pts,
-                                         const bool sub_formats[SUBBITMAP_COUNT])
+                                         int format)
 {
-    int format = SUBBITMAP_LIBASS;
-    if (!sub_formats[format] || osd->opts->force_rgba_osd)
-        format = SUBBITMAP_BGRA;
-
     struct sub_bitmaps *res = NULL;
 
     check_obj_resize(osd, osdres, obj);
@@ -455,6 +458,8 @@ struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
     if (draw_flags & OSD_DRAW_SUB_FILTER)
         draw_flags |= OSD_DRAW_SUB_ONLY;
 
+    int format = get_format(osd, formats);
+
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
 
@@ -471,7 +476,7 @@ struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
         stats_time_start(osd->stats, stat_type_render);
 
         struct sub_bitmaps *imgs =
-            render_object(osd, obj, res, video_pts, formats);
+            render_object(osd, obj, res, video_pts, format);
 
         stats_time_end(osd->stats, stat_type_render);
 
