@@ -198,6 +198,12 @@ void osd_free(struct osd_state *osd)
     talloc_free(osd);
 }
 
+// What the object shows has changed. Called locked.
+void osd_object_changed(struct osd_state *osd, struct osd_object *obj)
+{
+    osd->want_redraw_notification = true;
+}
+
 void osd_set_text(struct osd_state *osd, const char *text)
 {
     mp_mutex_lock(&osd->lock);
@@ -208,7 +214,7 @@ void osd_set_text(struct osd_state *osd, const char *text)
         talloc_free(osd_obj->text);
         osd_obj->text = talloc_strdup(osd_obj, text);
         osd_obj->osd_changed = true;
-        osd->want_redraw_notification = true;
+        osd_object_changed(osd, osd_obj);
     }
     mp_mutex_unlock(&osd->lock);
 }
@@ -271,7 +277,7 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
                sizeof(osd_obj->progbar_state.stops[0]) * s->num_stops);
     }
     osd_obj->osd_changed = true;
-    osd->want_redraw_notification = true;
+    osd_object_changed(osd, osd_obj);
     mp_mutex_unlock(&osd->lock);
 }
 
@@ -510,9 +516,9 @@ void osd_changed(struct osd_state *osd)
 {
     mp_mutex_lock(&osd->lock);
     osd->objs[OSDTYPE_OSD]->osd_changed = true;
-    osd->want_redraw_notification = true;
     // Done here for a lack of a better place.
     m_config_cache_update(osd->opts_cache);
+    osd_object_changed(osd, osd->objs[OSDTYPE_OSD]);
     mp_mutex_unlock(&osd->lock);
 }
 

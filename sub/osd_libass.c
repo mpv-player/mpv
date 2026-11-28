@@ -593,7 +593,7 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     if (!ov->format) {
         if (!entry->ov.hidden) {
             obj->changed = true;
-            osd->want_redraw_notification = true;
+            osd_object_changed(osd, obj);
         }
         destroy_external(entry);
         MP_TARRAY_REMOVE_AT(obj->externals, obj->num_externals, index);
@@ -611,7 +611,7 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     entry->ov.z = ov->z;
     if (!entry->ov.hidden || !ov->hidden) {
         obj->changed = true;
-        osd->want_redraw_notification = true;
+        osd_object_changed(osd, obj);
     }
     entry->ov.hidden = ov->hidden;
 
@@ -658,7 +658,7 @@ void osd_set_external_remove_owner(struct osd_state *osd, void *owner)
             destroy_external(e);
             MP_TARRAY_REMOVE_AT(obj->externals, obj->num_externals, n);
             obj->changed = true;
-            osd->want_redraw_notification = true;
+            osd_object_changed(osd, obj);
         }
     }
     mp_mutex_unlock(&osd->lock);

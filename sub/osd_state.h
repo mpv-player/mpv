@@ -98,4 +98,6 @@ struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
                                            struct mp_osd_res *res, int format);
 void osd_destroy_backend(struct osd_state *osd);
 
+void osd_object_changed(struct osd_state *osd, struct osd_object *obj);
+
 #endif
