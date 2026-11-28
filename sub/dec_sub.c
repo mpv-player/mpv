@@ -514,6 +514,12 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
 
     mp_mutex_lock(&sub->lock);
 
+    // Another thread may have rendered it while this one waited for the lock.
+    if (get_result(sub, dim, format, pts, &res)) {
+        mp_mutex_unlock(&sub->lock);
+        return res;
+    }
+
     double sub_pts = pts_to_subtitle(sub, pts);
     double sub_end = sub_pts;
     if (!sub->shared_opts->sub_visibility[sub->order])
