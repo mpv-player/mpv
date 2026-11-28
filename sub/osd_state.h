@@ -78,6 +78,11 @@ struct osd_object {
 
 struct osd_external {
     struct osd_external_ass ov;
+    bool ov_changed;
+    // The copy of ov the track is built from
+    char *data;
+    int res_x, res_y;
+    bool hidden;
     bool update;
     struct ass_state ass;
 };

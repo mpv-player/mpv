@@ -530,9 +530,9 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj,
 static void update_external(struct osd_state *osd, struct mp_osd_res *res,
                             struct osd_external *ext)
 {
-    bstr t = bstr0(ext->ov.data);
-    ext->ass.res_x = ext->ov.res_x;
-    ext->ass.res_y = ext->ov.res_y;
+    bstr t = bstr0(ext->data);
+    ext->ass.res_x = ext->res_x;
+    ext->ass.res_y = ext->res_y;
     create_ass_track(osd, res, &ext->ass);
 
     clear_ass(&ext->ass);
@@ -597,7 +597,7 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
         goto done;
     }
 
-    entry->update = true;
+    entry->ov_changed = true;
     entry->ov.format = ov->format;
     if (!entry->ov.data)
         entry->ov.data = talloc_strdup(entry, "");
@@ -607,10 +607,8 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     entry->ov.res_y = ov->res_y;
     zorder_changed |= entry->ov.z != ov->z;
     entry->ov.z = ov->z;
-    if (!entry->ov.hidden || !ov->hidden) {
-        obj->changed = true;
+    if (!entry->ov.hidden || !ov->hidden)
         osd_object_changed(osd, obj);
-    }
     entry->ov.hidden = ov->hidden;
 
     if (zorder_changed) {
@@ -619,6 +617,7 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     }
 
     if (ov->out_rc) {
+        osd_object_prepare(osd, obj);
         struct mp_osd_res vo_res = obj->vo_res;
         // Defined fallback if VO has not drawn this yet
         if (vo_res.w < 1 || vo_res.h < 1) {
@@ -712,6 +711,20 @@ void osd_object_prepare(struct osd_state *osd, struct osd_object *obj)
         obj->sub_packer = mp_sub_packer_alloc(obj);
 
     MP_TARRAY_GROW(obj, obj->ass_imgs, obj->num_externals + 1);
+
+    for (int n = 0; n < obj->num_externals; n++) {
+        struct osd_external *ext = obj->externals[n];
+        if (!ext->ov_changed)
+            continue;
+        ext->ov_changed = false;
+        talloc_free(ext->data);
+        ext->data = talloc_strdup(ext, ext->ov.data);
+        ext->res_x = ext->ov.res_x;
+        ext->res_y = ext->ov.res_y;
+        ext->hidden = ext->ov.hidden;
+        ext->update = true;
+        obj->changed = true;
+    }
 }
 
 struct sub_bitmaps *osd_object_render(struct osd_state *osd,
@@ -728,7 +741,7 @@ struct sub_bitmaps *osd_object_render(struct osd_state *osd,
             update_external(osd, res, ext);
             ext->update = false;
         }
-        if (ext->ov.hidden) {
+        if (ext->hidden) {
             update_playres(&ext->ass, res);
             obj->ass_imgs[n + 1] = NULL;
         } else {
