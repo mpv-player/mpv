@@ -33,6 +33,7 @@
 #include "common/recorder.h"
 #include "misc/dispatch.h"
 #include "osdep/threads.h"
+#include "video/mp_image.h"
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
@@ -70,6 +71,7 @@ struct dec_sub {
     double last_pkt_pts;
     bool preload_attempted;
     double video_fps;
+    struct mp_image_params video_params;
     double sub_speed;
     bool sub_visible;
 
@@ -247,6 +249,8 @@ static void update_segment(struct dec_sub *sub)
             talloc_free(sub->sd);
             sub->sd = new;
             update_subtitle_speed(sub);
+            if (sub->sd->driver->control)
+                sub->sd->driver->control(sub->sd, SD_CTRL_SET_VIDEO_PARAMS, &sub->video_params);
         } else {
             // We'll just keep the current decoder, and feed it possibly
             // invalid data (not our fault if it crashes or something).
@@ -517,6 +521,10 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
     case SD_CTRL_SET_VIDEO_DEF_FPS:
         sub->video_fps = *(double *)arg;
         update_subtitle_speed(sub);
+        break;
+    case SD_CTRL_SET_VIDEO_PARAMS:
+        sub->video_params = *(struct mp_image_params *)arg;
+        propagate = true;
         break;
     case SD_CTRL_SUB_STEP: {
         double *a = arg;
