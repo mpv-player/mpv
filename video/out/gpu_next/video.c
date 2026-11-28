@@ -583,6 +583,26 @@ static void update_overlays(struct mppl_video *p, struct mp_osd_res res,
     talloc_free(subs);
 }
 
+// The size subtitles are rendered at when they are blended into the video
+static struct mp_osd_res blend_subs_res(struct mppl_video *p, const struct pl_frame *image,
+                                        const struct pl_frame *target)
+{
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    float w = pl_rect_w(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target->crop);
+    float h = pl_rect_h(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target->crop);
+    float rx = w / pl_rect_w(image->crop);
+    float ry = h / pl_rect_h(image->crop);
+    return (struct mp_osd_res) {
+        .w = w,
+        .h = h,
+        .ml = -image->crop.x0 * rx,
+        .mr = (image->crop.x1 - p->image_params.w) * rx,
+        .mt = -image->crop.y0 * ry,
+        .mb = (image->crop.y1 - p->image_params.h) * ry,
+        .display_par = 1.0,
+    };
+}
+
 struct frame_priv {
     struct mppl_video *p;
     struct overlay_state subs;
@@ -1709,23 +1729,10 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
                 if (frame->redraw)
                     p->osd_sync++;
                 if (fp->osd_sync < p->osd_sync) {
-                    float w = pl_rect_w(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target.crop);
-                    float h = pl_rect_h(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target.crop);
-                    float rx = w / pl_rect_w(image->crop);
-                    float ry = h / pl_rect_h(image->crop);
-                    struct mp_osd_res res = {
-                        .w = w,
-                        .h = h,
-                        .ml = -image->crop.x0 * rx,
-                        .mr = (image->crop.x1 - p->image_params.w) * rx,
-                        .mt = -image->crop.y0 * ry,
-                        .mb = (image->crop.y1 - p->image_params.h) * ry,
-                        .display_par = 1.0,
-                    };
                     enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
                         ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
                     stats_time_start(p->stats, "osd-blend-update");
-                    update_overlays(p, res, OSD_DRAW_SUB_ONLY,
+                    update_overlays(p, blend_subs_res(p, image, &target), OSD_DRAW_SUB_ONLY,
                                     rel, &fp->subs, image, mpi,
                                     mpi->params.stereo3d, get_ref_luma(p));
                     stats_time_end(p->stats, "osd-blend-update");
@@ -1991,22 +1998,9 @@ void mppl_video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
 
     struct frame_priv *fp = mpi->priv;
     if (opts->blend_subs) {
-        float w = pl_rect_w(opts->blend_subs == BLEND_SUBS_VIDEO ? image.crop : target.crop);
-        float h = pl_rect_h(opts->blend_subs == BLEND_SUBS_VIDEO ? image.crop : target.crop);
-        float rx = w / pl_rect_w(image.crop);
-        float ry = h / pl_rect_h(image.crop);
-        struct mp_osd_res res = {
-            .w = w,
-            .h = h,
-            .ml = -image.crop.x0 * rx,
-            .mr = (image.crop.x1 - p->image_params.w) * rx,
-            .mt = -image.crop.y0 * ry,
-            .mb = (image.crop.y1 - p->image_params.h) * ry,
-            .display_par = 1.0,
-        };
         enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
             ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
-        update_overlays(p, res, osd_flags,
+        update_overlays(p, blend_subs_res(p, &image, &target), osd_flags,
                         rel, &fp->subs, &image, mpi,
                         mpi->params.stereo3d, 0);
         fp->osd_sync = 0;
