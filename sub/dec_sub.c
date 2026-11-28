@@ -436,17 +436,16 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
     mp_mutex_lock(&sub->lock);
 
     struct sub_bitmaps *res = NULL;
+    double sub_pts = pts_to_subtitle(sub, pts);
     if (!sub->shared_opts->sub_visibility[sub->order])
         goto done;
 
-    pts = pts_to_subtitle(sub, pts);
-
-    sub->last_vo_pts = pts;
+    sub->last_vo_pts = sub_pts;
     update_segment(sub);
 
-    if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
+    if (!(sub->end != MP_NOPTS_VALUE && sub_pts >= sub->end) &&
         sub->sd->driver->get_bitmaps)
-        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
+        res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, sub_pts);
 
     // The decoders tell whether the bitmaps differ from the previous ones.
     // A result that is kept needs an identity.
