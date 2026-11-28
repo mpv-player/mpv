@@ -168,6 +168,7 @@ struct osd_state *osd_create(struct mpv_global *global)
         .stats = stats_ctx_create(osd, global, "osd"),
     };
     mp_mutex_init(&osd->lock);
+    mp_cond_init(&osd->wakeup);
     osd->opts = osd->opts_cache->opts;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
@@ -197,8 +198,15 @@ void osd_free(struct osd_state *osd)
     talloc_free(osd->objs[OSDTYPE_EXTERNAL]->result);
     talloc_free(osd->objs[OSDTYPE_EXTERNAL2]->image_overlay);
     talloc_free(osd->objs[OSDTYPE_DISC_MENU]->image_overlay);
+    mp_cond_destroy(&osd->wakeup);
     mp_mutex_destroy(&osd->lock);
     talloc_free(osd);
+}
+
+void osd_wait_object_idle(struct osd_state *osd, struct osd_object *obj)
+{
+    while (obj->rendering)
+        mp_cond_wait(&osd->wakeup, &osd->lock);
 }
 
 // What the object shows has changed. Called locked.

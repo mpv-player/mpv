@@ -60,6 +60,8 @@ struct osd_object {
     int result_id;
     int result_change_id;
 
+    int rendering;  // Number of threads that render the object.
+
     // VO cache state
     int vo_change_id;
     int last_change_id;
@@ -89,6 +91,7 @@ struct osd_external {
 
 struct osd_state {
     mp_mutex lock;
+    mp_cond wakeup;
 
     struct osd_object *objs[MAX_OSD_PARTS];
 
@@ -114,6 +117,7 @@ struct sub_bitmaps *osd_object_render(struct osd_state *osd,
                                       struct mp_osd_res *res, int format);
 void osd_destroy_backend(struct osd_state *osd);
 
+void osd_wait_object_idle(struct osd_state *osd, struct osd_object *obj);
 void osd_object_changed(struct osd_state *osd, struct osd_object *obj);
 
 #endif
