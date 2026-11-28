@@ -163,6 +163,13 @@ static void draw_ass_rgba(unsigned char *src, int src_w, int src_h,
     dst += dst_y * dst_stride + dst_x * 4;
 
     for (int y = 0; y < src_h; y++, dst += dst_stride, src += src_stride) {
+        // Rows without coverage leave the destination as it is.
+        unsigned char coverage = 0;
+        for (int x = 0; x < src_w; x++)
+            coverage |= src[x];
+        if (!coverage)
+            continue;
+
         uint32_t *dstrow = (uint32_t *) dst;
         for (int x = 0; x < src_w; x++) {
             const unsigned int v = src[x];
