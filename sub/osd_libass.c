@@ -577,6 +577,10 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     if (index < 0 && !ov->format)
         goto done;
 
+    // Only the content of an overlay changes while the object is rendered.
+    if (index < 0 || !ov->format || obj->externals[index]->ov.z != ov->z || ov->out_rc)
+        osd_wait_object_idle(osd, obj);
+
     if (index < 0) {
         struct osd_external *new = talloc_zero(NULL, struct osd_external);
         new->ov.owner = ov->owner;
@@ -650,6 +654,7 @@ void osd_set_external_remove_owner(struct osd_state *osd, void *owner)
 {
     mp_mutex_lock(&osd->lock);
     struct osd_object *obj = osd->objs[OSDTYPE_EXTERNAL];
+    osd_wait_object_idle(osd, obj);
     for (int n = obj->num_externals - 1; n >= 0; n--) {
         struct osd_external *e = obj->externals[n];
         if (e->ov.owner == owner) {
