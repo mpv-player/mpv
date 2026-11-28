@@ -622,6 +622,7 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
     }
 
     if (ov->out_rc) {
+        obj->rendering += 1;
         osd_object_prepare(osd, obj);
         struct mp_osd_res vo_res = obj->vo_res;
         // Defined fallback if VO has not drawn this yet
@@ -638,12 +639,18 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
                 vo_res.h = 720;
         }
 
+        mp_mutex_unlock(&osd->lock);
+
         update_external(osd, &vo_res, entry);
         entry->update = false;
         ASS_Image *img_list = NULL;
         append_ass(&entry->ass, &vo_res, &img_list, NULL);
 
         mp_ass_get_bb(img_list, entry->ass.track, &vo_res, ov->out_rc);
+
+        mp_mutex_lock(&osd->lock);
+        obj->rendering -= 1;
+        mp_cond_broadcast(&osd->wakeup);
     }
 
 done:
