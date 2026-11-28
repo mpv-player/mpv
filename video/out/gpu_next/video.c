@@ -1679,7 +1679,7 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
     }
     stats_time_start(p->stats, "osd-update");
     update_overlays(p, p->osd_res,
-                    (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
+                    OSD_DRAW_OSD_LATEST | ((frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0),
                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current,
                     frame->current ? frame->current->params.stereo3d : 0, get_ref_luma(p));
     stats_time_end(p->stats, "osd-update");

@@ -5098,6 +5098,9 @@ OSD
     Render the subtitles of a video frame on a separate thread before the
     frame is drawn, if the VO supports it (default: yes).
     (``gpu-next`` only)
+    With this option it also renders the OSD on a separate thread when the
+    OSD changes, and shows the change once it is rendered instead of delaying
+    a frame for it.
 
 Screenshot
 ----------
