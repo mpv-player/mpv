@@ -574,9 +574,10 @@ void osd_set_external(struct osd_state *osd, struct osd_external_ass *ov)
         }
     }
 
+    if (index < 0 && !ov->format)
+        goto done;
+
     if (index < 0) {
-        if (!ov->format)
-            goto done;
         struct osd_external *new = talloc_zero(NULL, struct osd_external);
         new->ov.owner = ov->owner;
         new->ov.id = ov->id;
