@@ -61,6 +61,7 @@ struct osd_object {
     int result_change_id;
 
     int rendering;  // Number of threads that render the object.
+    int waiting;    // Number of threads that wait for thread to render it
     bool job;       // A job that renders the object ahead is queued or running
 
     // VO cache state

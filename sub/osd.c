@@ -219,8 +219,11 @@ void osd_free(struct osd_state *osd)
 
 void osd_wait_object_idle(struct osd_state *osd, struct osd_object *obj)
 {
+    obj->waiting += 1;
     while (obj->rendering)
         mp_cond_wait(&osd->wakeup, &osd->lock);
+    obj->waiting -= 1;
+    mp_cond_broadcast(&osd->wakeup);
 }
 
 // What the object shows has changed. Called locked.
