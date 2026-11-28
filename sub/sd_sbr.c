@@ -135,7 +135,7 @@ static int init(struct sd *sd)
     return 0;
 }
 
-static void decode(struct sd *sd, struct demux_packet *packet)
+static double decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_sbr_priv *ctx = sd->priv;
 
@@ -167,6 +167,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         const char *error = sbr_get_last_error_string();
         mp_err(sd->log, "Failed to load subtitles: %s\n", error);
     }
+    return -INFINITY;
 }
 
 static struct sub_bitmaps *get_bitmaps(struct sd *sd, struct mp_osd_res dim,

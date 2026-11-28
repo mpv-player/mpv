@@ -5094,6 +5094,14 @@ OSD
     Set the text layout engine used by libass for the OSD. Default: complex.
     See also ``--sub-shaper``
 
+``--osd-thread=<yes|no>``
+    Render the subtitles of a video frame on a separate thread before the
+    frame is drawn, if the VO supports it (default: yes).
+    (``gpu-next`` only)
+    With this option it also renders the OSD on a separate thread when the
+    OSD changes, and shows the change once it is rendered instead of delaying
+    a frame for it.
+
 Screenshot
 ----------
 

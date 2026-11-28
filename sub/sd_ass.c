@@ -464,7 +464,7 @@ static bool check_packet_seen(struct sd *sd, struct demux_packet *packet)
 
 #define UNKNOWN_DURATION (INT_MAX / 1000)
 
-static void decode(struct sd *sd, struct demux_packet *packet)
+static double decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
@@ -473,7 +473,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 
     if (ctx->converter) {
         if (!sd->opts->sub_clear_on_seek && check_packet_seen(sd, packet))
-            return;
+            return INFINITY;
 
         double sub_pts = 0;
         double sub_duration = 0;
@@ -515,6 +515,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         packet->seen = check_packet_seen(sd, packet);
         filter_and_add(sd, packet);
     }
+    return packet->pts;
 }
 
 // Calculate the height used for scaling subtitle text size so --sub-scale-with-window
@@ -801,6 +802,30 @@ done:
         mangle_colors(sd, res);
 
     return res;
+}
+
+static double get_bitmaps_end(struct sd *sd, double pts)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Track *track = ctx->ass_track;
+    // The timing fixes move the time in gaps and overlaps of events.
+    if (sd->opts->sub_fix_timing)
+        return pts;
+
+    long long ts = find_timestamp(sd, pts);
+    long long end = LLONG_MAX;
+    for (int n = 0; n < track->n_events; n++) {
+        ASS_Event *event = &track->events[n];
+        if (event->Start > ts) {
+            end = MPMIN(end, event->Start);
+        } else if (ts < event->Start + event->Duration) {
+            if ((event->Effect && event->Effect[0]) || is_animated(event->Text))
+                return pts;
+            end = MPMIN(end, event->Start + event->Duration);
+        }
+    }
+    // find_timestamp() rounds down.
+    return end == LLONG_MAX ? INFINITY : MPMAX(pts, (end - 0.5) / 1000);
 }
 
 #define MAX_BUF_SIZE 1024 * 1024
@@ -1119,6 +1144,7 @@ const struct sd_functions sd_ass = {
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
+    .get_bitmaps_end = get_bitmaps_end,
     .get_text = get_text,
     .get_times = get_times,
     .get_lines = get_lines,

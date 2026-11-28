@@ -40,7 +40,9 @@ struct sd_functions {
     const char *name;
     bool accept_packets_in_advance;
     int  (*init)(struct sd *sd);
-    void (*decode)(struct sd *sd, struct demux_packet *packet);
+    // Returns the subtitle time from which on the packet may change what is
+    // shown, INFINITY if it changes nothing. MP_NOPTS_VALUE, which mean unknown.
+    double (*decode)(struct sd *sd, struct demux_packet *packet);
     void (*reset)(struct sd *sd);
     void (*select)(struct sd *sd, bool selected);
     void (*uninit)(struct sd *sd);
@@ -50,6 +52,7 @@ struct sd_functions {
 
     struct sub_bitmaps *(*get_bitmaps)(struct sd *sd, struct mp_osd_res dim,
                                        int format, double pts);
+    double (*get_bitmaps_end)(struct sd *sd, double pts);
     char *(*get_text)(struct sd *sd, double pts, enum sd_text_type type);
     struct sd_times (*get_times)(struct sd *sd, double pts);
     struct sub_lines *(*get_lines)(struct sd *sd);

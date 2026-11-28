@@ -63,6 +63,8 @@ void sub_read_packets(struct dec_sub *sub, double video_pts, bool force,
                       bool *packets_read, bool *sub_updated);
 struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
                                     int format, double pts);
+bool sub_has_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
+                     double pts);
 char *sub_get_text(struct dec_sub *sub, double pts, enum sd_text_type type);
 char *sub_ass_get_extradata(struct dec_sub *sub);
 struct sd_times sub_get_times(struct dec_sub *sub, double pts);
@@ -73,8 +75,6 @@ void sub_reset(struct dec_sub *sub);
 void sub_select(struct dec_sub *sub, bool selected);
 void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink);
 void sub_set_play_dir(struct dec_sub *sub, int dir);
-bool sub_is_primary_visible(struct dec_sub *sub);
-bool sub_is_secondary_visible(struct dec_sub *sub);
 
 int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg);
 

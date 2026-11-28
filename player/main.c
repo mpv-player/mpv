@@ -321,6 +321,7 @@ struct MPContext *mp_create(void)
     init_libav(mpctx->global);
     mp_clients_init(mpctx);
     mpctx->osd = osd_create(mpctx->global);
+    osd_set_wakeup_cb(mpctx->osd, mp_wakeup_core_cb, mpctx);
 
 #if HAVE_COCOA
     cocoa_set_input_context(mpctx->input);

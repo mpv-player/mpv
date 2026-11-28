@@ -134,6 +134,11 @@ struct mppl_video {
     struct mp_osd_res osd_res;
     struct overlay_state osd_state;
 
+    // update_target_overlays() input
+    struct mp_image *osd_src;
+    int osd_flags;
+    bool osd_flush;
+
     uint64_t last_id;
     uint64_t osd_sync;
     double last_pts;
@@ -583,9 +588,59 @@ static void update_overlays(struct mppl_video *p, struct mp_osd_res res,
     talloc_free(subs);
 }
 
+// The size subtitles are rendered at when they are blended into the video
+static struct mp_osd_res blend_subs_res(struct mppl_video *p, const struct pl_frame *image,
+                                        const struct pl_frame *target)
+{
+    const struct gl_video_opts *opts = p->opts_cache->opts;
+    float w = pl_rect_w(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target->crop);
+    float h = pl_rect_h(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target->crop);
+    float rx = w / pl_rect_w(image->crop);
+    float ry = h / pl_rect_h(image->crop);
+    return (struct mp_osd_res) {
+        .w = w,
+        .h = h,
+        .ml = -image->crop.x0 * rx,
+        .mr = (image->crop.x1 - p->image_params.w) * rx,
+        .mt = -image->crop.y0 * ry,
+        .mb = (image->crop.y1 - p->image_params.h) * ry,
+        .display_par = 1.0,
+    };
+}
+
+static bool prefetch_overlays(struct mppl_video *p, struct mp_osd_res res, int flags,
+                              struct mp_image *src)
+{
+    int div[2];
+    mp_get_3d_side_by_side(src->params.stereo3d, div);
+    res.w /= div[0];
+    res.h /= div[1];
+    return osd_prefetch(p->osd, res, src->pts, flags, mp_draw_sub_formats);
+}
+
+static float get_ref_luma(struct mppl_video *p);
+
+static bool update_target_overlays(pl_gpu gpu, struct pl_frame *target)
+{
+    struct mppl_video *p = target->user_data;
+    // Start any GPU work before waiting for overlays to be ready.
+    if (p->osd_flush)
+        pl_gpu_flush(gpu);
+    stats_time_start(p->stats, "osd-update");
+    update_overlays(p, p->osd_res, p->osd_flags, PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state,
+                    target, p->osd_src, p->osd_src ? p->osd_src->params.stereo3d : 0,
+                    get_ref_luma(p));
+    stats_time_end(p->stats, "osd-update");
+    return true;
+}
+
 struct frame_priv {
     struct mppl_video *p;
     struct overlay_state subs;
+    // subs is outdated, update_image_overlays() renders it at this size
+    bool subs_pending;
+    struct mp_osd_res subs_res;
+    bool subs_flush;
     uint64_t osd_sync;
     struct ra_hwdec *hwdec;
     // Optional Dolby Vision FEL.
@@ -593,6 +648,29 @@ struct frame_priv {
     pl_tex el_tex[4];
     struct pl_frame el_frame;
 };
+
+static bool update_image_overlays(pl_gpu gpu, struct pl_frame *image)
+{
+    struct mp_image *mpi = image->user_data;
+    struct frame_priv *fp = mpi->priv;
+    struct mppl_video *p = fp->p;
+    if (fp->subs_pending) {
+        const struct gl_video_opts *opts = p->opts_cache->opts;
+        enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
+            ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
+        // Start any GPU work before waiting for overlays to be ready.
+        if (fp->subs_flush)
+            pl_gpu_flush(gpu);
+        stats_time_start(p->stats, "osd-blend-update");
+        update_overlays(p, fp->subs_res, OSD_DRAW_SUB_ONLY, rel, &fp->subs, image, mpi,
+                        mpi->params.stereo3d, get_ref_luma(p));
+        stats_time_end(p->stats, "osd-blend-update");
+        fp->subs_pending = false;
+    }
+    image->overlays = fp->subs.overlays;
+    image->num_overlays = fp->subs.num_overlays;
+    return true;
+}
 
 static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
                                   struct pl_bit_encoding *out_bits,
@@ -1647,12 +1725,19 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
             target.color.transfer = PL_COLOR_TRC_SRGB;
 #endif
     }
-    stats_time_start(p->stats, "osd-update");
-    update_overlays(p, p->osd_res,
-                    (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
-                    PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current,
-                    frame->current ? frame->current->params.stereo3d : 0, get_ref_luma(p));
-    stats_time_end(p->stats, "osd-update");
+    p->osd_flags = OSD_DRAW_OSD_LATEST | ((frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0);
+    p->osd_src = frame->current;
+    p->osd_flush = false;
+    target.user_data = p;
+#if PL_API_VER >= 402
+    // libplacebo asks for the overlays when it draws them. This allows to
+    // pipeline the libass and gpu rendering.
+    if (frame->current)
+        p->osd_flush = !prefetch_overlays(p, p->osd_res, p->osd_flags, frame->current);
+    target.acquire_overlays = update_target_overlays;
+#else
+    update_target_overlays(gpu, &target);
+#endif
     apply_crop(&target, p->dst, swframe->fbo->params.w, swframe->fbo->params.h);
     update_tm_viz(&pars->color_map_params, &target);
 
@@ -1709,33 +1794,26 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
                 if (frame->redraw)
                     p->osd_sync++;
                 if (fp->osd_sync < p->osd_sync) {
-                    float w = pl_rect_w(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target.crop);
-                    float h = pl_rect_h(opts->blend_subs == BLEND_SUBS_VIDEO ? image->crop : target.crop);
-                    float rx = w / pl_rect_w(image->crop);
-                    float ry = h / pl_rect_h(image->crop);
-                    struct mp_osd_res res = {
-                        .w = w,
-                        .h = h,
-                        .ml = -image->crop.x0 * rx,
-                        .mr = (image->crop.x1 - p->image_params.w) * rx,
-                        .mt = -image->crop.y0 * ry,
-                        .mb = (image->crop.y1 - p->image_params.h) * ry,
-                        .display_par = 1.0,
-                    };
-                    enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
-                        ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
-                    stats_time_start(p->stats, "osd-blend-update");
-                    update_overlays(p, res, OSD_DRAW_SUB_ONLY,
-                                    rel, &fp->subs, image, mpi,
-                                    mpi->params.stereo3d, get_ref_luma(p));
-                    stats_time_end(p->stats, "osd-blend-update");
+                    fp->subs_res = blend_subs_res(p, image, &target);
+                    fp->subs_pending = true;
                     fp->osd_sync = p->osd_sync;
                 }
             } else {
                 // Disable overlays when blend_subs is disabled
-                image->num_overlays = 0;
+                fp->subs.num_overlays = 0;
+                fp->subs_pending = false;
                 fp->osd_sync = 0;
             }
+#if PL_API_VER >= 402
+            // As for the target, libplacebo asks for the subtitles when it
+            // draws them into the frame. That is once for a frame it caches,
+            // and not before the frame is shown.
+            fp->subs_flush = fp->subs_pending &&
+                !prefetch_overlays(p, fp->subs_res, OSD_DRAW_SUB_ONLY, mpi);
+            image->acquire_overlays = update_image_overlays;
+#else
+            update_image_overlays(gpu, image);
+#endif
 
             // Update the frame signature to include the current OSD sync
             // value, in order to disambiguate between identical frames with
@@ -1759,6 +1837,16 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
     if (!render_ok) {
         MP_ERR(p, "Failed rendering frame!\n");
         goto done;
+    }
+
+    // The subtitles of the next frame are rendered on another thread while
+    // this frame is on screen. They are asked for once this frame has its
+    // own, which keeps the renders in order.
+    if (frame->num_frames > 1 && !opts->blend_subs) {
+        prefetch_overlays(p, p->osd_res, 0, frame->frames[1]);
+    } else if (frame->num_frames > 1 && mix.num_frames) {
+        prefetch_overlays(p, blend_subs_res(p, mix.frames[mix.num_frames - 1], &target),
+                          OSD_DRAW_SUB_ONLY, frame->frames[1]);
     }
 
     struct pl_frame ref_frame;
@@ -1881,6 +1969,10 @@ void mppl_video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
     // the resulting mix is the correct frame for this PTS
     struct pl_frame image = *(struct pl_frame *) mix.frames[0];
     struct mp_image *mpi = image.user_data;
+#if PL_API_VER >= 402
+    // The overlays of the screenshot are set below.
+    image.acquire_overlays = NULL;
+#endif
 
     // Clear reference luminance before taking a screenshot, we want screenshot
     // to be independent of the system reference luminance.
@@ -1991,22 +2083,9 @@ void mppl_video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
 
     struct frame_priv *fp = mpi->priv;
     if (opts->blend_subs) {
-        float w = pl_rect_w(opts->blend_subs == BLEND_SUBS_VIDEO ? image.crop : target.crop);
-        float h = pl_rect_h(opts->blend_subs == BLEND_SUBS_VIDEO ? image.crop : target.crop);
-        float rx = w / pl_rect_w(image.crop);
-        float ry = h / pl_rect_h(image.crop);
-        struct mp_osd_res res = {
-            .w = w,
-            .h = h,
-            .ml = -image.crop.x0 * rx,
-            .mr = (image.crop.x1 - p->image_params.w) * rx,
-            .mt = -image.crop.y0 * ry,
-            .mb = (image.crop.y1 - p->image_params.h) * ry,
-            .display_par = 1.0,
-        };
         enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
             ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
-        update_overlays(p, res, osd_flags,
+        update_overlays(p, blend_subs_res(p, &image, &target), osd_flags,
                         rel, &fp->subs, &image, mpi,
                         mpi->params.stereo3d, 0);
         fp->osd_sync = 0;

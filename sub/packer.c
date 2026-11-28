@@ -36,10 +36,12 @@
 #include "osd.h"
 #include "video/out/bitmap_packer.h"
 #include "video/mp_image.h"
+#include "video/mp_image_pool.h"
 
 struct mp_sub_packer {
     struct sub_bitmap *cached_parts; // only for the array memory
     struct sub_bitmap *cached_subrandr_images;
+    struct mp_image_pool *pool;
     struct mp_image *cached_img;
     struct sub_bitmaps cached_subs;
     bool cached_subs_valid;
@@ -53,6 +55,7 @@ struct mp_sub_packer *mp_sub_packer_alloc(void *ta_parent)
     struct mp_sub_packer *p = talloc_zero(ta_parent, struct mp_sub_packer);
     p->packer = talloc_zero(p, struct bitmap_packer);
     p->packer->padding = 1; // assume bilinear sampling
+    p->pool = mp_image_pool_new(p);
     return p;
 }
 
@@ -72,23 +75,13 @@ static bool pack(struct mp_sub_packer *p, struct sub_bitmaps *res, int imgfmt)
     res->packed_w = bb[1].x;
     res->packed_h = bb[1].y;
 
-    if (!p->cached_img || p->cached_img->w < res->packed_w ||
-                          p->cached_img->h < res->packed_h ||
-                          p->cached_img->imgfmt != imgfmt)
-    {
-        talloc_free(p->cached_img);
-        p->cached_img = mp_image_alloc(imgfmt, p->packer->w, p->packer->h);
-        if (!p->cached_img) {
-            packer_reset(p->packer);
-            return false;
-        }
-        talloc_steal(p, p->cached_img);
-    }
-
-    if (!mp_image_make_writeable(p->cached_img)) {
+    talloc_free(p->cached_img);
+    p->cached_img = mp_image_pool_get(p->pool, imgfmt, p->packer->w, p->packer->h);
+    if (!p->cached_img) {
         packer_reset(p->packer);
         return false;
     }
+    talloc_steal(p, p->cached_img);
 
     res->packed = p->cached_img;
 
@@ -163,6 +156,13 @@ static void draw_ass_rgba(unsigned char *src, int src_w, int src_h,
     dst += dst_y * dst_stride + dst_x * 4;
 
     for (int y = 0; y < src_h; y++, dst += dst_stride, src += src_stride) {
+        // Rows without coverage leave the destination as it is.
+        unsigned char coverage = 0;
+        for (int x = 0; x < src_w; x++)
+            coverage |= src[x];
+        if (!coverage)
+            continue;
+
         uint32_t *dstrow = (uint32_t *) dst;
         for (int x = 0; x < src_w; x++) {
             const unsigned int v = src[x];
@@ -311,12 +311,10 @@ void mp_sub_packer_pack_ass(struct mp_sub_packer *p, ASS_Image **image_lists,
         }
     }
 
-    bool r = false;
-    if (format == SUBBITMAP_BGRA) {
+    // Images that don't fit into one atlas are blended into RGBA regions.
+    bool r = format == SUBBITMAP_LIBASS && pack_libass(p, &res);
+    if (!r)
         r = pack_rgba(p, &res);
-    } else {
-        r = pack_libass(p, &res);
-    }
 
     if (!r)
         return;

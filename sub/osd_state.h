@@ -27,7 +27,10 @@ struct ass_state {
     struct ass_library *library;
     int res_x, res_y;
     bool changed;
-    struct mp_osd_res vo_res; // last known value
+    // The rendered track, until its events change
+    struct ass_image *imgs;
+    struct mp_osd_res imgs_res;
+    bool imgs_valid;
 };
 
 struct osd_object {
@@ -35,7 +38,6 @@ struct osd_object {
     bool is_sub;
 
     // OSDTYPE_OSD
-    bool osd_changed;
     char *text;
     struct osd_progbar_state progbar_state;
 
@@ -49,12 +51,30 @@ struct osd_object {
     // OSDTYPE_EXTERNAL2 / OSDTYPE_DISC_MENU
     struct sub_bitmaps *image_overlay;
 
+    // OSDTYPE_OSD / OSDTYPE_EXTERNAL: every change of what they show gets a
+    // new state_id, result is the render of the state result_id
+    int state_id;
+    struct sub_bitmaps *result;
+    struct mp_osd_res result_res;
+    int result_format;
+    int result_id;
+    int result_change_id;
+
+    int rendering;  // Number of threads that render the object.
+    int waiting;    // Number of threads that wait for thread to render it
+    bool job;       // A job that renders the object ahead is queued or running
+
     // VO cache state
     int vo_change_id;
+    int last_change_id;
     struct mp_osd_res vo_res;
+    int vo_format;
+    bool vo_latest; // asked for with OSD_DRAW_OSD_LATEST
     bool vo_had_output;
 
     // Internally used by osd_libass.c
+    char *render_text;
+    struct osd_progbar_state render_progbar;
     bool changed;
     struct ass_state ass;
     struct mp_sub_packer *sub_packer;
@@ -64,11 +84,19 @@ struct osd_object {
 
 struct osd_external {
     struct osd_external_ass ov;
+    bool ov_changed;
+    // The copy of ov the track is built from
+    char *data;
+    int res_x, res_y;
+    bool hidden;
+    bool update;
     struct ass_state ass;
 };
 
 struct osd_state {
     mp_mutex lock;
+    mp_cond wakeup;
+    struct mp_thread_pool *pool;
 
     struct osd_object *objs[MAX_OSD_PARTS];
 
@@ -77,6 +105,8 @@ struct osd_state {
 
     bool want_redraw;
     bool want_redraw_notification;
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_ctx;
 
     struct m_config_cache *opts_cache;
     struct mp_osd_render_opts *opts;
@@ -88,8 +118,13 @@ struct osd_state {
 };
 
 // defined in osd_libass.c
-struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
-                                           struct osd_object *obj, int format);
+void osd_object_prepare(struct osd_state *osd, struct osd_object *obj);
+struct sub_bitmaps *osd_object_render(struct osd_state *osd,
+                                      struct osd_object *obj,
+                                      struct mp_osd_res *res, int format);
 void osd_destroy_backend(struct osd_state *osd);
+
+void osd_wait_object_idle(struct osd_state *osd, struct osd_object *obj);
+void osd_object_changed(struct osd_state *osd, struct osd_object *obj);
 
 #endif

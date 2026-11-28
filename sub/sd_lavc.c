@@ -365,7 +365,7 @@ static void rerender_queued_subs(struct sd *sd)
     }
 }
 
-static void decode(struct sd *sd, struct demux_packet *packet)
+static double decode(struct sd *sd, struct demux_packet *packet)
 {
     struct mp_subtitle_opts *opts = sd->opts;
     struct sd_lavc_priv *priv = sd->priv;
@@ -394,7 +394,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     int got_sub;
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, priv->avpkt);
     if (res < 0 || !got_sub)
-        return;
+        return INFINITY;
 
     mp_codec_info_from_av(ctx, priv->codec);
 
@@ -431,7 +431,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         // This subtitle packet only signals the end of subtitle display.
         if (!sub.num_rects) {
             avsubtitle_free(&sub);
-            return;
+            return pts;
         }
     }
 
@@ -457,6 +457,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
                          (struct seekpoint){.pts = pts, .endpts = endpts});
         skip: ;
     }
+    return pts;
 }
 
 static struct sub *get_current(struct sd_lavc_priv *priv, double pts)
