@@ -226,6 +226,9 @@ enum mp_osd_draw_flags {
     OSD_DRAW_SUB_FILTER = (1 << 0),
     OSD_DRAW_SUB_ONLY   = (1 << 1),
     OSD_DRAW_OSD_ONLY   = (1 << 2),
+    // A change of the OSD is rendered on another thread, until it is done
+    // osd_render() returns what was rendered before.
+    OSD_DRAW_OSD_LATEST = (1 << 3),
 };
 
 void osd_draw(struct osd_state *osd, struct mp_osd_res res,

@@ -68,6 +68,8 @@ struct osd_object {
     int vo_change_id;
     int last_change_id;
     struct mp_osd_res vo_res;
+    int vo_format;
+    bool vo_latest; // asked for with OSD_DRAW_OSD_LATEST
     bool vo_had_output;
 
     // Internally used by osd_libass.c

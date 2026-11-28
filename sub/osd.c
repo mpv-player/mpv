@@ -226,11 +226,17 @@ void osd_wait_object_idle(struct osd_state *osd, struct osd_object *obj)
     mp_cond_broadcast(&osd->wakeup);
 }
 
+static bool queue_job(struct osd_state *osd, struct osd_object *obj,
+                      struct mp_osd_res res, int format, double pts);
+
 // What the object shows has changed. Called locked.
 void osd_object_changed(struct osd_state *osd, struct osd_object *obj)
 {
     obj->state_id += 1;
-    osd->want_redraw_notification = true;
+    // For a VO that takes the latest result a job renders the new state and
+    // asks for the redraw then, otherwise the redraw renders it.
+    if (!obj->vo_latest || !queue_job(osd, obj, obj->vo_res, obj->vo_format, 0))
+        osd->want_redraw_notification = true;
 }
 
 void osd_set_text(struct osd_state *osd, const char *text)
@@ -347,10 +353,15 @@ void osd_resize(struct osd_state *osd, struct mp_osd_res res)
     mp_mutex_unlock(&osd->lock);
 }
 
-static bool has_result(struct osd_object *obj, struct mp_osd_res res, int format)
+// Whether osd_render() returns the kept result for these arguments.
+static bool has_result(struct osd_object *obj, struct mp_osd_res res, int format,
+                       int draw_flags)
 {
-    return obj->result_id == obj->state_id && obj->result_format == format &&
-           osd_res_equals(obj->result_res, res);
+    if (obj->result_format != format || !osd_res_equals(obj->result_res, res))
+        return false;
+    // The result of the previous state does while a job renders the current.
+    return obj->result_id == obj->state_id ||
+           ((draw_flags & OSD_DRAW_OSD_LATEST) && obj->job);
 }
 
 // Called locked, the lock is released while it renders.
@@ -420,11 +431,13 @@ static bool is_drawn(struct osd_state *osd, struct osd_object *obj, int draw_fla
 static struct sub_bitmaps *render_object(struct osd_state *osd,
                                          struct osd_object *obj,
                                          struct mp_osd_res osdres, double video_pts,
-                                         int format)
+                                         int draw_flags, int format)
 {
     struct sub_bitmaps *res = NULL;
 
     check_obj_resize(osd, osdres, obj);
+    obj->vo_format = format;
+    obj->vo_latest = draw_flags & OSD_DRAW_OSD_LATEST;
 
     if (obj->is_sub) {
         res = render_sub_object(osd, obj, osdres, format, video_pts);
@@ -435,10 +448,10 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
             obj->image_overlay->change_id = 0;
         }
     } else {
-        if (!has_result(obj, osdres, format)) {
+        if (!has_result(obj, osdres, format, draw_flags)) {
             // A render of another thread may give it.
             osd_wait_object_idle(osd, obj);
-            if (!has_result(obj, osdres, format))
+            if (!has_result(obj, osdres, format, 0))
                 render_osd_object(osd, obj, osdres, format);
         }
         res = sub_bitmaps_copy(NULL, obj->result);
@@ -497,7 +510,7 @@ struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
         stats_time_start(osd->stats, stat_type_render);
 
         struct sub_bitmaps *imgs =
-            render_object(osd, obj, res, video_pts, format);
+            render_object(osd, obj, res, video_pts, draw_flags, format);
 
         stats_time_end(osd->stats, stat_type_render);
 
@@ -539,9 +552,24 @@ static void run_job(void *ptr)
     struct osd_job *job = ptr;
     struct osd_state *osd = job->osd;
 
+    struct osd_object *obj = job->obj;
+
     mp_mutex_lock(&osd->lock);
-    talloc_free(render_sub_object(osd, job->obj, job->res, job->format, job->pts));
-    job->obj->job = false;
+    if (obj->is_sub) {
+        talloc_free(render_sub_object(osd, obj, job->res, job->format, job->pts));
+    } else {
+        while (1) {
+            while (obj->rendering || obj->waiting)
+                mp_cond_wait(&osd->wakeup, &osd->lock);
+            // The state may change again during a render.
+            if (has_result(obj, obj->vo_res, obj->vo_format, 0))
+                break;
+            render_osd_object(osd, obj, obj->vo_res, obj->vo_format);
+            osd->want_redraw_notification = true;
+            osd->wakeup_cb(osd->wakeup_ctx);
+        }
+    }
+    obj->job = false;
     mp_mutex_unlock(&osd->lock);
     talloc_free(job);
 }
@@ -586,7 +614,7 @@ bool osd_prefetch(struct osd_state *osd, struct mp_osd_res res,
             ready = false;
         }
         if (obj->type == OSDTYPE_OSD || obj->type == OSDTYPE_EXTERNAL)
-            ready &= has_result(obj, res, format);
+            ready &= has_result(obj, res, format, draw_flags);
     }
 
     mp_mutex_unlock(&osd->lock);
