@@ -640,6 +640,7 @@ struct frame_priv {
     // subs is outdated, update_image_overlays() renders it at this size
     bool subs_pending;
     struct mp_osd_res subs_res;
+    bool subs_flush;
     uint64_t osd_sync;
     struct ra_hwdec *hwdec;
     // Optional Dolby Vision FEL.
@@ -657,6 +658,9 @@ static bool update_image_overlays(pl_gpu gpu, struct pl_frame *image)
         const struct gl_video_opts *opts = p->opts_cache->opts;
         enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
             ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
+        // Start any GPU work before waiting for overlays to be ready.
+        if (fp->subs_flush)
+            pl_gpu_flush(gpu);
         stats_time_start(p->stats, "osd-blend-update");
         update_overlays(p, fp->subs_res, OSD_DRAW_SUB_ONLY, rel, &fp->subs, image, mpi,
                         mpi->params.stereo3d, get_ref_luma(p));
@@ -1800,7 +1804,16 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
                 fp->subs_pending = false;
                 fp->osd_sync = 0;
             }
+#if PL_API_VER >= 402
+            // As for the target, libplacebo asks for the subtitles when it
+            // draws them into the frame. That is once for a frame it caches,
+            // and not before the frame is shown.
+            fp->subs_flush = fp->subs_pending &&
+                !prefetch_overlays(p, fp->subs_res, OSD_DRAW_SUB_ONLY, mpi);
+            image->acquire_overlays = update_image_overlays;
+#else
             update_image_overlays(gpu, image);
+#endif
 
             // Update the frame signature to include the current OSD sync
             // value, in order to disambiguate between identical frames with
@@ -1956,6 +1969,10 @@ void mppl_video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
     // the resulting mix is the correct frame for this PTS
     struct pl_frame image = *(struct pl_frame *) mix.frames[0];
     struct mp_image *mpi = image.user_data;
+#if PL_API_VER >= 402
+    // The overlays of the screenshot are set below.
+    image.acquire_overlays = NULL;
+#endif
 
     // Clear reference luminance before taking a screenshot, we want screenshot
     // to be independent of the system reference luminance.
