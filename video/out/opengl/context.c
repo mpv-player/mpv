@@ -315,11 +315,12 @@ static void ra_gl_ctx_get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
-static bool ra_gl_ctx_set_color(struct ra_swapchain *sw, struct mp_image_params *params)
+static bool ra_gl_ctx_set_color(struct ra_swapchain *sw, struct mp_image_params *params,
+                                bool target)
 {
     struct priv *p = sw->priv;
     if (p->params.set_color)
-        return p->params.set_color(sw->ctx, params);
+        return p->params.set_color(sw->ctx, params, target);
     return false;
 }
 
@@ -331,10 +332,26 @@ static pl_color_space_t ra_gl_ctx_target_csp(struct ra_swapchain *sw)
     return (pl_color_space_t){0};
 }
 
+static float ra_gl_ctx_target_ref_luma(struct ra_swapchain *sw, bool target)
+{
+    struct priv *p = sw->priv;
+    if (p->params.preferred_ref_luma)
+        return p->params.preferred_ref_luma(sw->ctx, target);
+    return 0;
+}
+
+static bool ra_gl_ctx_sdr_above_ref_luma(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    return p->params.sdr_above_ref_luma && p->params.sdr_above_ref_luma(sw->ctx);
+}
+
 static const struct ra_swapchain_fns ra_gl_swapchain_fns = {
     .color_depth   = ra_gl_ctx_color_depth,
     .set_color     = ra_gl_ctx_set_color,
     .target_csp    = ra_gl_ctx_target_csp,
+    .target_ref_luma = ra_gl_ctx_target_ref_luma,
+    .sdr_above_ref_luma = ra_gl_ctx_sdr_above_ref_luma,
     .start_frame   = ra_gl_ctx_start_frame,
     .submit_frame  = ra_gl_ctx_submit_frame,
     .swap_buffers  = ra_gl_ctx_swap_buffers,

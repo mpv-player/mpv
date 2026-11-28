@@ -222,6 +222,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {"wayland-edge-pixels-touch", OPT_INT(wl_edge_pixels_touch),
         M_RANGE(0, INT_MAX)},
     {"wayland-present", OPT_BOOL(wl_present)},
+    {"wayland-respect-pq-scale", OPT_BOOL(wl_respect_pq_scale)},
     {"wayland-session", OPT_STRING(wayland_session)},
 #endif
 #if HAVE_WIN32_DESKTOP

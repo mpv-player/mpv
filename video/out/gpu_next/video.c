@@ -173,6 +173,7 @@ struct mppl_video {
     // Color space and reference white of the display, from mppl_video_begin_frame()
     struct pl_color_space display_csp;
     float display_ref_luma;
+    bool display_sdr_above_ref_luma;
 
     // Bits per channel of the framebuffer, 0 if unknown
     int fb_depth;
@@ -883,11 +884,12 @@ static float get_ref_luma(struct mppl_video *p)
     return p->display_ref_luma;
 }
 
-static bool use_ref_luma(const struct pl_color_space *csp, const struct pl_color_space *target_csp)
+static bool use_ref_luma(const struct pl_color_space *csp, const struct pl_color_space *target_csp,
+                         bool sdr_above_ref_luma)
 {
     if (!pl_color_transfer_is_hdr(csp->transfer))
-        return true;
-    if (csp->transfer == PL_COLOR_TRC_SCRGB && target_csp && !pl_color_transfer_is_hdr(target_csp->transfer))
+        return !(sdr_above_ref_luma && pl_color_space_is_hdr(csp));
+    if (csp->transfer == PL_COLOR_TRC_SCRGB && target_csp && !pl_color_space_is_hdr(target_csp))
         return true;
     return false;
 }
@@ -1177,7 +1179,7 @@ static void apply_target_contrast(struct mppl_video *p, struct pl_color_space *c
 
 static void apply_target_options(struct mppl_video *p, struct pl_frame *target,
                                  float min_luma, bool hint, float target_ref_luma,
-                                 const struct pl_color_space *target_csp)
+                                 const struct pl_color_space *target_csp, bool sdr_above_ref_luma)
 {
     update_lut(p, &p->next_opts->target_lut);
     target->lut = p->next_opts->target_lut.lut;
@@ -1195,7 +1197,7 @@ static void apply_target_options(struct mppl_video *p, struct pl_frame *target,
     if (opts->target_peak && (!target->color.hdr.max_luma || !hint))
         target->color.hdr.max_luma = opts->target_peak;
     if (target_ref_luma && (!target->color.hdr.max_luma || !hint) &&
-        use_ref_luma(&target->color, target_csp)) {
+        use_ref_luma(&target->color, target_csp, sdr_above_ref_luma)) {
         target->color.hdr.max_luma = target_ref_luma;
     }
     if ((!target->color.hdr.min_luma || !hint))
@@ -1255,6 +1257,12 @@ static void apply_crop(struct pl_frame *frame, struct mp_rect crop,
 enum pl_color_levels mppl_video_get_output_levels(struct mppl_video *p)
 {
     return p->output_levels ? p->output_levels : PL_COLOR_LEVELS_FULL;
+}
+
+bool mppl_video_hint_is_target(struct mppl_video *p)
+{
+    // Without a hint the frame is rendered for the target in every mode.
+    return !p->next_opts->target_hint || p->next_opts->target_hint_mode == 0;
 }
 
 static void update_tm_viz(struct pl_color_map_params *params,
@@ -1326,11 +1334,13 @@ static void reset_queue(struct mppl_video *p)
 }
 
 void mppl_video_begin_frame(struct mppl_video *p, struct vo_frame *frame,
-                            struct pl_color_space display_csp, float display_ref_luma)
+                            struct pl_color_space display_csp, float display_ref_luma,
+                            bool display_sdr_above_ref_luma)
 {
     update_options(p);
     p->display_csp = display_csp;
     p->display_ref_luma = display_ref_luma;
+    p->display_sdr_above_ref_luma = display_sdr_above_ref_luma;
 
     struct frame_params fpar = get_frame_params(p, frame);
     bool can_interpolate = fpar.can_interpolate;
@@ -1410,7 +1420,9 @@ static struct pl_color_space get_target_csp(struct mppl_video *p, bool *unknown,
         target_csp.primaries = mp_get_best_prim_container(&target_csp.hdr.prim);
     if (!pl_color_transfer_is_hdr(target_csp.transfer)) {
         // limit min_luma to 1000:1 contrast ratio in SDR mode
-        if (target_csp.hdr.min_luma > PL_COLOR_SDR_WHITE / PL_COLOR_SDR_CONTRAST)
+        float ref = get_ref_luma(p);
+        float white = ref ? ref : PL_COLOR_SDR_WHITE;
+        if (target_csp.hdr.min_luma > white / PL_COLOR_SDR_CONTRAST)
             target_csp.hdr.min_luma = 0;
     }
     // maxFALL in display metadata is in fact MaxFullFrameLuminance. Wayland
@@ -1444,6 +1456,7 @@ enum mppl_video_hint mppl_video_get_target_hint(struct mppl_video *p, struct vo_
     struct pl_color_space hint = {0};
     bool target_hint = p->next_opts->target_hint == 1 ||
                        (p->next_opts->target_hint == -1 && !target_unknown);
+    bool sdr_above_ref_luma = target_hint && p->display_sdr_above_ref_luma;
     if (target_hint && frame->current) {
         const struct pl_color_space *source = &frame->current->params.color;
         const struct pl_color_space *target = &target_csp;
@@ -1492,7 +1505,7 @@ enum mppl_video_hint mppl_video_get_target_hint(struct mppl_video *p, struct vo_
         bool min_luma_known = hint.hdr.min_luma > 0;
         pl_color_space_infer_map(&source_csp, &hint);
         // Always prefer target luminance and transfer for inverse tone mapping
-        if (pl_color_transfer_is_hdr(target->transfer) && opts->tone_map.inverse) {
+        if (pl_color_space_is_hdr(target) && opts->tone_map.inverse) {
             hint.transfer     = target->transfer;
             hint.hdr.max_luma = target->hdr.max_luma;
             hint.hdr.min_luma = target->hdr.min_luma;
@@ -1507,7 +1520,7 @@ enum mppl_video_hint mppl_video_get_target_hint(struct mppl_video *p, struct vo_
             hint.transfer = opts->target_trc;
         if (opts->target_peak)
             hint.hdr.max_luma = opts->target_peak;
-        if (target_ref_luma && use_ref_luma(&hint, &target_csp))
+        if (target_ref_luma && use_ref_luma(&hint, &target_csp, sdr_above_ref_luma))
             hint.hdr.max_luma = target_ref_luma;
         // The SDR black point was inferred from the peak known before the
         // overrides above, keep the assumed contrast relative to the final
@@ -1599,8 +1612,9 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
     struct pl_frame target;
     pl_frame_from_swapchain(&target, swframe);
     bool strict_sw_params = hint && p->next_opts->target_hint_strict;
+    bool sdr_above_ref_luma = hint && p->display_sdr_above_ref_luma;
     apply_target_options(p, &target, hint ? hint->hdr.min_luma : target_csp.hdr.min_luma,
-                         strict_sw_params, target_ref_luma, &target_csp);
+                         strict_sw_params, target_ref_luma, &target_csp, sdr_above_ref_luma);
     bool clip_gamut = pl_primaries_valid(&target.color.hdr.prim);
     clip_gamut = clip_gamut && target.color.transfer != PL_COLOR_TRC_SCRGB;
     if (clip_gamut) {
@@ -1961,7 +1975,7 @@ void mppl_video_screenshot(struct mppl_video *p, struct voctrl_screenshot *args)
     const struct gl_video_opts *opts = p->opts_cache->opts;
     if (args->scaled) {
         // Apply target LUT, ICC profile and CSP override only in window mode
-        apply_target_options(p, &target, 0, false, 0, NULL);
+        apply_target_options(p, &target, 0, false, 0, NULL, false);
     } else if (args->native_csp) {
         target.color = image.color;
     } else {

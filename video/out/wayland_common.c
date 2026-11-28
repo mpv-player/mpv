@@ -2234,38 +2234,8 @@ static const struct wp_image_description_v1_listener image_description_listener 
 #endif
 };
 
-static void info_done(void *data, struct wp_image_description_info_v1 *image_description_info)
+static void scale_to_sdr_white(struct vo_wayland_preferred_description_info *wd)
 {
-    struct vo_wayland_preferred_description_info *wd = data;
-    struct vo_wayland_state *wl = wd->wl;
-    wl->image_description_info_done = true;
-    wp_image_description_info_v1_destroy(image_description_info);
-
-    if (wd->icc_file) {
-        if (wl->icc_size)
-            munmap(wl->icc_file, wl->icc_size);
-
-        wl->icc_file = wd->icc_file;
-        wl->icc_size = wd->icc_size;
-        wl->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
-        talloc_free(wd);
-        return;
-    }
-
-    MP_VERBOSE(wl, "Preferred surface feedback received:\n");
-    log_color_space(wl->log, wd);
-    if (!wd->csp.primaries) {
-        wd->csp.primaries = get_best_supported_prim_container(wl->primaries_map, &wd->raw_prim);
-        MP_VERBOSE(wl, "Setting best primary container from raw primaries: %s\n",
-                   m_opt_choice_str(pl_csp_prim_names, wd->csp.primaries));
-    }
-    // We don't support extended ranges output where luminance exceeds
-    // maximum nominal luminance range (1.0), so switch to PQ.
-    if (fabsf(wd->csp.hdr.max_luma / wd->ref_luma - 1.0f) > 1e-4f &&
-        !pl_color_transfer_is_hdr(wd->csp.transfer)) {
-        MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
-        wd->csp.transfer = PL_COLOR_TRC_PQ;
-    }
     // Wayland luminances are always in reference to the reference luminance. That is,
     // if max_luma == 2*ref_luma, then there is 2x headroom above paper white. On the
     // other hand, libplacebo hardcodes PL_COLOR_SDR_WHITE as the reference luminance.
@@ -2295,7 +2265,41 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         if (wd->csp.hdr.max_fall != 0)
             wd->csp.hdr.max_fall = MPMIN(wd->csp.hdr.max_fall, wd->csp.hdr.max_luma);
     }
+}
+
+static void info_done(void *data, struct wp_image_description_info_v1 *image_description_info)
+{
+    struct vo_wayland_preferred_description_info *wd = data;
+    struct vo_wayland_state *wl = wd->wl;
+    wl->image_description_info_done = true;
+    wp_image_description_info_v1_destroy(image_description_info);
+
+    if (wd->icc_file) {
+        if (wl->icc_size)
+            munmap(wl->icc_file, wl->icc_size);
+
+        wl->icc_file = wd->icc_file;
+        wl->icc_size = wd->icc_size;
+        wl->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
+        talloc_free(wd);
+        return;
+    }
+
+    MP_VERBOSE(wl, "Preferred surface feedback received:\n");
+    log_color_space(wl->log, wd);
+    if (!wd->csp.primaries) {
+        wd->csp.primaries = get_best_supported_prim_container(wl->primaries_map, &wd->raw_prim);
+        MP_VERBOSE(wl, "Setting best primary container from raw primaries: %s\n",
+                   m_opt_choice_str(pl_csp_prim_names, wd->csp.primaries));
+    }
+    // The luminances are in the scale of PL_COLOR_SDR_WHITE, unless those of
+    // the output are used as they are, with its reference white.
+    bool absolute = wl->opts->wl_respect_pq_scale;
+    if (!absolute)
+        scale_to_sdr_white(wd);
     wl->preferred_csp = wd->csp;
+    wl->preferred_ref_luma = absolute ? wd->ref_luma : 0;
+    wl->pending_vo_events |= VO_EVENT_EXPOSE;
     talloc_free(wd);
 }
 
@@ -3722,7 +3726,27 @@ static void seat_create_text_input(struct vo_wayland_seat *seat)
 }
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
-static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color)
+// The reference white that the image description of a signal declares.
+static float image_ref_luma(struct vo_wayland_state *wl, const struct pl_color_space *color,
+                            bool target)
+{
+    // A signal that is made for an output whose luminances are used as they
+    // are has the reference white of that output and is shown as it is. Any
+    // other signal is in the scale of PL_COLOR_SDR_WHITE.
+    bool output_ref = target && wl->preferred_ref_luma;
+    float ref_luma = output_ref ? wl->preferred_ref_luma : PL_COLOR_SDR_WHITE;
+    if (pl_color_transfer_is_hdr(color->transfer))
+        return ref_luma;
+    // The renderer matches an SDR or linear signal at the reference white of
+    // the output, so that is the peak, unless the output shows such a signal
+    // above its reference white. In the scale of PL_COLOR_SDR_WHITE the white
+    // of such a signal is at most its peak.
+    float white = color->hdr.max_luma;
+    return output_ref && !vo_wayland_sdr_above_ref_luma(wl->vo) ? white : MPMIN(ref_luma, white);
+}
+
+static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color,
+                                 float ref_luma, bool target)
 {
     if (!wl->color_surface || !wl->color_queue || !wl->supports_parametric)
         goto nosupport;
@@ -3769,9 +3793,9 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
         case PL_COLOR_TRC_PQ:
             // Set min luminance to 0 for PQ as per SMPTE ST 2084
             wp_image_description_creator_params_v1_set_luminances(image_creator_params,
-                0 * WAYLAND_MIN_LUM_FACTOR, 10000, PL_COLOR_SDR_WHITE);
+                0 * WAYLAND_MIN_LUM_FACTOR, 10000, ref_luma);
             MP_VERBOSE(wl, "Setting PQ luminance range: min=0, max=10000, ref=%.2f\n",
-                PL_COLOR_SDR_WHITE);
+                ref_luma);
             // Mastering luminances will be set below
             break;
         case PL_COLOR_TRC_LINEAR:
@@ -3779,25 +3803,35 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
             // black, similar to PQ transfer. Configure it in the same way as PQ.
             if (use_metadata) {
                 wp_image_description_creator_params_v1_set_luminances(image_creator_params,
-                    0 * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                    0 * WAYLAND_MIN_LUM_FACTOR, lrintf(hdr.max_luma), lrintf(ref_luma));
                 MP_VERBOSE(wl, "Setting linear luminance range: min=0, max=%.5f, ref=%.2f\n",
-                    hdr.max_luma, PL_COLOR_SDR_WHITE);
-                wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
-                    lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
-                MP_VERBOSE(wl, "Setting linear luminance mastering range: min=%.5f, max=%.2f\n",
-                    hdr.min_luma, hdr.max_luma);
+                    hdr.max_luma, ref_luma);
+                if (wl->supports_display_primaries) {
+                    wp_image_description_creator_params_v1_set_mastering_luminance(image_creator_params,
+                        lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
+                    MP_VERBOSE(wl, "Setting linear luminance mastering range: min=%.5f, max=%.2f\n",
+                        hdr.min_luma, hdr.max_luma);
+                }
             }
             break;
         case PL_COLOR_TRC_HLG:
-            // Leave default for HLG, we wouldn't output it directly, except for pass-through
+            // HLG that is made for the output is encoded for its black and
+            // peak. HLG of the source keeps the defaults.
+            if (target && use_metadata) {
+                wp_image_description_creator_params_v1_set_luminances(image_creator_params,
+                    lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma), ref_luma);
+                MP_VERBOSE(wl, "Setting HLG luminance range: min=%.5f, max=%.2f, ref=%.2f\n",
+                    hdr.min_luma, hdr.max_luma, ref_luma);
+            }
             break;
         default:
             // Set SDR luminance range for all relative transfers
             if (use_metadata) {
                 wp_image_description_creator_params_v1_set_luminances(image_creator_params,
-                    hdr.min_luma * WAYLAND_MIN_LUM_FACTOR, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                    lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma),
+                    lrintf(ref_luma));
                 MP_VERBOSE(wl, "Setting relative luminance range: min=%.5f, max=%.2f, ref=%.2f\n",
-                    hdr.min_luma, hdr.max_luma, PL_COLOR_SDR_WHITE);
+                    hdr.min_luma, hdr.max_luma, ref_luma);
             }
             break;
         }
@@ -3828,15 +3862,20 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
                 lrintf(hdr.min_luma * WAYLAND_MIN_LUM_FACTOR), lrintf(hdr.max_luma));
         }
         MP_VERBOSE(wl, "max_cll: %f, max_fall: %f\n", hdr.max_cll, hdr.max_fall);
-        wp_image_description_creator_params_v1_set_max_cll(image_creator_params, lrintf(hdr.max_cll));
-        wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
+        if (hdr.max_cll)
+            wp_image_description_creator_params_v1_set_max_cll(image_creator_params, lrintf(hdr.max_cll));
+        if (hdr.max_fall)
+            wp_image_description_creator_params_v1_set_max_fall(image_creator_params, lrintf(hdr.max_fall));
     }
     image_description = wp_image_description_creator_params_v1_create(image_creator_params);
     cm_dispatch_color_queue(wl, image_description);
     return;
 
 nosupport:
+    // Without an image description the surface is taken as sRGB, with its
+    // peak where a declared signal has its reference white.
     *color = pl_color_space_srgb;
+    color->hdr.max_luma = ref_luma;
     pl_color_space_infer(color);
     return;
 }
@@ -4302,6 +4341,18 @@ struct pl_color_space vo_wayland_preferred_csp(struct vo *vo)
     return wl->preferred_csp;
 }
 
+float vo_wayland_preferred_ref_luma(struct vo *vo, bool target)
+{
+    // The compositor anchors a signal of the source at its own reference white.
+    return target ? vo->wl->preferred_ref_luma : 0;
+}
+
+bool vo_wayland_sdr_above_ref_luma(struct vo *vo)
+{
+    struct vo_wayland_state *wl = vo->wl;
+    return wl->preferred_csp.hdr.max_luma > wl->preferred_ref_luma && wl->supports_set_luminances;
+}
+
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_wayland_state *wl = vo->wl;
@@ -4351,6 +4402,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                                              &wl->opts->border);
                 }
             }
+            if (opt == &opts->wl_respect_pq_scale)
+                get_compositor_preferred_description(wl);
             if (opt == &opts->wl_content_type)
                 set_content_type(wl);
             if (opt == &opts->cursor_passthrough)
@@ -4495,7 +4548,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params *params)
+void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params *params,
+                             bool target)
 {
 #if HAVE_WAYLAND_PROTOCOLS_1_41
     if (!params) {
@@ -4515,7 +4569,9 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
             wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
     }
 
-    bool color_space_changed = !pl_color_space_equal(&wl->last_hint_params.color, &params->color);
+    float ref_luma = image_ref_luma(wl, &params->color, target);
+    bool color_space_changed = !pl_color_space_equal(&wl->last_hint_params.color, &params->color) ||
+                               wl->last_hint_ref_luma != ref_luma;
     bool color_repr_changed = !pl_color_repr_equal(&wl->last_hint_params.repr, &params->repr) ||
                               wl->last_hint_params.chroma_location != params->chroma_location;
 
@@ -4524,8 +4580,9 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
         return;
     }
     wl->last_hint_params = *params;
+    wl->last_hint_ref_luma = ref_luma;
     if (color_space_changed) {
-        set_color_management(wl, &params->color);
+        set_color_management(wl, &params->color, ref_luma, target);
     } else {
         params->color = wl->current_params.color;
     }

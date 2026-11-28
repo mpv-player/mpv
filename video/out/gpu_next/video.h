@@ -66,7 +66,8 @@ bool mppl_video_opts_want_alpha(struct mpv_global *global);
 bool mppl_video_icc_auto_enabled(struct mppl_video *p);
 bool mppl_video_set_icc_profile(struct mppl_video *p, struct bstr icc);
 void mppl_video_begin_frame(struct mppl_video *p, struct vo_frame *frame,
-                            struct pl_color_space display_csp, float display_ref_luma);
+                            struct pl_color_space display_csp, float display_ref_luma,
+                            bool display_sdr_above_ref_luma);
 enum mppl_video_hint mppl_video_get_target_hint(struct mppl_video *p, struct vo_frame *frame,
                                                 struct pl_color_space *out_hint);
 void mppl_video_skip_frame(struct mppl_video *p, struct vo_frame *frame);
@@ -76,6 +77,7 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
                              struct mp_image_params *target_params);
 bool mppl_video_get_hdr_metadata(struct mppl_video *p, struct pl_hdr_metadata *out);
 enum pl_color_levels mppl_video_get_output_levels(struct mppl_video *p);
+bool mppl_video_hint_is_target(struct mppl_video *p);
 void mppl_video_set_paused(struct mppl_video *p, bool paused);
 bool mppl_video_showing_interpolated_frame(struct mppl_video *p);
 void mppl_video_reset(struct mppl_video *p);

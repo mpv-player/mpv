@@ -44,6 +44,7 @@ typedef struct mp_vo_opts {
     int wl_edge_pixels_pointer;
     int wl_edge_pixels_touch;
     bool wl_present;
+    bool wl_respect_pq_scale;
 
     float panscan;
     float zoom;

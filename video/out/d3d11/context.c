@@ -224,7 +224,7 @@ static struct pl_color_space d3d11_target_color_space(struct ra_swapchain *sw)
     return (struct pl_color_space){0};
 }
 
-static float d3d11_target_ref_luma(struct ra_swapchain *sw)
+static float d3d11_target_ref_luma(struct ra_swapchain *sw, bool target)
 {
     if (sw->ctx->opts.composition)
         return 0;

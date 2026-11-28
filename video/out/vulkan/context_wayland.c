@@ -41,15 +41,25 @@ static bool wayland_vk_check_visible(struct ra_ctx *ctx)
     return vo_wayland_check_visible(ctx->vo);
 }
 
-static bool wayland_vk_set_color(struct ra_ctx *ctx, struct mp_image_params *params)
+static bool wayland_vk_set_color(struct ra_ctx *ctx, struct mp_image_params *params, bool target)
 {
-    vo_wayland_handle_color(ctx->vo->wl, params);
+    vo_wayland_handle_color(ctx->vo->wl, params, target);
     return true;
 }
 
 static pl_color_space_t wayland_vk_preferred_csp(struct ra_ctx *ctx)
 {
     return vo_wayland_preferred_csp(ctx->vo);
+}
+
+static float wayland_vk_preferred_ref_luma(struct ra_ctx *ctx, bool target)
+{
+    return vo_wayland_preferred_ref_luma(ctx->vo, target);
+}
+
+static bool wayland_vk_sdr_above_ref_luma(struct ra_ctx *ctx)
+{
+    return vo_wayland_sdr_above_ref_luma(ctx->vo);
 }
 
 static void wayland_vk_swap_buffers(struct ra_ctx *ctx)
@@ -102,6 +112,8 @@ static bool wayland_vk_init(struct ra_ctx *ctx)
         .color_depth = wayland_vk_color_depth,
         .check_visible = wayland_vk_check_visible,
         .preferred_csp = wayland_vk_preferred_csp,
+        .preferred_ref_luma = wayland_vk_preferred_ref_luma,
+        .sdr_above_ref_luma = wayland_vk_sdr_above_ref_luma,
         .set_color    = wayland_vk_set_color,
         .swap_buffers = wayland_vk_swap_buffers,
         .get_vsync = wayland_vk_get_vsync,

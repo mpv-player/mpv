@@ -259,7 +259,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
         }
     }
     if (src) {
-        vo_wayland_handle_color(wl, &p->sws->dst);
+        vo_wayland_handle_color(wl, &p->sws->dst, false);
         struct mp_image dst = buf->mpi;
         struct mp_rect src_rc;
         struct mp_rect dst_rc;

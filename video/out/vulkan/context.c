@@ -627,7 +627,7 @@ static void get_vsync(struct ra_swapchain *sw,
         p->params.get_vsync(sw->ctx, info);
 }
 
-static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params)
+static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params, bool target)
 {
     struct priv *p = sw->priv;
 
@@ -642,7 +642,7 @@ static bool set_color(struct ra_swapchain *sw, struct mp_image_params *params)
           pl_swapchain_colorspace_hint(p->vk->swapchain,
                                        &(struct pl_color_space){0});
         }
-        bool ret = p->params.set_color(sw->ctx, params);
+        bool ret = p->params.set_color(sw->ctx, params, target);
         // To avoid ping-pong between VK_COLOR_SPACE_PASS_THROUGH_EXT and others,
         // we assume that internal Wayland set_color always work, and update
         // params to fallback values if needed.
@@ -662,12 +662,18 @@ static pl_color_space_t target_csp(struct ra_swapchain *sw)
     return (pl_color_space_t){0};
 }
 
-static float target_ref_luma(struct ra_swapchain *sw)
+static float target_ref_luma(struct ra_swapchain *sw, bool target)
 {
     struct priv *p = sw->priv;
     if (p->params.preferred_ref_luma)
-        return p->params.preferred_ref_luma(sw->ctx);
+        return p->params.preferred_ref_luma(sw->ctx, target);
     return 0;
+}
+
+static bool sdr_above_ref_luma(struct ra_swapchain *sw)
+{
+    struct priv *p = sw->priv;
+    return p->params.sdr_above_ref_luma && p->params.sdr_above_ref_luma(sw->ctx);
 }
 
 static const struct ra_swapchain_fns vulkan_swapchain = {
@@ -675,6 +681,7 @@ static const struct ra_swapchain_fns vulkan_swapchain = {
     .set_color     = set_color,
     .target_csp    = target_csp,
     .target_ref_luma = target_ref_luma,
+    .sdr_above_ref_luma = sdr_above_ref_luma,
     .start_frame   = start_frame,
     .submit_frame  = submit_frame,
     .swap_buffers  = swap_buffers,

@@ -1,0 +1,1 @@
+add `--wayland-respect-pq-scale` option

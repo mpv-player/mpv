@@ -55,7 +55,8 @@ static bool set_colorspace_hint(struct priv *p, struct pl_color_space *hint)
         },
     };
 
-    if (sw->fns->set_color && sw->fns->set_color(sw, hint ? &params : NULL)) {
+    bool target = mppl_video_hint_is_target(p->renderer);
+    if (sw->fns->set_color && sw->fns->set_color(sw, hint ? &params : NULL, target)) {
         if (hint) {
             *hint = params.color;
             return true;
@@ -74,8 +75,10 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
     // TODO: Implement this for all backends
     if (sw->fns->target_csp)
         display_csp = sw->fns->target_csp(sw);
-    float display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw) : 0;
-    mppl_video_begin_frame(p->renderer, frame, display_csp, display_ref_luma);
+    bool target = mppl_video_hint_is_target(p->renderer);
+    float display_ref_luma = sw->fns->target_ref_luma ? sw->fns->target_ref_luma(sw, target) : 0;
+    bool sdr_above_ref_luma = sw->fns->sdr_above_ref_luma && sw->fns->sdr_above_ref_luma(sw);
+    mppl_video_begin_frame(p->renderer, frame, display_csp, display_ref_luma, sdr_above_ref_luma);
 
     struct pl_color_space hint = {0};
     bool external_params = false;

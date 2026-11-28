@@ -6622,6 +6622,18 @@ them.
     frame presentation if it is supported by the compositor (default: ``yes``).
     This only has an effect if ``--video-sync=display-...`` is being used.
 
+``--wayland-respect-pq-scale=<yes|no>``
+    Render to the absolute PQ luminances as mastered (default: ``no``). HDR
+    video then keeps the luminance it was mastered with, while SDR video, the
+    OSD and subtitles are drawn at the reference white of the compositor (see
+    ``--hdr-reference-white``).
+
+    By default all luminances are relative to the reference white of the
+    compositor. HDR video gets brighter or darker relative to 203 cd/m².
+
+    With ``--target-colorspace-hint-mode=source`` and ``--vo=dmabuf-wayland``
+    the compositor scales and tone maps the video in either case.
+
 ``--wayland-session=<string>``
     Set the wayland session name for window restoration (default: unset).
     Not setting this or setting it to the empty string disables session
@@ -7709,14 +7721,15 @@ them.
     (Only for ``--vo=gpu-next``)
 
     In ``auto`` mode (default), the reference white luminance is queried from
-    the system. This is currently only supported on Windows. If the system does
+    the system. This is supported on Windows and Wayland. If the system does
     not provide a value, 203 cd/m² is assumed.
 
     .. note::
 
         This option overrides the ``--target-peak`` if is set and the target
         transfer function is SDR. This way you can control SDR output separately
-        from HDR output.
+        from HDR output. A Wayland HDR output keeps a peak above 203 cd/m² for
+        an SDR transfer function, with SDR content at the reference white.
 
 ``--sdr-adjust-gamma=<auto|yes|no>``
     SDR transfer functions are often ambiguous or mismatched. Even if files are
