@@ -131,6 +131,7 @@ int packer_pack(struct bitmap_packer *packer)
     int w_orig = packer->w, h_orig = packer->h;
     struct pos *in = packer->in;
     int xmax = 0, ymax = 0;
+    int64_t area = 0;
     for (int i = 0; i < packer->count; i++) {
         if (in[i].x <= 0 || in[i].y <= 0) {
             in[i] = (struct pos){0, 0};
@@ -142,6 +143,7 @@ int packer_pack(struct bitmap_packer *packer)
             return -1;
         xmax = MPMAX(xmax, in[i].x);
         ymax = MPMAX(ymax, in[i].y);
+        area += (int64_t)in[i].x * in[i].y;
     }
     if (xmax > packer->w)
         packer->w = 1 << (mp_log2(xmax - 1) + 1);
@@ -149,7 +151,10 @@ int packer_pack(struct bitmap_packer *packer)
         packer->h = 1 << (mp_log2(ymax - 1) + 1);
     while (1) {
         int used_width = 0;
-        int y = pack_rectangles(in, packer->result, packer->count,
+        int y = -1;
+        // A size with less area than the rectangles can't fit them.
+        if ((int64_t)packer->w * packer->h >= area)
+            y = pack_rectangles(in, packer->result, packer->count,
                                 packer->w, packer->h,
                                 packer->scratch, &used_width);
         if (y >= 0) {
