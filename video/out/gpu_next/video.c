@@ -637,6 +637,9 @@ static bool update_target_overlays(pl_gpu gpu, struct pl_frame *target)
 struct frame_priv {
     struct mppl_video *p;
     struct overlay_state subs;
+    // subs is outdated, update_image_overlays() renders it at this size
+    bool subs_pending;
+    struct mp_osd_res subs_res;
     uint64_t osd_sync;
     struct ra_hwdec *hwdec;
     // Optional Dolby Vision FEL.
@@ -644,6 +647,26 @@ struct frame_priv {
     pl_tex el_tex[4];
     struct pl_frame el_frame;
 };
+
+static bool update_image_overlays(pl_gpu gpu, struct pl_frame *image)
+{
+    struct mp_image *mpi = image->user_data;
+    struct frame_priv *fp = mpi->priv;
+    struct mppl_video *p = fp->p;
+    if (fp->subs_pending) {
+        const struct gl_video_opts *opts = p->opts_cache->opts;
+        enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
+            ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
+        stats_time_start(p->stats, "osd-blend-update");
+        update_overlays(p, fp->subs_res, OSD_DRAW_SUB_ONLY, rel, &fp->subs, image, mpi,
+                        mpi->params.stereo3d, get_ref_luma(p));
+        stats_time_end(p->stats, "osd-blend-update");
+        fp->subs_pending = false;
+    }
+    image->overlays = fp->subs.overlays;
+    image->num_overlays = fp->subs.num_overlays;
+    return true;
+}
 
 static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
                                   struct pl_bit_encoding *out_bits,
@@ -1767,20 +1790,17 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
                 if (frame->redraw)
                     p->osd_sync++;
                 if (fp->osd_sync < p->osd_sync) {
-                    enum pl_overlay_coords rel = opts->blend_subs == BLEND_SUBS_VIDEO
-                        ? PL_OVERLAY_COORDS_SRC_CROP : PL_OVERLAY_COORDS_DST_CROP;
-                    stats_time_start(p->stats, "osd-blend-update");
-                    update_overlays(p, blend_subs_res(p, image, &target), OSD_DRAW_SUB_ONLY,
-                                    rel, &fp->subs, image, mpi,
-                                    mpi->params.stereo3d, get_ref_luma(p));
-                    stats_time_end(p->stats, "osd-blend-update");
+                    fp->subs_res = blend_subs_res(p, image, &target);
+                    fp->subs_pending = true;
                     fp->osd_sync = p->osd_sync;
                 }
             } else {
                 // Disable overlays when blend_subs is disabled
-                image->num_overlays = 0;
+                fp->subs.num_overlays = 0;
+                fp->subs_pending = false;
                 fp->osd_sync = 0;
             }
+            update_image_overlays(gpu, image);
 
             // Update the frame signature to include the current OSD sync
             // value, in order to disambiguate between identical frames with
