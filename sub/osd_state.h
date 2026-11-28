@@ -53,6 +53,15 @@ struct osd_object {
     // OSDTYPE_EXTERNAL2 / OSDTYPE_DISC_MENU
     struct sub_bitmaps *image_overlay;
 
+    // OSDTYPE_OSD / OSDTYPE_EXTERNAL: every change of what they show gets a
+    // new state_id, result is the render of the state result_id
+    int state_id;
+    struct sub_bitmaps *result;
+    struct mp_osd_res result_res;
+    int result_format;
+    int result_id;
+    int result_change_id;
+
     // VO cache state
     int vo_change_id;
     int last_change_id;

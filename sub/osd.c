@@ -176,6 +176,7 @@ struct osd_state *osd_create(struct mpv_global *global)
             .type = n,
             .text = talloc_strdup(obj, ""),
             .progbar_state = {.type = -1},
+            .state_id = 1,
             .vo_change_id = 1,
         };
         osd->objs[n] = obj;
@@ -192,6 +193,8 @@ void osd_free(struct osd_state *osd)
     if (!osd)
         return;
     osd_destroy_backend(osd);
+    talloc_free(osd->objs[OSDTYPE_OSD]->result);
+    talloc_free(osd->objs[OSDTYPE_EXTERNAL]->result);
     talloc_free(osd->objs[OSDTYPE_EXTERNAL2]->image_overlay);
     talloc_free(osd->objs[OSDTYPE_DISC_MENU]->image_overlay);
     mp_mutex_destroy(&osd->lock);
@@ -201,6 +204,7 @@ void osd_free(struct osd_state *osd)
 // What the object shows has changed. Called locked.
 void osd_object_changed(struct osd_state *osd, struct osd_object *obj)
 {
+    obj->state_id += 1;
     osd->want_redraw_notification = true;
 }
 
@@ -320,6 +324,27 @@ void osd_resize(struct osd_state *osd, struct mp_osd_res res)
     mp_mutex_unlock(&osd->lock);
 }
 
+static bool has_result(struct osd_object *obj, struct mp_osd_res res, int format)
+{
+    return obj->result_id == obj->state_id && obj->result_format == format &&
+           osd_res_equals(obj->result_res, res);
+}
+
+static void render_osd_object(struct osd_state *osd, struct osd_object *obj,
+                              struct mp_osd_res res, int format)
+{
+    struct sub_bitmaps *imgs = osd_object_get_bitmaps(osd, obj, &res, format);
+    if (imgs) {
+        obj->result_change_id += imgs->change_id;
+        imgs->change_id = obj->result_change_id;
+    }
+    talloc_free(obj->result);
+    obj->result = imgs;
+    obj->result_res = res;
+    obj->result_format = format;
+    obj->result_id = obj->state_id;
+}
+
 static struct sub_bitmaps *render_object(struct osd_state *osd,
                                          struct osd_object *obj,
                                          struct mp_osd_res osdres, double video_pts,
@@ -343,7 +368,9 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
             obj->image_overlay->change_id = 0;
         }
     } else {
-        res = osd_object_get_bitmaps(osd, obj, &osdres, format);
+        if (!has_result(obj, osdres, format))
+            render_osd_object(osd, obj, osdres, format);
+        res = sub_bitmaps_copy(NULL, obj->result);
     }
 
     if (obj->vo_had_output != !!res) {
@@ -352,7 +379,7 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
     }
 
     if (res) {
-        if (!obj->is_sub) {
+        if (obj->type == OSDTYPE_EXTERNAL2 || obj->type == OSDTYPE_DISC_MENU) {
             obj->vo_change_id += res->change_id;
         } else {
             obj->vo_change_id += res->change_id != obj->last_change_id;
