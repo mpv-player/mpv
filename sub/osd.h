@@ -198,6 +198,7 @@ struct mpv_global;
 struct dec_sub;
 
 struct osd_state *osd_create(struct mpv_global *global);
+void osd_set_wakeup_cb(struct osd_state *osd, void (*cb)(void *ctx), void *ctx);
 void osd_changed(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
 

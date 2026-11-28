@@ -192,6 +192,16 @@ struct osd_state *osd_create(struct mpv_global *global)
     return osd;
 }
 
+// The callback is called when osd_query_and_reset_want_redraw() has news
+// from another thread.
+void osd_set_wakeup_cb(struct osd_state *osd, void (*cb)(void *ctx), void *ctx)
+{
+    mp_mutex_lock(&osd->lock);
+    osd->wakeup_cb = cb;
+    osd->wakeup_ctx = ctx;
+    mp_mutex_unlock(&osd->lock);
+}
+
 void osd_free(struct osd_state *osd)
 {
     if (!osd)
