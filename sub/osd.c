@@ -336,11 +336,18 @@ static bool has_result(struct osd_object *obj, struct mp_osd_res res, int format
            osd_res_equals(obj->result_res, res);
 }
 
+// Called locked, the lock is released while it renders.
 static void render_osd_object(struct osd_state *osd, struct osd_object *obj,
                               struct mp_osd_res res, int format)
 {
+    int state_id = obj->state_id;
+    obj->rendering += 1;
     osd_object_prepare(osd, obj);
+    mp_mutex_unlock(&osd->lock);
+
     struct sub_bitmaps *imgs = osd_object_render(osd, obj, &res, format);
+
+    mp_mutex_lock(&osd->lock);
     if (imgs) {
         obj->result_change_id += imgs->change_id;
         imgs->change_id = obj->result_change_id;
@@ -349,7 +356,9 @@ static void render_osd_object(struct osd_state *osd, struct osd_object *obj,
     obj->result = imgs;
     obj->result_res = res;
     obj->result_format = format;
-    obj->result_id = obj->state_id;
+    obj->result_id = state_id;
+    obj->rendering -= 1;
+    mp_cond_broadcast(&osd->wakeup);
 }
 
 // Called locked, the lock is released while it renders.
