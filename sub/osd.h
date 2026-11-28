@@ -235,6 +235,9 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
 struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
                                    double video_pts, int draw_flags,
                                    const bool formats[SUBBITMAP_COUNT]);
+bool osd_prefetch(struct osd_state *osd, struct mp_osd_res res,
+                  double video_pts, int draw_flags,
+                  const bool formats[SUBBITMAP_COUNT]);
 
 struct mp_image;
 void osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,

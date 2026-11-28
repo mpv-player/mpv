@@ -61,6 +61,7 @@ struct osd_object {
     int result_change_id;
 
     int rendering;  // Number of threads that render the object.
+    bool job;       // A job that renders the object ahead is queued or running
 
     // VO cache state
     int vo_change_id;
@@ -92,6 +93,7 @@ struct osd_external {
 struct osd_state {
     mp_mutex lock;
     mp_cond wakeup;
+    struct mp_thread_pool *pool;
 
     struct osd_object *objs[MAX_OSD_PARTS];
 

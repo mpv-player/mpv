@@ -28,6 +28,7 @@
 #include "osdep/timer.h"
 
 #include "mpv_talloc.h"
+#include "misc/thread_pool.h"
 #include "options/m_config.h"
 #include "options/options.h"
 #include "common/global.h"
@@ -170,6 +171,8 @@ struct osd_state *osd_create(struct mpv_global *global)
     mp_mutex_init(&osd->lock);
     mp_cond_init(&osd->wakeup);
     osd->opts = osd->opts_cache->opts;
+    // Every object has one job at most.
+    osd->pool = mp_thread_pool_create(osd, 0, 0, MAX_OSD_PARTS);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = talloc(osd, struct osd_object);
@@ -193,6 +196,7 @@ void osd_free(struct osd_state *osd)
 {
     if (!osd)
         return;
+    talloc_free(osd->pool);
     osd_destroy_backend(osd);
     talloc_free(osd->objs[OSDTYPE_OSD]->result);
     talloc_free(osd->objs[OSDTYPE_EXTERNAL]->result);
@@ -507,6 +511,73 @@ struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
 
     mp_mutex_unlock(&osd->lock);
     return list;
+}
+
+struct osd_job {
+    struct osd_state *osd;
+    struct osd_object *obj;
+    struct mp_osd_res res;
+    int format;
+    double pts;
+};
+
+static void run_job(void *ptr)
+{
+    struct osd_job *job = ptr;
+    struct osd_state *osd = job->osd;
+
+    mp_mutex_lock(&osd->lock);
+    talloc_free(render_sub_object(osd, job->obj, job->res, job->format, job->pts));
+    job->obj->job = false;
+    mp_mutex_unlock(&osd->lock);
+    talloc_free(job);
+}
+
+// Returns whether a job renders the object now.
+static bool queue_job(struct osd_state *osd, struct osd_object *obj,
+                      struct mp_osd_res res, int format, double pts)
+{
+    if (!obj->job && osd->opts->osd_thread) {
+        struct osd_job *job = talloc_ptrtype(NULL, job);
+        *job = (struct osd_job){osd, obj, res, format, pts};
+        obj->job = mp_thread_pool_queue(osd->pool, run_job, job);
+        if (!obj->job)
+            talloc_free(job);
+    }
+    return obj->job;
+}
+
+// Start to render on another thread what osd_render() returns for the same
+// arguments. osd_render() waits for it then, if it is not done yet.
+bool osd_prefetch(struct osd_state *osd, struct mp_osd_res res,
+                  double video_pts, int draw_flags,
+                  const bool formats[SUBBITMAP_COUNT])
+{
+    mp_mutex_lock(&osd->lock);
+
+    double force_video_pts = atomic_load(&osd->force_video_pts);
+    if (force_video_pts != MP_NOPTS_VALUE)
+        video_pts = force_video_pts;
+
+    int format = get_format(osd, formats);
+    bool ready = true;
+
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct osd_object *obj = osd->objs[n];
+
+        if (!is_drawn(osd, obj, draw_flags))
+            continue;
+
+        if (obj->sub && !sub_has_bitmaps(obj->sub, res, format, video_pts)) {
+            queue_job(osd, obj, res, format, video_pts);
+            ready = false;
+        }
+        if (obj->type == OSDTYPE_OSD || obj->type == OSDTYPE_EXTERNAL)
+            ready &= has_result(obj, res, format);
+    }
+
+    mp_mutex_unlock(&osd->lock);
+    return ready;
 }
 
 // Warning: this function should be considered legacy. Use osd_render() instead.

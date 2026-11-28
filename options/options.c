@@ -432,10 +432,12 @@ const struct m_sub_options mp_osd_render_sub_opts = {
         {"osd-glyph-limit", OPT_INT(osd_glyph_limit)},
         {"osd-bitmap-max-size", OPT_INT(osd_bitmap_max_size)},
         {"osd-shaper", OPT_CHOICE(osd_shaper, {"simple", 0}, {"complex", 1})},
+        {"osd-thread", OPT_BOOL(osd_thread)},
         {0}
     },
     .size = sizeof(OPT_BASE_STRUCT),
     .defaults = &(OPT_BASE_STRUCT){
+        .osd_thread = true,
         .osd_scale = 1,
         .osd_scale_by_window = true,
         .osd_selected_color = {250, 189, 47, 255},
