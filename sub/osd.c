@@ -567,6 +567,9 @@ struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p)
 void osd_changed(struct osd_state *osd)
 {
     mp_mutex_lock(&osd->lock);
+    // The renders read the options without the lock.
+    while (osd->objs[OSDTYPE_OSD]->rendering || osd->objs[OSDTYPE_EXTERNAL]->rendering)
+        mp_cond_wait(&osd->wakeup, &osd->lock);
     // Done here for a lack of a better place.
     m_config_cache_update(osd->opts_cache);
     osd_object_changed(osd, osd->objs[OSDTYPE_OSD]);
