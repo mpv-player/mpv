@@ -28,6 +28,10 @@ struct ass_state {
     int res_x, res_y;
     bool changed;
     struct mp_osd_res vo_res; // last known value
+    // The rendered track, until its events change
+    struct ass_image *imgs;
+    struct mp_osd_res imgs_res;
+    bool imgs_valid;
 };
 
 struct osd_object {

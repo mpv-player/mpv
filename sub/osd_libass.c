@@ -191,6 +191,7 @@ static void clear_ass(struct ass_state *ass)
 {
     if (ass->track)
         ass_flush_events(ass->track);
+    ass->imgs_valid = false;
 }
 
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
@@ -668,15 +669,21 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
         return;
     }
 
-    update_playres(ass, res);
+    if (!ass->imgs_valid || !osd_res_equals(ass->imgs_res, *res)) {
+        update_playres(ass, res);
 
-    ass_set_frame_size(ass->render, res->w, res->h);
-    ass_set_pixel_aspect(ass->render, res->display_par);
+        ass_set_frame_size(ass->render, res->w, res->h);
+        ass_set_pixel_aspect(ass->render, res->display_par);
 
-    int ass_changed;
-    *img_list = ass_render_frame(ass->render, ass->track, 0, &ass_changed);
+        int ass_changed;
+        ass->imgs = ass_render_frame(ass->render, ass->track, 0, &ass_changed);
+        ass->imgs_res = *res;
+        ass->imgs_valid = true;
 
-    ass->changed |= ass_changed;
+        ass->changed |= ass_changed;
+    }
+
+    *img_list = ass->imgs;
 
     if (changed) {
         *changed |= ass->changed;
