@@ -337,7 +337,7 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
             obj->image_overlay->change_id = 0;
         }
     } else {
-        res = osd_object_get_bitmaps(osd, obj, format);
+        res = osd_object_get_bitmaps(osd, obj, &osdres, format);
     }
 
     if (obj->vo_had_output != !!res) {

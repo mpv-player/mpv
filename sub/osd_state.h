@@ -94,7 +94,8 @@ struct osd_state {
 
 // defined in osd_libass.c
 struct sub_bitmaps *osd_object_get_bitmaps(struct osd_state *osd,
-                                           struct osd_object *obj, int format);
+                                           struct osd_object *obj,
+                                           struct mp_osd_res *res, int format);
 void osd_destroy_backend(struct osd_state *osd);
 
 #endif
