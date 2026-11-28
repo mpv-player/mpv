@@ -346,7 +346,12 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
     }
 
     if (res) {
-        obj->vo_change_id += res->change_id;
+        if (!obj->is_sub) {
+            obj->vo_change_id += res->change_id;
+        } else {
+            obj->vo_change_id += res->change_id != obj->last_change_id;
+            obj->last_change_id = res->change_id;
+        }
 
         res->render_index = obj->type;
         res->change_id = obj->vo_change_id;

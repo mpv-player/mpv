@@ -55,6 +55,7 @@ struct osd_object {
 
     // VO cache state
     int vo_change_id;
+    int last_change_id;
     struct mp_osd_res vo_res;
     bool vo_had_output;
 

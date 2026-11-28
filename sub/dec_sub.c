@@ -53,6 +53,8 @@ static const struct sd_functions *const sd_list[] = {
 struct dec_sub {
     mp_mutex lock;
 
+    int change_id;
+
     struct mp_log *log;
     struct mpv_global *global;
     struct demux_packet_pool *packet_pool;
@@ -445,6 +447,13 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
     if (!(sub->end != MP_NOPTS_VALUE && pts >= sub->end) &&
         sub->sd->driver->get_bitmaps)
         res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts);
+
+    // The decoders tell whether the bitmaps differ from the previous ones.
+    // A result that is kept needs an identity.
+    if (res) {
+        sub->change_id += res->change_id;
+        res->change_id = sub->change_id;
+    }
 
 done:
     mp_mutex_unlock(&sub->lock);
