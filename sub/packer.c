@@ -311,12 +311,10 @@ void mp_sub_packer_pack_ass(struct mp_sub_packer *p, ASS_Image **image_lists,
         }
     }
 
-    bool r = false;
-    if (format == SUBBITMAP_BGRA) {
+    // Images that don't fit into one atlas are blended into RGBA regions.
+    bool r = format == SUBBITMAP_LIBASS && pack_libass(p, &res);
+    if (!r)
         r = pack_rgba(p, &res);
-    } else {
-        r = pack_libass(p, &res);
-    }
 
     if (!r)
         return;
