@@ -387,6 +387,19 @@ static int get_format(struct osd_state *osd, const bool formats[SUBBITMAP_COUNT]
     return SUBBITMAP_LIBASS;
 }
 
+static bool is_drawn(struct osd_state *osd, struct osd_object *obj, int draw_flags)
+{
+    // Object is drawn into the video frame itself; don't draw twice
+    if (osd->render_subs_in_filter && obj->is_sub &&
+        !(draw_flags & OSD_DRAW_SUB_FILTER))
+        return false;
+    if ((draw_flags & (OSD_DRAW_SUB_ONLY | OSD_DRAW_SUB_FILTER)) && !obj->is_sub)
+        return false;
+    if ((draw_flags & OSD_DRAW_OSD_ONLY) && obj->is_sub)
+        return false;
+    return true;
+}
+
 static struct sub_bitmaps *render_object(struct osd_state *osd,
                                          struct osd_object *obj,
                                          struct mp_osd_res osdres, double video_pts,
@@ -455,21 +468,12 @@ struct sub_bitmap_list *osd_render(struct osd_state *osd, struct mp_osd_res res,
     if (force_video_pts != MP_NOPTS_VALUE)
         video_pts = force_video_pts;
 
-    if (draw_flags & OSD_DRAW_SUB_FILTER)
-        draw_flags |= OSD_DRAW_SUB_ONLY;
-
     int format = get_format(osd, formats);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
 
-        // Object is drawn into the video frame itself; don't draw twice
-        if (osd->render_subs_in_filter && obj->is_sub &&
-            !(draw_flags & OSD_DRAW_SUB_FILTER))
-            continue;
-        if ((draw_flags & OSD_DRAW_SUB_ONLY) && !obj->is_sub)
-            continue;
-        if ((draw_flags & OSD_DRAW_OSD_ONLY) && obj->is_sub)
+        if (!is_drawn(osd, obj, draw_flags))
             continue;
 
         char *stat_type_render = obj->is_sub ? "sub-render" : "osd-render";
