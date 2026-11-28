@@ -57,7 +57,8 @@ struct sub_cache_entry {
     struct mp_osd_res dim;
     int format;
     double pts;                 // as passed to sub_get_bitmaps()
-    double sub_pts;
+    double pts_end;             // the result holds from pts until before this
+    double sub_pts, sub_end;
     uint64_t age;               // 0 if unused
 };
 
@@ -144,18 +145,24 @@ static double pts_from_subtitle(struct dec_sub *sub, double pts)
     return pts;
 }
 
-// Drop the results at and after the given subtitle time.
+// Drop the results that hold at or after the given subtitle time.
 static void drop_results(struct dec_sub *sub, double sub_pts)
 {
     mp_mutex_lock(&sub->cache_lock);
     for (int n = 0; n < SUB_CACHE_SIZE; n++) {
         struct sub_cache_entry *e = &sub->cache[n];
-        if (e->sub_pts >= sub_pts) {
+        if (e->sub_pts >= sub_pts || e->sub_end > sub_pts) {
             talloc_free(e->res);
             *e = (struct sub_cache_entry){0};
         }
     }
     mp_mutex_unlock(&sub->cache_lock);
+}
+
+// pts_end lies before pts with backward playback.
+static bool result_holds(struct sub_cache_entry *e, double pts)
+{
+    return e->pts == pts || (pts > MPMIN(e->pts, e->pts_end) && pts < MPMAX(e->pts, e->pts_end));
 }
 
 static bool get_result(struct dec_sub *sub, struct mp_osd_res dim, int format,
@@ -165,7 +172,7 @@ static bool get_result(struct dec_sub *sub, struct mp_osd_res dim, int format,
     mp_mutex_lock(&sub->cache_lock);
     for (int n = 0; n < SUB_CACHE_SIZE && !found; n++) {
         struct sub_cache_entry *e = &sub->cache[n];
-        if (e->age && e->pts == pts && e->format == format && osd_res_equals(e->dim, dim)) {
+        if (e->age && result_holds(e, pts) && e->format == format && osd_res_equals(e->dim, dim)) {
             e->age = ++sub->cache_age;
             *res = sub_bitmaps_copy(NULL, e->res);
             found = true;
@@ -508,6 +515,7 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
     mp_mutex_lock(&sub->lock);
 
     double sub_pts = pts_to_subtitle(sub, pts);
+    double sub_end = sub_pts;
     if (!sub->shared_opts->sub_visibility[sub->order])
         goto done;
 
@@ -516,7 +524,17 @@ struct sub_bitmaps *sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim,
 
     if (!(sub->end != MP_NOPTS_VALUE && sub_pts >= sub->end) &&
         sub->sd->driver->get_bitmaps)
+    {
         res = sub->sd->driver->get_bitmaps(sub->sd, dim, format, sub_pts);
+        if (sub->sd->driver->get_bitmaps_end) {
+            sub_end = sub->sd->driver->get_bitmaps_end(sub->sd, sub_pts);
+            // Segments switch only when a render reaches them.
+            if (sub->end != MP_NOPTS_VALUE)
+                sub_end = MPMIN(sub_end, sub->end);
+            if (sub->new_segment)
+                sub_end = MPMIN(sub_end, sub->new_segment->start);
+        }
+    }
 
     // The decoders tell whether the bitmaps differ from the previous ones.
     // A result that is kept needs an identity.
@@ -530,7 +548,8 @@ done:
     if (pts != MP_NOPTS_VALUE) {
         put_result(sub, (struct sub_cache_entry){
             .res = sub_bitmaps_copy(NULL, res), .dim = dim, .format = format,
-            .pts = pts, .sub_pts = sub_pts,
+            .pts = pts, .pts_end = pts_from_subtitle(sub, sub_end),
+            .sub_pts = sub_pts, .sub_end = sub_end,
         });
     }
     mp_mutex_unlock(&sub->lock);
