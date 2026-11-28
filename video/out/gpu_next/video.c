@@ -137,6 +137,7 @@ struct mppl_video {
     // update_target_overlays() input
     struct mp_image *osd_src;
     int osd_flags;
+    bool osd_flush;
 
     uint64_t last_id;
     uint64_t osd_sync;
@@ -622,6 +623,9 @@ static float get_ref_luma(struct mppl_video *p);
 static bool update_target_overlays(pl_gpu gpu, struct pl_frame *target)
 {
     struct mppl_video *p = target->user_data;
+    // Start any GPU work before waiting for overlays to be ready.
+    if (p->osd_flush)
+        pl_gpu_flush(gpu);
     stats_time_start(p->stats, "osd-update");
     update_overlays(p, p->osd_res, p->osd_flags, PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state,
                     target, p->osd_src, p->osd_src ? p->osd_src->params.stereo3d : 0,
@@ -1696,8 +1700,17 @@ bool mppl_video_render_frame(struct mppl_video *p, struct vo_frame *frame,
     }
     p->osd_flags = OSD_DRAW_OSD_LATEST | ((frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0);
     p->osd_src = frame->current;
+    p->osd_flush = false;
     target.user_data = p;
+#if PL_API_VER >= 402
+    // libplacebo asks for the overlays when it draws them. This allows to
+    // pipeline the libass and gpu rendering.
+    if (frame->current)
+        p->osd_flush = !prefetch_overlays(p, p->osd_res, p->osd_flags, frame->current);
+    target.acquire_overlays = update_target_overlays;
+#else
     update_target_overlays(gpu, &target);
+#endif
     apply_crop(&target, p->dst, swframe->fbo->params.w, swframe->fbo->params.h);
     update_tm_viz(&pars->color_map_params, &target);
 
