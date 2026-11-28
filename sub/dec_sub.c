@@ -174,7 +174,8 @@ static bool get_result(struct dec_sub *sub, struct mp_osd_res dim, int format,
         struct sub_cache_entry *e = &sub->cache[n];
         if (e->age && result_holds(e, pts) && e->format == format && osd_res_equals(e->dim, dim)) {
             e->age = ++sub->cache_age;
-            *res = sub_bitmaps_copy(NULL, e->res);
+            if (res)
+                *res = sub_bitmaps_copy(NULL, e->res);
             found = true;
         }
     }
@@ -502,6 +503,12 @@ void sub_redecode_cached_packets(struct dec_sub *sub)
         ++index;
     }
     mp_mutex_unlock(&sub->lock);
+}
+
+bool sub_has_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
+                     double pts)
+{
+    return get_result(sub, dim, format, pts, NULL);
 }
 
 // Unref sub_bitmaps.rc to free the result. May return NULL.
