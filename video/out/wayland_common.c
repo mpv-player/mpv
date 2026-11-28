@@ -2299,8 +2299,13 @@ static void info_done(void *data, struct wp_image_description_info_v1 *image_des
         MP_VERBOSE(wl, "Setting preferred transfer to PQ for HDR output.\n");
         wd->csp.transfer = PL_COLOR_TRC_PQ;
     }
-    scale_to_sdr_white(wd);
+    // The luminances are in the scale of PL_COLOR_SDR_WHITE, unless those of
+    // the output are used as they are, with its reference white.
+    bool absolute = wl->opts->wl_respect_pq_scale;
+    if (!absolute)
+        scale_to_sdr_white(wd);
     wl->preferred_csp = wd->csp;
+    wl->preferred_ref_luma = absolute ? wd->ref_luma : 0;
     wl->pending_vo_events |= VO_EVENT_EXPOSE;
     talloc_free(wd);
 }
@@ -3729,12 +3734,21 @@ static void seat_create_text_input(struct vo_wayland_seat *seat)
 
 #if HAVE_WAYLAND_PROTOCOLS_1_41
 // The reference white that the image description of a signal declares.
-static float image_ref_luma(const struct pl_color_space *color)
+static float image_ref_luma(struct vo_wayland_state *wl, const struct pl_color_space *color,
+                            bool target)
 {
+    // A signal that is made for an output whose luminances are used as they
+    // are has the reference white of that output and is shown as it is. Any
+    // other signal is in the scale of PL_COLOR_SDR_WHITE.
+    bool output_ref = target && wl->preferred_ref_luma;
+    float ref_luma = output_ref ? wl->preferred_ref_luma : PL_COLOR_SDR_WHITE;
     if (pl_color_transfer_is_hdr(color->transfer))
-        return PL_COLOR_SDR_WHITE;
-    // The white of an SDR or linear signal is at most its peak.
-    return MPMIN(PL_COLOR_SDR_WHITE, color->hdr.max_luma);
+        return ref_luma;
+    // The renderer matches an SDR or linear signal at the reference white of
+    // the output, so that is the peak. In the scale of PL_COLOR_SDR_WHITE the
+    // white of such a signal is at most its peak.
+    float white = color->hdr.max_luma;
+    return output_ref ? white : MPMIN(ref_luma, white);
 }
 
 static void set_color_management(struct vo_wayland_state *wl, struct pl_color_space *color,
@@ -3857,7 +3871,10 @@ static void set_color_management(struct vo_wayland_state *wl, struct pl_color_sp
     return;
 
 nosupport:
+    // Without an image description the surface is taken as sRGB, with its
+    // peak where a declared signal has its reference white.
     *color = pl_color_space_srgb;
+    color->hdr.max_luma = ref_luma;
     pl_color_space_infer(color);
     return;
 }
@@ -4323,6 +4340,11 @@ struct pl_color_space vo_wayland_preferred_csp(struct vo *vo)
     return wl->preferred_csp;
 }
 
+float vo_wayland_preferred_ref_luma(struct vo *vo)
+{
+    return vo->wl->preferred_ref_luma;
+}
+
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_wayland_state *wl = vo->wl;
@@ -4372,6 +4394,8 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
                                              &wl->opts->border);
                 }
             }
+            if (opt == &opts->wl_respect_pq_scale)
+                get_compositor_preferred_description(wl);
             if (opt == &opts->wl_content_type)
                 set_content_type(wl);
             if (opt == &opts->cursor_passthrough)
@@ -4537,7 +4561,9 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
             wl->color_surface = wp_color_manager_v1_get_surface(wl->color_manager, wl->callback_surface);
     }
 
-    bool color_space_changed = !pl_color_space_equal(&wl->last_hint_params.color, &params->color);
+    float ref_luma = image_ref_luma(wl, &params->color, target);
+    bool color_space_changed = !pl_color_space_equal(&wl->last_hint_params.color, &params->color) ||
+                               wl->last_hint_ref_luma != ref_luma;
     bool color_repr_changed = !pl_color_repr_equal(&wl->last_hint_params.repr, &params->repr) ||
                               wl->last_hint_params.chroma_location != params->chroma_location;
 
@@ -4546,8 +4572,9 @@ void vo_wayland_handle_color(struct vo_wayland_state *wl, struct mp_image_params
         return;
     }
     wl->last_hint_params = *params;
+    wl->last_hint_ref_luma = ref_luma;
     if (color_space_changed) {
-        set_color_management(wl, &params->color, image_ref_luma(&params->color));
+        set_color_management(wl, &params->color, ref_luma);
     } else {
         params->color = wl->current_params.color;
     }

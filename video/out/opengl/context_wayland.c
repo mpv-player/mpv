@@ -67,6 +67,11 @@ static pl_color_space_t wayland_egl_preferred_csp(struct ra_ctx *ctx)
     return vo_wayland_preferred_csp(ctx->vo);
 }
 
+static float wayland_egl_preferred_ref_luma(struct ra_ctx *ctx)
+{
+    return vo_wayland_preferred_ref_luma(ctx->vo);
+}
+
 static bool wayland_egl_set_color(struct ra_ctx *ctx, struct mp_image_params *params, bool target)
 {
     vo_wayland_handle_color(ctx->vo->wl, params, target);
@@ -118,6 +123,7 @@ static bool egl_create_context(struct ra_ctx *ctx)
     struct ra_ctx_params params = {
         .check_visible      = wayland_egl_check_visible,
         .preferred_csp      = wayland_egl_preferred_csp,
+        .preferred_ref_luma = wayland_egl_preferred_ref_luma,
         .set_color          = wayland_egl_set_color,
         .swap_buffers       = wayland_egl_swap_buffers,
         .get_vsync          = wayland_egl_get_vsync,

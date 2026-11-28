@@ -6622,6 +6622,18 @@ them.
     frame presentation if it is supported by the compositor (default: ``yes``).
     This only has an effect if ``--video-sync=display-...`` is being used.
 
+``--wayland-respect-pq-scale=<yes|no>``
+    Render to the absolute PQ luminances as mastered (default: ``no``). HDR
+    video then keeps the luminance it was mastered with, while SDR video, the
+    OSD and subtitles are drawn at the reference white of the compositor (see
+    ``--hdr-reference-white``).
+
+    By default all luminances are relative to the reference white of the
+    compositor. HDR video gets brighter or darker relative to 203 cd/m².
+
+    With ``--target-colorspace-hint-mode=source`` and ``--vo=dmabuf-wayland``
+    the compositor scales and tone maps the video in either case.
+
 ``--wayland-session=<string>``
     Set the wayland session name for window restoration (default: unset).
     Not setting this or setting it to the empty string disables session
@@ -7709,7 +7721,7 @@ them.
     (Only for ``--vo=gpu-next``)
 
     In ``auto`` mode (default), the reference white luminance is queried from
-    the system. This is currently only supported on Windows. If the system does
+    the system. This is supported on Windows and Wayland. If the system does
     not provide a value, 203 cd/m² is assumed.
 
     .. note::
