@@ -576,22 +576,6 @@ void sub_set_play_dir(struct dec_sub *sub, int dir)
     mp_mutex_unlock(&sub->lock);
 }
 
-bool sub_is_primary_visible(struct dec_sub *sub)
-{
-    mp_mutex_lock(&sub->lock);
-    bool ret = sub->shared_opts->sub_visibility[0];
-    mp_mutex_unlock(&sub->lock);
-    return ret;
-}
-
-bool sub_is_secondary_visible(struct dec_sub *sub)
-{
-    mp_mutex_lock(&sub->lock);
-    bool ret = sub->shared_opts->sub_visibility[1];
-    mp_mutex_unlock(&sub->lock);
-    return ret;
-}
-
 static int sub_line_cmp(const void *a, const void *b)
 {
     const struct sub_line *la = a, *lb = b;
