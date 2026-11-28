@@ -128,6 +128,11 @@ static double pts_from_subtitle(struct dec_sub *sub, double pts)
     return pts;
 }
 
+static void decode_packet(struct dec_sub *sub, struct demux_packet *pkt)
+{
+    sub->sd->driver->decode(sub->sd, pkt);
+}
+
 static void wakeup_demux(void *ctx)
 {
     struct mp_dispatch_queue *q = ctx;
@@ -256,7 +261,7 @@ static void update_segment(struct dec_sub *sub)
             // invalid data (not our fault if it crashes or something).
             MP_ERR(sub, "Can't change to new codec.\n");
         }
-        sub->sd->driver->decode(sub->sd, sub->new_segment);
+        decode_packet(sub, sub->new_segment);
         talloc_free(sub->new_segment);
         sub->new_segment = NULL;
     }
@@ -289,7 +294,7 @@ void sub_preload(struct dec_sub *sub)
         }
         if (!pkt)
             break;
-        sub->sd->driver->decode(sub->sd, pkt);
+        decode_packet(sub, pkt);
         MP_TARRAY_APPEND(sub, sub->cached_pkts, sub->num_cached_pkts, pkt);
     }
 
@@ -399,7 +404,7 @@ void sub_read_packets(struct dec_sub *sub, double video_pts, bool force,
         }
 
         if (!(sub->preload_attempted && sub->sd->preload_ok))
-            sub->sd->driver->decode(sub->sd, pkt);
+            decode_packet(sub, pkt);
     }
     if (sub->cached_pkts && sub->num_cached_pkts) {
         bool visible = is_packet_visible(sub->cached_pkts[sub->cached_pkt_pos], video_pts);
@@ -416,7 +421,7 @@ void sub_redecode_cached_packets(struct dec_sub *sub)
     mp_mutex_lock(&sub->lock);
     int index = sub->cached_pkt_pos;
     while (index < sub->num_cached_pkts) {
-        sub->sd->driver->decode(sub->sd, sub->cached_pkts[index]);
+        decode_packet(sub, sub->cached_pkts[index]);
         ++index;
     }
     mp_mutex_unlock(&sub->lock);
