@@ -235,6 +235,7 @@ void osd_set_sub(struct osd_state *osd, int index, struct dec_sub *dec_sub)
     mp_mutex_lock(&osd->lock);
     if (index >= 0 && index < 2) {
         struct osd_object *obj = osd->objs[OSDTYPE_SUB + index];
+        osd_wait_object_idle(osd, obj);
         obj->sub = dec_sub;
         obj->vo_change_id += 1;
     }
@@ -351,6 +352,25 @@ static void render_osd_object(struct osd_state *osd, struct osd_object *obj,
     obj->result_id = obj->state_id;
 }
 
+// Called locked, the lock is released while it renders.
+static struct sub_bitmaps *render_sub_object(struct osd_state *osd, struct osd_object *obj,
+                                             struct mp_osd_res res, int format, double pts)
+{
+    struct dec_sub *sub = obj->sub;
+    if (!sub)
+        return NULL;
+
+    obj->rendering += 1;
+    mp_mutex_unlock(&osd->lock);
+
+    struct sub_bitmaps *imgs = sub_get_bitmaps(sub, res, format, pts);
+
+    mp_mutex_lock(&osd->lock);
+    obj->rendering -= 1;
+    mp_cond_broadcast(&osd->wakeup);
+    return imgs;
+}
+
 static struct sub_bitmaps *render_object(struct osd_state *osd,
                                          struct osd_object *obj,
                                          struct mp_osd_res osdres, double video_pts,
@@ -365,8 +385,7 @@ static struct sub_bitmaps *render_object(struct osd_state *osd,
     check_obj_resize(osd, osdres, obj);
 
     if (obj->is_sub) {
-        if (obj->sub)
-            res = sub_get_bitmaps(obj->sub, obj->vo_res, format, video_pts);
+        res = render_sub_object(osd, obj, osdres, format, video_pts);
     } else if (obj->type == OSDTYPE_EXTERNAL2 ||
                obj->type == OSDTYPE_DISC_MENU) {
         if (obj->image_overlay && obj->image_overlay->format) {
