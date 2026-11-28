@@ -67,6 +67,8 @@ struct osd_object {
     bool vo_had_output;
 
     // Internally used by osd_libass.c
+    char *render_text;
+    struct osd_progbar_state render_progbar;
     bool changed;
     struct ass_state ass;
     struct mp_sub_packer *sub_packer;

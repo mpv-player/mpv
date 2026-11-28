@@ -283,12 +283,12 @@ static void update_osd_text(struct osd_state *osd, struct osd_object *obj,
                             struct mp_osd_res *res)
 {
 
-    if (!obj->text[0])
+    if (!obj->render_text[0])
         return;
 
     create_ass_track(osd, res, &obj->ass);
     set_osd_style(osd, res, get_style(&obj->ass, "OSD"));
-    add_osd_ass_event_escaped(obj->ass.track, "OSD", obj->text);
+    add_osd_ass_event_escaped(obj->ass.track, "OSD", obj->render_text);
 }
 
 void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h)
@@ -419,7 +419,7 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
 static void update_progbar(struct osd_state *osd, struct osd_object *obj,
                            struct mp_osd_res *res)
 {
-    if (obj->progbar_state.type < 0)
+    if (obj->render_progbar.type < 0)
         return;
 
     float px, py, width, height, border;
@@ -432,13 +432,13 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj,
 
     bstr buf = bstr0(talloc_asprintf(NULL, "{\\an6\\pos(%f,%f)}", sx, sy));
 
-    if (obj->progbar_state.type == 0 || obj->progbar_state.type >= 256) {
+    if (obj->render_progbar.type == 0 || obj->render_progbar.type >= 256) {
         // no sym
-    } else if (obj->progbar_state.type >= 32) {
-        mp_append_utf8_bstr(NULL, &buf, obj->progbar_state.type);
+    } else if (obj->render_progbar.type >= 32) {
+        mp_append_utf8_bstr(NULL, &buf, obj->render_progbar.type);
     } else {
         bstr_xappend(NULL, &buf, bstr0(ASS_USE_OSD_FONT));
-        mp_append_utf8_bstr(NULL, &buf, OSD_CODEPOINTS + obj->progbar_state.type);
+        mp_append_utf8_bstr(NULL, &buf, OSD_CODEPOINTS + obj->render_progbar.type);
         bstr_xappend(NULL, &buf, bstr0("{\\r}"));
     }
 
@@ -465,7 +465,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj,
     // filled area
     d->text = talloc_asprintf_append(d->text, "{\\bord0\\pos(%f,%f)}", px, py);
     ass_draw_start(d);
-    float pos = obj->progbar_state.value * width - border / 2;
+    float pos = obj->render_progbar.value * width - border / 2;
     ass_draw_rect_cw(d, 0, 0, pos, height);
     ass_draw_stop(d);
     add_osd_ass_event(track, "progbar", bstr0(d->text));
@@ -493,8 +493,8 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj,
     struct osd_bar_style_opts *bar_opts = osd->opts->osd_bar_style;
     // chapter marks
     if (bar_opts->marker_style) {
-        for (int n = 0; n < obj->progbar_state.num_stops; n++) {
-            float s = obj->progbar_state.stops[n] * width;
+        for (int n = 0; n < obj->render_progbar.num_stops; n++) {
+            float s = obj->render_progbar.stops[n] * width;
             float size = MPMAX(border * bar_opts->marker_scale,
                                bar_opts->marker_min_size);
 
@@ -692,8 +692,22 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
     }
 }
 
+// Copy the state the render reads, which it does without the lock. Called
+// locked by the thread that renders the object.
 void osd_object_prepare(struct osd_state *osd, struct osd_object *obj)
 {
+    if (obj->type == OSDTYPE_OSD) {
+        talloc_free(obj->render_text);
+        obj->render_text = talloc_strdup(obj, obj->text);
+        struct osd_progbar_state *s = &obj->progbar_state, *d = &obj->render_progbar;
+        d->type = s->type;
+        d->value = s->value;
+        d->num_stops = s->num_stops;
+        MP_TARRAY_GROW(obj, d->stops, s->num_stops);
+        if (s->num_stops)
+            memcpy(d->stops, s->stops, sizeof(d->stops[0]) * s->num_stops);
+    }
+
     if (!obj->sub_packer)
         obj->sub_packer = mp_sub_packer_alloc(obj);
 
